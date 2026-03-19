@@ -24,33 +24,37 @@ Evaluate the Project against each criterion after completing the Scorecard and a
 
 ## 2. Coherence
 
-**Test:** Check for content overlap between files, conflicting instructions between Custom Instructions and knowledge files, and inconsistent terminology.
+**Test:** Check for content overlap between files, conflicting instructions between Custom Instructions and knowledge files, and inconsistent terminology. Also check that Memory edits do not contradict knowledge file content or Custom Instructions.
 
 **Pass indicators:**
 - Each concept has one authoritative location
 - Terminology is consistent across all components
 - No instruction in one place contradicts an instruction in another
+- Memory edits and knowledge files present consistent facts
 
 **Fail indicators:**
 - The same concept is explained differently in two files
 - Custom Instructions say "be concise" while an output section specifies 1500 words
 - The system prompt uses "operational modes" while a knowledge file calls them "task profiles"
+- A Memory edit states a fact that contradicts information in a knowledge file
 
 ---
 
 ## 3. Efficiency
 
-**Test:** For every instruction in Custom Instructions, ask: "If I removed this, would the output get noticeably worse?" For every knowledge file, ask: "Is this file consulted often enough to justify its presence?"
+**Test:** For every instruction in Custom Instructions, ask: "If I removed this, would the output get noticeably worse?" For every knowledge file, ask: "Is this file consulted often enough to justify its presence?" For Memory, ask: "Does every edit contain orientation-level facts that are relevant to most conversations?"
 
 **Pass indicators:**
 - Every instruction demonstrably improves output
 - Every file serves a purpose that arises in a significant fraction of conversations
+- Memory contains only current, orientation-level facts
 - The system prompt contains behavioral rules and routing, not reference material
 
 **Fail indicators:**
 - Instructions added "just in case"
 - Knowledge files for rare edge cases
 - Reference material embedded in Custom Instructions
+- Memory stuffed with reference-depth content or stale facts
 - The system prompt could be 30%+ shorter without degrading output
 
 ---
@@ -73,18 +77,22 @@ Evaluate the Project against each criterion after completing the Scorecard and a
 
 ## 5. Instruction/Reference Separation
 
-**Test:** Are all behavioral instructions in Custom Instructions and all reference material in knowledge files? Or are they mixed?
+**Test:** Are all behavioral instructions in Custom Instructions and all reference material in knowledge files? Or are they mixed? Is always-loaded orientation in Memory and searchable depth in knowledge files? Or are the layers blurred?
 
 **Pass indicators:**
 - Custom Instructions contain only: identity, behavioral rules, knowledge file routing, operational modes, and output standards
 - Knowledge files contain only: reference material, frameworks, data, templates, and examples
+- Memory contains only: current orientation facts relevant to most conversations
+- Each layer serves its designated function
 
 **Fail indicators:**
 - Custom Instructions contain data tables, extended examples, or framework descriptions
 - Knowledge files contain "always do X" behavioral instructions that should be in the system prompt
+- Memory contains detailed procedural content or historical rationale that belongs in knowledge files
+- The same fact is maintained in multiple layers without a clear authoritative home
 
 ---
 
 ## Reporting
 
-For each criterion, state **Pass**, **Partial**, or **Fail** with one to two sentences of evidence. Partial means some indicators pass and some fail — specify which. Link findings to the relevant Scorecard dimensions where they overlap (e.g., a Coherence failure often connects to Instruction Clarity or Knowledge Architecture scores).
+For each criterion, state **Pass**, **Partial**, or **Fail** with one to two sentences of evidence. Partial means some indicators pass and some fail — specify which. Link findings to the relevant Scorecard dimensions where they overlap (e.g., a Coherence failure often connects to Instruction Clarity or Knowledge & Context Architecture scores).

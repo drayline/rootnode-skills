@@ -3,21 +3,21 @@ name: rootnode-reasoning-blocks
 description: >-
   Tested reasoning approaches for Claude prompts — 18 variants across 6
   categories (Analytical, Strategic, Creative, Technical, Research, Comparative).
-  Provides selection guidance for choosing the right reasoning method and
-  ready-to-use reasoning instructions. Use when building a prompt and choosing
-  how Claude should think through a problem, when asking "what reasoning approach
-  should I use," "how should Claude analyze this," "which thinking method fits,"
-  "help me structure the reasoning," "what analytical framework," or "recommend a
-  reasoning pattern." Also use when a prompt produces shallow output and the fix
-  is likely a reasoning upgrade. Provides 18 tested reasoning approaches for
-  analytical, strategic, creative, technical, research, and comparison tasks.
-  Do NOT use for evaluating or scoring existing prompts — use
-  rootnode-prompt-validation for that if available. Do NOT use for project-level
-  audits — use rootnode-project-audit for that if available.
+  Use when the user wants a specific reasoning template — retrieving, reviewing,
+  customizing, or combining reasoning instructions for a prompt. Trigger on:
+  "give me the Root Cause Diagnosis approach," "show me the reasoning template
+  for," "I need the Evidence Synthesis method," "show me analytical reasoning
+  options," "combine reasoning approaches for," "show me all reasoning variants."
+  Also use when a prompt produces shallow output and the fix is a reasoning
+  upgrade. Provides 18 tested approaches for analytical, strategic, creative,
+  technical, research, and comparison tasks. If the user is unsure which
+  reasoning method fits, use rootnode-block-selection first. Do NOT use for
+  evaluating existing prompts — use rootnode-prompt-validation if available. Do
+  NOT use for project-level audits — use rootnode-project-audit if available.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "1.1"
   original-source: BLOCK_LIBRARY_REASONING.md
 ---
 

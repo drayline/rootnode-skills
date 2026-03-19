@@ -12,6 +12,15 @@ Ask these when you need to understand the Project's structure before auditing:
 - What output formats does the Project produce?
 - What is the Project's scope — what is explicitly outside it?
 
+## Memory Discovery
+
+Ask these when you need to understand the Project's Memory configuration:
+
+- Has the Project's Memory been configured with manual edits, or is it using only auto-populated memories?
+- What orientation facts does Claude need in every conversation — current project phase, key constraints, user role, active decisions?
+- Is there a build_context.md or similar institutional memory file in the Project's knowledge files?
+- Has the Memory been reviewed since the Project's last significant change?
+
 ## Symptom Discovery
 
 Ask these when the user reports problems but has not provided enough detail to diagnose:

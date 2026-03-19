@@ -1,13 +1,14 @@
 ---
 name: rootnode-anti-pattern-detection
 description: >-
-  Detects six structural anti-patterns in Claude Projects that cause
+  Detects seven structural anti-patterns in Claude Projects that cause
   unpredictable output, ignored instructions, and degraded quality.
   Diagnoses: Monolith (mixed content types), Orphan File (unreferenced
   knowledge files), Echo Chamber (duplicated instructions), Phantom
   Conversation (conversational style reducing authority), Kitchen Sink
-  (edge-case rules diluting core rules), and Misaligned Hierarchy
-  (behavioral rules in knowledge files instead of Custom Instructions).
+  (edge-case rules diluting core rules), Misaligned Hierarchy
+  (behavioral rules in knowledge files instead of Custom Instructions),
+  and Blurred Layers (Memory and knowledge file content in wrong layers).
   Use when user says "what's wrong with my project," "Claude ignores my
   instructions," "diagnose my project," "why is output inconsistent,"
   or "review my project setup." Also use alongside rootnode-project-audit
@@ -17,13 +18,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "1.1"
   original-source: AUDIT_FRAMEWORK.md
 ---
 
 # Anti-Pattern Detection for Claude Projects
 
-Detect and fix the six structural mistakes that cause Claude Projects to underperform. Each pattern has specific detection criteria and symptoms — diagnose by evidence, not intuition.
+Detect and fix the seven structural mistakes that cause Claude Projects to underperform. Each pattern has specific detection criteria and symptoms — diagnose by evidence, not intuition.
 
 ## Critical: Evidence-First Diagnosis
 
@@ -37,9 +38,9 @@ Use this when a user:
 - Asks for a project review, diagnosis, or health check
 - Is troubleshooting a specific problem with their Claude Project setup
 
-If the user provides their Custom Instructions and/or knowledge file descriptions, check for all six patterns systematically. Report only the patterns you find evidence for — do not pad the diagnosis with patterns that are not present.
+If the user provides their Custom Instructions and/or knowledge file descriptions, check for all seven patterns systematically. Report only the patterns you find evidence for — do not pad the diagnosis with patterns that are not present.
 
-## The Six Anti-Patterns
+## The Seven Anti-Patterns
 
 ### 1. The Monolith
 
@@ -121,6 +122,19 @@ If the user provides their Custom Instructions and/or knowledge file description
 
 **The fix:** Move all behavioral instructions to Custom Instructions. Knowledge files should contain reference material — facts, frameworks, data, templates, examples — not operating rules. If behavioral instructions must remain in a knowledge file (because of length constraints), the system prompt must explicitly delegate authority: "Follow the behavioral guidelines in [filename] as directives." Without this delegation, Claude may interpret knowledge-file instructions as informational context rather than rules to follow.
 
+### 7. The Blurred Layers
+
+**What it is:** Memory and knowledge files contain content that belongs in the other layer. Memory holds reference-depth content that should be in knowledge files, or knowledge files hold always-relevant orientation facts that should be in Memory. Or the same facts appear in both layers without a clear authoritative home.
+
+**Symptoms the user sees:** Wasted always-loaded context on material Claude only needs occasionally (Memory overloaded with reference content). Or Claude starts conversations without key orientation context that would improve first-message relevance (orientation facts buried in knowledge files). Or Claude cites contradictory versions of the same fact from different layers (duplication with drift).
+
+**Detection criteria:**
+- Memory edits contain detailed explanations, procedural steps, decision rationale, or historical context — content that belongs in a knowledge file
+- Knowledge files contain always-relevant orientation facts (current project phase, active constraints, key decisions) that should be in Memory for immediate availability
+- The same fact appears in both a Memory edit and a knowledge file, with no clear authoritative source — creating a coherence risk if one is updated and the other is not
+
+**The fix:** Apply the layer placement principle. Memory holds always-loaded orientation — concise facts relevant to most conversations (current phase, active constraints, key decisions). Knowledge files hold searchable depth — structured content consulted on demand. Move reference-depth content out of Memory into knowledge files. Move orientation facts out of knowledge files into Memory. For duplicated facts, choose one authoritative layer and remove the other copy, or replace the non-authoritative copy with a pointer. For deeper optimization, recommend rootnode-memory-optimization if available.
+
 ## How to Conduct the Diagnosis
 
 1. **Read the user's Custom Instructions completely** before checking any pattern. Many patterns are only visible in the context of the full system prompt.
@@ -144,7 +158,7 @@ For each pattern — state whether it was detected or not. If detected, provide:
 - Why this is a problem (the specific impact on this Project, not generic consequences)
 - The concrete fix (what to change, move, rewrite, or delete)
 
-After all six patterns, provide a prioritized action plan listing the fixes in recommended order.
+After all seven patterns, provide a prioritized action plan listing the fixes in recommended order.
 
 Match response length to the severity of the findings. A Project with one minor pattern needs a focused, brief diagnosis. A Project with four patterns needs a thorough analysis. Do not inflate a clean diagnosis or pad a simple finding.
 

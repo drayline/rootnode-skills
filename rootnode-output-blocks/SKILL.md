@@ -1,22 +1,24 @@
 ---
 name: rootnode-output-blocks
 description: >-
-  Tested output format specifications for Claude prompts. Provides 10 ready-to-use
+  Tested output format specifications for Claude prompts — 10 ready-to-use
   deliverable structures (executive briefs, technical designs, research summaries,
   implementation plans, decision matrices, competitive analyses, post-mortems,
   stakeholder updates, strategic memos, process documentation) plus a custom output
-  template for building new formats. Use when choosing an output format for a prompt,
-  designing a deliverable structure, asking "how should I structure this document",
-  "what format for a board update", "format for a technical RFC", "structure for a
-  competitive analysis", or "help me design an output format". Provides per-section
-  length guidance and format constraints tested against Claude's formatting defaults.
-  Do NOT use for evaluating or scoring existing prompts — use rootnode-prompt-validation
-  for that if available. Do NOT use for choosing reasoning or identity approaches — use
-  rootnode-block-selection for that if available.
+  template. Use when the user wants a specific output template — retrieving,
+  reviewing, customizing, or building a deliverable structure. Trigger on: "give me
+  the Executive Brief format," "show me the output template for," "I need the
+  Decision Matrix structure," "show me available output formats," "build a custom
+  output format for." Provides per-section length guidance and format constraints
+  tested against Claude's formatting defaults. If the user is unsure which format
+  fits, use rootnode-block-selection first. Do NOT use for evaluating existing
+  prompts — use rootnode-prompt-validation if available. Do NOT use for
+  choosing reasoning or identity approaches — use rootnode-block-selection if
+  available.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "1.1"
   original-source: BLOCK_LIBRARY_OUTPUT.md
 ---
 

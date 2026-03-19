@@ -2,20 +2,22 @@
 name: rootnode-block-selection
 description: >-
   Guides selection of the right identity, reasoning, and output approaches for a
-  Claude prompt based on task characteristics. Use when choosing which approach fits
-  a task, deciding between reasoning methods, selecting an output format, or
-  determining when domain-specific approaches are needed beyond the core catalog.
-  Trigger on: "what approach should I use," "which reasoning method," "how should I
-  structure the analysis," "recommend a prompt pattern," "what identity fits this
-  task," "which output format," "help me pick the right approach." Provides 8 tested
-  identity approaches, 18 reasoning variants across 6 categories, and 10 output
-  formats with decision-tree selection logic. Do NOT use for evaluating existing
-  prompts (see rootnode-prompt-validation if available) or auditing existing Claude
-  Projects (see rootnode-project-audit if available).
+  Claude prompt based on task characteristics. Use when the user needs help
+  choosing between approaches — deciding which method fits, comparing options, or
+  mapping a task to the right prompt architecture. Trigger on: "help me choose an
+  approach," "which approach fits this task," "compare reasoning methods for,"
+  "recommend a prompt pattern," "map this task to the right approach," "what
+  combination of approaches." Provides decision-tree selection logic across 8
+  identity approaches, 18 reasoning variants, and 10 output formats. After
+  selection, use the relevant block catalog skill to retrieve full templates. Do
+  NOT use for retrieving a specific known approach (use the relevant catalog skill
+  directly). Do NOT use for evaluating existing prompts (see
+  rootnode-prompt-validation if available) or auditing existing Claude Projects
+  (see rootnode-project-audit if available).
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "1.1"
   original-source: PROMPT_COMPILER.md, BLOCK_LIBRARY_IDENTITY.md, BLOCK_LIBRARY_REASONING.md, BLOCK_LIBRARY_OUTPUT.md
 ---
 

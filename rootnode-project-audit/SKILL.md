@@ -3,17 +3,18 @@ name: rootnode-project-audit
 description: >-
   Audits and scores Claude Projects using a six-dimension Scorecard (Identity Precision,
   Instruction Clarity, Knowledge Architecture, Mode Design, Output Standards, Behavioral
-  Calibration) with anchored 1-5 rubrics. Detects six structural anti-patterns and produces
+  Calibration) with anchored 1-5 rubrics. Detects seven structural anti-patterns and produces
   prioritized, evidence-grounded fixes. Use when evaluating, auditing, diagnosing, or improving
   an existing Claude Project. Trigger on: "audit my project," "review my custom instructions,"
   "score my project," "why is my project underperforming," "evaluate my Claude project,"
   "improve my system prompt," "what's wrong with my project." Also use when the user pastes
   Custom Instructions and asks why output quality is poor, inconsistent, or generic. Do NOT use
   for evaluating a single standalone prompt — use rootnode-prompt-validation for that if available.
+  Do NOT use for Memory-specific optimization — use rootnode-memory-optimization if available.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "1.1"
   original-source: AUDIT_FRAMEWORK.md, PROJECT_OPTIMIZER.md
 ---
 
@@ -85,17 +86,17 @@ For each dimension: state the score, cite the evidence from the Project, and exp
 | **4** | Clear, non-contradictory, domain-relevant directives. Each rule addresses a specific behavioral need. The rule set is lean — no "just in case" instructions diluting the important ones. |
 | **5** | All of 4, plus rules ordered by importance with critical constraints at the top. Uses the principle/default distinction: hard rules stated as rules, preferences stated as defaults with flexibility. Every rule demonstrably improves output. |
 
-#### Dimension 3: Knowledge Architecture
+#### Dimension 3: Knowledge & Context Architecture
 
-*Are knowledge files well-structured, appropriately scoped, and effectively routed?*
+*Are knowledge files and Memory well-structured, appropriately scoped, and effectively routed? Does the Project use both context layers according to their strengths?*
 
 | Score | What This Looks Like |
 |:-----:|---|
-| **1** | No knowledge files, or files exist but are not referenced in Custom Instructions (orphan files). |
-| **2** | Files referenced with inventory descriptions ("This project contains company_info.md") rather than routing guidance ("Consult company_info.md when the user asks about our product, market, or competitive position"). |
-| **3** | Routing guidance present, but structural issues: content overlap between files, files serving multiple purposes, or significantly over/under-sized files. |
-| **4** | Each file has a single clear purpose, no content overlap, descriptive naming, and decision-oriented routing. File sizes are appropriate. |
-| **5** | All of 4, plus the architecture is evolvable (a new file slots in without restructuring existing files). Clean instruction/reference separation — behavioral rules in Custom Instructions, reference material in knowledge files. Files front-load their most important content. |
+| **1** | No knowledge files, or files exist but are not referenced in Custom Instructions (orphan files). No Memory configured. Claude has no persistent reference material and no orientation context. |
+| **2** | Files referenced with inventory descriptions ("This project contains company_info.md") rather than routing guidance ("Consult company_info.md when the user asks about our product, market, or competitive position"). Memory is either absent or contains only auto-populated content with no manual edits. |
+| **3** | Routing guidance present, but structural issues: content overlap between files, files serving multiple purposes, or significantly over/under-sized files. Memory may be configured but contains misplaced content — reference-depth material that belongs in knowledge files, or stale orientation facts. The two context layers are not working as complements. |
+| **4** | Each file has a single clear purpose, no content overlap, descriptive naming, and decision-oriented routing. File sizes are appropriate. For Projects with 3+ knowledge files: Memory is configured with current orientation facts (project phase, key constraints, user context) that complement rather than duplicate the knowledge files. Clean instruction/reference separation. |
+| **5** | All of 4, plus the architecture is evolvable (a new file slots in without restructuring existing files). Memory and knowledge files follow the complementary layer principle: Memory holds always-loaded orientation, knowledge files hold searchable depth, and neither duplicates the other. Memory is reviewed at project transitions and contains no stale facts. Files front-load their most important content. |
 
 #### Dimension 4: Mode Design
 
@@ -139,7 +140,7 @@ Claude has eight known behavioral tendencies: agreeableness, hedging, verbosity,
 
 ### Step 3: Run the Anti-Pattern Sweep
 
-Check for each of these six structural anti-patterns. For each detected pattern, cite the specific evidence from the Project. Do not assert a pattern without quoting the component that exhibits it.
+Check for each of these seven structural anti-patterns. For each detected pattern, cite the specific evidence from the Project. Do not assert a pattern without quoting the component that exhibits it.
 
 **1. The Monolith** — Custom Instructions exceed ~1500 words AND contain reference material (examples, frameworks, data tables) mixed with behavioral instructions. Or a single knowledge file serves multiple distinct purposes. *Symptom:* Inconsistent adherence to behavioral rules.
 
@@ -152,6 +153,8 @@ Check for each of these six structural anti-patterns. For each detected pattern,
 **5. The Kitchen Sink** — Custom Instructions address more than 8–10 distinct behavioral instructions, or include conditional logic for scenarios that arise less than 10% of the time. *Symptom:* Core behavioral rules are followed less reliably due to attention dilution.
 
 **6. The Misaligned Hierarchy** — Behavioral instructions exist in knowledge files rather than Custom Instructions, without explicit delegation from the system prompt. *Symptom:* Unpredictable adherence to behavioral rules.
+
+**7. The Blurred Layers** — Memory contains reference-depth content that belongs in knowledge files (detailed explanations, procedural steps, decision rationale). Or knowledge files contain always-relevant orientation facts that should be in Memory (current phase, active constraints, key decisions). Or the same facts appear in both layers without a clear authoritative home. *Symptom:* Wasted always-loaded context, missing orientation at conversation start, or contradictory facts across layers.
 
 ### Step 4: Produce Findings
 
@@ -176,7 +179,7 @@ For comprehensive audits, evaluate the Project against five holistic quality cri
 
 **Full Audit** — When the user wants comprehensive evaluation. Deliver: complete architecture map, scorecard with 2–3 sentence justifications per dimension, anti-pattern sweep with evidence, quality criteria evaluation (from references/quality-criteria.md), all findings categorized by severity (Critical / Major / Minor), and a prioritized action plan.
 
-**Reconstruct** — When the user wants optimized replacement materials. Deliver the Full Audit first, then produce each file as a separately copyable unit — do not combine Custom Instructions and knowledge files into a single document. Deliver: optimized Custom Instructions in its own code block using XML tags for all section boundaries (ready to paste directly into the Custom Instructions field), each knowledge file in its own code block preceded by filename and purpose (each independently copyable as a new knowledge file), and a migration checklist. Offer reconstruction proactively when three or more Critical findings are present.
+**Reconstruct** — When the user wants optimized replacement materials. Deliver the Full Audit first, then produce each file as a separately copyable unit — do not combine Custom Instructions and knowledge files into a single document. Every file must be output complete — never output diffs, patches, or partial sections that require manual splicing. The user replaces the old file by copying the complete output. Deliver: optimized Custom Instructions in its own code block using XML tags for all section boundaries (ready to paste directly into the Custom Instructions field), each knowledge file in its own code block preceded by filename and purpose (each independently copyable as a new knowledge file), and a migration checklist. Offer reconstruction proactively when three or more Critical findings are present.
 
 When reconstructing Custom Instructions, apply these structural principles:
 
@@ -190,7 +193,7 @@ Match response depth to audit mode. A quick audit produces 3–5 high-impact fin
 
 Write in prose by default. Use tables for the scorecard, numbered lists for action plans, and structured formats only when the content genuinely benefits from structure.
 
-Before delivering any audit, verify: Does every finding cite specific evidence? Does every fix explain why it will improve output? Are findings ordered by impact? If reconstructing, would the optimized version pass its own audit?
+Before delivering any audit, verify: Does every finding cite specific evidence? Does every fix explain why it will improve output? Are findings ordered by impact? If reconstructing, would the optimized version pass its own audit? If producing any file deliverable (Custom Instructions, knowledge files, or other Project materials), is the file complete — not a diff, patch, or partial section?
 
 ## Common Mistakes
 

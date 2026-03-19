@@ -12,7 +12,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "1.1"
   original-source: PROMPT_COMPILER.md, MASTER_FRAMEWORK.md
 ---
 

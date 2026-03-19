@@ -3,22 +3,21 @@ name: rootnode-identity-blocks
 description: >-
   Eight tested identity approaches for Claude prompts, each shaping depth,
   vocabulary, reasoning style, and what Claude treats as obvious vs. requiring
-  explanation. Use when choosing a role or persona for a system prompt, building
-  a Claude prompt that needs an identity layer, or asking "what identity should
-  I use for this task." Trigger on: "what role should Claude play," "identity
-  for my prompt," "persona for this task," "which expert approach," "role
-  definition for Claude," "pick an identity," "build a custom role." Also use
-  when reviewing a prompt's identity layer or when a prompt's output lacks the
-  right depth or vocabulary for the domain. Provides 8 tested approaches across
-  strategy, technical, research, communications, and operations domains plus a
-  template for building custom identities. Do NOT use for evaluating or scoring
-  complete prompts — use rootnode-prompt-validation for that if available.
-  Do NOT use for full prompt assembly — use rootnode-prompt-compilation if
-  available.
+  explanation. Use when the user wants a specific identity template — retrieving,
+  reviewing, customizing, or building a role definition. Trigger on: "give me the
+  Strategic Advisor identity," "show me the identity template for," "I need a
+  Technical Architect role," "build a custom role for," "show me all available
+  identities." Also use when reviewing a prompt's identity layer or when output
+  lacks domain-appropriate depth. Provides 8 tested approaches across strategy,
+  technical, research, communications, and operations domains plus a template for
+  building custom identities. If the user is unsure which identity fits their
+  task, use rootnode-block-selection first. Do NOT use for evaluating complete
+  prompts — use rootnode-prompt-validation if available. Do NOT use for full
+  prompt assembly — use rootnode-prompt-compilation if available.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "1.1"
   original-source: BLOCK_LIBRARY_IDENTITY.md
 ---
 

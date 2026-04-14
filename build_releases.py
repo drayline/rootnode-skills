@@ -49,7 +49,7 @@ def zip_skill(skill_path: Path, dist_dir: Path) -> Path:
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for file in sorted(skill_path.rglob("*")):
             if file.is_file():
-                arcname = file.relative_to(skill_path.parent)
+                arcname = file.relative_to(skill_path)
                 zf.write(file, arcname)
 
     return zip_path

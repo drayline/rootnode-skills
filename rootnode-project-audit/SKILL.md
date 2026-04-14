@@ -4,17 +4,19 @@ description: >-
   Audits and scores Claude Projects using a six-dimension Scorecard (Identity Precision,
   Instruction Clarity, Knowledge Architecture, Mode Design, Output Standards, Behavioral
   Calibration) with anchored 1-5 rubrics. Detects seven structural anti-patterns and produces
-  prioritized, evidence-grounded fixes. Use when evaluating, auditing, diagnosing, or improving
-  an existing Claude Project. Trigger on: "audit my project," "review my custom instructions,"
-  "score my project," "why is my project underperforming," "evaluate my Claude project,"
-  "improve my system prompt," "what's wrong with my project." Also use when the user pastes
-  Custom Instructions and asks why output quality is poor, inconsistent, or generic. Do NOT use
-  for evaluating a single standalone prompt — use rootnode-prompt-validation for that if available.
-  Do NOT use for Memory-specific optimization — use rootnode-memory-optimization if available.
+  prioritized, evidence-based fixes. When global layer info is provided (Preferences,
+  Skills, Connectors), adds cross-layer alignment findings. Use when evaluating, auditing,
+  or improving an existing Claude Project. Trigger on: "audit my project," "review my custom
+  instructions," "score my project," "why is my project underperforming," "evaluate my Claude
+  project," "improve my system prompt," "what's wrong with my project." Also use when user
+  pastes Custom Instructions asking why output is poor or generic. Do NOT use for global setup
+  audits — use rootnode-global-audit if available. Do NOT use for single prompt evaluation —
+  use rootnode-prompt-validation if available. Do NOT use for Memory optimization — use
+  rootnode-memory-optimization if available.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.1"
+  version: "1.2"
   original-source: AUDIT_FRAMEWORK.md, PROJECT_OPTIMIZER.md
 ---
 
@@ -40,6 +42,19 @@ Use this when a user wants to evaluate, improve, or diagnose problems with an ex
 - Pasted Custom Instructions with a request for feedback
 
 If the user's submission is incomplete (Custom Instructions provided but knowledge files not described, or symptoms described but no Project materials), consult `references/diagnostic-questions.md` for structured discovery questions before auditing.
+
+## Global Layer Awareness
+
+This Skill's primary scope is Project-level auditing. When the user also provides global layer information — User Preferences text, installed Skills list, configured MCP Connectors, or active Style descriptions — the audit gains cross-layer awareness that strengthens findings without changing the core pipeline.
+
+**What global information enables:**
+- **Quick Audit** gains a "Global Layer Notes" paragraph at the end — 2-3 sentences flagging any obvious cross-layer issues visible from the Project side (e.g., CI instructions that duplicate User Preferences, CI referencing tools without configured connectors).
+- **Full Audit** gains a "Cross-Layer Alignment" section after the Quality Criteria evaluation — runs the Cross-Layer Alignment Check for failure modes detectable from the Project side: Redundant Layering (L1+L6), Connector/Instruction Mismatch (L5+L6), Skill/Project Collision (L4+L6/L7), and Style/CI Tension (L2+L6). See `references/cross-layer-basics.md`.
+- **Reconstruct** gains a "Global Layer Impact Note" at the end — explains how the reconstructed CI interacts with the user's global configuration. The reconstruction itself avoids duplicating User Preferences content and accounts for installed Skills when designing knowledge file architecture.
+
+**Graceful degradation:** If no global layer information is provided, the audit runs exactly as before — pure Project-scoped evaluation. Global layer awareness is additive, never required.
+
+**When to recommend escalation:** If the audit detects multiple cross-layer issues (3+), or if issues require modifying global layers (not just the Project), recommend rootnode-global-audit or rootnode-full-stack-audit for comprehensive evaluation. This Skill does not modify global layers — it detects Project-side symptoms of global-layer problems.
 
 ## Audit Workflow
 
@@ -175,9 +190,9 @@ For comprehensive audits, evaluate the Project against five holistic quality cri
 
 ## Audit Modes
 
-**Quick Audit** — When the user wants a fast health check. Deliver: architecture snapshot (3–5 sentences), scorecard summary (six scores with one sentence each), top 3–5 findings ordered by impact, and an overall assessment with highest-priority action.
+**Quick Audit** — When the user wants a fast health check. Deliver: architecture snapshot (3–5 sentences), scorecard summary (six scores with one sentence each), top 3–5 findings ordered by impact, an overall assessment with highest-priority action, and — when global layer information is available — a Global Layer Notes paragraph (2-3 sentences flagging obvious cross-layer issues visible from the Project side).
 
-**Full Audit** — When the user wants comprehensive evaluation. Deliver: complete architecture map, scorecard with 2–3 sentence justifications per dimension, anti-pattern sweep with evidence, quality criteria evaluation (from references/quality-criteria.md), all findings categorized by severity (Critical / Major / Minor), and a prioritized action plan.
+**Full Audit** — When the user wants comprehensive evaluation. Deliver: complete architecture map, scorecard with 2–3 sentence justifications per dimension, anti-pattern sweep with evidence, quality criteria evaluation (from references/quality-criteria.md), Cross-Layer Alignment section when global layer information is provided (see references/cross-layer-basics.md), all findings categorized by severity (Critical / Major / Minor), and a prioritized action plan. If 3+ cross-layer issues are detected, recommend rootnode-global-audit or rootnode-full-stack-audit.
 
 **Reconstruct** — When the user wants optimized replacement materials. Deliver the Full Audit first, then produce each file as a separately copyable unit — do not combine Custom Instructions and knowledge files into a single document. Every file must be output complete — never output diffs, patches, or partial sections that require manual splicing. The user replaces the old file by copying the complete output. Deliver: optimized Custom Instructions in its own code block using XML tags for all section boundaries (ready to paste directly into the Custom Instructions field), each knowledge file in its own code block preceded by filename and purpose (each independently copyable as a new knowledge file), and a migration checklist. Offer reconstruction proactively when three or more Critical findings are present.
 
@@ -186,6 +201,12 @@ When reconstructing Custom Instructions, apply these structural principles:
 - **Primacy-recency ordering.** Place the identity and most critical behavioral rules at the top of the system prompt (high primacy attention). Place output standards and pre-response verification checks at the bottom (high recency attention). Routing guidance and operational modes go in the middle.
 - **XML tag boundaries.** Use XML tags (`<identity>`, `<core_rules>`, `<knowledge_files>`, `<operational_modes>`, `<output_standards>`) to create clear section boundaries. This gives Claude unambiguous structural signals about where one concern ends and the next begins.
 - **Scoped behavioral countermeasures.** Include countermeasures only for the behavioral tendencies this Project's domain is likely to trigger. Do not include a generic list of all eight tendencies. Place countermeasures in the identity section (for tendencies that affect the overall analytical approach) or the output standards section (for tendencies that affect format and length).
+
+When global layer information is available, the reconstruction incorporates global awareness:
+- Custom Instructions do not duplicate behavioral instructions already present in User Preferences
+- Knowledge file architecture accounts for installed Skills — does not create files covering content an active Skill already provides
+- CI references configured MCP Connectors where relevant and notes missing connectors the Project depends on
+- A "Global Layer Impact Note" is appended explaining how the reconstructed Project interacts with the user's global configuration
 
 ## Output Guidance
 

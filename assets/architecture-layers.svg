@@ -1,0 +1,107 @@
+<svg viewBox="0 0 700 946" xmlns="http://www.w3.org/2000/svg">
+  <rect width="700" height="946" rx="12" fill="#0d1117"/>
+  <rect x="0.5" y="0.5" width="699" height="945" rx="12" fill="none" stroke="#21262d" stroke-width="1"/>
+  <text x="350.0" y="37" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="17" font-weight="600" fill="#e6edf3" text-anchor="middle">The Nine Layers of a Claude Project</text>
+  <text x="350.0" y="54" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#8b949e" text-anchor="middle">Each layer has root.node Skills that diagnose, build, or optimize it</text>
+
+  <rect x="70.0" y="72" width="560" height="64" rx="8" fill="#1c1230" stroke="#bc8cff" stroke-width="1" stroke-dasharray="5 3" opacity="0.85"/>
+  <text x="350.0" y="86" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" font-weight="700" fill="#bc8cff" text-anchor="middle" letter-spacing="1.5">CROSS-LAYER</text>
+  <rect x="300.8" y="95.0" width="98.4" height="18" rx="9" fill="#261845" stroke="#3a2668" stroke-width="0.5"/>
+    <text x="350.0" y="107.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#bc8cff" text-anchor="middle">full-stack-audit</text>
+  <text x="350.0" y="128" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#8b949e" text-anchor="middle">Spans all 9 layers — Project audit + Global audit + Cross-Layer Alignment in one pass</text>
+  <rect x="25.0" y="147" width="650" height="354" rx="10" fill="#0a1628" opacity="0.5"/>
+  <rect x="25.0" y="147" width="650" height="2" rx="1" fill="#58a6ff" opacity="0.25"/>
+  <rect x="25.0" y="509" width="650" height="304" rx="10" fill="#1a1008" opacity="0.5"/>
+  <rect x="25.0" y="509" width="650" height="2" rx="1" fill="#d29922" opacity="0.25"/>
+  <rect x="25.0" y="821" width="650" height="88" rx="10" fill="#0a1f14" opacity="0.5"/>
+  <rect x="25.0" y="821" width="650" height="2" rx="1" fill="#3fb950" opacity="0.25"/>
+  <text x="350.0" y="166" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#6e7681" text-anchor="middle"><tspan font-weight="700" fill="#58a6ff" letter-spacing="1.5">GLOBAL SCOPE</tspan>  —  Foundation across all Projects</text>
+  <rect x="70.0" y="176" width="560" height="62" rx="8" fill="#0f1d35"/>
+  <rect x="70.0" y="179" width="3" height="56" rx="1.5" fill="#58a6ff" opacity="0.6"/>
+  <text x="350.0" y="194" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">User Preferences</text>
+  <text x="350.0" y="208" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Communication style, expertise level, behavioral defaults.</text>
+  <rect x="264.8" y="215.0" width="76.8" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="303.2" y="227.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">global-audit</text>
+    <rect x="347.6" y="215.0" width="87.6" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="391.4" y="227.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">context-budget</text>
+  <rect x="70.0" y="241" width="560" height="62" rx="8" fill="#0f1d35"/>
+  <rect x="70.0" y="244" width="3" height="56" rx="1.5" fill="#58a6ff" opacity="0.6"/>
+  <text x="350.0" y="259" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Styles</text>
+  <text x="350.0" y="273" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Tone, format, and delivery patterns. Applied by selection.</text>
+  <rect x="311.6" y="280.0" width="76.8" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="350.0" y="292.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">global-audit</text>
+  <rect x="70.0" y="306" width="560" height="62" rx="8" fill="#0f1d35"/>
+  <rect x="70.0" y="309" width="3" height="56" rx="1.5" fill="#58a6ff" opacity="0.6"/>
+  <text x="350.0" y="324" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Global Memory</text>
+  <text x="350.0" y="338" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Cross-project context and learned preferences.</text>
+  <rect x="204.5" y="345.0" width="76.8" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="242.9" y="357.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">global-audit</text>
+    <rect x="287.3" y="345.0" width="114.6" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="344.6" y="357.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">memory-optimization</text>
+    <rect x="407.9" y="345.0" width="87.6" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="451.7" y="357.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">context-budget</text>
+  <rect x="70.0" y="371" width="560" height="62" rx="8" fill="#0f1d35"/>
+  <rect x="70.0" y="374" width="3" height="56" rx="1.5" fill="#58a6ff" opacity="0.6"/>
+  <text x="350.0" y="389" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Skills</text>
+  <text x="350.0" y="403" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Procedural knowledge in SKILL.md files. Activated by task relevance.</text>
+  <rect x="220.7" y="410.0" width="76.8" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="259.1" y="422.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">global-audit</text>
+    <rect x="303.5" y="410.0" width="82.2" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="344.6" y="422.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">skill-builder</text>
+    <rect x="391.7" y="410.0" width="87.6" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="435.5" y="422.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">context-budget</text>
+  <rect x="70.0" y="436" width="560" height="62" rx="8" fill="#0f1d35"/>
+  <rect x="70.0" y="439" width="3" height="56" rx="1.5" fill="#58a6ff" opacity="0.6"/>
+  <text x="350.0" y="454" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">MCP Connectors</text>
+  <text x="350.0" y="468" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">External service integrations. Tools loaded on demand.</text>
+  <rect x="264.8" y="475.0" width="76.8" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="303.2" y="487.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">global-audit</text>
+    <rect x="347.6" y="475.0" width="87.6" height="18" rx="9" fill="#132d4a" stroke="#1d3d5a" stroke-width="0.5"/>
+    <text x="391.4" y="487.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#58a6ff" text-anchor="middle">context-budget</text>
+  <text x="350.0" y="528" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#6e7681" text-anchor="middle"><tspan font-weight="700" fill="#d29922" letter-spacing="1.5">PROJECT SCOPE</tspan>  —  Shapes every conversation in a Project</text>
+  <rect x="70.0" y="538" width="560" height="80" rx="8" fill="#251a0d"/>
+  <rect x="70.0" y="541" width="3" height="74" rx="1.5" fill="#d29922" opacity="0.6"/>
+  <text x="350.0" y="559" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14.5" font-weight="600" fill="#e6edf3" text-anchor="middle">Project Memory</text>
+  <text x="350.0" y="575" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Phase awareness, active constraints, key decisions.</text>
+  <rect x="201.8" y="584.0" width="114.6" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="259.1" y="596.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">memory-optimization</text>
+    <rect x="322.4" y="584.0" width="82.2" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="363.5" y="596.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">project-audit</text>
+    <rect x="410.6" y="584.0" width="87.6" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="454.4" y="596.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">context-budget</text>
+  <rect x="70.0" y="623" width="560" height="102" rx="8" fill="#251a0d"/>
+  <rect x="70.0" y="626" width="3" height="96" rx="1.5" fill="#d29922" opacity="0.6"/>
+  <text x="350.0" y="644" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14.5" font-weight="600" fill="#e6edf3" text-anchor="middle">Custom Instructions</text>
+  <text x="350.0" y="660" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Always-loaded behavioral architecture. Identity, rules, routing, output standards.</text>
+  <rect x="196.4" y="669.0" width="109.2" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="251.0" y="681.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">prompt-compilation</text>
+    <rect x="311.6" y="669.0" width="82.2" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="352.7" y="681.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">project-audit</text>
+    <rect x="399.8" y="669.0" width="103.8" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="451.7" y="681.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">behavioral-tuning</text>
+  <rect x="182.9" y="691.0" width="87.6" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="226.7" y="703.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">context-budget</text>
+    <rect x="276.5" y="691.0" width="130.8" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="341.9" y="703.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">anti-pattern-detection</text>
+    <rect x="413.3" y="691.0" width="103.8" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="465.2" y="703.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">prompt-validation</text>
+  <rect x="70.0" y="730" width="560" height="80" rx="8" fill="#251a0d"/>
+  <rect x="70.0" y="733" width="3" height="74" rx="1.5" fill="#d29922" opacity="0.6"/>
+  <text x="350.0" y="751" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14.5" font-weight="600" fill="#e6edf3" text-anchor="middle">Knowledge Files</text>
+  <text x="350.0" y="767" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Searchable reference depth. Documentation, data, frameworks.</text>
+  <rect x="136.1" y="776.0" width="87.6" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="179.9" y="788.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">context-budget</text>
+    <rect x="229.7" y="776.0" width="82.2" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="270.8" y="788.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">project-audit</text>
+    <rect x="317.9" y="776.0" width="130.8" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="383.3" y="788.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">anti-pattern-detection</text>
+    <rect x="454.7" y="776.0" width="109.2" height="18" rx="9" fill="#3d2b13" stroke="#5a4020" stroke-width="0.5"/>
+    <text x="509.3" y="788.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d29922" text-anchor="middle">prompt-compilation</text>
+  <text x="350.0" y="840" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#6e7681" text-anchor="middle"><tspan font-weight="700" fill="#3fb950" letter-spacing="1.5">CONVERSATION SCOPE</tspan>  —  The current exchange</text>
+  <rect x="70.0" y="850" width="560" height="56" rx="8" fill="#0f2b1b"/>
+  <rect x="70.0" y="853" width="3" height="50" rx="1.5" fill="#3fb950" opacity="0.6"/>
+  <text x="350.0" y="872" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14.5" font-weight="600" fill="#e6edf3" text-anchor="middle">Conversation Context</text>
+  <text x="350.0" y="890" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Where you interact with the Project. Skills activate here through natural language.</text>
+  <text x="350.0" y="918" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#6e7681" text-anchor="middle">Supporting Skills (activate in background):  block-selection  ·  identity-blocks  ·  reasoning-blocks  ·  output-blocks  ·  5 domain packs</text>
+
+</svg>

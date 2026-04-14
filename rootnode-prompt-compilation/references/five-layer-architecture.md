@@ -11,6 +11,7 @@ Detailed descriptions, templates, ready-to-use approaches, and design principles
 5. Layer 5 — Output
 6. Quality Control (cross-cutting)
 7. Assembly Principles
+8. Global Layer Interaction (Project Mode)
 
 ---
 
@@ -360,3 +361,19 @@ Actionability: Every recommendation must be specific enough that someone could a
 7. **Wrap everything in XML tags** for structural clarity.
 8. **Apply primacy-recency ordering** — identity and constraints top, output and quality bottom.
 9. **Audit** — remove anything that does not actively improve output.
+
+---
+
+## Global Layer Interaction (Project Mode)
+
+When building a Project scaffold with global layer awareness, the five-layer architecture operates within a broader context:
+
+**Layer 1 (Identity)** — The Project identity may reference capabilities provided by global layers. Example: "You have access to Google Drive for file retrieval" (if the Drive connector is configured). The identity should not claim capabilities the user's configuration does not support.
+
+**Layer 2 (Objective)** — Unchanged. Task objectives are always project-specific.
+
+**Layer 3 (Context)** — Project context may include awareness of global configuration. Example: the context section might note "The user's Preferences establish [X], so this Project focuses on [Y-specific calibration]."
+
+**Layer 4 (Reasoning)** — Unchanged. Reasoning approaches are always task-specific.
+
+**Layer 5 (Output + Quality Control)** — Output standards should not conflict with the user's Style settings. If the user has an active Style that affects formatting, note potential tensions in the Global Layer Advisory rather than building conflicting output rules.

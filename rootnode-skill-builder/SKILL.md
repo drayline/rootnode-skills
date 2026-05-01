@@ -1,18 +1,19 @@
 ---
 name: rootnode-skill-builder
 description: >-
-  Builds deployment-ready root.node Skill files (SKILL.md + references/) from
-  design specifications. Carries the full Agent Skills spec, root.node
-  conversion rules, progressive disclosure patterns, and quality gate. Use
-  when building a new Skill from a design spec, reviewing an existing Skill
-  for spec compliance, or revising a Skill's structure. Trigger on: "build
-  this Skill," "convert this to a Skill," "build from this design spec,"
-  "review this Skill," "check spec compliance," "is this description under
-  1024 chars," "revise this Skill." Also use when a design spec is present in
-  context and the user says "proceed with the build." Do NOT use for prompt
-  compilation (use rootnode-prompt-compilation), project auditing (use
-  rootnode-project-audit), or designing Skill methodology — this Skill
-  builds the package, not the content inside it.
+  Builds deployment-ready Skill files (SKILL.md + references/) from design
+  specifications. Use for building, packaging, converting, or reviewing Skills.
+  Trigger on: "build this Skill," "build from this design spec," "convert this
+  to a Skill," "package as a Skill," "review this Skill," "check spec
+  compliance," "revise this Skill," "is my description under 1024 chars," "my
+  SKILL.md is too long." Also trigger on symptom-phrased requests: "my Skill
+  doesn't activate," "my Skill folder structure is wrong," "my description
+  truncates in Claude Code." Also use when a design spec is in context and the
+  user says "proceed with the build." Do NOT use when the user is designing
+  Skill methodology itself (the content a Skill teaches, not its packaging) —
+  that's design work. Do NOT use for prompt compilation, project auditing, or
+  prompt scoring (use rootnode-prompt-compilation, rootnode-project-audit, or
+  rootnode-prompt-validation respectively, if available).
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -21,6 +22,8 @@ metadata:
 ---
 
 # Skill Builder
+
+> **Calibration:** Tier 2, Opus-primary. See repository README for model compatibility.
 
 Build, review, and revise root.node Skills in the SKILL.md format for Anthropic's Claude Skills ecosystem. This Skill carries the complete build methodology — Agent Skills spec, conversion rules, progressive disclosure patterns, and quality gate.
 
@@ -39,6 +42,14 @@ Skills are built from design specifications produced during methodology design w
 **Standalone-first composition.** Every Skill delivers its complete value when installed alone. Cross-Skill references are soft pointers only ("for deeper specialization, see X if available"). Prefer a few hundred tokens of duplicated guidance over a dependency that breaks a Skill when installed alone.
 
 **Complete file output.** Always output the complete file. Never diffs, patches, or partial sections.
+
+---
+
+## Reasoning discipline
+
+Before declaring a Skill ready to ship, walk through the five-dimension quality gate explicitly. State each check, cite the specific evidence (character counts, section structure, activation triggers, cross-Skill references), then apply the pass/fail verdict. Do not compress this sequence into a summary judgment.
+
+If the build scope is unclear (new build vs. review vs. revision, description constraints, reference file structure), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 
 ---
 

@@ -2,17 +2,17 @@
 name: rootnode-domain-agentic-context
 description: >-
   Specialized agentic and context engineering prompt methodology for Claude.
-  Provides 12 tested approaches for designing AI agent systems — system prompts,
-  tool definitions, context window architectures, failure mode planning,
-  multi-agent coordination, and agent evaluation. Use when building prompts that
-  design agent behavior, not when using agents. Trigger on: "design an agent,"
-  "build a system prompt for an agent," "architect an agent's context," "design
-  tool definitions," "agent system prompt," "context window architecture,"
-  "tool interface design," "evaluate agent behavior," "multi-agent coordination,"
-  "context engineering for agents," "ACI design." Do NOT use for evaluating or
-  scoring individual non-agent prompts (use rootnode-prompt-validation if
-  available). Do NOT use for general software architecture that hosts agents
-  (use standard technical reasoning for that).
+  Use when designing AI agents — system prompts, tool definitions, context
+  window architectures, failure mode planning, multi-agent coordination,
+  agent evaluation. Trigger on: "design an agent," "build a system prompt for
+  an agent," "architect an agent's context," "design tool definitions,"
+  "agent system prompt," "context window architecture," "tool interface
+  design," "evaluate agent behavior," "multi-agent coordination," "context
+  engineering for agents," "ACI design." Provides 12 tested approaches for
+  agent architecture (designing agents, not using them). Do NOT use for
+  evaluating or scoring individual non-agent prompts (use
+  rootnode-prompt-validation if available). Do NOT use for general software
+  architecture that hosts agents (use standard technical reasoning for that).
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -21,6 +21,8 @@ metadata:
 ---
 
 # Agentic & Context Engineering — Prompt Methodology
+
+> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
 
 Specialized approaches for designing AI agent systems: the system prompts agents follow, the tool definitions they consume, the context architectures they operate within, the failure modes they encounter, and the evaluation criteria that measure their performance.
 

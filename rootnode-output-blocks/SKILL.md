@@ -1,20 +1,20 @@
 ---
 name: rootnode-output-blocks
 description: >-
-  Tested output format specifications for Claude prompts — 10 ready-to-use
-  deliverable structures (executive briefs, technical designs, research summaries,
-  implementation plans, decision matrices, competitive analyses, post-mortems,
-  stakeholder updates, strategic memos, process documentation) plus a custom output
-  template. Use when the user wants a specific output template — retrieving,
-  reviewing, customizing, or building a deliverable structure. Trigger on: "give me
-  the Executive Brief format," "show me the output template for," "I need the
-  Decision Matrix structure," "show me available output formats," "build a custom
-  output format for." Provides per-section length guidance and format constraints
-  tested against Claude's formatting defaults. If the user is unsure which format
-  fits, use rootnode-block-selection first. Do NOT use for evaluating existing
-  prompts — use rootnode-prompt-validation if available. Do NOT use for
-  choosing reasoning or identity approaches — use rootnode-block-selection if
-  available.
+  Tested output format specifications for Claude prompts. Use when the user
+  wants a specific deliverable structure — retrieving, reviewing,
+  customizing, or building output formatting. Trigger on: "give me the
+  Executive Brief format," "show me the output template for," "I need the
+  Decision Matrix structure," "show me available output formats," "build a
+  custom output format for." Provides 10 ready-to-use structures (executive
+  briefs, technical designs, research summaries, implementation plans,
+  decision matrices, competitive analyses, post-mortems, stakeholder updates,
+  strategic memos, process documentation) plus a custom template, with
+  per-section length guidance and format constraints tested against Claude
+  formatting defaults. If unsure which format fits, use
+  rootnode-block-selection first if available. Do NOT use for evaluating
+  existing prompts (use rootnode-prompt-validation if available) or choosing
+  reasoning/identity approaches (use rootnode-block-selection if available).
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -23,6 +23,8 @@ metadata:
 ---
 
 # Output Format Selection for Claude Prompts
+
+> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
 
 Tested output format specifications that control what Claude's deliverable looks like — structure, sections, length, and format. Without an explicit output format, Claude defaults to its own formatting preferences, which often means overlong prose with excessive bullet points.
 

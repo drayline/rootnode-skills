@@ -22,6 +22,8 @@ metadata:
 
 # Business Strategy Prompt Methodology
 
+> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
+
 Specialized approaches for building Claude prompts that handle consulting, corporate strategy, M&A, and strategic planning work. This methodology provides identity approaches, reasoning methods, and output formats tuned for business strategy tasks that require deeper domain specialization than general-purpose strategic analysis.
 
 Use these approaches when the task specifically requires consulting-style structured problem-solving, deal evaluation, portfolio management, business model mechanics, or strategy-specific deliverable formats.

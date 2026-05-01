@@ -1,16 +1,17 @@
 ---
 name: rootnode-domain-software-engineering
 description: >-
-  Specialized software engineering prompt methodology. Provides 11 tested approaches
-  for system design, code review, incident response, security analysis, API design, and
-  architecture decision prompts. Use when building prompts for: reliability engineering,
-  threat modeling, performance analysis, technical leadership, RFCs, ADRs, runbooks, or
-  code review feedback. Trigger on: "build a prompt for code review," "system design
-  prompt," "SRE prompt," "security review prompt," "incident response prompt," "API
-  design prompt," "architecture decision prompt," "RFC prompt," "runbook prompt." Do
-  NOT use for general coding help, writing code, or debugging — this builds prompts
-  that shape engineering analysis, not code itself. Do NOT use for evaluating existing
-  prompts — use rootnode-prompt-validation if available.
+  Specialized software engineering prompt methodology for Claude. Use when
+  building prompts for system design, code review, incident response,
+  security analysis, API design, architecture decisions, RFCs, ADRs,
+  runbooks, or technical leadership. Trigger on: "build a prompt for code
+  review," "system design prompt," "SRE prompt," "security review prompt,"
+  "incident response prompt," "API design prompt," "architecture decision
+  prompt," "RFC prompt," "runbook prompt." Provides 11 tested approaches
+  across identity, reasoning, and output for engineering analysis. Do NOT use
+  for general coding help, writing code, or debugging — this builds prompts
+  that shape engineering analysis, not code itself. Do NOT use for evaluating
+  existing prompts (use rootnode-prompt-validation if available).
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -19,6 +20,8 @@ metadata:
 ---
 
 # Software Engineering Prompt Methodology
+
+> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
 
 Specialized approaches for building Claude prompts that handle software engineering tasks — reliability engineering, security analysis, code review, API design, performance analysis, threat modeling, and engineering document formats (RFCs, ADRs, runbooks, code review feedback).
 

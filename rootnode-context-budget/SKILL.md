@@ -3,19 +3,18 @@ name: rootnode-context-budget
 description: >-
   Analyzes Claude Project context budget using the two-pool architecture:
   knowledge files (~66,500 token RAG threshold) vs. threshold-exempt overhead.
-  Two modes: Quick Diagnostic (health check, feasibility) and Full Budget
-  Audit (per-file evaluation, growth trajectory, work-phase timing, content
-  routing, phased optimization with compression safeguards). Use when user
-  says "check my context budget," "how much context am I using," "is my
-  project too big," "optimize my token usage," "tier my files," "optimize for
-  RAG," "improve retrieval quality," "should I keep compressing," "am I
-  over-compressing," "should I accept RAG mode," or reports context pressure
-  symptoms (forgetting instructions, generic responses, inconsistency, content
-  not found in knowledge files). Also use when a project audit scores
-  Knowledge Architecture ≤ 3. Do NOT use for content placement (use
-  rootnode-memory-optimization), full project audits (use
-  rootnode-project-audit), or behavioral tuning (use
-  rootnode-behavioral-tuning).
+  Two modes: Quick Diagnostic and Full Budget Audit. Use when user says "check
+  my context budget," "how much context am I using," "is my project too big,"
+  "optimize my token usage," "tier my files," "optimize for RAG," "improve
+  retrieval quality," "should I keep compressing," "am I over-compressing,"
+  "should I accept RAG mode." Also trigger on context pressure symptoms: "Claude
+  forgets my instructions," "responses getting generic," "content not found in
+  my knowledge files." Also use when a project audit scores Knowledge
+  Architecture ≤ 3. Do NOT use for content placement decisions (use
+  rootnode-memory-optimization if available), full project audits (use
+  rootnode-project-audit if available), or behavioral tuning (use
+  rootnode-behavioral-tuning if available). Opus recommended; non-Opus models
+  may produce less complete analysis.
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -24,6 +23,8 @@ metadata:
 ---
 
 # Context Budget Analysis
+
+> **Calibration:** Tier 3, Opus-primary. See repository README for model compatibility.
 
 Analyze Claude Project context budget health. Determine operating mode (full-context vs. retrieval). Produce tiered file placement recommendations with a strategy matched to the project's growth trajectory, work-phase timing, and content routing needs.
 
@@ -42,6 +43,12 @@ Analyze Claude Project context budget health. Determine operating mode (full-con
 **Compression has a quality floor.** Not all content is equally compressible. Classify content type before recommending compression depth. See `references/compression-execution.md` for the Content-Type Classification (Type A prose vs. Type B precision reference) and structured off-ramps when compression stalls.
 
 **Optimize for where the project is going, not just where it is.** A plan that restores full-context mode for one session before the next file addition pushes it back into RAG is a cleanup, not a strategy. Always assess growth trajectory before producing an optimization plan.
+
+## Model requirements
+
+This Skill performs per-file evaluation against the six File Evaluation Dimensions, growth trajectory analysis, content routing decisions, and phased optimization planning with compression safeguards. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, per-file evaluation and compression quality judgment may compress — set effort higher for intelligence-sensitive audits.
+
+On non-Opus models (Sonnet 4.6, Haiku 4.5 with extended thinking enabled), expect compressed per-file evaluation, surface-level tier recommendations, and reduced synthesis across the growth trajectory. Quick Diagnostic mode degrades less than Full Budget Audit mode. The Skill will execute and produce correctly-shaped output; users should weight findings accordingly. Haiku without extended thinking is not a supported deployment target for this Skill.
 
 ## Core Concepts
 

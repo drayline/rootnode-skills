@@ -2,17 +2,18 @@
 name: rootnode-prompt-validation
 description: >-
   Evaluates and scores Claude prompts and system prompts using a six-dimension
-  Prompt Scorecard (Objective Clarity, Context Specificity, Reasoning Fit,
-  Output Precision, Behavioral Calibration, Architectural Efficiency) with
-  anchored 1-5 rubrics, plus a five-question Output Evaluation Rubric for
-  assessing actual output quality. Use when user says "review my prompt,"
-  "score this prompt," "rate my prompt," "why isn't my prompt working,"
-  "evaluate this prompt," "what's wrong with my prompt," "improve my prompt,"
-  "my prompt produces bad output," or "help me fix this prompt." Also use when
-  user pastes a system prompt and asks for feedback. Do NOT use for
-  project-level audits involving Custom Instructions architecture, knowledge
-  file organization, or multi-file Project structure — use
-  rootnode-project-audit for those if available.
+  Scorecard with anchored 1-5 rubrics. Trigger on: "review my prompt," "score
+  this prompt," "rate my prompt," "evaluate this prompt," "improve my prompt,"
+  "what's wrong with my prompt." Also trigger on: "why isn't my prompt working,"
+  "my prompt produces bad output," "help me fix this prompt," "is this prompt
+  any good." Scorecard covers Objective Clarity, Context Specificity, Reasoning
+  Fit, Output Precision, Behavioral Calibration, and Architectural Efficiency,
+  plus a five-question Output Evaluation Rubric for assessing actual output.
+  Also use when the user pastes a system prompt and asks for feedback. Activate
+  whenever structured quality assessment of a single prompt is the primary need.
+  Do NOT use for project-level audits involving Custom Instructions
+  architecture, knowledge file organization, or multi-file Project structure
+  (use rootnode-project-audit if available).
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -22,7 +23,15 @@ metadata:
 
 # Prompt Validation
 
+> **Calibration:** Tier 2, Opus-primary. See repository README for model compatibility.
+
 Evaluate whether a prompt is well-constructed, diagnose why it underperforms, and fix it systematically. This Skill treats prompt evaluation as a structured discipline — score the architecture, test the output, trace failures to their root layer.
+
+## Reasoning discipline
+
+Before scoring any dimension, walk through the evidence explicitly. State the observations (specific prompt features, instruction clarity, structural elements, behavioral countermeasures), name the pattern or principle they match against the rubric anchors, then apply the 1-5 score. Do not compress this sequence into a summary score.
+
+If the evaluation scope is unclear (Scorecard only? Output Evaluation Rubric too? scoring or rewrite?), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 
 ## When to Use This Skill
 

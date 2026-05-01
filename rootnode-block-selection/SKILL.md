@@ -1,19 +1,19 @@
 ---
 name: rootnode-block-selection
 description: >-
-  Guides selection of the right identity, reasoning, and output approaches for a
-  Claude prompt based on task characteristics. Use when the user needs help
-  choosing between approaches — deciding which method fits, comparing options, or
-  mapping a task to the right prompt architecture. Trigger on: "help me choose an
-  approach," "which approach fits this task," "compare reasoning methods for,"
-  "recommend a prompt pattern," "map this task to the right approach," "what
-  combination of approaches." Provides decision-tree selection logic across 8
-  identity approaches, 18 reasoning variants, and 10 output formats. After
-  selection, use the relevant block catalog skill to retrieve full templates. Do
-  NOT use for retrieving a specific known approach (use the relevant catalog skill
-  directly). Do NOT use for evaluating existing prompts (see
-  rootnode-prompt-validation if available) or auditing existing Claude Projects
-  (see rootnode-project-audit if available).
+  Guides selection of identity, reasoning, and output approaches for Claude
+  prompts based on task characteristics. Trigger on: "help me choose an
+  approach," "which approach fits this task," "recommend a prompt pattern,"
+  "compare reasoning methods," "map this task to the right approach," "what
+  combination of approaches," "which identity fits," "which reasoning method."
+  Also trigger on symptom-phrased: "my prompt feels generic," "I don't know
+  which approach to use," "my output lacks domain depth." Covers decision-tree
+  logic across 8 identity approaches, 18 reasoning variants, and 10 output
+  formats. After selection, use the relevant catalog skill to retrieve full
+  templates. Activate whenever approach-selection across multiple categories is
+  the primary decision. Do NOT use when the user already names a specific
+  approach to retrieve (use the relevant catalog skill directly) or for
+  evaluating existing prompts (use rootnode-prompt-validation if available).
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -22,6 +22,8 @@ metadata:
 ---
 
 # Approach Selection for Claude Prompts
+
+> **Calibration:** Tier 2, Opus-primary. See repository README for model compatibility.
 
 This Skill provides the decision logic for choosing the right identity, reasoning method, and output format when building a Claude prompt. Given a task description, it maps task characteristics to the best-fit approach in each category.
 
@@ -43,6 +45,14 @@ This Skill provides selection logic and approach summaries. For the full approac
 **Match complexity to task.** Not every task needs all four selection decisions. A simple task may need only an identity and output format. A medium task adds a reasoning method. Only complex, high-stakes tasks need the full selection plus quality control additions.
 
 **Core approaches cover 80% of tasks.** The 8 identity approaches, 18 reasoning variants, and 10 output formats handle most prompt construction needs. Route to domain-specific approaches only when the task requires specialization the core catalog cannot provide. See the domain routing guidance at the end of this file.
+
+---
+
+## Reasoning discipline
+
+Before recommending an approach, walk through the task characteristics explicitly. State the observations (task type, depth required, audience, output shape, constraints), name the approach pattern they match against the decision tree, then apply the selection. Do not compress this sequence into a summary recommendation.
+
+If the task scope is unclear (single-prompt selection? multi-block combination? architecture decision?), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 
 ---
 

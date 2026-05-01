@@ -22,6 +22,8 @@ metadata:
 
 # Content & Communications Prompt Methodology
 
+> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
+
 Build Claude prompts that produce high-quality content — articles, copy, content strategy, messaging frameworks, email sequences, and editorial evaluations. This Skill provides tested identity, reasoning, and output approaches tuned for content and communications work.
 
 **This Skill builds prompts, not content.** Use it when you need a system prompt or structured prompt that will reliably produce good content from Claude. If you need to write content directly, you do not need this Skill — you need a writer.

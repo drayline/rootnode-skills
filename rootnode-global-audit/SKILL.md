@@ -1,17 +1,20 @@
 ---
 name: rootnode-global-audit
 description: >-
-  Audits and optimizes the five global Claude layers (User Preferences, Styles, Global Memory,
-  Skills, MCP Connectors) using the Global Layer Scorecard (six dimensions: Preference Precision,
-  Style Coherence, Memory Hygiene, Skill Portfolio Fitness, Connector Alignment, Cross-Layer
-  Efficiency) with anchored 1-5 rubrics. Detects eight cross-layer failure modes and produces
-  evolutionary recommendations (Promotion, Demotion, Codification, Skill Extraction). Use when
-  user says "audit my global setup," "optimize my preferences," "review my Claude configuration,"
-  "check my cross-project setup," "are my preferences working," "clean up my global memory," or
-  "what should be in my preferences vs my project." Also use when a user has 3+ Projects and wants
-  to improve their shared foundation. Do NOT use for single-Project audits
-  (rootnode-project-audit), Project Memory optimization (rootnode-memory-optimization), or
-  full-stack audits (rootnode-full-stack-audit) — use those Skills if available.
+  Audits and optimizes the five global Claude layers (User Preferences,
+  Styles, Global Memory, Skills, MCP Connectors) using the Global Layer
+  Scorecard (six dimensions, anchored 1-5 rubrics). Detects eight cross-layer
+  failure modes and produces evolutionary recommendations (Promotion,
+  Demotion, Codification, Skill Extraction). Use when user says "audit my
+  global setup," "optimize my preferences," "review my Claude configuration,"
+  "check my cross-project setup," "are my preferences working," "clean up my
+  global memory," or "what should be in my preferences vs my project." Also
+  use when a user has 3+ Projects and wants to improve their shared
+  foundation. Do NOT use for single-Project audits, Project Memory
+  optimization, or full-stack audits (use rootnode-project-audit,
+  rootnode-memory-optimization, or rootnode-full-stack-audit respectively, if
+  available). Opus recommended; non-Opus models may produce less complete
+  analysis.
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -20,6 +23,8 @@ metadata:
 ---
 
 # Global Layer Auditor
+
+> **Calibration:** Tier 3, Opus-primary. See repository README for model compatibility.
 
 You audit the account-wide layers of a user's Claude environment — the configuration that affects every conversation, inside and outside Projects. You produce scored evaluations, cross-layer alignment findings, and evolutionary recommendations that strengthen the user's global foundation.
 
@@ -32,6 +37,12 @@ Every finding must cite specific evidence from the user's global layer content. 
 ## Critical: Complete File Output
 
 When producing any updated content — optimized User Preferences, Memory edit prescriptions, or any other deliverable — always output the complete content as a single, separately copyable unit. Never output diffs, patches, or partial sections.
+
+## Model requirements
+
+This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Global Layer Scorecard, detects eight cross-layer failure modes, and synthesizes evolutionary recommendations across four pathways. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, cross-layer synthesis may compress — set effort higher for intelligence-sensitive audits.
+
+On non-Opus models (Sonnet 4.6, Haiku 4.5 with extended thinking enabled), expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across the five global layers. The Skill will execute and produce correctly-shaped output; users should weight findings accordingly. Haiku without extended thinking is not a supported deployment target for this Skill.
 
 ## When to Use This Skill
 

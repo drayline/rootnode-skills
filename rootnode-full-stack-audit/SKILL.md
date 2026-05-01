@@ -1,16 +1,20 @@
 ---
 name: rootnode-full-stack-audit
 description: >-
-  Comprehensive audit of a user's entire Claude environment — combines Project audit (six-dimension
-  Project Scorecard, seven anti-patterns) with Global audit (six-dimension Global Layer Scorecard)
-  plus Cross-Layer Alignment Check across all nine layers and Evolutionary Recommendations (four
-  pathways: Promotion, Demotion, Codification, Skill Extraction). Produces a unified action plan.
-  Use when user says "full audit of everything," "audit my entire Claude setup," "full stack audit,"
-  "comprehensive review of my project and preferences," "check everything," or wants the complete
-  health check of both a specific Project AND their global configuration. Also use when a project
-  audit reveals cross-layer issues that require full-stack visibility. Do NOT use for auditing only
-  a Project (use rootnode-project-audit if available) or only global layers (use rootnode-global-audit
-  if available). Do NOT use for single prompt evaluation (use rootnode-prompt-validation if available).
+  Comprehensive audit of a user's entire Claude environment — combines Project
+  audit (six-dimension Project Scorecard, seven anti-patterns) with Global audit
+  (six-dimension Global Layer Scorecard) plus Cross-Layer Alignment Check across
+  all nine layers and Evolutionary Recommendations across four pathways.
+  Produces a unified action plan. Use when user says "full audit of everything,"
+  "audit my entire Claude setup," "full stack audit," "comprehensive review of
+  my project and preferences," "check everything," or wants the complete health
+  check of both a specific Project AND their global configuration. Also use when
+  a project audit reveals cross-layer issues that require full-stack visibility.
+  Do NOT use for auditing only a Project (use rootnode-project-audit if
+  available) or only global layers (use rootnode-global-audit if available). Do
+  NOT use for single prompt evaluation (use rootnode-prompt-validation if
+  available). Opus recommended; non-Opus models may produce less complete
+  analysis.
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -19,6 +23,8 @@ metadata:
 ---
 
 # Full Stack Auditor
+
+> **Calibration:** Tier 3, Opus-primary. See repository README for model compatibility.
 
 You perform the comprehensive health check of a user's entire Claude environment — both their Project architecture and their global configuration, evaluated together. You are the only audit mode that has simultaneous visibility into all nine layers, which means you detect cross-layer issues invisible to Project-only or global-only audits.
 
@@ -31,6 +37,12 @@ Every finding must cite specific evidence from the user's materials. No assertio
 ## Critical: Complete File Output
 
 When producing reconstructed Custom Instructions, optimized User Preferences, or any other deliverable, always output the complete content as a single, separately copyable unit. Never output diffs or partial sections.
+
+## Model requirements
+
+This Skill performs the most complex analysis in the catalog — combining Project audit (six-dimension Project Scorecard, seven anti-patterns) with Global audit (six-dimension Global Layer Scorecard) plus cross-layer alignment checks and evolutionary recommendations across all nine layers. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, the multi-scorecard synthesis may compress — set effort higher for intelligence-sensitive audits.
+
+On non-Opus models (Sonnet 4.6, Haiku 4.5 with extended thinking enabled), expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across the Project and Global layers. The Skill will execute and produce correctly-shaped output; users should weight findings accordingly. Haiku without extended thinking is not a supported deployment target for this Skill.
 
 ## When to Use This Skill
 

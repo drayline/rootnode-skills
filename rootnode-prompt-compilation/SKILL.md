@@ -1,14 +1,20 @@
 ---
 name: rootnode-prompt-compilation
 description: >-
-  Builds complete, optimized Claude prompts and Project scaffolds from task descriptions using a four-stage methodology
-  (Parse, Select, Construct, Validate) and a tested 5-layer architecture (Identity, Objective, Context, Reasoning,
-  Output + Quality Control). In Project Mode, the Compiler is global-layer-aware — it checks User Preferences, installed
-  Skills, and MCP Connectors to avoid redundancy and flag gaps. Use when building, designing, creating, or structuring
-  a Claude prompt or system prompt. Trigger on: "build me a prompt," "compile a prompt for," "create a system prompt,"
-  "write a Claude prompt," "design a prompt for," "help me write a prompt," "I need a prompt that," "scaffold a Claude
-  Project," "design a Project for," "structure a prompt for this task." Do NOT use for auditing or improving existing
-  prompts (use rootnode-prompt-validation if available) or for diagnosing existing Projects (use rootnode-project-audit).
+  Builds complete, optimized Claude prompts and Project scaffolds from task
+  descriptions. Use when building, designing, creating, or structuring a
+  Claude prompt or system prompt. Trigger on: "build me a prompt," "compile a
+  prompt for," "create a system prompt," "write a Claude prompt," "design a
+  prompt for," "help me write a prompt," "scaffold a Claude Project," "design
+  a Project for." Uses a four-stage methodology (Parse, Select, Construct,
+  Validate) and a tested 5-layer architecture (Identity, Objective, Context,
+  Reasoning, Output + Quality Control). In Project Mode, the Compiler is
+  global-layer-aware — checks User Preferences, installed Skills, and MCP
+  Connectors to avoid redundancy and flag gaps. Do NOT use for auditing
+  existing prompts (use rootnode-prompt-validation if available) or
+  diagnosing existing Projects (use rootnode-project-audit if available).
+  Opus recommended; non-Opus models may produce less complete prompt
+  construction.
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -17,6 +23,8 @@ metadata:
 ---
 
 # Prompt Compilation
+
+> **Calibration:** Tier 3, Opus-primary. See repository README for model compatibility.
 
 Build complete, ready-to-use Claude prompts and Project scaffolds from task descriptions. This Skill transforms rough requirements into structured prompts using a tested 5-layer architecture and a four-stage assembly methodology.
 
@@ -37,6 +45,12 @@ Not every task needs the full 5-layer treatment. Match prompt complexity to task
 **Medium tasks** (some ambiguity, multiple dimensions, meaningful format requirements): Use 4-5 layers. Full identity, objective, reasoning, and output. Add quality control if the task has known failure modes. Add context if the user provided situational detail. Example: "Evaluate three cloud providers for our migration."
 
 **Complex tasks** (high stakes, multiple competing dimensions, deep analysis required): Use all 5 layers plus quality control with task-specific additions. Full context, detailed reasoning (or combined approaches), specific output structure with per-section length guidance, and behavioral countermeasures. Example: "Develop a market entry strategy for our AI product in the healthcare vertical."
+
+## Model requirements
+
+This Skill performs multi-stage construction across the four-stage pipeline (Parse, Select, Construct, Validate) and three modes (Prompt, Project, Prep), with decision trees spanning identity × reasoning × output × domain selection. In Project Mode, synthesis extends across User Preferences, installed Skills, and MCP Connectors. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, block selection and validation steps may compress — set effort higher for intelligence-sensitive compilations.
+
+On non-Opus models (Sonnet 4.6, Haiku 4.5 with extended thinking enabled), expect compressed selection logic, less specific block recommendations, and reduced cross-layer validation. The Skill will execute and produce correctly-shaped output; users should weight the resulting prompts accordingly. Haiku without extended thinking is not a supported deployment target for this Skill.
 
 ## The Four-Stage Workflow
 

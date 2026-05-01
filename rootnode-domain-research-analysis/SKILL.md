@@ -24,6 +24,8 @@ metadata:
 
 # Research & Analysis Prompt Methodology
 
+> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
+
 Specialized approaches for building Claude prompts that handle quantitative analysis, policy research, investigative inquiry, systematic evidence review, and research-specific deliverable formats. This Skill provides identity templates, reasoning methods, and output structures tuned for research work — where rigor, source transparency, and calibrated confidence matter most.
 
 **When to use this Skill:** You have a research or analysis task and need a well-structured Claude prompt for it. The task involves interpreting data, synthesizing evidence, evaluating policy options, investigating a question from primary sources, or producing a research deliverable (policy brief, data analysis report, literature review, briefing document).

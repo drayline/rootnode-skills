@@ -2,18 +2,19 @@
 name: rootnode-reasoning-blocks
 description: >-
   Tested reasoning approaches for Claude prompts — 18 variants across 6
-  categories (Analytical, Strategic, Creative, Technical, Research, Comparative).
-  Use when the user wants a specific reasoning template — retrieving, reviewing,
-  customizing, or combining reasoning instructions for a prompt. Trigger on:
-  "give me the Root Cause Diagnosis approach," "show me the reasoning template
-  for," "I need the Evidence Synthesis method," "show me analytical reasoning
-  options," "combine reasoning approaches for," "show me all reasoning variants."
-  Also use when a prompt produces shallow output and the fix is a reasoning
-  upgrade. Provides 18 tested approaches for analytical, strategic, creative,
-  technical, research, and comparison tasks. If the user is unsure which
-  reasoning method fits, use rootnode-block-selection first. Do NOT use for
-  evaluating existing prompts — use rootnode-prompt-validation if available. Do
-  NOT use for project-level audits — use rootnode-project-audit if available.
+  categories (Analytical, Strategic, Creative, Technical, Research,
+  Comparative). Use when the user wants a specific reasoning template —
+  retrieving, reviewing, customizing, or combining reasoning instructions for
+  a prompt. Trigger on: "give me the Root Cause Diagnosis approach," "show me
+  the reasoning template for," "I need the Evidence Synthesis method," "show
+  me analytical reasoning options," "combine reasoning approaches for," "show
+  me all reasoning variants." Also use when a prompt produces shallow output
+  and the fix is a reasoning upgrade. Provides 18 tested approaches for
+  analytical, strategic, creative, technical, research, and comparison tasks.
+  If the user is unsure which reasoning method fits, use
+  rootnode-block-selection first if available. Do NOT use for evaluating
+  existing prompts — use rootnode-prompt-validation if available. Do NOT use
+  for project-level audits — use rootnode-project-audit if available.
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -22,6 +23,8 @@ metadata:
 ---
 
 # Reasoning Approach Selection for Claude Prompts
+
+> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
 
 Select the reasoning approach that matches how the task requires Claude to think. The reasoning layer is the highest-leverage component in a prompt — the difference between shallow and deep output almost always traces back to reasoning quality.
 

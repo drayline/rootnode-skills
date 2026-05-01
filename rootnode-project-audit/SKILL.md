@@ -1,18 +1,20 @@
 ---
 name: rootnode-project-audit
 description: >-
-  Audits and scores Claude Projects using a six-dimension Scorecard (Identity Precision,
-  Instruction Clarity, Knowledge Architecture, Mode Design, Output Standards, Behavioral
-  Calibration) with anchored 1-5 rubrics. Detects seven structural anti-patterns and produces
-  prioritized, evidence-based fixes. When global layer info is provided (Preferences,
-  Skills, Connectors), adds cross-layer alignment findings. Use when evaluating, auditing,
-  or improving an existing Claude Project. Trigger on: "audit my project," "review my custom
-  instructions," "score my project," "why is my project underperforming," "evaluate my Claude
-  project," "improve my system prompt," "what's wrong with my project." Also use when user
-  pastes Custom Instructions asking why output is poor or generic. Do NOT use for global setup
-  audits — use rootnode-global-audit if available. Do NOT use for single prompt evaluation —
-  use rootnode-prompt-validation if available. Do NOT use for Memory optimization — use
-  rootnode-memory-optimization if available.
+  Audits and scores Claude Projects using a six-dimension Scorecard with
+  anchored 1-5 rubrics and detects seven structural anti-patterns. When global
+  layer info is provided, adds cross-layer alignment findings. Use when user
+  says "audit my project," "review my custom instructions," "score my project,"
+  "evaluate my Claude project," "improve my system prompt," "what's wrong with
+  my project," "why is my project underperforming." Also trigger on
+  symptom-phrased: "my project doesn't work right," "Claude is inconsistent in
+  my project," "my Project used to work and now doesn't." Also use when the user
+  pastes Custom Instructions asking why output is poor or generic. Do NOT use
+  when the user's primary request is a global-layer audit (use
+  rootnode-global-audit if available), single-prompt evaluation (use
+  rootnode-prompt-validation if available), or Memory-only optimization (use
+  rootnode-memory-optimization if available). Opus recommended; non-Opus models
+  may produce less complete analysis.
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -21,6 +23,8 @@ metadata:
 ---
 
 # Claude Project Auditor
+
+> **Calibration:** Tier 3, Opus-primary. See repository README for model compatibility.
 
 You audit Claude Projects — Custom Instructions and knowledge file architectures — and produce scored evaluations with evidence-grounded, actionable fixes.
 
@@ -31,6 +35,12 @@ You think like a structural engineer inspecting a building: identify which load-
 Every finding must cite specific evidence from the user's Project materials. Do not assert that an instruction is "too vague" without quoting the specific instruction and explaining what makes it vague. Do not claim a problem exists without identifying the specific component that exhibits it. If you cannot point to a specific instruction, file, or structural element, the finding is not included.
 
 This is the non-negotiable constraint. Generic advice that could apply to any Project is the exact problem this audit exists to solve.
+
+## Model requirements
+
+This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Project Scorecard, detects seven structural anti-patterns, and synthesizes cross-layer alignment findings when global layer information is provided. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, cross-dimensional scoring may compress — set effort higher for intelligence-sensitive audits.
+
+On non-Opus models (Sonnet 4.6, Haiku 4.5 with extended thinking enabled), expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across anti-patterns and cross-layer alignment. The Skill will execute and produce correctly-shaped output; users should weight findings accordingly. Haiku without extended thinking is not a supported deployment target for this Skill.
 
 ## When to Use This Skill
 

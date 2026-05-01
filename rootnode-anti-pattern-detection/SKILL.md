@@ -2,19 +2,19 @@
 name: rootnode-anti-pattern-detection
 description: >-
   Detects seven structural anti-patterns in Claude Projects that cause
-  unpredictable output, ignored instructions, and degraded quality.
-  Diagnoses: Monolith (mixed content types), Orphan File (unreferenced
-  knowledge files), Echo Chamber (duplicated instructions), Phantom
-  Conversation (conversational style reducing authority), Kitchen Sink
-  (edge-case rules diluting core rules), Misaligned Hierarchy
-  (behavioral rules in knowledge files instead of Custom Instructions),
-  and Blurred Layers (Memory and knowledge file content in wrong layers).
-  Use when user says "what's wrong with my project," "Claude ignores my
-  instructions," "diagnose my project," "why is output inconsistent,"
-  or "review my project setup." Also use alongside rootnode-project-audit
-  if available. Activate whenever the user describes symptoms of
-  unreliable, inconsistent, or degraded Claude Project output, even if
-  they do not name a specific pattern.
+  unpredictable output, ignored instructions, and degraded quality. Diagnoses
+  Monolith, Orphan File, Echo Chamber, Phantom Conversation, Kitchen Sink,
+  Misaligned Hierarchy, and Blurred Layers. Use when user says "what's wrong
+  with my project," "Claude ignores my instructions," "diagnose my project,"
+  "why is output inconsistent," "review my project setup." Also trigger on
+  symptom-phrased: "Claude doesn't follow my rules," "my instructions keep
+  getting overridden," "my Project isn't behaving as designed." Use alongside
+  rootnode-project-audit if available for deeper structural analysis. Activate
+  whenever the user describes symptoms of unreliable, inconsistent, or degraded
+  Claude Project output, even if they do not name a specific pattern. Do NOT use
+  when the user's primary request is Memory-layer rebalancing (use
+  rootnode-memory-optimization if available) or scoring a single prompt (use
+  rootnode-prompt-validation if available).
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -24,11 +24,19 @@ metadata:
 
 # Anti-Pattern Detection for Claude Projects
 
+> **Calibration:** Tier 2, Opus-primary. See repository README for model compatibility.
+
 Detect and fix the seven structural mistakes that cause Claude Projects to underperform. Each pattern has specific detection criteria and symptoms — diagnose by evidence, not intuition.
 
 ## Critical: Evidence-First Diagnosis
 
 Never assert a pattern without citing the specific component that exhibits it. For every pattern you detect, quote the exact text from the user's Custom Instructions or knowledge files that demonstrates the problem. If you cannot point to concrete evidence, the pattern is not confirmed.
+
+## Reasoning discipline
+
+Before declaring an anti-pattern present, walk through the evidence explicitly. State the observations (specific file contents, structural features, duplication instances, layer assignments), name the anti-pattern they match against detection criteria, then explain the severity and impact. Do not compress this sequence into a summary diagnosis.
+
+If the diagnosis scope is unclear (which files are in scope? which Project layers? all seven patterns or a subset?), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 
 ## When to Use This Skill
 

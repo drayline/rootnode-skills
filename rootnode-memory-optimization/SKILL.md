@@ -3,18 +3,18 @@ name: rootnode-memory-optimization
 description: >-
   Rebalances context across Memory, Custom Instructions, knowledge files, and
   User Preferences in Claude Projects. Audits Memory for redundancy, staleness,
-  and misplacement, then prescribes optimization including the Codification
-  pathway — identifying stable Memory patterns that should be promoted to
-  explicit User Preferences or Project CI rules. Use when user says "optimize my
-  memory," "what should be in my memory," "trim my knowledge files," "reduce my
-  context usage," "rebalance my project," "my project feels bloated," "what
+  and misplacement; prescribes optimization including Codification of stable
+  Memory patterns into explicit User Preferences or Project CI rules. Use when
+  user says "optimize my memory," "what should be in my memory," "trim my
+  knowledge files," "reduce my context usage," "rebalance my project," "what
   should be in my preferences vs memory," or asks whether something belongs in
-  Memory, a knowledge file, or User Preferences. Also use when a user reports
-  context window pressure or truncation in long conversations. Do NOT use for
-  full project architecture audits (use rootnode-project-audit if available).
-  Do NOT use for evaluating a single prompt (use rootnode-prompt-validation
-  if available). Do NOT use for global-only audits (use rootnode-global-audit
-  if available).
+  Memory, a knowledge file, or User Preferences. Also trigger on
+  symptom-phrased: "my project feels bloated," "Claude keeps forgetting things,"
+  "my context window keeps hitting limits." Activate whenever Memory-layer
+  balance is the primary concern. Do NOT use for full Project audits (use
+  rootnode-project-audit if available), single-prompt evaluation (use
+  rootnode-prompt-validation if available), or global-layer audits that don't
+  touch Project Memory (use rootnode-global-audit if available).
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -23,6 +23,8 @@ metadata:
 ---
 
 # Context Layer Optimization for Claude Projects
+
+> **Calibration:** Tier 2, Opus-primary. See repository README for model compatibility.
 
 Rebalances context across Memory, Custom Instructions, knowledge files, and User Preferences in Claude Projects. Produces Memory edit prescriptions, knowledge file trimming recommendations, codification prescriptions for promoting stable patterns to explicit instructions, and cross-layer alignment findings.
 
@@ -44,6 +46,12 @@ If the user wants partial execution — execute only the approved edits. Note wh
 ## Critical Rule: Complete File Output
 
 When producing any updated file — Custom Instructions, knowledge files, or any other deliverable — always output the complete file as a single, separately copyable unit. Never output diffs, patches, or partial sections that require manual splicing. The user replaces the old file by copying the complete output.
+
+## Reasoning discipline
+
+Before prescribing a Memory optimization, walk through the evidence explicitly. State the observations (specific Memory entries, content types, redundancies, staleness markers), name the placement pattern or principle they match (Memory vs. Custom Instructions vs. knowledge file vs. User Preferences), then apply the rebalancing prescription. Do not compress this sequence into a summary recommendation.
+
+If the optimization scope is unclear (Memory-only? full context-layer rebalance? Codification-focused?), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 
 ## Core Thesis
 

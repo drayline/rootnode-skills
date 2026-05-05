@@ -19,7 +19,7 @@ license: Apache-2.0
 metadata:
   author: rootnode
   version: "1.0"
-  original-source: "NEW — Skill Design Spec: Brief Builder & Ecosystem Intelligence"
+  original-source: "Seed-project methodology synthesis"
 ---
 
 # Project Brief Builder

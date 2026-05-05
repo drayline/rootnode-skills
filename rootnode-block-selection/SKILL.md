@@ -9,11 +9,12 @@ description: >-
   Also trigger on symptom-phrased: "my prompt feels generic," "I don't know
   which approach to use," "my output lacks domain depth." Covers decision-tree
   logic across 8 identity approaches, 18 reasoning variants, and 10 output
-  formats. After selection, use the relevant catalog skill to retrieve full
-  templates. Activate whenever approach-selection across multiple categories is
-  the primary decision. Do NOT use when the user already names a specific
-  approach to retrieve (use the relevant catalog skill directly) or for
-  evaluating existing prompts (use rootnode-prompt-validation if available).
+  formats. After selection, use the relevant catalog skill if available to
+  retrieve full templates. Activate whenever approach-selection across multiple
+  categories is the primary decision. Do NOT use when the user already names a
+  specific approach to retrieve (use the relevant catalog skill directly if
+  available) or for evaluating existing prompts (use rootnode-prompt-validation
+  if available).
 license: Apache-2.0
 metadata:
   author: rootnode

@@ -27,6 +27,7 @@ metadata:
     against a CC deployment sweep on 2026-05-04 surfacing 23 findings across
     14 categories with three-form authorization use and Path 3 commit-plan
     adaptation accepted as defer-to-downstream.
+  discipline_post: phase-30
 ---
 
 # rootnode-repo-hygiene

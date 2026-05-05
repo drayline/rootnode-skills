@@ -22,6 +22,7 @@ metadata:
   original-source: "root.node design 2026 — runtime layer (gates, router, profile builder)"
   companion-files: "schema/profile.schema.json, profiles/strict.json, profiles/balanced.json, profiles/lenient.json, references/examples.md, references/troubleshooting.md, references/sensing-triggers-detailed.md"
   changelog: "1.1.2 (2026-05-05): Activation precision tuning. Added two symptom-phrased triggers (\"are we ready to ship this,\" \"should I just hand this off\") to broaden activation under user vocabulary that doesn't include the word 'handoff.' No methodology, schema, or workflow changes; behavior identical to 1.1.1 once activated. 1.1.1 (2026-05-01): Structural patch to align with rootnode authoring convention. Added references/ folder with three on-demand-loaded files (examples, troubleshooting, sensing-triggers-detailed). SKILL.md body slimmed ~23% via content extraction (Examples and Troubleshooting sections moved out; sensing-triggers detail expanded into a dedicated reference); behavior identical to 1.1. 1.1 (2026-05-01): Added Mode 2 (proactive sensing) and Mode 3 (conversational walkthrough). Mode 1 (deliberate gate) behavior unchanged from 1.0 — backward compatible. Deployment target: chat-Project (CP) side of CP/CC split."
+  discipline_post: phase-30
 ---
 
 # Handoff Trigger Check

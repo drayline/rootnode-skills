@@ -30,6 +30,7 @@ metadata:
     of cc-anti-patterns.md to canonical numbering. Brand-surface clean
     (cchq references stripped or restructured; hyge contamination
     anonymized to "production CC deployment 2026-05-04").
+  discipline_post: phase-30
 ---
 
 # Claude Code Design

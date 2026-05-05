@@ -23,6 +23,7 @@ metadata:
   original-source: "root.node design 2026 — distilled from production engine evolution patterns"
   companion-files: "schema/profile.schema.json, profiles/lenient.json, profiles/strict.json, profiles/balanced.json, references/checks-detailed.md, references/severity-coverage.md, references/troubleshooting.md"
   changelog: "1.0.2 (2026-05-05): Activation precision tuning. Trigger list rebalanced — 'review this proposed change' + 'approve this diff' consolidated to 'review/approve this proposed change' (saves char budget); 'should this land' replaced with 'should I let this land' (1st-person symptom phrasing); 'is this safe to merge' added as new symptom trigger (merge framing covers user-vocabulary surface that change/diff framing misses). Description grew 996 → 1014 chars (10-char headroom remaining). No methodology, schema, or workflow changes; behavior identical to 1.0.1 once activated. 1.0.1 (2026-05-01): Structural patch to align with rootnode authoring convention. Added references/ folder with three on-demand-loaded files (checks-detailed, severity-coverage, troubleshooting). SKILL.md body slimmed via content extraction; behavior identical to 1.0. Deployment target: Claude Code (CC) side of CP/CC split."
+  discipline_post: phase-30
 ---
 
 # Critic Gate

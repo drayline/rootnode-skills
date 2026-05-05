@@ -23,6 +23,7 @@ metadata:
   original-source: "root.node design 2026 — runtime layer (gates, router, profile builder)"
   companion-files: "schema/router-config.schema.json, configs/example-router.json, examples/routing-walkthrough.md, references/trigger-types-detailed.md, references/compound-trigger-semantics.md, references/troubleshooting.md"
   changelog: "1.0.2 (2026-05-05): Brand-strip patch per Phase 27/28 methodology absorption. Body line 34 cchq reference replaced with rootnode runtime layer framing; behavior identical to 1.0.1. No structural or methodology changes. 1.0.1 (2026-05-01): Structural patch to align with rootnode authoring convention. Added references/ folder with three on-demand-loaded files (trigger-types-detailed, compound-trigger-semantics, troubleshooting). SKILL.md body slimmed via content extraction; behavior identical to 1.0. Deployment target: Claude Code (CC) side of CP/CC split."
+  discipline_post: phase-30
 ---
 
 # Mode Router

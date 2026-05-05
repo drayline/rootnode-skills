@@ -21,6 +21,7 @@ metadata:
   version: "2.0"
   predecessor: "rootnode-skill-builder v1.0"
   original-source: "root.node seed Project KFs (post-Phase 27/28 methodology absorption) + rootnode-skills repo v1 source files"
+  discipline_post: phase-30
 ---
 
 # Skill Builder

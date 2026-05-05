@@ -76,7 +76,10 @@ metadata:
   author: rootnode
   version: "1.0"
   original-source: AUDIT_FRAMEWORK.md
+  discipline_post: phase-30
 ```
+
+**`metadata.discipline_post`** (rootnode build convention, required from skill-builder v2.x onward): Marks the build-discipline phase under which the Skill was produced. Value `phase-30` indicates the Skill was built under the Phase 30 audit-artifact discipline (placement note + conditional promotion provenance + conditional AP warnings). The field is not optional for new builds — it is part of D1 spec compliance going forward; Skills built without it fail D1. Future phases may extend the enum (`phase-31a`, etc.); the field carries the most recent applicable phase. The field's absence on a Skill signals it predates the discipline. See `root_SKILL_BUILD_DISCIPLINE.md` §4.6 for the canonical convention.
 
 ---
 

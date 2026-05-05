@@ -192,7 +192,7 @@ When asked to revise a Skill:
 
 For the full specification, read references/skills-spec.md.
 
-**YAML frontmatter:** `name` in kebab-case, max 64 chars, must match folder name. `description` max 1024 chars (verify YAML-parsed length), must include what + when + triggers. No XML angle brackets. Optional: `license` (Apache-2.0 for rootnode), `metadata` (author, version, predecessor, original-source, notes).
+**YAML frontmatter:** `name` in kebab-case, max 64 chars, must match folder name. `description` max 1024 chars (verify YAML-parsed length), must include what + when + triggers. No XML angle brackets. Optional: `license` (Apache-2.0 for rootnode), `metadata` (author, version, predecessor, original-source, notes). Required from skill-builder v2.x onward: `metadata.discipline_post: phase-30` — marks the build-discipline phase per `root_SKILL_BUILD_DISCIPLINE.md` §4.6; emit on every new build (D1 spec-compliance).
 
 **SKILL.md body:** Under 500 lines, under ~5000 tokens. Core instructions only. Imperative form. Include 2-3 examples, When to Use section, Troubleshooting section.
 

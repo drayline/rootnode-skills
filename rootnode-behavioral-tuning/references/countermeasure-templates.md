@@ -421,4 +421,10 @@ Before finalizing a countermeasure package, walk through this checklist:
 
 ---
 
+## Language Calibration
+
+Countermeasure language design affects compliance. Research (Meincke et al. 2025, N=28,000) found persuasion techniques — authority, commitment, and scarcity framing — more than doubled LLM behavioral compliance rates (33% → 72%, p < .001). For discipline-enforcing countermeasures (tendencies #1 agreeableness, #5 fabricated precision, #7b tool under-triggering, #10 self-referential fabrication), use imperative framing: direct commands with authority and commitment anchors (e.g., "Run the verification command. Read the output. THEN claim the result."). For overcorrection-risk tendencies (#3 verbosity, #6 over-exploration), use calibrated framing that sets boundaries without triggering compensatory extremes. See `root_OPTIMIZATION_REFERENCE.md` §"Behavioral Tendencies and Countermeasures" — "Note on countermeasure language design" for full reasoning and citation.
+
+---
+
 *End of extended templates.*

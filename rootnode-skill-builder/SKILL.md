@@ -3,7 +3,7 @@ name: rootnode-skill-builder
 description: >-
   Builds, validates, and packages deployment-ready Skill files (SKILL.md +
   references/) from design specifications. Three pre-build gates (decomposition,
-  warrant, ecosystem fit) plus an 8-dimension quality gate. Use for building,
+  warrant, ecosystem fit) plus an 9-dimension quality gate. Use for building,
   packaging, converting, reviewing, or revising Skills. Trigger on: "build this
   Skill," "build from this design spec," "convert this to a Skill," "package as
   a Skill," "review this Skill," "check spec compliance," "revise this Skill,"
@@ -28,9 +28,9 @@ metadata:
 
 > **Calibration:** Tier 2, Opus-primary. See repository README for model compatibility.
 
-> **Version 2.0:** Adds three pre-build gates (decomposition, warrant, ecosystem fit) before any build work begins. Expands the publication review from 5 to 8 dimensions (auto-activation enforcement, anti-pattern catalog scan, 7-layer leak-check). Adds three new build artifacts (placement note, promotion provenance, AP-warning summary). v1-built Skills continue to work unmodified; this Skill can review them advisorially against the new dimensions.
+> **Version 2.0:** Adds three pre-build gates (decomposition, warrant, ecosystem fit) before any build work begins. Expands the publication review from 5 to 9 dimensions (auto-activation enforcement, anti-pattern catalog scan, 7-layer leak-check; behavioral validation added in v2.1). Adds three new build artifacts (placement note, promotion provenance, AP-warning summary). v1-built Skills continue to work unmodified; this Skill can review them advisorially against the new dimensions.
 
-Build, review, and revise root.node Skills in the SKILL.md format for Anthropic's Claude Skills ecosystem. This Skill carries the complete build methodology — Agent Skills spec, conversion rules, progressive disclosure patterns, pre-build gates, and the 8-dimension quality gate.
+Build, review, and revise root.node Skills in the SKILL.md format for Anthropic's Claude Skills ecosystem. This Skill carries the complete build methodology — Agent Skills spec, conversion rules, progressive disclosure patterns, pre-build gates, and the 9-dimension quality gate.
 
 Skills are built from design specifications produced during methodology design work. The design spec is the input — it contains the methodology, architectural decisions, description field draft, internal language adaptation notes, composition testing cases, and reference file structure. This Skill's job is gate-checking, construction, validation, and publication-readiness.
 
@@ -56,7 +56,7 @@ Skills are built from design specifications produced during methodology design w
 
 ## Reasoning discipline
 
-Before declaring a Skill ready to ship, walk through the eight-dimension quality gate explicitly. State each check, cite the specific evidence (character counts, section structure, activation triggers, cross-Skill references, AP catches, layer leaks), then apply the pass/fail verdict. Do not compress this sequence into a summary judgment.
+Before declaring a Skill ready to ship, walk through the nine-dimension quality gate explicitly. State each check, cite the specific evidence (character counts, section structure, activation triggers, cross-Skill references, AP catches, layer leaks), then apply the pass/fail verdict. Do not compress this sequence into a summary judgment.
 
 If the build scope is unclear (new build vs. review vs. revision, description constraints, reference file structure), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 
@@ -118,7 +118,7 @@ When the three pre-build gates have passed and a design specification is present
 
 **Step 4 — Apply internal language adaptation.** Use the adaptation notes from the design spec. Default conversions (see references/conversion-guide.md for full table): "block" → "approach" or "methodology," "the Compiler" → "this Skill" or "the compilation process," "knowledge file" → "reference file" or "documentation." Exception: Skills that operate ON Claude Projects platform features (memory-optimization, context-budget, project-audit) retain platform terminology. If the design spec documents a terminology exception, follow it.
 
-**Step 5 — Run eight-dimension publication review.** Score each dimension pass/fail with evidence:
+**Step 5 — Run nine-dimension publication review.** Score each dimension pass/fail with evidence:
 
 1. **Spec compliance:** Name format, description length (YAML-parsed ≤1024), body length (<500 lines), no XML in frontmatter, no README.md in folder, folder name matches `name` field.
 2. **Activation precision:** Would this description trigger on the right tasks? Stay silent on wrong tasks? Compete with 50+ descriptions? Check for undertriggering (Claude's default bias) — descriptions should be slightly "pushy."
@@ -134,6 +134,7 @@ When the three pre-build gates have passed and a design specification is present
    - External integration logic → candidate for MCP
 
    Surface as warnings; user decides whether to extract.
+9. **Behavioral validation (v2.1, RECOMMENDED — not REQUIRED):** Has the Skill been tested against at least one adversarial scenario where Claude would fail without it? Three pass conditions (pressure scenario documented, baseline failure confirmed/credibly expected, compliance with Skill confirmed/credibly expected) OR the skip condition for reference-only / data-carrying / configuration-driven Skills. RECOMMENDED classification: D1–D8 pass without D9 is shippable; D9 absence is not a build-blocker. Full canonical pass conditions, skip condition, and classification rationale are reproduced verbatim in references/skills-spec.md ("Behavioral Validation (D9)" subsection); canonical source is `root_SKILL_BUILD_DISCIPLINE.md` §3.9.
 
 **Step 6 — Package the deployable Skill and deliver alongside separated audit artifacts.** The deliverable is two distinct things: (1) a single zip file containing the deployable Skill folder, ready to drop into the user's local install path or upload to the Skills repo without further assembly; (2) the audit artifacts, delivered as separate files outside the zip. Never require the user to assemble the package themselves — packaging is the Skill's responsibility, not the user's.
 
@@ -145,7 +146,7 @@ When the three pre-build gates have passed and a design specification is present
 - **Promotion provenance** (`{skill-name}_promotion_evidence.md`) — produced when Gate 2 warrant evidence was provided OR when Gate 2 was overridden with reasoning. Captures the evidence (or the override reasoning) for audit trail. Format spec in references/warrant-check-criteria.md.
 - **AP-warning summary** (`{skill-name}_ap_warnings.md`) — produced when validation dimension 7 surfaces warnings. Lists each warning, the user's accept/revise decision, and the reasoning when accepted. Future maintainers can see what was a deliberate choice vs. an oversight.
 
-**Delivery format:** Use the present_files tool (or equivalent file-presentation mechanism in the runtime) to surface the zip first, then the audit artifacts. The zip is the primary deliverable; the audit artifacts are secondary. Follow the file presentation with a build note (3-5 sentences) covering key adaptation decisions and the eight-dimension review verdict. The user should be able to install the Skill from the zip immediately, and file the audit artifacts separately to their build provenance location (typically `Projects/{CODE}/research/` or equivalent).
+**Delivery format:** Use the present_files tool (or equivalent file-presentation mechanism in the runtime) to surface the zip first, then the audit artifacts. The zip is the primary deliverable; the audit artifacts are secondary. Follow the file presentation with a build note (3-5 sentences) covering key adaptation decisions and the nine-dimension review verdict. The user should be able to install the Skill from the zip immediately, and file the audit artifacts separately to their build provenance location (typically `Projects/{CODE}/research/` or equivalent).
 
 **Why separation matters:** Audit artifacts are about the build event (placement reasoning, warrant evidence, AP catches). The Skill folder is about runtime behavior (instructions, references). Mixing them inside the zip pollutes the deployable with build-time metadata that the runtime never consumes — and creates confusion when the user installs ("are these audit files part of the Skill?"). Separation keeps each concern clean.
 
@@ -169,8 +170,9 @@ When asked to review a Skill:
 6. **Auto-activation enforcement:** Description has verb-based triggers, both explicit and symptom-phrased. `disable-model-invocation: true` (if set) has `metadata.notes` justification. See references/auto-activation-discipline.md.
 7. **Anti-pattern catalog scan:** Run the AP catalog scan from references/anti-pattern-catalog.md. Surface catches as advisory warnings.
 8. **7-layer leak-check:** Scan for material that belongs in CLAUDE.md, `.claude/rules/`, hooks, or MCP rather than in the Skill.
+9. **Behavioral validation (v2.1, RECOMMENDED — not REQUIRED):** Has the Skill been tested or credibly validated against at least one adversarial scenario where Claude would fail without it? Apply the three pass conditions or the skip condition per references/skills-spec.md "Behavioral Validation (D9)". RECOMMENDED classification — absence is not a build-blocker; pre-v2.1 Skills surface as advisory only.
 
-For v1-built Skills, dimensions 6-8 surface as advisory warnings only — do not break a working v1 Skill automatically. The user decides whether to revise based on the warnings.
+For v1-built Skills, dimensions 6-9 surface as advisory warnings only — do not break a working v1 Skill automatically. The user decides whether to revise based on the warnings.
 
 Flag issues with specific fix recommendations. Do not pad with praise.
 
@@ -182,7 +184,7 @@ When asked to revise a Skill:
 
 1. Read current SKILL.md and reference files.
 2. Apply requested changes while maintaining spec compliance, methodology preservation, and standalone completeness.
-3. Run the eight-dimension review against the revised version.
+3. Run the nine-dimension review against the revised version.
 4. Output complete updated files (not diffs).
 5. Present brief revision note (3-5 sentences) covering what changed and why.
 
@@ -253,10 +255,10 @@ When the standalone constraint requires inlining shared methodology, inline the 
 3. Build SKILL.md — implement the pipeline as step-by-step instructions, inline the key spec constraints, add examples and troubleshooting.
 4. Build reference files — move detailed rubrics and pattern libraries to references/.
 5. Apply language adaptation — retain platform terminology per documented exception.
-6. Run eight-dimension review — verify all 8 dimensions; surface AP catches and 7-layer leaks as advisory warnings.
+6. Run nine-dimension review — verify all 9 dimensions; surface AP catches and 7-layer leaks as advisory warnings.
 7. Present complete files with build note, review verdict, placement note, and AP-warning summary if applicable.
 
-**Result:** A deployable zip (`rootnode-context-budget.zip`) containing the Skill folder structure (SKILL.md + 2 reference files), delivered first. Three audit artifacts delivered separately outside the zip: ecosystem placement note, AP-warning summary if catches occurred, promotion provenance if warrant evidence was provided. A 3-5 sentence build note and an 8-dimension review verdict accompany the delivery. The user installs the zip directly with no manual assembly; files the audit artifacts to their build provenance location.
+**Result:** A deployable zip (`rootnode-context-budget.zip`) containing the Skill folder structure (SKILL.md + 2 reference files), delivered first. Three audit artifacts delivered separately outside the zip: ecosystem placement note, AP-warning summary if catches occurred, promotion provenance if warrant evidence was provided. A 3-5 sentence build note and an 9-dimension review verdict accompany the delivery. The user installs the zip directly with no manual assembly; files the audit artifacts to their build provenance location.
 
 ### Example 2: Review Existing Skill
 
@@ -285,10 +287,10 @@ When the standalone constraint requires inlining shared methodology, inline the 
 3. Extract: what the Skill does, when it activates, what belongs in SKILL.md vs. references/.
 4. Draft a description field with trigger phrases and negative triggers.
 5. Build the SKILL.md and any reference files following the standard pipeline.
-6. Run the eight-dimension review.
+6. Run the nine-dimension review.
 7. Flag any design decisions made during conversion (since no formal spec existed) in the build note.
 
-**Result:** A deployable zip with the Skill folder, delivered first. Audit artifacts (placement note, promotion provenance, AP-warning summary as applicable) delivered separately outside the zip. The 8-dimension review verdict and a build note flag any design decisions made during conversion (since no formal spec existed).
+**Result:** A deployable zip with the Skill folder, delivered first. Audit artifacts (placement note, promotion provenance, AP-warning summary as applicable) delivered separately outside the zip. The 9-dimension review verdict and a build note flag any design decisions made during conversion (since no formal spec existed).
 
 ### Example 4: Build with Pre-Build Gates Triggered
 

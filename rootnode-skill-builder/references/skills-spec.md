@@ -273,6 +273,28 @@ Agent Skills is published as an open standard — portable across tools and plat
 
 Ask Claude: "When would you use the [skill name] skill?" Claude will quote the description back. Adjust based on what's missing.
 
+### Behavioral Validation (D9)
+
+Canonical source: `root_SKILL_BUILD_DISCIPLINE.md` §3.9 D9. The text below is reproduced verbatim from the canonical KF (heading style and list formatting adapted for integration; pass conditions, skip condition, and classification preserved exactly).
+
+**Check.** Has the Skill been tested against at least one adversarial scenario where Claude would fail without it? The dimension assesses the Skill's behavioral effectiveness, not its document architecture (D1–D8 cover architecture).
+
+**Three pass conditions** (all must be met OR the skip condition must apply):
+
+1. **Pressure scenario documented.** At least one scenario is described where Claude, without the Skill loaded, would produce incorrect behavior that the Skill is designed to prevent. The scenario should target the Skill's core discipline — the failure mode it exists to stop.
+2. **Baseline failure confirmed or credibly expected.** The scenario has been run against a subagent without the Skill (RED), or the expected failure is credible based on documented Claude behavioral tendencies (cite the specific tendency from the 10-tendency taxonomy if applicable).
+3. **Compliance with Skill confirmed or credibly expected.** The scenario has been re-run with the Skill loaded (GREEN), or compliance is credible based on the Skill's instruction specificity and the countermeasure's alignment with the identified tendency.
+
+**Skip condition.** The Skill is reference-only, data-carrying, or configuration-driven — it has no behavioral compliance to test. Examples: context carriers (drayline-ecosystem), profile schemas, block libraries used by other Skills. Mark as `D9: SKIPPED — no behavioral compliance surface` with one-sentence justification.
+
+**Classification: RECOMMENDED, not REQUIRED.** Full RED-GREEN-REFACTOR pressure testing requires subagent access (CC-side only) and is therefore not feasible for CP-only Skill validation. Skills that pass D1–D8 but lack D9 validation are shippable; D9 adds confidence but its absence is not a build-blocker.
+
+**Pass evidence.** Name the pressure scenario, the expected failure mode, and the validation result (tested or credibly expected). For tested scenarios, cite the session or test artifact. For credibly-expected scenarios, cite the behavioral tendency and explain why the Skill's countermeasure formulation addresses it.
+
+**Disposition.** Advisory for v2.1. Future evolution may tighten to REQUIRED for discipline-enforcing Skills (tendencies #1–#10 countermeasures) while keeping RECOMMENDED for procedural and reference Skills.
+
+**Source pattern.** The pressure-testing methodology was identified during the CC ecosystem analysis (May 2026) from Superpowers v5.1.0's `writing-skills` skill, which applies TDD to skill authoring — write pressure test scenarios with subagents, watch Claude fail without the skill, write the skill to address observed rationalizations, verify compliance. The Meincke et al. (2025, N=28,000) finding that persuasion techniques more than doubled LLM compliance rates (33% → 72%) provides the research grounding for why countermeasure language design matters enough to validate empirically.
+
 ---
 
 ## Common Problems

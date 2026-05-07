@@ -18,7 +18,7 @@ license: Apache-2.0
 metadata:
   author: rootnode
   version: "2.0"
-  original-source: "OPTIMIZATION_REFERENCE.md, CLAUDE_OPTIMIZATION_NOTES.md, SELF_REFERENTIAL_FABRICATION_COUNTERMEASURE.md"
+  original-source: "OPTIMIZATION_REFERENCE.md, CLAUDE_OPTIMIZATION_NOTES.md"
 ---
 
 # Behavioral Tuning for Claude

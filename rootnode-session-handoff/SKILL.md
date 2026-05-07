@@ -19,7 +19,7 @@ license: Apache-2.0
 metadata:
   author: rootnode
   version: "1.0"
-  original-source: "Seed project Session Handoff design spec v1.0"
+  original-source: "Seed-project methodology synthesis"
 ---
 
 # Session Handoff

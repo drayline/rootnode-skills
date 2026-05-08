@@ -1,8 +1,8 @@
 # root_SKILL_BUILD_DISCIPLINE.md
 
-The canonical home for rootnode Skill build methodology. Establishes the disciplines that govern how a rootnode Skill gets built from a design specification, validated, packaged, and shipped: pre-build gates, the 8-dimension quality gate, build-event audit artifacts, token-budget heuristics, version-and-lifecycle rules, methodology preservation across releases, and design-spec consumption.
+The canonical home for rootnode Skill build methodology. Establishes the disciplines that govern how a rootnode Skill gets built from a design specification, validated, packaged, and shipped: pre-build gates, the 9-dimension quality gate, build-event audit artifacts, token-budget heuristics, version-and-lifecycle rules, methodology preservation across releases, design-spec consumption, description refinement loop discipline, and environment-adaptive degradation discipline.
 
-This KF applies to Skills on both surfaces (CP-side methodology Skills and CC-side runtime Skills). Surface-invariant Skill-authoring principles live here. The build tool that operationalizes these disciplines is `rootnode-skill-builder` (currently v2.0). The Skill's references cite this KF as the canonical source; the KF is the methodology, the Skill is the application.
+This KF applies to Skills on both surfaces (CP-side methodology Skills and CC-side runtime Skills). Surface-invariant Skill-authoring principles live here. The build tool that operationalizes these disciplines is `rootnode-skill-builder` (currently v3.0, this release). The Skill's references cite this KF as the canonical source; the KF is the methodology, the Skill is the application.
 
 When designing a new Skill, building a Skill from a design spec, reviewing an existing Skill, or planning a versioned successor, this is the first KF consulted. For surface-invariant principles that govern Skill behavior at runtime (placement discipline, source authority hierarchy, evidence grounding), see `root_AGENT_ENVIRONMENT_ARCHITECTURE.md`. For the unified anti-pattern catalog scanned by quality gate dimension 7, see `root_AGENT_ANTI_PATTERNS.md`.
 
@@ -44,7 +44,7 @@ Three gates run before any Skill build work begins. Each gate has a pass conditi
 
 **Pass condition.** The work is a multi-step procedure or methodology, triggered by user intent expressed in language, that produces a coherent deliverable or analysis, and is reusable across contexts (different projects, different users, different inputs). All four criteria must hold.
 
-**Halt action.** If the work fits a different mechanism, redirect with brief explanation. Do not build the Skill. The redirect language by mechanism is documented in skill-builder v2's `references/decomposition-framework.md`. Common redirects: enforcement requests → hooks; file-pattern requests → `.claude/rules/`; always-loaded standing context → CLAUDE.md; isolated specialist tasks → subagents; external service integration → MCP; permission boundaries → settings.
+**Halt action.** If the work fits a different mechanism, redirect with brief explanation. Do not build the Skill. The redirect language by mechanism is documented in skill-builder `references/decomposition-framework.md`. Common redirects: enforcement requests → hooks; file-pattern requests → `.claude/rules/`; always-loaded standing context → CLAUDE.md; isolated specialist tasks → subagents; external service integration → MCP; permission boundaries → settings.
 
 **Exception: hybrid placements.** Some requests genuinely warrant a Skill *plus* a different mechanism. The Skill provides the procedure ("how to validate a release"); the hook provides enforcement ("always run release validation before tagging"). Build the Skill; flag the companion mechanism as a build-summary recommendation. The user adds the companion separately. Hybrid placements are not Gate 1 halts.
 
@@ -60,7 +60,7 @@ Three gates run before any Skill build work begins. Each gate has a pass conditi
 2. The pattern is structurally consistent across occurrences. Not "I did three roughly similar things" but "the same procedure with predictable variation in inputs."
 3. The future demand is plausible. Not "I might need this someday" but "this pattern keeps coming up; I expect it to keep coming up."
 
-**Halt action.** If the warrant is thin (1–2 occurrences, speculative future need, "I think we'll need this," "this would be cool to have"), recommend a paste-and-edit template instead of building a Skill. The template captures the work shape, lets the user iterate freely on each instance, and includes explicit promotion criteria so future-self knows when to upgrade. Naming convention per User Preferences: `{code}_template_{descriptor}.md`. The template structure (purpose, promotion criteria, last-used date, use count, body) is documented in skill-builder v2's `references/warrant-check-criteria.md`.
+**Halt action.** If the warrant is thin (1–2 occurrences, speculative future need, "I think we'll need this," "this would be cool to have"), recommend a paste-and-edit template instead of building a Skill. The template captures the work shape, lets the user iterate freely on each instance, and includes explicit promotion criteria so future-self knows when to upgrade. Naming convention per User Preferences: `{code}_template_{descriptor}.md`. The template structure (purpose, promotion criteria, last-used date, use count, body) is documented in skill-builder `references/warrant-check-criteria.md`.
 
 **Exception: upstream process-abstraction handoff.** When the user provides a process-abstraction handoff brief from an upstream Skill following the documented format (e.g., `rootnode-repo-hygiene` Cat 14 process-abstraction findings), the handoff brief is the warrant evidence. Gate 2 passes automatically. The handoff brief documents that the pattern has been observed and abstracted at the upstream layer; the Skill build formalizes it.
 
@@ -80,13 +80,13 @@ Three gates run before any Skill build work begins. Each gate has a pass conditi
 
 **Output artifact.** Gate 3 produces the placement note (§5.1) regardless of pass/halt. On pass, the placement note documents the placement decision; on halt, the placement note documents what would have been built and why duplication blocked it (the user can revisit if the differentiation gets sharper).
 
-For the full ecosystem placement decision logic — surface boundaries, composition lineage, duplication signals by Skill — see skill-builder v2's `references/ecosystem-placement-decision.md`.
+For the full ecosystem placement decision logic — surface boundaries, composition lineage, duplication signals by Skill — see skill-builder `references/ecosystem-placement-decision.md`.
 
 ---
 
 ## 3. The 9-dimension quality gate
 
-After the build pipeline produces SKILL.md and references, the Skill is scored across nine dimensions. Each dimension produces a pass/fail verdict with cited evidence. Dimensions 1–5 inherit from skill-builder v1 (production-validated through 21 v1.x Skill builds). Dimensions 6–8 are v2 additions (auto-activation enforcement, anti-pattern catalog scan, 7-layer leak-check) closing gaps surfaced during the Phase 27/28 methodology refresh. Dimension 9 (behavioral validation) was added after the CC ecosystem analysis (May 2026) identified pressure-testing as a methodology gap — the quality gate assessed Skill document architecture but not Skill behavioral effectiveness.
+After the build pipeline produces SKILL.md and references, the Skill is scored across nine dimensions. Each dimension produces a pass/fail verdict with cited evidence. Dimensions 1–5 inherit from skill-builder v1 (production-validated through 21 v1.x Skill builds). Dimensions 6–8 are v2 additions (auto-activation enforcement, anti-pattern catalog scan, 7-layer leak-check) closing gaps surfaced during the Phase 27/28 methodology refresh. Dimension 9 (behavioral validation) was added after the CC ecosystem analysis (May 2026) identified pressure-testing as a methodology gap — the quality gate assessed Skill document architecture but not Skill behavioral effectiveness. v3.0 expands D9 into three sub-levels (D9a/D9b/D9c) tracking the empirical strength of the validation evidence at the build environment's tier.
 
 ### 3.1 D1 — Spec compliance
 
@@ -120,6 +120,8 @@ After the build pipeline produces SKILL.md and references, the Skill is scored a
 
 **Common catches.** Bloated SKILL.md with rubrics and pattern libraries inlined; orphaned reference files (not pointed at from SKILL.md); reference files referenced without "when to read" guidance; nested subdirectory structure.
 
+**Intelligent abstraction principle (refinement of progressive disclosure).** The dimension's pass evidence above describes *what* good progressive disclosure looks like; the intelligent abstraction principle describes *how* to design for it from the start. SKILL.md sections that introduce new workflows are **routing surfaces** by default — they name the workflow, identify which tier or mechanism applies, and point to the reference where the procedural depth lives. SKILL.md does not duplicate procedural content from its references. The 500-line SKILL.md ceiling is not a constraint to compress around at build time; it is a **design-phase forcing function** that drives correct layer placement at authoring time. Applied this way, the ceiling raises architectural quality automatically rather than requiring compression-time discipline. The principle compounds — each Skill that enforces routing-surface discipline raises the architectural floor for downstream Skills built using the same methodology. This is a refinement of the long-standing progressive disclosure discipline canonicalized in this dimension, not a new methodology claim; what changes is that the principle is applied at design time as the primary lens rather than at build time as a fallback.
+
 ### 3.5 D5 — Standalone completeness
 
 **Check.** The Skill delivers complete value when installed alone. Cross-Skill references are soft pointers only ("for deeper specialization, see X if available"). The Skill never fails, produces incomplete output, or defers a user request because another Skill is not installed.
@@ -136,7 +138,7 @@ After the build pipeline produces SKILL.md and references, the Skill is scored a
 
 **Common catches.** Manual-only Skills without justification (the Manual-only Skills anti-pattern, `root_AGENT_ANTI_PATTERNS.md §4.3`). Static-descriptor descriptions without verbs ("for prompt-related tasks").
 
-**Why v2 added this dimension.** v1 quality gate didn't enforce auto-activation as a positive discipline — it caught the failure mode (D2 catches missing triggers) but didn't enforce the principle. The Phase 27/28 cross-evaluation surfaced auto-activation discipline as a Skill-build first principle that warranted explicit enforcement. For full discipline see skill-builder v2's `references/auto-activation-discipline.md`.
+**Why v2 added this dimension.** v1 quality gate didn't enforce auto-activation as a positive discipline — it caught the failure mode (D2 catches missing triggers) but didn't enforce the principle. The Phase 27/28 cross-evaluation surfaced auto-activation discipline as a Skill-build first principle that warranted explicit enforcement. For full discipline see skill-builder `references/auto-activation-discipline.md`.
 
 ### 3.7 D7 — Anti-pattern catalog scan (v2)
 
@@ -152,7 +154,7 @@ After the build pipeline produces SKILL.md and references, the Skill is scored a
 - `§4.11` Verification-before-completion absent (CC-side)
 - `§4.14` Stale content (CC-side)
 
-For the Skill-internal scan procedure see skill-builder v2's `references/anti-pattern-catalog.md`.
+For the Skill-internal scan procedure see skill-builder `references/anti-pattern-catalog.md`.
 
 **Disposition.** Warnings are advisory, not blockers — patterns are sometimes intentional. Three dispositions per catch: REVISED (Skill changed to resolve the catch), ACCEPTED with reasoning (catch documented as deliberate; reasoning captured in the AP-warning audit artifact §5.3), or HALT (catch is severe enough to block release; user reviews and decides).
 
@@ -173,25 +175,59 @@ For the Skill-internal scan procedure see skill-builder v2's `references/anti-pa
 
 **Why v2 added this dimension.** v1 caught misplacement at Gate 1 (the entire Skill belongs in a different mechanism), but did not catch partial leakage (most of the Skill is correctly placed, but a section of it should have been a `.claude/rules/` file or a hook). D8 catches the partial-leak failure mode.
 
-### 3.9 D9 — Behavioral validation (v2.1) `[RECOMMENDED]`
+### 3.9 D9 — Behavioral validation (v2.1, expanded v3.0) `[RECOMMENDED]`
 
 **Check.** Has the Skill been tested against at least one adversarial scenario where Claude would fail without it? The dimension assesses the Skill's behavioral effectiveness, not its document architecture (D1–D8 cover architecture).
 
-**Three pass conditions** (all must be met OR the skip condition must apply):
+D9 was a single-tier recommendation in v2.1. v3.0 expands D9 into three sub-levels — D9a / D9b / D9c — that reflect the empirical strength of the evidence captured at validation time. Each sub-level has its own pass conditions and tier of evidence; the **build summary records which sub-level was applied** so future audits can read the evidentiary basis for the D9 verdict. The dimension itself remains RECOMMENDED, not REQUIRED.
 
-1. **Pressure scenario documented.** At least one scenario is described where Claude, without the Skill loaded, would produce incorrect behavior that the Skill is designed to prevent. The scenario should target the Skill's core discipline — the failure mode it exists to stop.
-2. **Baseline failure confirmed or credibly expected.** The scenario has been run against a subagent without the Skill (RED), or the expected failure is credible based on documented Claude behavioral tendencies (cite the specific tendency from the 10-tendency taxonomy if applicable).
-3. **Compliance with Skill confirmed or credibly expected.** The scenario has been re-run with the Skill loaded (GREEN), or compliance is credible based on the Skill's instruction specificity and the countermeasure's alignment with the identified tendency.
+The sub-levels exist because validation infrastructure differs across build environments. Tier A environments (subagents available, runnable execution available) can run with-Skill vs. without-Skill comparison empirically. Tier B environments (execution available, no subagents) can confirm execution under realistic test prompts but cannot run baseline comparison. Tier C environments (neither subagents nor execution available) fall back to analytical reasoning grounded in the 10-tendency taxonomy. The three sub-levels are degradation paths, not parallel options — the build CV applies the strongest tier the environment supports. The environment-adaptive degradation discipline (§10) is the operational model that determines tier applicability; the description refinement loop discipline (§9) is the methodology that D9b/D9c invoke when generating the trigger eval set used to confirm execution.
 
-**Skip condition.** The Skill is reference-only, data-carrying, or configuration-driven — it has no behavioral compliance to test. Examples: context carriers (drayline-ecosystem), profile schemas, block libraries used by other Skills. Mark as `D9: SKIPPED — no behavioral compliance surface` with one-sentence justification.
+#### 3.9a D9a — Empirical Tier A (strongest evidence)
 
-**Classification: RECOMMENDED, not REQUIRED.** Full RED-GREEN-REFACTOR pressure testing requires subagent access (CC-side only) and is therefore not feasible for CP-only Skill validation. Skills that pass D1–D8 but lack D9 validation are shippable; D9 adds confidence but its absence is not a build-blocker.
+**Pass conditions** (all must be met):
 
-**Pass evidence.** Name the pressure scenario, the expected failure mode, and the validation result (tested or credibly expected). For tested scenarios, cite the session or test artifact. For credibly-expected scenarios, cite the behavioral tendency and explain why the Skill's countermeasure formulation addresses it.
+1. **With-Skill vs. without-Skill comparison run.** A representative scenario set is executed twice — once with the Skill loaded (GREEN), once without it loaded (RED). Both runs use the same trigger evaluations and the same downstream task.
+2. **Outcomes graded via subagent grader.** Each run's output is scored by a grader subagent against rubric assertions (per `agents/grader.md` schema). The grader's pass/fail per assertion is the empirical evidence.
+3. **GREEN/RED differential is materially positive.** The Skill-loaded run materially outperforms the baseline on the assertions the Skill is designed to enforce. "Material" means more than chance — pre-defined threshold per scenario.
 
-**Disposition.** Advisory for v2.1. Future evolution may tighten to REQUIRED for discipline-enforcing Skills (tendencies #1–#10 countermeasures) while keeping RECOMMENDED for procedural and reference Skills.
+**Required infrastructure.** Subagent execution available; execution environment available; trigger eval set generated per §9 procedure; rubric assertions defined per `references/behavioral-validation.md`.
 
-**Source pattern.** The pressure-testing methodology was identified during the CC ecosystem analysis (May 2026) from Superpowers v5.1.0's `writing-skills` skill, which applies TDD to skill authoring — write pressure test scenarios with subagents, watch Claude fail without the skill, write the skill to address observed rationalizations, verify compliance. The Meincke et al. (2025, N=28,000) finding that persuasion techniques more than doubled LLM compliance rates (33% → 72%) provides the research grounding for why countermeasure language design matters enough to validate empirically.
+**Pass evidence.** Cite the scenario set, the trigger evals run, the grader outputs (pass/fail per assertion for both GREEN and RED), and the differential analysis. Captured in the build summary as `D9: Tier A — empirical comparison (N scenarios, GREEN/RED differential = X%)`.
+
+#### 3.9b D9b — Empirical Tier B (moderate evidence)
+
+**Pass conditions** (all must be met):
+
+1. **With-Skill execution confirmed via realistic test prompts.** The Skill is loaded into a runnable environment; representative trigger evaluations from the §9 generated set are executed; the Skill's auto-activation and procedural compliance are observed directly.
+2. **Qualitative review of outputs.** Outputs from the test runs are reviewed by the build CV against the Skill's stated quality criteria. No subagent grader required; the review is qualitative but explicit.
+3. **No baseline comparison required.** Tier B does not require a without-Skill RED run; the evidence rests on with-Skill behavioral confirmation alone.
+
+**Required infrastructure.** Execution environment available; subagent execution NOT required; trigger eval set generated per §9 procedure.
+
+**Pass evidence.** Cite the test prompts run, the observed activation and behavior, and the qualitative review verdict. Captured in the build summary as `D9: Tier B — empirical execution (N test prompts, qualitative compliance: pass/fail)`.
+
+#### 3.9c D9c — Analytical (weakest evidence; valid floor)
+
+**Pass conditions** (all must be met OR the skip condition applies):
+
+1. **Pressure scenario documented.** At least one scenario is described where Claude, without the Skill loaded, would produce incorrect behavior the Skill is designed to prevent.
+2. **Baseline failure credibly expected.** The expected without-Skill failure is grounded in a documented Claude behavioral tendency from the 10-tendency taxonomy or in production-observed failure modes. Citation required.
+3. **Compliance with Skill credibly expected.** The Skill's countermeasure formulation is shown to address the identified tendency. The reasoning chain from tendency → countermeasure → expected compliance is explicit.
+
+**Required infrastructure.** None — analytical reasoning only. Tier C is the fallback when neither subagent execution nor a runnable environment is available, and the discipline floor when validation infrastructure is absent.
+
+**Pass evidence.** Cite the scenario, the behavioral tendency, the countermeasure mechanism, and the reasoning chain. Captured in the build summary as `D9: Tier C — analytical (tendency: <name>, countermeasure: <mechanism>)`. This was the v2.1 D9 pass standard; v3.0 keeps it as the analytical floor.
+
+**Skip condition.** The Skill is reference-only, data-carrying, or configuration-driven — it has no behavioral compliance to test. Examples: context carriers, profile schemas, block libraries used by other Skills. Mark as `D9: SKIPPED — no behavioral compliance surface` with one-sentence justification. The skip condition applies regardless of which sub-level the build environment otherwise supports.
+
+**Classification.** D9 remains RECOMMENDED, not REQUIRED. All three sub-levels carry the same dimensional weight; the verdict per dimension specifies which sub-level applied. A Skill that passes D1–D8 but lacks D9 validation is shippable. The sub-level architecture allows Skills to record the strongest evidence available without forcing build halts when stronger evidence cannot be produced.
+
+**Cross-references.** The trigger eval set referenced by D9a/D9b is generated per the description refinement loop discipline (§9). The tier applicability decision is made per the environment-adaptive degradation discipline (§10).
+
+**Disposition.** Advisory for v3.0. Future evolution may tighten D9a to REQUIRED for discipline-enforcing Skills (tendencies #1–#10 countermeasures) when subagent infrastructure is broadly available, while keeping the lower tiers as fallbacks.
+
+**Source pattern.** The pressure-testing methodology was identified during the CC ecosystem analysis (May 2026) from Superpowers v5.1.0's `writing-skills` skill, which applies TDD to skill authoring — write pressure test scenarios with subagents, watch Claude fail without the skill, write the skill to address observed rationalizations, verify compliance. The Meincke et al. (2025, N=28,000) finding that persuasion techniques more than doubled LLM compliance rates (33% → 72%) provides the research grounding for why countermeasure language design matters enough to validate empirically. The Tier A/B/C sub-level formalism was added in v3.0 from the Opus 4.6 cross-pass analysis (§5.2) of Anthropic's `skill-creator` empirical pipeline.
 
 ---
 
@@ -268,7 +304,7 @@ To make audit-time provenance discrimination unambiguous, post-discipline Skills
 - `phase-30` — Skill was built under Phase 30 audit-artifact discipline (placement note + conditional promotion provenance + conditional AP warnings, filed at `Projects/{CODE}/research/`).
 - Future phases may add values (`phase-31a` for the methodology centralization application; `phase-31x` for whatever a future cycle adds). Multiple values are not stacked — the field carries the most recent applicable phase and prior compliance is implied by phase ordering.
 
-**When skill-builder emits this field.** Every Skill build under skill-builder v2.x or later. The field is not optional — it is part of the spec-compliance dimension D1. Skills built without it fail D1 going forward.
+**When skill-builder emits this field.** Every Skill build under skill-builder current version or later. The field is not optional — it is part of the spec-compliance dimension D1. Skills built without it fail D1 going forward.
 
 **What the field signals to audit Skills.** Provenance is post-discipline. The audit should expect artifacts at the filing destination per §4.1–4.3 and discriminate verdicts using the §3.7 D7 catalog as the substantive scan.
 
@@ -369,6 +405,7 @@ Compatible with preservation:
 - **Vocabulary alignment.** Term-for-term swaps where the underlying claim is unchanged (e.g., `addresses` → `addresses_finding` for terminology alignment with an upstream Producer Skill).
 - **Cross-Skill contract alignments.** Updates that align field names, schema patterns, or composition semantics with a verified upstream Producer.
 - **Brand-surface cleanups.** Anonymization that removes proprietary identifiers without altering methodology grounding.
+- **Tone calibration.** Adjustments to prose voice consistent with the AEA "explain the why" principle (`root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.11`) — converting imperative-without-rationale phrasing to reasoned voice where the reasoning carries equal force, while preserving imperative voice for spec constraints, safety boundaries, and other places where reasoning would dilute the constraint. Substantive claims unchanged; only surface phrasing. Tone calibration is permitted within preservation because it affects how the methodology is communicated, not what the methodology claims.
 
 ### 7.3 What requires warrant
 
@@ -390,9 +427,10 @@ The promotion provenance documents the evolution-source for every change in the 
 | Mechanical consequence of locked decision | Scope-lock or design spec | Documentation alignment |
 | Composition-alignment to verified Producer | Upstream Producer Skill's built artifact | Cross-Skill contract alignment |
 | Brand-surface cleanup | Hyge-anonymization discipline (`root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.10`) | Brand-surface cleanliness |
+| Tone calibration | "Explain the why" principle (`root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.11`) | Surface-phrasing alignment |
 | New claim with fresh warrant | New Tier 1–4 evidence | Methodology evolution (requires Gate 2) |
 
-If a row would land in the fourth category, the v2 release is no longer rename + composition-alignment + brand-surface — it is methodology evolution. The build CV halts and surfaces the methodology evolution to the user; the canonical KF is updated in a separate human-reviewed cycle before the v2 release continues.
+If a row would land in the fifth category, the v2 release is no longer rename + composition-alignment + brand-surface — it is methodology evolution. The build CV halts and surfaces the methodology evolution to the user; the canonical KF is updated in a separate human-reviewed cycle before the v2 release continues.
 
 ---
 
@@ -442,7 +480,115 @@ This discipline emerged from the Phase 30 D-build CV under the question "Q-B3: w
 
 ---
 
-## 9. Where to go next
+## 9. Description refinement loop discipline
+
+The 1024-character description field is the highest-leverage surface in a Skill — it is the auto-activation index entry that determines whether the Skill triggers on a user query. A description that fails to trigger renders every other discipline (build gates, quality gate, methodology preservation) inert; the Skill exists but the user never reaches it. The description refinement loop is the methodology that hardens a description against under-triggering and over-triggering through evidence-based iteration rather than authorial heuristic.
+
+Two reasons this discipline lives at the methodology layer rather than as a Skill-specific procedure: it generalizes across every Skill build, not just `rootnode-skill-builder`'s — any future build CV that produces a description benefits from the same iteration shape — and the train/test split discipline that prevents overfitting is methodology-grade, not implementation detail. The reference application lives in `rootnode-skill-builder/references/description-optimization.md`; the canonical home for the discipline is here.
+
+### 9.1 Trigger eval generation
+
+Generate a corpus of realistic user-voice queries the Skill *should* trigger on (positive set) and a corpus of adjacent or distractor queries the Skill *should not* trigger on (negative set). Realism is load-bearing — synthetic queries written by the build CV in declarative voice ("a query about building a Skill") under-test the description because users do not phrase requests that way. The query corpus must mirror the way users actually phrase requests: incomplete sentences, context-laden references, ambiguous noun forms, copy-pasted error messages, casual register.
+
+The minimum viable corpus: 8–12 should-trigger queries, 5–8 should-not-trigger queries, 2–4 edge cases (queries that could plausibly trigger either way). Larger corpora reduce variance per iteration; smaller corpora over-fit faster. Edge cases earn their place — they are the queries where the description's precision matters most.
+
+### 9.2 Manual walkthrough discipline (Tier B/C floor)
+
+The simplest form of the discipline is a manual walkthrough: read each query in the corpus, reason about whether the description's verbs, nouns, and trigger phrases would index that query, and note where the description misses or where adjacent Skills match more cleanly. Refine the description against the observations; repeat until the corpus stabilizes.
+
+The manual walkthrough is the floor — every build CV runs at least this. It is the only form available when no execution environment is present (Tier C per §10). It is the moderate evidentiary form when execution is available but subagent grading is not (Tier B). The walkthrough is not a degraded automation; it is a different evidentiary form. Manual reasoning grounded in 50-description competition logic produces credible verdicts without infrastructure.
+
+### 9.3 Automated optimization via `description_optimizer.py` (Tier A)
+
+When subagent execution is available, the description refinement loop runs as an automated 5-iteration train/test loop:
+
+1. Split the trigger eval corpus into a train set (used to drive description revisions) and a held-out test set (used to score each iteration without bleeding into the revision signal).
+2. Run the current description against the train set; surface miss/false-positive cases.
+3. Generate a revised description that addresses the train-set misses without obviously over-fitting (the revision prompt structure is documented verbatim in `references/description-optimization.md`).
+4. Score the revised description against the held-out test set.
+5. Repeat for N iterations; select the revision with the highest test-set score, not the highest train-set score — train-set wins are ambiguous between true improvement and overfitting.
+
+The reference implementation is `rootnode-skill-builder/scripts/description_optimizer.py`. The build CV's role is to generate the trigger eval corpus and review the optimizer's iteration outputs; the optimizer's role is to mechanize the iteration loop and surface the per-iteration train/test scores for review.
+
+### 9.4 Anti-overfitting principle
+
+A description that scores 100% on the train set but degrades on the held-out test set has overfit to the train corpus's idiosyncrasies — the revision learned the corpus's shape rather than the underlying user-intent pattern. The discipline: evaluate every revision against the held-out test set as the primary signal; treat train-set wins as supportive evidence only. If train-set and test-set scores diverge by more than ~15%, the revision is likely overfit and should be discarded in favor of the prior iteration.
+
+The held-out discipline is the structural reason the corpus is split rather than evaluated as a single set. Without the split, every iteration sees every query, the description is gradually bent toward the corpus shape, and the Skill triggers reliably on the corpus while degrading on out-of-corpus queries that share the underlying intent. The split makes overfitting detectable; without it, overfitting is invisible until the Skill ships and fails in production.
+
+### 9.5 Triggering detection mechanism
+
+The auto-activation engine signals a Skill trigger via the model's stream-event protocol: a `content_block_start` event with type `tool_use` and the Skill's name in the tool field. The triggering detection mechanism — the procedure that determines whether a given query triggered the Skill — monitors the stream for this event pattern and records the trigger result per query. The detection mechanism is preserved verbatim in `rootnode-skill-builder/scripts/description_optimizer.py` and documented in `references/description-optimization.md`.
+
+The detection is critical because manual inspection of conversational output cannot reliably tell whether the Skill was invoked or whether the model simply produced output similar to what the Skill would have produced. The stream-event signal is the only ground-truth source. Refinement loops that score by output similarity rather than by trigger-event detection produce false positives (the model produced Skill-like output without triggering) and false negatives (the Skill triggered but the output didn't visibly differ).
+
+### 9.6 Cross-references
+
+The description refinement loop is invoked by D9 sub-levels:
+
+- D9a (Tier A) uses the automated optimizer (§9.3) as part of empirical comparison.
+- D9b (Tier B) uses the manual walkthrough (§9.2) or scoped automation that does not require subagents.
+- D9c (Tier C) uses the manual walkthrough (§9.2) only.
+
+The trigger eval corpus generated for description refinement is the same corpus used by D9a/D9b for behavioral validation. Generating one corpus serves both dimensions; this is intentional, not duplication. Tier applicability is determined per the environment-adaptive degradation discipline (§10).
+
+For full procedural detail (eval query schema verbatim, query realism principles, train/test split mechanics, optimization prompt structure, run mechanics), see `rootnode-skill-builder/references/description-optimization.md`.
+
+---
+
+## 10. Environment-adaptive degradation discipline
+
+Build CVs do not always run in the same environment. Some run with subagent execution available, full Anthropic SDK access, and runnable Skills under test. Others run in chat-side surfaces where neither subagents nor a runnable environment exists. The same Skill build methodology must produce credible verdicts across this range without either pretending capabilities it lacks or refusing to verify what it can. The environment-adaptive degradation discipline is the operational model that names the three tiers, specifies what each tier verifies, and defines the fallback paths between them.
+
+The three tiers are degradation paths, not parallel options. The build CV applies the strongest tier the environment supports; lower tiers remain available as fallbacks when individual evaluation steps fail infrastructurally.
+
+### 10.1 Tier A — full empirical pipeline
+
+**Capabilities.** Subagent execution available; runnable Skill environment available; tooling layer (`scripts/`, `agents/`) invocable.
+
+**What Tier A verifies.** Full behavioral validation per D9a — with-Skill vs. without-Skill comparison via subagent grader. Description refinement via automated train/test optimizer (§9.3). Version comparison via blind A/B with subagent comparator and analyzer (when applicable).
+
+**Verdict format.** `D9: Tier A — empirical comparison (N scenarios, GREEN/RED differential = X%)`, with grader output and differential analysis captured in the build summary.
+
+### 10.2 Tier B — empirical execution without subagents
+
+**Capabilities.** Runnable Skill environment available; subagent execution NOT available.
+
+**What Tier B verifies.** With-Skill execution confirmed via realistic test prompts per D9b. Description refinement via manual walkthrough (§9.2) or scoped scripts that do not require subagents. Version comparison via inline manual blind procedure.
+
+**Verdict format.** `D9: Tier B — empirical execution (N test prompts, qualitative compliance: pass/fail)`, with test prompts and qualitative review captured.
+
+### 10.3 Tier C — analytical floor
+
+**Capabilities.** Neither subagents nor a runnable Skill environment.
+
+**What Tier C verifies.** Behavioral validation per D9c — pressure scenario documented, baseline failure credibly expected from a cited Claude behavioral tendency, compliance credibly expected from the Skill's countermeasure formulation. Description refinement via manual walkthrough only. Version comparison documented as a deferred verification.
+
+**Verdict format.** `D9: Tier C — analytical (tendency: <name>, countermeasure: <mechanism>)`, with cited tendency and countermeasure mechanism captured.
+
+### 10.4 Tier determination
+
+The build CV determines tier applicability at build time, not at design time. The decision rule:
+
+1. Is subagent execution available in this environment? If yes, Tier A applies (assuming a runnable environment is also present).
+2. If subagent execution is not available, is a runnable Skill environment available? If yes, Tier B applies.
+3. If neither is available, Tier C applies.
+
+The build CV records the determination explicitly in the build summary — which tier was selected and why. A build CV cannot claim Tier A evidence when Tier A infrastructure was unavailable; the discipline is "use the strongest tier the environment supports, no more." Pretending capabilities the environment lacks produces unauditable verdicts; refusing to verify what the environment can produces a discipline floor that under-rewards available infrastructure. The tier model resolves both failure modes by binding the verdict to the infrastructure.
+
+### 10.5 Fallback paths
+
+Each tier has an explicit fallback to the next lower tier when an evaluation step fails infrastructurally — for example, a subagent timeout in Tier A. The fallback rule: reattempt with extended budget; if still failing, fall back to the next-lower tier for that step only. Fallbacks are per-step, not per-build — a build can run most of D9 at Tier A and fall back to Tier B for one scenario without dropping the whole verdict. The build summary records both the headline tier and any per-step fallbacks so future audits can trace the evidentiary basis at the granularity it was produced.
+
+### 10.6 Cross-references
+
+Tier applicability gates the D9 sub-level (§3.9): D9a requires Tier A; D9b requires Tier B or Tier A; D9c is always available as the analytical floor. The description refinement loop (§9) uses the same tier model — Tier A invokes the automated optimizer, Tier B/C falls back to the manual walkthrough. Other empirical workflows (version comparison, benchmark aggregation) follow the same tier pattern.
+
+For per-script tier compatibility tables and detailed fallback patterns, see `rootnode-skill-builder/references/multi-environment-adaptation.md`.
+
+---
+
+## 11. Where to go next
 
 For surface-invariant principles that govern Skill behavior at runtime:
 
@@ -455,7 +601,7 @@ For the unified anti-pattern catalog:
 
 For the build tool itself:
 
-- **The rootnode-skill-builder Skill (currently v2.0):** the operational application of these disciplines. Its references (`decomposition-framework.md`, `warrant-check-criteria.md`, `ecosystem-placement-decision.md`, `auto-activation-discipline.md`, `anti-pattern-catalog.md`, `conversion-guide.md`, `skills-spec.md`) cite back to this KF as the canonical methodology. When this KF evolves, skill-builder's references regenerate against the new canonical.
+- **The rootnode-skill-builder Skill (currently v3.0, this release):** the operational application of these disciplines. Its references (`decomposition-framework.md`, `warrant-check-criteria.md`, `ecosystem-placement-decision.md`, `auto-activation-discipline.md`, `anti-pattern-catalog.md`, `conversion-guide.md`, `skills-spec.md`) cite back to this KF as the canonical methodology. When this KF evolves, skill-builder's references regenerate against the new canonical.
 
 For Project-level context budget (different concern):
 

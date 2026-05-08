@@ -8,18 +8,18 @@ description: >-
   from friction), RESEARCH (evaluate a CC tool/pattern), TEMPLATE (reusable
   artifacts), REMEDIATE (consume hygiene findings → produce + execute plan).
   Use when user says "design CC for X", "build CC environment", "design
-  CLAUDE.md", "we hit X friction in CC", "should we adopt Y for CC", "give me
-  a CLAUDE.md skeleton", "remediate the hygiene findings", "fix the audit
-  issues", "close the loop on the report". Do NOT use REMEDIATE for direct
-  cleanup (Cat 1–10 — use rootnode-repo-hygiene Phase 2; REMEDIATE handles Cat
-  11–14 + 7-layer leaks). Do NOT use for hygiene scanning (use
-  rootnode-repo-hygiene). Do NOT use for chat prompts
+  CLAUDE.md", "build a CC prompt", "design a CC prompt for X", "write a
+  session prompt", "we hit X friction in CC", "should we adopt Y for CC",
+  "give me a CLAUDE.md skeleton", "remediate the hygiene findings". Do NOT
+  use REMEDIATE for direct cleanup (Cat 1–10 — use rootnode-repo-hygiene
+  Phase 2; REMEDIATE handles Cat 11–14 + 7-layer leaks). Do NOT use for
+  hygiene scanning (use rootnode-repo-hygiene). Do NOT use for chat prompts
   (rootnode-prompt-validation) or chat Projects (rootnode-project-audit).
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "2.0"
-  predecessor: "rootnode-cchq-design v1.1.1"
+  version: "2.1"
+  predecessor: "rootnode-cc-design v2.0"
   original-source: |
     root.node seed Project KFs (post-Phase 27/28 methodology absorption:
     root_AGENT_ENVIRONMENT_ARCHITECTURE.md, root_CC_ENVIRONMENT_GUIDE.md,
@@ -98,6 +98,7 @@ Read the relevant references before producing output. Each mode draws from a spe
 - **Halt triggers and scope authorization.** Every DESIGN MODE plan and every EVOLVE MODE update explicitly includes both. Non-negotiable.
 - **Token budgets.** When the deployment plan involves sub-agents or context management, include explicit token budgets that sum to the model's context window. A context plan without numbers is not a context plan.
 - **Source-tagged claims.** Every substantive technical claim carries an inline source tag.
+- **CC-prompt-specific output discipline.** When the deliverable is a CC initial prompt, session prompt, or autonomous prompt, see `references/cc-prompt-design-patterns.md` § Output discipline for CC prompts for additional output standards (shell-agnostic syntax, pre-flight Skill enumeration, continuation-phrase ambiguity gate, forward-state-aware authoring).
 
 ### Step 5 — Surface the chat→Code handoff explicitly
 

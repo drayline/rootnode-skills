@@ -17,6 +17,7 @@ This reference is for DESIGN mode when the deliverable includes a CC prompt of a
 7. Subagent delegation prompt patterns
 8. Files-as-context: the spec-file pattern
 9. The verification iron law
+10. Output discipline for CC prompts
 
 ---
 
@@ -359,6 +360,20 @@ Banned phrases at completion: "should work," "probably fine," "looks good," "I b
 ```
 
 This pattern alone catches the most common CC failure mode (silent partial completion) and is worth specifying in every prompt where verification is possible. **[obra/superpowers iron law + Anthropic's "trust-then-verify gap" framing]**
+
+---
+
+## 10. Output discipline for CC prompts
+
+CC prompts authored in DESIGN mode carry empirically-tested output standards that don't fully surface in environment-design references. The four below emerged from production CC prompt execution (Phase 31d merge, Phase 32a/b v3.0 builds, 2026-05-06 to 2026-05-08) — each gap produced a named friction during execution. Apply them when the deliverable is an initial prompt, session prompt, or autonomous prompt that an agent will run.
+
+**Shell environment in CC prompts.** When producing CC prompts that include shell command blocks, default to bash. The CC harness shell is bash on Windows (Git Bash) and sh/bash on Linux/macOS, even when the operator's interactive environment is PowerShell. Prompts authored against the operator's local shell land in CC and trigger live translation by the agent (`Get-Content` → `cat`, `Test-Path` → `[ -f <file> ]`, `Measure-Object -Line` → `wc -l`, backtick line-continuation → backslash). Translation usually works but relies on agent judgment, creates inconsistent execution logs, and can fail silently for less-obvious divergences. Pattern: bash as the primary command block, with PowerShell variants labeled and adjacent for the divergent set. Universal commands — all `git` and `gh` invocations, `pwd`, `ls` — work in both shells and need no variants. `[generalizable: Phase 31d merge prompt execution 2026-05-06]`
+
+**Pre-flight Skill enumeration in CC prompts.** When producing a multi-step CC prompt — any session prompt with phases, halts, or non-trivial scope — include a pre-flight stage that enumerates available Skills before any other file reads. Skill availability is determined at session-launch time, not at design-time, and the agent's methodology grounding depends on what's actually loaded. Prompts that proceed straight into file reads risk two failure modes: agents make decisions assuming Skills they don't have (requiring rework when discovery happens mid-execution), or agents skip Skill activation entirely and miss methodology that should have applied. The pre-flight stage takes one paragraph — enumerate available Skills, name the relevant ones the prompt expects to compose with, and explicitly note any expected Skill that's missing. See CC_ENVIRONMENT_GUIDE — pre-flight checklist (R5) for the broader pre-flight discipline this extends to runtime tooling discovery. `[generalizable: Phase 31d/32 execution learnings 2026-05-07/08]`
+
+**Continuation-phrase ambiguity gate in multi-halt CC prompts.** When producing a CC prompt with operator halts and continuation phrases, include explicit halt-on-ambiguity discipline at each resume point. Continuation phrases that look unambiguous in design can be ambiguous in execution: an operator's reply may match the literal phrase, admit a clear semantic equivalent, or admit two reasonable interpretations. A prompt that doesn't direct the agent to halt on ambiguity produces silent inference — the agent picks one interpretation and proceeds, and is wrong some non-trivial fraction of the time. Pattern at every resume point: "If the operator's continuation message is ambiguous between two or more reasonable interpretations, halt and ask one targeted clarifying question. Do not infer." This is a specific application of the broader halt-and-escalate discipline (see root_AGENT_ENVIRONMENT_ARCHITECTURE — halt-and-escalate as a first-class discipline) to the resume case. `[generalizable: Phase 31d merge prompt execution 2026-05-06]`
+
+**Forward-state-aware artifact authoring in CC prompts.** When a CC prompt instructs the agent to author downstream artifacts — PR descriptions, commit messages, audit summaries, halt reports — direct the agent to be explicit about whether forward references describe state at authoring or expected state post-commit/post-merge/post-release. Artifacts read mid-flow should not assume completed state that hasn't yet happened. Pattern: prefix forward references with explicit temporal markers ("post-merge:", "this PR will:", "after the v3.0 release will…") rather than declarative present tense ("is on main", "ships in v3.0"). The discipline is most load-bearing in PR bodies (read between PR open and PR merge, when the described state hasn't yet landed) and in audit reports authored mid-build (where the build is in progress at authoring). `[generalizable: Phase 32a/b artifact authoring 2026-05-07/08]`
 
 ---
 

@@ -157,6 +157,96 @@ The description is the highest-leverage artifact in the entire Skill. It's worth
 
 ---
 
+## Realistic test prompt patterns
+
+The 50-description competition test asks whether the description triggers correctly. Running the test rigorously requires a corpus of queries to walk through. Synthetic queries written by the build CV — declarative, third-person, full-sentence — under-test the description because users do not phrase requests that way. Real queries are messier: incomplete, context-laden, copy-paste-adjacent, casual. A description that triggers cleanly on a synthetic corpus may still miss the half of real queries that share its underlying intent.
+
+The discipline: generate a trigger eval corpus that mirrors actual user voice, then walk the description against it. The corpus serves both auto-activation testing here and behavioral validation in D9b/D9c (see `references/behavioral-validation.md` and `references/description-optimization.md` for the full procedure and schema).
+
+### Query realism principles
+
+Realistic queries match user voice on multiple axes:
+
+- **Length and completeness.** Real queries are often fragmentary. "fix this" or "why isn't this working" appear alongside full requests. A description that triggers only on grammatically complete requests under-tests the activation surface.
+- **Vocabulary drift.** Users say "fix my prompt" not "audit and revise the prompt against the validation rubric." Trigger phrases should match user vocabulary. The description's internal terminology may differ from what users say; the description must contain enough of the user's words to be indexable.
+- **Symptom voice.** Many real queries describe a problem, not a request: "Claude keeps ignoring me," "my Skill isn't firing," "this output looks wrong." Symptom-phrased queries match users who don't know the Skill exists.
+- **Casual register.** Real queries use contractions, lowercase starts, run-on sentences, and abbreviations. "can you build me a skill from this" is more representative than "Build a Skill from the following design specification."
+- **Context-laden references.** Users paste error messages, code snippets, log fragments. The description has to compete against a query that includes irrelevant noise. Trigger phrases should index against the *intent* embedded in the noise, not against the noise itself.
+
+### Should-trigger templates (positive set)
+
+Generate 8–12 queries that the Skill should trigger on. Cover at least three patterns:
+
+**Explicit triggers** — queries that use the Skill's own vocabulary:
+
+- "build a skill for X"
+- "package this as a skill"
+- "convert this design spec into a skill"
+- "review this skill"
+
+**Symptom-phrased triggers** — queries describing the problem the Skill solves:
+
+- "my skill doesn't activate"
+- "claude keeps ignoring my skill"
+- "the description is too long"
+- "auto-invocation isn't firing"
+
+**Implicit / context-laden triggers** — queries that imply the Skill's intent without naming it:
+
+- "I have a design spec, what's next?"
+- "how do I make this folder install-ready"
+- "when I upload this to claude it doesn't trigger"
+- "this is over 1024 chars, what do I cut"
+
+The mix matters. A corpus with only explicit triggers under-tests how the Skill behaves on the larger user population that doesn't know its vocabulary.
+
+### Should-not-trigger templates (negative set)
+
+Generate 5–8 queries that the Skill must NOT trigger on. Cover the adjacent-Skill territory and generic distractors:
+
+**Adjacent Skill territory** — queries that match adjacent Skills more cleanly:
+
+- "score this prompt" → routes to prompt-validation if available
+- "audit my project" → routes to project-audit if available
+- "what reasoning approach should I use" → routes to block-selection if available
+
+**Generic distractors** — queries that share surface vocabulary but different intent:
+
+- "write a python skill check function" (mentions "skill" but means programming skill)
+- "skill issue" (gaming slang; not relevant)
+- "what skills should I learn" (career advice; unrelated)
+
+A description that triggers on the negative set has insufficient negative triggers, vocabulary collisions with adjacent Skills, or both. Each false positive identifies a precision gap.
+
+### Edge-case templates
+
+Generate 2–4 queries that could plausibly trigger either way. These earn their place — they are the queries where the description's precision matters most:
+
+- "I want to teach Claude about X" (could be a Skill build, could be CLAUDE.md, could be a hook)
+- "design my skill" (skill-builder vs. cc-design vs. design-time methodology)
+- "make my skill auto-activate" (skill-builder vs. a tuning-only Skill if one existed)
+- "compare these two skills" (skill-builder via version-comparison vs. a different evaluation Skill)
+
+Edge cases force the description to make a defensible call. The build CV records the intended verdict per edge case (trigger / not-trigger / acceptable-either-way) so iteration can measure progress against the intent.
+
+### How the corpus is used
+
+Walk the corpus query-by-query against the current description. For each query, reason about whether the description's verbs, nouns, and trigger phrases would index the query. Note the queries the description misses (under-triggering) and the queries that match adjacent Skills more cleanly (over-triggering or routing collision). Refine the description against the observations; re-walk; repeat until the corpus stabilizes.
+
+When a runnable environment is available, the same corpus drives the automated description optimizer (`scripts/description_optimizer.py` per `references/description-optimization.md`). The corpus content is the same; only the evaluation mechanism differs by tier (see `references/multi-environment-adaptation.md` for the tier model).
+
+---
+
+## Tone calibration in descriptions
+
+The "explain the why" calibration (canonical: `root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.11`) applies to description fields and to the prose of this reference. Imperative voice is correct where reasoning would dilute the constraint — the description format spec ("description MUST be ≤ 1024 chars YAML-parsed"), the reserved-word constraint ("name MUST NOT include 'claude' or 'anthropic'"), the kebab-case rule ("name MUST be kebab-case"). These are spec constraints; the reasoning is the spec, not a model judgment.
+
+Reasoned voice is correct for description-writing guidance — when to use symptom-phrased triggers, why negative triggers cite the alternative, why the 50-description competition test matters. The build CV applies these as judgment, not as hard rules; reasoned formulation lets the model apply the principle to edge cases the original authoring did not anticipate.
+
+The anti-pattern is caps-everywhere: a description (or a SKILL.md) where every instruction reads "MUST," "ALWAYS," "NEVER" signals to the model that everything is non-negotiable, which dilutes the actual non-negotiables. Calibrated voice — imperative for spec compliance, reasoned for procedural guidance — produces more reliable compliance because the model can distinguish what is load-bearing from what is advisory.
+
+---
+
 ## What this reference does not do
 
 This reference doesn't teach the YAML spec — that's `references/skills-spec.md`. It applies the spec to description-writing decisions.
@@ -164,3 +254,5 @@ This reference doesn't teach the YAML spec — that's `references/skills-spec.md
 This reference doesn't replace the AP catalog scan for Pattern 5 (Manual-only Skills). The AP scan flags `disable-model-invocation: true` without `metadata.notes`. This reference establishes when notes are warranted in the first place.
 
 This reference doesn't cover Skill ecosystem composition (how this Skill sits next to other rootnode Skills) — that's `ecosystem-placement-decision.md`. Routing discipline (negative triggers) is in scope here; ecosystem placement is in scope there.
+
+This reference doesn't cover the description refinement loop methodology (manual walkthrough vs. automated train/test optimization) or the trigger eval schema in detail — those live in `references/description-optimization.md`. The realistic test prompt patterns above seed the corpus the refinement loop iterates on; the corpus generation discipline is shared between the two references.

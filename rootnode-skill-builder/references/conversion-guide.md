@@ -140,6 +140,30 @@ When scoring dimensions, state the score, the evidence, and the
 fix — nothing else.
 ```
 
+### Tone Calibration in Produced Skill Content
+
+When converting root.node content into Skill prose, apply the "explain the why" calibration (canonical: `root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.11`). The principle: use imperative voice where the constraint genuinely warrants it; use reasoned voice where reasoning carries equal or greater force. Source content authored under earlier conventions sometimes leans on imperative-without-rationale ("MUST not skip step 3", "ALWAYS verify before completion") in places where the reasoning would carry more weight. Convert with judgment, not mechanically.
+
+**When imperative voice is correct (preserve as-is):**
+
+- Spec compliance constraints — "the description field MUST be ≤ 1024 characters" (the spec is the authority).
+- Safety boundaries — "NEVER push to main without explicit authorization" (the boundary is the authority).
+- Irreversible operations — "do NOT force-push to shared branches" (the cost of model rationalization exceeds the cost of false-positive halts).
+- Reserved-word constraints — "name MUST NOT use 'claude' or 'anthropic'" (the platform rejects these regardless of reasoning).
+
+**When reasoned voice is correct (rewrite source content):**
+
+- Procedural guidance — "verify before reporting completion because untested claims compound across sessions" (rather than "ALWAYS verify").
+- Decision rubrics — "prefer routing-surface SKILL.md sections because procedural depth in SKILL.md duplicates references" (rather than "ALWAYS keep SKILL.md as routing surface").
+- Design recommendations where multiple reasonable choices exist.
+- Tradeoff explanations and edge-case handling.
+
+**Anti-pattern: caps-everywhere.** Source root.node content sometimes uses "MUST," "ALWAYS," "NEVER" formatted in caps for emphasis. Inline-converting this to Skill content produces a standing context where every instruction reads as non-negotiable — which dilutes the actual non-negotiables. The model loses the signal that distinguishes a hard constraint from a strong recommendation. Calibrated voice produces more reliable compliance because the model can verify the reasoned grounding against the situation it is in.
+
+**Conversion rule.** When inlining source content, ask per instruction: is this a spec constraint or safety boundary, or is it procedural guidance? Apply the corresponding voice. Substantive claims unchanged; only surface phrasing.
+
+The calibration is permitted within methodology preservation per `root_SKILL_BUILD_DISCIPLINE.md §7.2` (tone calibration is a within-warrant change). Successor Skill builds may apply this rewrite without invoking Gate 2 — the underlying claim is preserved, only the voice changes.
+
 ---
 
 ## Description Field Templates

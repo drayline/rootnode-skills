@@ -36,6 +36,109 @@ your-skill-name/
 
 ---
 
+## Skill Subdirectory Structure
+
+The Skill folder is the unit of distribution. Subdirectories within it carry layered content that the methodology layer (SKILL.md) invokes or references on demand. The subdirectory taxonomy:
+
+```
+your-skill-name/
+├── SKILL.md              # Required — methodology layer (frontmatter + body)
+├── references/           # Optional — methodology depth (loaded on demand)
+├── scripts/              # Optional — Python tooling (executed on demand)
+├── agents/               # Optional — subagent prompts (invoked when subagent
+│                         #            execution is available)
+├── eval-viewer/          # Optional — HTTP-served review UI (Tier A only)
+└── assets/               # Optional — templates, fonts, icons used in output
+```
+
+Each subdirectory has a defined purpose. Mixing content across subdirectories produces a Skill that is hard to reason about and hard to evolve.
+
+### references/
+
+Methodology depth that supports the workflow in SKILL.md but does not need to be loaded at activation. SKILL.md references each file with explicit "when to read" guidance; the model loads the file only when its scope is in play. This is the second level of progressive disclosure (per "Progressive Disclosure Model" below). Reference files over ~300 lines should carry a table of contents at the top.
+
+No nested subdirectories. The flat layout under `references/` is part of the spec — nested directories complicate model navigation and break the "load on demand" pattern.
+
+### scripts/
+
+Executable code (typically Python; Bash and other interpreted languages permitted). Scripts execute without being loaded into context — the model invokes them as tool calls and the output flows back without the script's source ever entering the conversation. This is the third level of progressive disclosure for executable content.
+
+Script invocation pattern: SKILL.md or a reference file documents what the script does, when to invoke it, and what arguments it takes. The model invokes the script via the execution surface (Bash tool in CC; Code Interpreter in CP/Claude.ai). The script reads inputs (typically files in the working directory or stdin), runs its logic, writes outputs (typically files), and prints a summary to stdout. The model parses stdout and continues the workflow.
+
+When `scripts/` is present, include `__init__.py` (zero-byte) so the directory functions as a Python package — required for relative imports between scripts. A shared `utils.py` is the conventional location for parsing helpers and other cross-script utilities.
+
+### agents/
+
+Subagent prompt files. Each `.md` file in `agents/` is a complete subagent prompt — system prompt + role definition + output schema — that can be invoked as a Task subagent in environments that support subagent execution (CC-side currently; not available in CP). The files are not loaded into the parent conversation; they are passed to the subagent at spawn time.
+
+Subagent prompt invocation pattern: SKILL.md or a reference file documents which subagent to invoke for which task (grader, comparator, analyzer per the rootnode skill-builder convention). The methodology layer invokes the subagent via the Task tool; the subagent runs in isolated context with its own prompt loaded; the subagent returns structured output that the parent reads. This isolates context-heavy or judgment-heavy work from the parent conversation.
+
+Subagent availability is environment-dependent. Skills with `agents/` should declare tier compatibility (Tier A requires subagents available; Tier B/C falls back to inline procedures or analytical reasoning). See `references/multi-environment-adaptation.md` for the operational model.
+
+### eval-viewer/
+
+Optional. HTTP-served review interface for browsing eval runs and collecting feedback. Used by Skills with empirical evaluation pipelines (e.g., behavioral validation, version comparison) where the operator wants an interactive view of run outcomes rather than reading raw JSON. Typical contents: a Python generator (`generate_review.py`) and an HTML template (`viewer.html`). The generator scans a workspace for runs, embeds output data into the HTML template, and serves the page via a tiny HTTP server with feedback auto-save.
+
+Tier compatibility: Tier A only (requires Python + browser). Skills with `eval-viewer/` document the subdirectory's purpose and tier compatibility in their tooling-layer reference.
+
+### assets/
+
+Static templates, fonts, icons, and other artifacts that the Skill or its scripts reference but that are not themselves methodology, code, or subagent content. Assets are not the same as references — references are markdown content the model reads; assets are binary or template files the model references but does not parse.
+
+---
+
+## Executable Layer in Skills
+
+A Skill that includes only `SKILL.md` and `references/` is a **methodology-only** Skill — pure prose, loaded into context when relevant, applied by the model as instructions. A Skill that adds `scripts/`, `agents/`, or `eval-viewer/` is a **multi-modality** Skill — methodology plus executable tooling that the methodology invokes.
+
+The executable layer extends what the Skill can do without expanding what the Skill loads into context. A 200-line Python script executes for tens of seconds, produces a structured output, and never burns context budget; the same logic written as natural-language instructions in SKILL.md would consume thousands of tokens, run unreliably (model judgment vs. deterministic code), and pollute the conversation with intermediate state. Executable layer for deterministic logic; methodology layer for judgment-heavy reasoning.
+
+### When to use scripts vs. methodology
+
+Push logic into `scripts/` when:
+
+- The logic is deterministic — given the same input, it always produces the same output. Validation, schema checking, parsing, packaging, format conversion.
+- The logic is computational — counting tokens, computing statistics, running diff analyses, generating reports.
+- The logic is repetitive — invoked many times per session, where the per-invocation context cost compounds.
+- The logic interfaces with external state — file system operations, HTTP requests, structured data writes.
+
+Keep logic in methodology (SKILL.md / references) when:
+
+- The logic is judgment-heavy — applying a rubric, weighing tradeoffs, deciding between approaches.
+- The logic is one-shot — executed once per Skill invocation; the per-invocation context cost is amortized.
+- The logic depends on context the model already has — requires reasoning about the conversation, the user's intent, or the surrounding code.
+
+### When to use subagents vs. inline procedures
+
+Push procedures into `agents/` when:
+
+- The procedure requires isolated context — graders need to evaluate output against rubrics without parent-conversation context bleeding into their judgment.
+- The procedure produces structured output that the parent consumes — schema-defined JSON, scored rubric outputs, analyzer findings.
+- The procedure runs many times per session — keeping each run in isolated context prevents context contamination across runs.
+
+Keep procedures inline when:
+
+- The procedure runs once and the model has the context it needs — the cost of subagent setup exceeds the value of context isolation.
+- Subagent execution is not available in the deployment environment — Tier B/C falls back to inline procedures.
+
+### Tier compatibility for executable content
+
+Skills with executable content document per-component tier compatibility:
+
+- **Tier A** (subagents + runnable environment available): Full executable layer — scripts run, subagents invoked, eval-viewer served.
+- **Tier B** (runnable environment, no subagents): Scripts run; subagent procedures fall back to inline; eval-viewer typically unavailable (depends on browser surface).
+- **Tier C** (neither): Scripts and subagents both unavailable; methodology layer applies analytical fallback.
+
+The tier model is canonical at `root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.12` and detailed in `references/multi-environment-adaptation.md`. Skills with executable layers reference the tier model rather than re-documenting it.
+
+### The methodology-tooling boundary
+
+The methodology layer (SKILL.md, references/) is **content the model reads and applies as judgment**. The tooling layer (scripts/, agents/, eval-viewer/) is **content the model invokes as tools**. The two layers compose — methodology decides when to invoke tooling; tooling produces structured artifacts that methodology then interprets. Neither layer subsumes the other; mixing them produces a Skill that is hard to maintain (a SKILL.md that embeds executable logic) or hard to invoke (scripts that require methodology-grade judgment to run correctly).
+
+The boundary is most legible in the file structure: scripts/ holds code, references/ holds prose, SKILL.md orchestrates both. A reader of the Skill folder can tell the layers apart without reading the contents.
+
+---
+
 ## YAML Frontmatter
 
 The YAML frontmatter is how Claude decides whether to load a Skill. This is the first level of progressive disclosure — always loaded in Claude's system prompt for all enabled skills.

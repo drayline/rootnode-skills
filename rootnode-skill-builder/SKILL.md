@@ -1,26 +1,26 @@
 ---
 name: rootnode-skill-builder
 description: >-
-  Builds, validates, and packages deployment-ready Skill files (SKILL.md +
-  references/) from design specifications. Three pre-build gates (decomposition,
-  warrant, ecosystem fit) plus an 9-dimension quality gate. Use for building,
-  packaging, converting, reviewing, or revising Skills. Trigger on: "build this
-  Skill," "build from this design spec," "convert this to a Skill," "package as
-  a Skill," "review this Skill," "check spec compliance," "revise this Skill,"
-  "is this actually a Skill," "does this belong in a hook instead," "should I
-  build a paste-and-edit template first." Also trigger on symptom-phrased
-  requests: "my Skill doesn't activate," "my SKILL.md is too long," "my
-  description truncates." Do NOT use when the user is designing Skill
-  methodology itself — that's design work, not packaging. Do NOT use for prompt
-  compilation, project auditing, or prompt scoring (use
-  rootnode-prompt-compilation, rootnode-project-audit, or
-  rootnode-prompt-validation if available).
+  Builds, validates, packages, tests, and optimizes deployment-ready Skill
+  files (SKILL.md + references/ + scripts/ + agents/) from design
+  specifications. Three pre-build gates + 9-dimension quality gate (with
+  D9a/b/c empirical evidence tiers) + behavioral iteration loop + automated
+  description optimizer + blind version comparator. Use for building,
+  reviewing, revising, testing, or optimizing Skills. Trigger on: "build
+  this Skill," "review this Skill," "test my Skill," "optimize the
+  description," "compare these Skill versions," "should this be a hook
+  instead," "build a template first." Also: "my Skill doesn't activate,"
+  "my description truncates," "my SKILL.md is too long," "my Skill is
+  overtriggering." Do NOT use when designing Skill methodology — that's
+  design work, not packaging. Do NOT use for prompt compilation, project
+  auditing, or prompt scoring (use rootnode-prompt-compilation,
+  rootnode-project-audit, or rootnode-prompt-validation if available).
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "2.0"
-  predecessor: "rootnode-skill-builder v1.0"
-  original-source: "root.node seed Project KFs (post-Phase 27/28 methodology absorption) + rootnode-skills repo v1 source files"
+  version: "3.0"
+  predecessor: "rootnode-skill-builder v2.1"
+  original-source: "root.node seed Project KFs (post-Phase 32a methodology updates) + rootnode-skill-builder v2.1 source"
   discipline_post: phase-30
 ---
 
@@ -28,27 +28,31 @@ metadata:
 
 > **Calibration:** Tier 2, Opus-primary. See repository README for model compatibility.
 
-> **Version 2.0:** Adds three pre-build gates (decomposition, warrant, ecosystem fit) before any build work begins. Expands the publication review from 5 to 9 dimensions (auto-activation enforcement, anti-pattern catalog scan, 7-layer leak-check; behavioral validation added in v2.1). Adds three new build artifacts (placement note, promotion provenance, AP-warning summary). v1-built Skills continue to work unmodified; this Skill can review them advisorially against the new dimensions.
+> **Version 3.0:** Methodology + tooling release. D9 expanded into D9a/D9b/D9c sub-levels (empirical Tier A / empirical Tier B / analytical floor). Adds Description Refinement Loop methodology (manual or automated via `scripts/description_optimizer.py`). Adds Tier A/B/C environment-adaptive degradation. Adds executable layer (`scripts/`, `agents/`, `eval-viewer/`) ported from upstream Anthropic skill-creator with content-class-policy adaptation. v2.1 build methodology preserved verbatim where unchanged.
 
-Build, review, and revise root.node Skills in the SKILL.md format for Anthropic's Claude Skills ecosystem. This Skill carries the complete build methodology — Agent Skills spec, conversion rules, progressive disclosure patterns, pre-build gates, and the 9-dimension quality gate.
+Build, review, revise, test, and optimize root.node Skills in the SKILL.md format for the Anthropic Agent Skills ecosystem. This Skill carries the complete build methodology — Agent Skills spec, conversion rules, progressive disclosure patterns, pre-build gates, the 9-dimension quality gate (with sub-level evidence tiers), behavioral iteration, description optimization, and blind version comparison.
 
-Skills are built from design specifications produced during methodology design work. The design spec is the input — it contains the methodology, architectural decisions, description field draft, internal language adaptation notes, composition testing cases, and reference file structure. This Skill's job is gate-checking, construction, validation, and publication-readiness.
+Skills are built from design specifications produced during methodology design work. The design spec is the input. This Skill's job is gate-checking, construction, validation, iteration, optimization, and publication-readiness.
 
-**Platform terminology note:** This Skill retains root.node terminology (Block, Block Library, Domain Pack, Compiler, Optimizer) by design. Unlike most rootnode Skills which strip internal language, this Skill operates ON root.node Skills as its subject matter — the conversion rules, concept mapping, and build pipeline all reference root.node concepts by name because those are the things being built.
+**Platform terminology note:** This Skill retains root.node terminology (Block, Block Library, Domain Pack, Compiler, Optimizer) by design. Unlike most rootnode Skills that strip internal language, this Skill operates ON root.node Skills as its subject matter — the conversion rules, concept mapping, and build pipeline reference root.node concepts by name because those are what gets built.
 
 ## Important
 
-**Description fields are everything.** Claude decides whether to load a Skill based almost entirely on the description field in YAML frontmatter. A Skill with perfect methodology and a vague description will never activate. Test every description: "If Claude sees this alongside 50 other descriptions, will it correctly activate this Skill and ONLY this Skill for the right tasks?"
+**Description fields are everything.** Claude decides whether to load a Skill based almost entirely on the description in YAML frontmatter. A perfect methodology behind a vague description never activates. Test every description: would Claude pick this Skill, and only this Skill, alongside 50 others?
 
-**Preserve depth, adapt format.** The methodology is the differentiator. Every Skill retains the substantive instructions, reasoning patterns, and quality criteria from the source material. What changes is the packaging — frontmatter, progressive disclosure structure, activation descriptions — not the intellectual content.
+**Preserve depth, adapt format.** The methodology is the differentiator. Every Skill retains substantive instructions, reasoning patterns, and quality criteria from source material. What changes is packaging — frontmatter, progressive disclosure structure, activation descriptions — not intellectual content.
 
-**Spec compliance is non-negotiable.** Every Skill conforms to the Agent Skills specification. Name in kebab-case (max 64 chars), description under 1024 chars (always verify parsed YAML length, not raw text), no XML angle brackets in frontmatter, no README.md inside skill folders, SKILL.md body under 500 lines / ~5000 tokens.
+**Spec compliance is non-negotiable.** Every Skill conforms to the Agent Skills specification. Name in kebab-case (max 64 chars), description ≤ 1024 chars (verify YAML-parsed length, not raw text), no XML angle brackets in frontmatter, no README.md inside skill folders, SKILL.md body under 500 lines / ~5000 tokens.
 
-**Standalone-first composition.** Every Skill delivers its complete value when installed alone. Cross-Skill references are soft pointers only ("for deeper specialization, see X if available"). Prefer a few hundred tokens of duplicated guidance over a dependency that breaks a Skill when installed alone.
+**Standalone-first composition.** Every Skill delivers complete value when installed alone. Cross-Skill references are soft pointers ("for deeper specialization, see X if available"). Prefer a few hundred tokens of duplicated guidance over a dependency that breaks a Skill when installed alone.
 
-**Pre-build gates run first.** Before parsing any design spec, walk the three pre-build gates explicitly. A Skill that should have been a hook, a template, or an extension of an existing Skill is worse than no Skill at all — it ships, looks reasonable, and silently fails to deliver value. Gates prevent that.
+**Pre-build gates run first.** Before parsing any design spec, walk the three pre-build gates explicitly. A Skill that should have been a hook, a template, or an extension of an existing Skill is worse than no Skill at all — it ships, looks reasonable, and silently fails to deliver value.
 
-**The deliverable is a packaged zip plus separated audit artifacts.** Never deliver Skill files individually for the user to assemble. Build the deployable as `{skill-name}.zip` containing `{skill-name}/SKILL.md` + `{skill-name}/references/*.md` — drop-in ready for the user's local install path or the rootnode-skills repo. Audit artifacts (placement note, promotion provenance, AP-warning summary) ship as separate files OUTSIDE the zip — they document the build event, not runtime behavior, and don't belong inside the deployable folder. Assembly is the Skill's job, not the user's.
+**The deliverable is a packaged zip plus separated audit artifacts.** Build the deployable as `{skill-name}.zip` containing the Skill folder structure. Audit artifacts (placement note, promotion provenance, AP-warning summary) ship as separate files OUTSIDE the zip — they document the build event, not runtime behavior.
+
+**Routing surfaces over procedural depth in SKILL.md.** Each new workflow section in SKILL.md names the workflow, identifies tier routing, and points to a reference. Procedural depth lives in references. The 500-line ceiling is a design-time forcing function, not a compression-time problem.
+
+**Tier-aware verdicts.** When validation dimensions invoke empirical workflows (D9 sub-levels, description refinement, version comparison), the build environment determines which tier applies. Record the tier explicitly in the build summary; do not claim Tier A evidence when Tier A infrastructure was unavailable.
 
 **Complete file output.** Always output the complete file. Never diffs, patches, or partial sections.
 
@@ -56,9 +60,9 @@ Skills are built from design specifications produced during methodology design w
 
 ## Reasoning discipline
 
-Before declaring a Skill ready to ship, walk through the nine-dimension quality gate explicitly. State each check, cite the specific evidence (character counts, section structure, activation triggers, cross-Skill references, AP catches, layer leaks), then apply the pass/fail verdict. Do not compress this sequence into a summary judgment.
+Before declaring a Skill ready to ship, walk through the nine-dimension quality gate explicitly. State each check, cite the specific evidence (character counts, section structure, activation triggers, cross-Skill references, AP catches, layer leaks, applied D9 sub-level), then apply the pass/fail verdict. Do not compress this sequence into a summary judgment.
 
-If the build scope is unclear (new build vs. review vs. revision, description constraints, reference file structure), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
+If the build scope is unclear (new build vs. review vs. revision vs. iterate vs. optimize description vs. compare versions), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 
 ---
 
@@ -68,39 +72,25 @@ Before parsing any design spec or building any Skill files, walk three gates exp
 
 ### Gate 1 — Decomposition check
 
-Where does this work fit in the 7-layer Claude Code mechanism framework? The mechanisms are: CLAUDE.md (always-loaded standing context), `.claude/rules/` (path-scoped on-demand rules), Skills (.claude/skills/ — multi-step procedures), subagents (focused specialists with isolated context), hooks (lifecycle guarantees), MCP (external data/APIs), settings (trust/permission boundaries).
+Where does this work fit in the 7-layer Claude Code mechanism framework? The mechanisms are CLAUDE.md (always-loaded standing context), `.claude/rules/` (path-scoped on-demand rules), Skills (multi-step procedures), subagents (focused specialists with isolated context), hooks (lifecycle guarantees), MCP (external data/APIs), settings (trust/permission boundaries). For full framework guidance, read `references/decomposition-framework.md`.
 
-For full framework guidance, read references/decomposition-framework.md.
-
-If the work fits "Skills" cleanly: proceed to Gate 2.
-
-If the work fits a different mechanism: redirect the user with brief explanation. Do NOT build a Skill that should have been a hook, a rule, CLAUDE.md content, etc. Misplaced content is the dominant failure mode in CC deployments.
+If the work fits "Skills" cleanly: proceed to Gate 2. If the work fits a different mechanism: redirect with brief explanation. Do NOT build a Skill that should have been a hook, a rule, CLAUDE.md content, etc.
 
 ### Gate 2 — Warrant check
 
-Has the work pattern surfaced 3+ times in real use, with evidence?
+Has the work pattern surfaced 3+ times in real use, with traceable evidence?
 
-If yes (3+ occurrences with traceable evidence): proceed to Gate 3.
+If yes: proceed to Gate 3. If no (1-2 occurrences, speculative future need): recommend building a paste-and-edit template first. Use the user's project prefix convention (`{code}_template_{descriptor}.md`). Document explicit promotion criteria inline. For full warrant guidance, read `references/warrant-check-criteria.md`.
 
-If no (1-2 occurrences, speculative future need, "I think we'll need this"): recommend building a paste-and-edit template first. Use the user's project prefix convention (project files use `{code}_` prefix per User Preferences). Document explicit promotion criteria inline (when does this template earn promotion to a Skill?). Skill build is premature.
-
-For full warrant guidance, read references/warrant-check-criteria.md.
-
-**Exception:** when the user provides a process-abstraction handoff brief from rootnode-repo-hygiene (or another upstream Skill following the same format), the brief is the warrant evidence. Gate 2 passes automatically; proceed to Gate 3.
+**Exception:** when the user provides a process-abstraction handoff brief from rootnode-repo-hygiene (or another upstream Skill), the brief is the warrant evidence. Gate 2 passes automatically.
 
 ### Gate 3 — Ecosystem fit check
 
-Where does this Skill belong in the rootnode runtime tooling map? Check:
+Where does this Skill belong in the rootnode runtime tooling map? Check (1) CP-side or CC-side surface; (2) which existing rootnode Skills it composes with; (3) clear gap or duplicate of existing capability.
 
-1. CP-side (runs in chat-side Projects) or CC-side (deploys to delivery project repositories)?
-2. Composes with which existing rootnode Skills (handoff-trigger-check, profile-builder, skill-builder, rootnode-cc-design, prompt-validation, project-audit, critic-gate, mode-router, repo-hygiene)?
-3. Fills a clear gap, or duplicates existing capability?
+If clear gap: proceed to "Build New Skill." Surface the placement decision and suggested entry for the runtime tooling catalog (`root_AGENT_ENVIRONMENT_ARCHITECTURE.md §6`) in the build summary.
 
-If clear gap: proceed to "Build New Skill." Surface the placement decision and suggested entry for the runtime tooling catalog (`root_AGENT_ENVIRONMENT_ARCHITECTURE.md §6`) in the build summary so the user can update the canonical KF.
-
-If duplication detected: surface to user. Ask whether to extend the existing Skill instead. Building a duplicate Skill creates routing collisions.
-
-For full ecosystem guidance, read references/ecosystem-placement-decision.md.
+If duplication detected: surface to user. Ask whether to extend the existing Skill instead. Building a duplicate creates routing collisions. For full ecosystem guidance, read `references/ecosystem-placement-decision.md`.
 
 ---
 
@@ -108,53 +98,78 @@ For full ecosystem guidance, read references/ecosystem-placement-decision.md.
 
 When the three pre-build gates have passed and a design specification is present in context:
 
-**Step 1 — Parse the design spec.** Identify: the methodology (what the Skill does), the reference file structure, the description field draft, the internal language adaptation notes, the composition testing cases, and any architectural decisions already made.
+**Step 1 — Parse the design spec.** Identify the methodology (what the Skill does), the reference file structure, the description field draft, the internal language adaptation notes, the composition testing cases, and any architectural decisions already made.
 
-**Step 2 — Build SKILL.md.** Implement the methodology from the design spec. Apply conversion rules (see references/conversion-guide.md): strip root.node internal language per adaptation notes, inline relevant behavioral countermeasures, convert quality gates to actionable verification steps. Structure: identity paragraph, Important/Critical section, core instructions, examples (2-3 input → output), When to Use section, Troubleshooting section. Verify body is under 500 lines. Verify description is under 1024 characters with trigger phrases and negative triggers.
+**Step 2 — Build SKILL.md.** Implement the methodology from the design spec. Apply conversion rules (see `references/conversion-guide.md`): strip root.node internal language per adaptation notes, inline relevant behavioral countermeasures, convert quality gates to actionable verification steps. Structure: identity paragraph, Important/Critical section, core instructions, examples, When to Use section, Troubleshooting section. Verify body under 500 lines. Verify description under 1024 characters with trigger phrases and negative triggers.
 
-**Step 2a — Description field construction.** The description is the highest-leverage artifact. Build it using the templates in references/conversion-guide.md and the discipline in references/auto-activation-discipline.md. Structure: [What it does] + [When to use it] + [Trigger phrases] + [Negative triggers]. Claude has a bias toward undertriggering — make descriptions slightly "pushy" with trigger phrases covering both explicit and implicit user requests. When a Skill risks overtriggering, add explicit negative triggers ("Do NOT use for..."). Always verify the YAML-parsed character count is ≤1024 — measure parsed output, not raw text, because YAML block scalars can differ from source length.
+**Step 2a — Description field construction.** The description is the highest-leverage artifact. Build using the templates in `references/conversion-guide.md` and the discipline in `references/auto-activation-discipline.md`. Structure: [What it does] + [When to use it] + [Trigger phrases] + [Negative triggers]. Make descriptions slightly "pushy" with both explicit and implicit triggers. Add explicit negative triggers when overtriggering risk exists. Always verify YAML-parsed character count is ≤ 1024.
 
-**Step 3 — Build reference files.** Apply progressive disclosure — detailed content, rubrics, pattern libraries, extended examples, and edge cases go here. Each reference file must be referenced from SKILL.md with guidance on when to read it. Add table of contents for files over 300 lines. One level deep (no nested subdirectories within references/).
+**Step 3 — Build reference files.** Apply progressive disclosure — detailed content, rubrics, pattern libraries, extended examples, edge cases go here. Each reference file referenced from SKILL.md with "when to read" guidance. TOC for files over 300 lines. One level deep (no nested subdirectories within `references/`).
 
-**Step 4 — Apply internal language adaptation.** Use the adaptation notes from the design spec. Default conversions (see references/conversion-guide.md for full table): "block" → "approach" or "methodology," "the Compiler" → "this Skill" or "the compilation process," "knowledge file" → "reference file" or "documentation." Exception: Skills that operate ON Claude Projects platform features (memory-optimization, context-budget, project-audit) retain platform terminology. If the design spec documents a terminology exception, follow it.
+**Step 4 — Apply internal language adaptation.** Use adaptation notes from the design spec. Default conversions in `references/conversion-guide.md`. Exception: Skills that operate ON Claude Projects platform features retain platform terminology. Apply tone calibration consistent with AEA "explain the why" — imperative voice for spec constraints; reasoned voice for procedural guidance.
 
 **Step 5 — Run nine-dimension publication review.** Score each dimension pass/fail with evidence:
 
-1. **Spec compliance:** Name format, description length (YAML-parsed ≤1024), body length (<500 lines), no XML in frontmatter, no README.md in folder, folder name matches `name` field.
-2. **Activation precision:** Would this description trigger on the right tasks? Stay silent on wrong tasks? Compete with 50+ descriptions? Check for undertriggering (Claude's default bias) — descriptions should be slightly "pushy."
-3. **Methodology preservation:** Has substantive content been lost? Are instructions still actionable and specific? Compare against design spec methodology sections.
-4. **Progressive disclosure:** Is SKILL.md focused on core instructions? Is detailed documentation properly delegated to references/? Is any reference file unreferenced from SKILL.md?
-5. **Standalone completeness:** Does the Skill deliver full value installed alone? Any hidden dependencies? All cross-Skill references use "if available" language?
-6. **Auto-activation enforcement:** Description includes verb-based triggering-context language (not just static descriptors). Auto-invocation defaults to on. If `disable-model-invocation: true` is set, explicit reasoning is captured in `metadata.notes`. Per the auto-activation discipline in `root_CC_ENVIRONMENT_GUIDE.md §1.3` and the Manual-only Skills anti-pattern (`root_AGENT_ANTI_PATTERNS.md §4.3`): manual-only Skills are an anti-pattern unless the Skill genuinely should be human-only. For full discipline, see references/auto-activation-discipline.md.
-7. **Anti-pattern catalog scan:** Scan produced SKILL.md and references/ against the Skill-relevant subset of the structural anti-pattern catalog (references/anti-pattern-catalog.md). Each detected pattern surfaces as a warning with a section reference to `root_AGENT_ANTI_PATTERNS.md`. Warnings are advisory, not blockers — patterns are sometimes intentional. User accepts (with reasoning captured) or revises. Common catches: §2.1 Monolithic standing context (bloated SKILL.md), §3.5 Blurred Layers (rules mixed with reference), §4.3 Manual-only Skills (weak description), §4.11 Verification-before-completion absent, §4.14 Stale content.
-8. **7-layer leak-check:** Scan produced content for material that should have been placed in another mechanism per the 7-layer framework. Common leaks:
-   - File-pattern rules in references/ → candidate for `.claude/rules/`
-   - Always-relevant facts → candidate for CLAUDE.md
-   - Enforcement guarantees in instructions → candidate for hooks
-   - External integration logic → candidate for MCP
+1. **Spec compliance:** name format, description length (YAML-parsed ≤ 1024), body length (< 500 lines), no XML in frontmatter, no README in folder, folder/name match.
+2. **Activation precision:** description triggers correctly under the 50-description competition test; verb-based language; symptom-phrased and explicit triggers; negative triggers present.
+3. **Methodology preservation:** substantive content from design spec preserved; instructions remain actionable and specific.
+4. **Progressive disclosure:** SKILL.md routing-surface; references hold depth; cross-references resolve; routing-surface compliance check (no procedural duplication of reference content in SKILL.md).
+5. **Standalone completeness:** cross-Skill references use "if available"; no hidden dependencies.
+6. **Auto-activation enforcement:** verb-based triggers; `disable-model-invocation` either absent or with `metadata.notes` justification.
+7. **Anti-pattern catalog scan:** scan against `references/anti-pattern-catalog.md` Skill-relevant subset; surface catches with section reference; advisory unless severe (HALT disposition).
+8. **7-layer leak-check:** scan for content belonging in CLAUDE.md, `.claude/rules/`, hooks, or MCP rather than in the Skill.
+9. **Behavioral validation (RECOMMENDED, sub-level applies):** D9a (Tier A — empirical with-Skill vs. without-Skill comparison via subagent grader); D9b (Tier B — empirical execution under realistic test prompts; qualitative review; no baseline); D9c (Tier C — analytical reasoning grounded in the 10-tendency taxonomy). Capture the applied sub-level in the build summary. The sub-level architecture and per-tier procedure live in `references/behavioral-validation.md`. Tier applicability per `references/multi-environment-adaptation.md`.
 
-   Surface as warnings; user decides whether to extract.
-9. **Behavioral validation (v2.1, RECOMMENDED — not REQUIRED):** Has the Skill been tested against at least one adversarial scenario where Claude would fail without it? Three pass conditions (pressure scenario documented, baseline failure confirmed/credibly expected, compliance with Skill confirmed/credibly expected) OR the skip condition for reference-only / data-carrying / configuration-driven Skills. RECOMMENDED classification: D1–D8 pass without D9 is shippable; D9 absence is not a build-blocker. Full canonical pass conditions, skip condition, and classification rationale are reproduced verbatim in references/skills-spec.md ("Behavioral Validation (D9)" subsection); canonical source is `root_SKILL_BUILD_DISCIPLINE.md` §3.9.
+**Step 6 — Package the deployable Skill and deliver alongside separated audit artifacts.** The deliverable is two distinct things: (1) `{skill-name}.zip` containing the Skill folder (`{skill-name}/SKILL.md` + `{skill-name}/references/*.md` + `{skill-name}/scripts/*` + `{skill-name}/agents/*.md` + `{skill-name}/eval-viewer/*` if present); (2) audit artifacts as separate files outside the zip. The zip is the primary deliverable; audit artifacts are secondary. Use `scripts/package_zip.py` to build the zip and verify contents before delivery.
 
-**Step 6 — Package the deployable Skill and deliver alongside separated audit artifacts.** The deliverable is two distinct things: (1) a single zip file containing the deployable Skill folder, ready to drop into the user's local install path or upload to the Skills repo without further assembly; (2) the audit artifacts, delivered as separate files outside the zip. Never require the user to assemble the package themselves — packaging is the Skill's responsibility, not the user's.
+**Audit artifacts (delivered separately, NOT inside the zip):**
 
-**Deployable zip (`{skill-name}.zip`):** Contains exactly the Skill folder structure — `{skill-name}/SKILL.md` plus `{skill-name}/references/*.md`. Root entry inside the zip MUST be the named Skill folder itself (so `unzip` produces `{skill-name}/...`, matching the standard rootnode-skills repo layout). No audit artifacts inside the zip. No README inside the Skill folder (per spec). Verify zip contents before delivery: list the archive, confirm structure, confirm file count matches the build (1 SKILL.md + N references).
+- **Ecosystem placement note** (`{skill-name}_placement.md`) — always produced.
+- **Promotion provenance** (`{skill-name}_promotion_evidence.md`) — produced when Gate 2 evidence was provided OR Gate 2 was overridden with reasoning.
+- **AP-warning summary** (`{skill-name}_ap_warnings.md`) — produced when D7 surfaces catches.
 
-**Audit artifacts (delivered as separate files, NOT inside the zip):**
-
-- **Ecosystem placement note** (`{skill-name}_placement.md`) — always produced. Documents CP/CC placement, composition with existing rootnode Skills, and the suggested entry for the runtime tooling catalog in `root_AGENT_ENVIRONMENT_ARCHITECTURE.md §6`. Surfaces as a build-summary recommendation; the user updates the canonical KF in a separate edit. This Skill does not auto-edit canonical KFs — methodology updates remain human-reviewed. Format spec in references/ecosystem-placement-decision.md.
-- **Promotion provenance** (`{skill-name}_promotion_evidence.md`) — produced when Gate 2 warrant evidence was provided OR when Gate 2 was overridden with reasoning. Captures the evidence (or the override reasoning) for audit trail. Format spec in references/warrant-check-criteria.md.
-- **AP-warning summary** (`{skill-name}_ap_warnings.md`) — produced when validation dimension 7 surfaces warnings. Lists each warning, the user's accept/revise decision, and the reasoning when accepted. Future maintainers can see what was a deliberate choice vs. an oversight.
-
-**Delivery format:** Use the present_files tool (or equivalent file-presentation mechanism in the runtime) to surface the zip first, then the audit artifacts. The zip is the primary deliverable; the audit artifacts are secondary. Follow the file presentation with a build note (3-5 sentences) covering key adaptation decisions and the nine-dimension review verdict. The user should be able to install the Skill from the zip immediately, and file the audit artifacts separately to their build provenance location (typically `Projects/{CODE}/research/` or equivalent).
-
-**Why separation matters:** Audit artifacts are about the build event (placement reasoning, warrant evidence, AP catches). The Skill folder is about runtime behavior (instructions, references). Mixing them inside the zip pollutes the deployable with build-time metadata that the runtime never consumes — and creates confusion when the user installs ("are these audit files part of the Skill?"). Separation keeps each concern clean.
+**Why separation matters:** audit artifacts document the build event (placement reasoning, warrant evidence, AP catches). The Skill folder documents runtime behavior (instructions, references, executable layer). Mixing them inside the zip pollutes the deployable.
 
 ### Build Behavioral Calibration
 
-When producing SKILL.md bodies and reference files, match content density to the source methodology. Do not pad with explanatory context or transitional prose the source does not contain.
+When producing SKILL.md bodies and reference files, match content density to the source methodology — do not pad with explanatory context the source does not contain.
+
+Apply the "explain the why" calibration (canonical: `root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.11`) to new content. Use imperative voice for spec constraints and safety boundaries (the spec is the authority); use reasoned voice for procedural guidance and decision rubrics (the model can apply judgment). Avoid caps-everywhere — when every instruction reads "MUST" or "ALWAYS," the model loses the signal that distinguishes hard constraints from strong recommendations.
 
 When building from a design spec, the design decisions are already made. Build what the spec says. If a design decision appears suboptimal, flag it as a build note after delivery — do not pause the build to explore alternatives.
+
+---
+
+## Iterate the Skill
+
+When a Skill has been built and the build CV (or operator) wants behavioral confirmation that it works, enter the iteration loop. The loop tightens the Skill against observed gaps — assertions that fail, behaviors that diverge from criteria, scenarios where the analytical reasoning chain breaks down.
+
+**Tier routing.** Determine which D9 sub-level applies based on the build environment per `references/multi-environment-adaptation.md`:
+
+- **Tier A:** invoke the `agents/grader.md` subagent on with-Skill (GREEN) and without-Skill (RED) runs across the trigger eval set; compute the differential per assertion. Optionally run `scripts/aggregate_benchmark.py` for multi-eval aggregation.
+- **Tier B:** load the Skill into the runnable environment; execute the trigger eval set; review activation and procedural compliance qualitatively against the Skill's stated criteria.
+- **Tier C:** apply the analytical floor — pressure scenario documented; baseline failure expected from a cited Claude tendency; compliance expected from countermeasure formulation.
+
+For full procedure, schemas verbatim, grader principles verbatim, and per-tier mechanics, read `references/behavioral-validation.md`.
+
+---
+
+## Optimize the Description
+
+The description is the highest-leverage artifact in a Skill. A description that fails to trigger renders every other discipline (build gates, quality gate, methodology preservation) inert. The optimization loop hardens the description against under-triggering and over-triggering through evidence-based iteration.
+
+**Tier routing.** Per `references/multi-environment-adaptation.md`:
+
+- **Tier A:** invoke `scripts/description_optimizer.py` with the trigger eval corpus for an automated 5-iteration train/test loop with held-out scoring. Generate per-iteration HTML report via `scripts/generate_report.py`.
+- **Tier B/C:** run the manual walkthrough — read each query against the description and reason about activation; refine; repeat until the corpus stabilizes.
+
+For full procedure including the trigger eval schema, the train/test split methodology, the triggering detection mechanism, the description improvement prompt structure, and the anti-overfitting principle, read `references/description-optimization.md`.
+
+---
+
+## Compare Skill Versions
+
+When the build CV needs evidence that a successor revision improves on a predecessor before shipping. Tier A invokes `agents/comparator.md` (blind A/B) and `agents/analyzer.md` (post-hoc analysis); Tier B/C falls back to inline blind comparison with identifier-leak prevention. For procedure, rubric verbatim, and analyzer outputs verbatim, read `references/version-comparison.md`.
 
 ---
 
@@ -162,17 +177,17 @@ When building from a design spec, the design decisions are already made. Build w
 
 When asked to review a Skill:
 
-1. **Spec compliance:** Check name format, description length (YAML-parsed), body length, no XML in frontmatter, no README.md, folder/name match. See references/skills-spec.md for full constraints.
-2. **Activation precision:** Evaluate description against the 50-description competition test. Check for both undertriggering and overtriggering. Check negative triggers against adjacent Skills.
-3. **Methodology preservation:** Compare against source material (if available). Check for content loss, vague instructions, or missing quality criteria.
-4. **Progressive disclosure:** SKILL.md should contain core instructions only. Detailed docs, extended examples, edge cases belong in references/. Check file references include "when to read" guidance.
-5. **Standalone completeness:** Verify no hidden dependencies. Cross-Skill references must use "if available." Test: if this were the only rootnode Skill installed, would it still work?
-6. **Auto-activation enforcement:** Description has verb-based triggers, both explicit and symptom-phrased. `disable-model-invocation: true` (if set) has `metadata.notes` justification. See references/auto-activation-discipline.md.
-7. **Anti-pattern catalog scan:** Run the AP catalog scan from references/anti-pattern-catalog.md. Surface catches as advisory warnings.
-8. **7-layer leak-check:** Scan for material that belongs in CLAUDE.md, `.claude/rules/`, hooks, or MCP rather than in the Skill.
-9. **Behavioral validation (v2.1, RECOMMENDED — not REQUIRED):** Has the Skill been tested or credibly validated against at least one adversarial scenario where Claude would fail without it? Apply the three pass conditions or the skip condition per references/skills-spec.md "Behavioral Validation (D9)". RECOMMENDED classification — absence is not a build-blocker; pre-v2.1 Skills surface as advisory only.
+1. **Spec compliance:** name format, description length (YAML-parsed), body length, no XML in frontmatter, no README, folder/name match.
+2. **Activation precision:** evaluate against the 50-description competition test; check undertriggering and overtriggering; check negative triggers against adjacent Skills.
+3. **Methodology preservation:** compare against source material if available; check for content loss, vague instructions, missing quality criteria.
+4. **Progressive disclosure:** SKILL.md core only; routing-surface compliance; references hold depth; "when to read" guidance present.
+5. **Standalone completeness:** verify no hidden dependencies; cross-Skill references use "if available."
+6. **Auto-activation enforcement:** verb-based triggers, both explicit and symptom-phrased; `disable-model-invocation` justified if set.
+7. **Anti-pattern catalog scan:** run scan from `references/anti-pattern-catalog.md`. Surface catches as advisory.
+8. **7-layer leak-check:** scan for material belonging in CLAUDE.md, `.claude/rules/`, hooks, or MCP.
+9. **Behavioral validation (sub-level applies):** apply the strongest available tier per `references/multi-environment-adaptation.md`. For pre-v3.0 Skills without sub-level marking, apply analytically (D9c) by default.
 
-For v1-built Skills, dimensions 6-9 surface as advisory warnings only — do not break a working v1 Skill automatically. The user decides whether to revise based on the warnings.
+For v1- and v2-built Skills, dimensions added in v2/v3 surface as advisory warnings only — do not break a working Skill automatically. The user decides whether to revise based on the warnings.
 
 Flag issues with specific fix recommendations. Do not pad with praise.
 
@@ -184,7 +199,7 @@ When asked to revise a Skill:
 
 1. Read current SKILL.md and reference files.
 2. Apply requested changes while maintaining spec compliance, methodology preservation, and standalone completeness.
-3. Run the nine-dimension review against the revised version.
+3. Run the nine-dimension review against the revised version (with the appropriate D9 sub-level).
 4. Output complete updated files (not diffs).
 5. Present brief revision note (3-5 sentences) covering what changed and why.
 
@@ -192,32 +207,34 @@ When asked to revise a Skill:
 
 ## Key Spec Constraints
 
-For the full specification, read references/skills-spec.md.
+For the full specification, read `references/skills-spec.md`.
 
-**YAML frontmatter:** `name` in kebab-case, max 64 chars, must match folder name. `description` max 1024 chars (verify YAML-parsed length), must include what + when + triggers. No XML angle brackets. Optional: `license` (Apache-2.0 for rootnode), `metadata` (author, version, predecessor, original-source, notes). Required from skill-builder v2.x onward: `metadata.discipline_post: phase-30` — marks the build-discipline phase per `root_SKILL_BUILD_DISCIPLINE.md` §4.6; emit on every new build (D1 spec-compliance).
+**YAML frontmatter:** `name` in kebab-case (max 64 chars, must match folder name); `description` max 1024 chars (YAML-parsed); no XML angle brackets. Optional: `license` (Apache-2.0 for rootnode), `metadata` (allowed sub-fields: `author`, `version`, `predecessor`, `original-source`, `notes`, `discipline_post`). Required from skill-builder current version or later: `metadata.discipline_post: phase-30` per `root_SKILL_BUILD_DISCIPLINE.md §4.6`.
 
-**SKILL.md body:** Under 500 lines, under ~5000 tokens. Core instructions only. Imperative form. Include 2-3 examples, When to Use section, Troubleshooting section.
+**SKILL.md body:** under 500 lines, under ~5000 tokens. Routing-surface design (procedural depth in references). Imperative form for spec constraints; reasoned voice for procedural guidance.
 
-**References:** One level deep. Each file referenced from SKILL.md with "when to read" guidance. TOC for files over 300 lines.
+**References:** one level deep. Each file referenced from SKILL.md with "when to read" guidance. TOC for files over 300 lines.
 
-**Progressive disclosure:** Level 1 = frontmatter (always loaded, ~100 words). Level 2 = SKILL.md body (loaded on activation). Level 3 = references/ (loaded on demand).
+**Subdirectories (v3.0):** `scripts/` (Python tooling), `agents/` (subagent prompts), `eval-viewer/` (HTTP-served review interface). See `references/skills-spec.md` and `references/tooling-layer-overview.md`.
 
 **Folder structure:**
+
 ```
 your-skill-name/
 ├── SKILL.md          # Required — main skill file
-├── scripts/          # Optional — executable code
-├── references/       # Optional — documentation loaded as needed
-└── assets/           # Optional — templates, fonts, icons
+├── references/       # Optional — methodology depth (loaded on demand)
+├── scripts/          # Optional — Python tooling (executed on demand)
+├── agents/           # Optional — subagent prompts (Tier A invocation)
+└── eval-viewer/      # Optional — interactive review UI (Tier A only)
 ```
 
-**Naming rules:** SKILL.md must be exact case. Folder name in kebab-case, no spaces/underscores/capitals. No README.md inside skill folders. Names with "claude" or "anthropic" are reserved.
+**Naming rules:** SKILL.md exact case. Folder name kebab-case, no spaces/underscores/capitals. No README inside skill folders. Names with "claude" or "anthropic" reserved.
 
 ---
 
 ## Conversion Rules Quick Reference
 
-For the full conversion guide including concept mapping, content adaptation patterns, standalone composition rules, and description templates, read references/conversion-guide.md.
+For the full conversion guide including concept mapping, content adaptation patterns, standalone composition rules, description templates, and tone calibration in produced Skill content, read `references/conversion-guide.md`.
 
 ### Default Language Adaptations
 
@@ -229,17 +246,27 @@ For the full conversion guide including concept mapping, content adaptation patt
 | "Per the Optimization Notes..." | "Claude tends to..." |
 | "The seed project demonstrates..." | [Remove — not relevant outside root.node] |
 
-**Exception:** Skills that operate ON root.node concepts (this Skill) or ON Claude Projects platform features (memory-optimization, context-budget, project-audit) retain their domain-specific terminology. The design spec documents any exceptions.
-
-### Countermeasure Handling
-
-Behavioral countermeasures are inlined where they apply, not referenced as external instructions. Convert XML-tagged countermeasure sections into concrete inline instructions within the relevant workflow step. Exception: the behavioral tuning Skill retains the full countermeasure catalog because its purpose IS behavioral diagnosis.
+**Exception:** Skills that operate ON root.node concepts (this Skill) or ON Claude Projects platform features retain their domain-specific terminology. The design spec documents any exceptions.
 
 ### Cross-Skill References
 
-All cross-Skill references must be soft pointers: "for deeper specialization, see X if available." The phrase "if available" (or equivalent) must always be present. No Skill may fail, produce incomplete output, or defer a user request because another Skill is not installed.
+All cross-Skill references must be soft pointers: "for deeper specialization, see X if available." The "if available" qualifier must always be present. No Skill may fail because another Skill is not installed.
 
-When the standalone constraint requires inlining shared methodology, inline the narrow slice each Skill needs. A few hundred tokens of duplicated guidance across Skills is acceptable. A Skill that fails when installed alone is not.
+---
+
+## Multi-Environment Adaptation
+
+Some Skills run across multiple environments (CC, Cowork, CP, custom orchestrators). Their tooling layer fails silently in environments that lack required infrastructure unless the Skill flags the dependencies explicitly and provides fallback paths.
+
+Apply the Tier A/B/C operational model (canonical: `root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.12`):
+
+| Tier | Capabilities | What it supports |
+|---|---|---|
+| A | Subagents + runnable env | Full empirical pipeline (D9a, automated description optimizer, blind comparator) |
+| B | Runnable env, no subagents | Empirical execution under realistic prompts (D9b, manual walkthrough) |
+| C | Neither | Analytical floor (D9c, manual reasoning) |
+
+The build CV records the determined tier in the build summary; lower tiers serve as per-step fallbacks when individual steps fail infrastructurally. For per-script tier compatibility, fallback patterns, and detection logic, read `references/multi-environment-adaptation.md`.
 
 ---
 
@@ -247,123 +274,160 @@ When the standalone constraint requires inlining shared methodology, inline the 
 
 ### Example 1: Build from Design Spec
 
-**Input:** User provides a design specification for `rootnode-context-budget` v5 with methodology, description draft, reference file structure, and adaptation notes.
+**Input:** User provides a design spec for `rootnode-context-budget` v5.
 
-**Actions:**
-1. Walk pre-build gates: Gate 1 (Skill mechanism — yes, multi-step procedure with intent triggers); Gate 2 (warrant — design spec exists, implies recurring need); Gate 3 (ecosystem fit — composes with project-audit; clear gap).
-2. Parse the design spec — identify methodology (context budget analysis pipeline), reference structure (assessment-rubric.md, optimization-patterns.md), description draft, and adaptation notes.
-3. Build SKILL.md — implement the pipeline as step-by-step instructions, inline the key spec constraints, add examples and troubleshooting.
-4. Build reference files — move detailed rubrics and pattern libraries to references/.
-5. Apply language adaptation — retain platform terminology per documented exception.
-6. Run nine-dimension review — verify all 9 dimensions; surface AP catches and 7-layer leaks as advisory warnings.
-7. Present complete files with build note, review verdict, placement note, and AP-warning summary if applicable.
+**Actions:** Walk pre-build gates → parse spec → build SKILL.md and references → apply language adaptation → run 9-dimension review → package zip and audit artifacts.
 
-**Result:** A deployable zip (`rootnode-context-budget.zip`) containing the Skill folder structure (SKILL.md + 2 reference files), delivered first. Three audit artifacts delivered separately outside the zip: ecosystem placement note, AP-warning summary if catches occurred, promotion provenance if warrant evidence was provided. A 3-5 sentence build note and an 9-dimension review verdict accompany the delivery. The user installs the zip directly with no manual assembly; files the audit artifacts to their build provenance location.
+**Result:** Deployable zip + 3 audit artifacts (placement, promotion, AP-warnings if applicable). Build note covers key adaptation decisions and the D9 sub-level applied.
 
 ### Example 2: Review Existing Skill
 
-**Input:** User asks "Review the rootnode-output-blocks Skill for me."
+**Input:** User asks "Review the rootnode-output-blocks Skill."
 
-**Actions:**
-1. Read the Skill's SKILL.md and all reference files.
-2. Check spec compliance: name format ✓, description at 1019/1024 chars (flagged as tight), body under 500 lines ✓.
-3. Check activation precision: description includes catalog-specific triggers, negative triggers to validation and block-selection, forward pointer for uncertain users. Evaluate against 50-description competition.
-4. Check methodology: verify all 10 output formats preserved in references/, selection guidance intact.
-5. Check progressive disclosure: SKILL.md has selection logic, references/ has format specifications.
-6. Check standalone: no hard dependencies, soft pointers use "if available."
-7. Check auto-activation enforcement: verb-based triggers present; `disable-model-invocation` not set (default on, correct).
-8. Run AP catalog scan: no §2.1 Monolithic catches; §3.5 Blurred Layers — warning on lines 80-95 where reference content appears in SKILL.md (advisory).
-9. Run 7-layer leak-check: no leaks detected.
+**Actions:** Read SKILL.md and references → walk all 9 dimensions → flag specific issues with fix recommendations → produce AP-warning summary if catches surfaced.
 
-**Result:** Review findings organized by dimension with specific fix recommendations. AP-warning summary surfaces the §3.5 catch for user disposition.
+**Result:** Per-dimension verdicts with cited evidence; D9 verdict cites the applied sub-level.
 
 ### Example 3: Convert Informal Methodology
 
 **Input:** "I have this methodology document. Convert this to a Skill."
 
-**Actions:**
-1. Walk pre-build gates: Gate 1 confirm Skill is the right mechanism (not a hook, rule, or CLAUDE.md addition); Gate 2 ask for evidence of recurring use; Gate 3 check ecosystem fit.
-2. Treat the methodology document as an informal design spec.
-3. Extract: what the Skill does, when it activates, what belongs in SKILL.md vs. references/.
-4. Draft a description field with trigger phrases and negative triggers.
-5. Build the SKILL.md and any reference files following the standard pipeline.
-6. Run the nine-dimension review.
-7. Flag any design decisions made during conversion (since no formal spec existed) in the build note.
+**Actions:** Walk pre-build gates (warrant evidence often thin — surface to user) → treat document as informal design spec → extract description and reference structure → run 9-dimension review → flag conversion-time decisions in the build note.
 
-**Result:** A deployable zip with the Skill folder, delivered first. Audit artifacts (placement note, promotion provenance, AP-warning summary as applicable) delivered separately outside the zip. The 9-dimension review verdict and a build note flag any design decisions made during conversion (since no formal spec existed).
+**Result:** Deployable zip + audit artifacts. Build note flags any design decisions made during conversion.
 
-### Example 4: Build with Pre-Build Gates Triggered
+### Example 4: Build with Pre-Build Gate Triggered
 
-**Input:** User says "I want to build a Skill that always runs pytest before declaring a task complete in our Python projects."
+**Input:** "Build a Skill that always runs pytest before declaring a task complete."
 
-**Actions:**
-1. Gate 1 (decomposition): This is a lifecycle guarantee — runs on Stop trigger. Belongs in a hook, not a Skill. Redirect: "This work fits the hook mechanism (PreToolUse/Stop hook), not a Skill. Hooks provide enforcement; Skills provide on-demand procedures. The Enforcement-as-preference anti-pattern (`root_AGENT_ANTI_PATTERNS.md §4.4`) describes exactly this failure mode — prompt-level rules that need deterministic enforcement. See references/decomposition-framework.md for the framework. Want help drafting a hook config instead?"
-2. Halt — no Skill built.
+**Actions:** Gate 1 catches the lifecycle-guarantee shape — redirect to hook mechanism with brief rationale, citing `references/decomposition-framework.md` and the Enforcement-as-preference anti-pattern.
 
-**Result:** Correct redirect. Skill mechanism mismatched the work shape; the gate caught it before producing a Skill that would silently fail to enforce.
+**Result:** No Skill built. Correct redirect prevents a Skill that would silently fail to enforce.
+
+### Example 5: Iterate on a Built Skill
+
+**Input:** "Test my Skill against realistic queries."
+
+**Actions:** Determine tier (Tier A available?) → generate trigger eval corpus → invoke grader subagent (Tier A) or qualitative review (Tier B) or analytical reasoning (Tier C) → identify gaps → propose revisions.
+
+**Result:** D9 verdict with applied sub-level + iteration recommendations.
+
+### Example 6: Optimize a Description
+
+**Input:** "My description triggers on the wrong queries — fix it."
+
+**Actions:** Generate trigger eval corpus → invoke `description_optimizer.py` (Tier A) for automated train/test loop OR run manual walkthrough (Tier B/C) → select highest-test-score revision.
+
+**Result:** Updated description with per-iteration train/test scores; selection rationale documented.
+
+### Example 7: Compare Two Skill Versions
+
+**Input:** "Is v3 actually better than v2?"
+
+**Actions:** Run both Skills against representative eval prompts → invoke comparator subagent (Tier A) or inline blind comparison (Tier B/C) → invoke analyzer for post-hoc insights.
+
+**Result:** Winner verdict with rubric scores and improvement suggestions for the loser.
+
+### Example 8: Multi-Environment Tier Determination
+
+**Input:** "Build my Skill — I'm running in chat-side review."
+
+**Actions:** Detect no execution surface → Tier C applies → build proceeds with analytical-only D9c verdict; description optimization falls to manual walkthrough.
+
+**Result:** Build complete with explicit Tier C verdict; build summary notes which workflows were unavailable.
 
 ---
 
 ## Quality Gate
 
-Before finalizing any build or revision:
+Before finalizing any build, review, or revision:
 
 - Have the three pre-build gates been walked explicitly (decomposition, warrant, ecosystem fit)?
-- Does the description YAML-parse to ≤1024 chars?
-- Is the SKILL.md body under 500 lines and ~5000 tokens?
+- Does the description YAML-parse to ≤ 1024 chars?
+- Is SKILL.md body under 500 lines? Are new sections routing surfaces (no procedural duplication of references)?
 - Does the name field conform (kebab-case, max 64 chars, no reserved words)?
-- Has all substantive methodology been preserved from the design spec?
+- Has all substantive methodology been preserved from the design spec (or predecessor for successor builds)?
 - Are root.node internal references adapted per conversion rules and design spec exceptions?
-- Is progressive disclosure working — core instructions in SKILL.md, detailed docs in references/?
-- Does the Skill work standalone without requiring other rootnode Skills?
-- Are cross-Skill references soft pointers with "if available" language?
-- Is metadata.original-source set for traceability? (And `metadata.predecessor` if this is a versioned successor?)
-- Are all output files complete (not diffs)?
-- Has the auto-activation enforcement check passed?
-- Has the anti-pattern catalog scan completed (warnings reviewed and accepted/revised)?
-- Has the 7-layer leak-check completed (leaks reviewed and extracted/accepted)?
-- Has the deployable zip been assembled with the correct folder structure (`{skill-name}/SKILL.md` + `{skill-name}/references/*.md`) and no audit artifacts inside?
-- Have the audit artifacts been produced as separate files outside the zip (placement note always; promotion provenance when warrant evidence/override; AP-warning summary when dim 7 catches)?
-- Has zip contents been verified by listing the archive before delivery?
+- Has tone calibration been applied to new content per AEA §4.11?
+- Is progressive disclosure working — routing surfaces in SKILL.md, depth in references?
+- Does the Skill work standalone without other rootnode Skills?
+- Are cross-Skill references soft pointers with "if available"?
+- Is `metadata.original-source` set? Is `metadata.predecessor` set for successor builds? Is `metadata.discipline_post` set?
+- Has auto-activation enforcement passed?
+- Has the AP catalog scan completed? For Skills with co-located workflows, has the Kitchen Sink decomposition test been applied (lifecycle coherence, governance duplication, independent invocation)?
+- Has the 7-layer leak-check completed?
+- For D9: has the applied sub-level been determined and recorded in the build summary?
+- For Skills with empirical workflows: is per-script tier compatibility documented?
+- Has the deployable zip been assembled with correct folder structure and no audit artifacts inside?
+- Have audit artifacts been produced as separate files (placement always; promotion when warrant/override; AP-warnings when D7 catches)?
+- Has zip contents been verified before delivery?
 
 ---
 
 ## When to Use This Skill
 
 Use this Skill when:
+
 - A design specification is present in context and the user wants deployment-ready Skill files
 - The user asks to build, convert, or package methodology into SKILL.md format
 - The user asks whether something should be a Skill at all ("is this actually a Skill," "does this belong in a hook instead")
-- The user asks whether to build a Skill or a paste-and-edit template first
-- The user asks to review an existing Skill for spec compliance, activation precision, or structural quality
-- The user asks to revise an existing Skill's structure, description, or reference files
-- The user asks about Agent Skills spec constraints (folder structure, YAML requirements, description limits)
+- The user asks to review an existing Skill
+- The user asks to revise an existing Skill
+- The user asks to test or iterate on a Skill behaviorally
+- The user asks to optimize a Skill description
+- The user asks to compare two Skill versions
+- The user asks about Agent Skills spec constraints
 
 Do NOT use this Skill when:
-- The user wants to design Skill methodology (what the Skill does, how its pipeline works) — that's normal design work using the project's knowledge base
+
+- The user wants to design Skill methodology — that's design work
 - The user wants to compile a prompt (use rootnode-prompt-compilation if available)
 - The user wants to audit a Claude Project (use rootnode-project-audit if available)
 - The user wants to evaluate a prompt's quality (use rootnode-prompt-validation if available)
-- The user is working on composition testing or description optimization across the full Skill inventory — that workflow belongs in the Skills project
 
 ---
 
 ## Troubleshooting
 
-**Skill doesn't trigger:** Description too vague. Check that it includes both what the Skill does AND when to use it. Add specific trigger phrases users would actually say. Claude has an undertriggering bias — make descriptions slightly "pushy." See references/auto-activation-discipline.md for the full discipline.
+**Skill doesn't trigger:** description too vague. Add specific trigger phrases users would actually say. Run `references/auto-activation-discipline.md` walkthrough; consider running `description_optimizer.py` if Tier A is available.
 
-**Skill triggers on wrong tasks:** Description too broad. Add negative triggers ("Do NOT use for..."). Check for vocabulary overlap with adjacent Skills in the inventory.
+**Skill triggers on wrong tasks:** description too broad. Add negative triggers ("Do NOT use for..."). Check for vocabulary overlap with adjacent Skills.
 
-**Description over 1024 chars:** Consolidate negative triggers, tighten phrasing, compress trigger phrase lists. Never drop routing-critical content (negative triggers, domain boundary markers). Always re-measure parsed YAML length after edits — not raw text length.
+**Description over 1024 chars:** consolidate negative triggers, tighten phrasing, compress trigger phrase lists. Never drop routing-critical content. Always re-measure parsed YAML length after edits.
 
-**SKILL.md body too long:** Move detailed documentation to references/. Keep SKILL.md focused on the core workflow and instructions. Check for content that belongs in reference files: full rubrics, extended examples, edge case catalogs, pattern libraries.
+**SKILL.md body too long:** apply intelligent abstraction discipline. Move detailed documentation to references/. New sections in SKILL.md should be routing surfaces, not procedural depth.
 
-**Instructions not followed at runtime:** Check for buried critical instructions (move to top), vague language (replace with specific checks), or excessive verbosity (concise lists beat long paragraphs for procedural instructions).
+**D9 sub-level unclear:** read `references/multi-environment-adaptation.md` §"Tier determination." Detect subagent execution availability and runnable env availability; the conservative determination is the lower tier when ambiguous.
 
-**Cross-Skill routing collision:** Two Skills activate on the same query. Compare both descriptions and identify the overlapping vocabulary. Add negative triggers to one or both. Use distinct vocabulary domains (e.g., "audit" vs. "optimize," "retrieve" vs. "choose"). See references/ecosystem-placement-decision.md for the duplication detection signals.
+**Cross-Skill routing collision:** add negative triggers; use distinct vocabulary domains. See `references/ecosystem-placement-decision.md`.
 
-**User asks for a Skill that should be a hook / rule / CLAUDE.md content:** Walk Gate 1 (decomposition) explicitly. Use the redirect language in references/decomposition-framework.md. Do not build the Skill — redirect to the correct mechanism with a 2-3 sentence pivot prompt.
+**User asks for a Skill that should be a hook / rule / CLAUDE.md content:** walk Gate 1 explicitly. Use the redirect language in `references/decomposition-framework.md`. Do not build the Skill.
 
-**User asks for a Skill but can name only 1-2 occurrences:** Walk Gate 2 (warrant) explicitly. Recommend a paste-and-edit template (`{code}_template_{descriptor}.md`) with promotion criteria. Do not build the Skill prematurely. See references/warrant-check-criteria.md for the template structure.
+**User asks for a Skill but can name only 1-2 occurrences:** walk Gate 2 explicitly. Recommend a paste-and-edit template. See `references/warrant-check-criteria.md`.
 
-**Disable-model-invocation flag set without justification:** Validation dimension 6 catches this. Either remove the flag (default to auto-invocation) or add `metadata.notes` documenting the human-only reasoning. Manual-only Skills are an anti-pattern unless the Skill genuinely warrants human-only invocation.
+**`disable-model-invocation` flag set without justification:** D6 catches this. Either remove the flag or add `metadata.notes` documenting human-only reasoning.
+
+---
+
+## Reference table
+
+The full reference catalog. Each file is loaded on demand; "when to read" guidance summarized below.
+
+| Reference | When to read |
+|---|---|
+| `references/skills-spec.md` | Authoritative Agent Skills spec; subdirectory taxonomy; executable layer in Skills |
+| `references/auto-activation-discipline.md` | Description-writing discipline; realistic test prompt patterns; tone calibration in descriptions |
+| `references/conversion-guide.md` | root.node → Skills conversion patterns; tone calibration in produced Skill content; description templates |
+| `references/decomposition-framework.md` | 7-layer placement framework; redirect language by mechanism (Gate 1) |
+| `references/warrant-check-criteria.md` | Gate 2 evidence types; template promotion criteria |
+| `references/ecosystem-placement-decision.md` | Gate 3 placement decision; duplication detection; composition lineage |
+| `references/anti-pattern-catalog.md` | Skill-relevant subset of the AP catalog (D7 scan) |
+| `references/behavioral-validation.md` | D9 sub-level architecture; grader principles verbatim; eval and grading schemas verbatim |
+| `references/description-optimization.md` | Trigger eval generation; manual walkthrough; automated train/test loop; triggering detection mechanism |
+| `references/version-comparison.md` | Blind A/B comparison rubric verbatim; analyzer output verbatim; identifier-leak prevention |
+| `references/multi-environment-adaptation.md` | Tier A/B/C operational model; per-script tier compatibility; fallback patterns |
+| `references/tooling-layer-overview.md` | Catalog of `scripts/`, `agents/`, `eval-viewer/`; integration patterns; drift detection discipline |
+
+---
+
+*End of SKILL.md.*

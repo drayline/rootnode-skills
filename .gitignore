@@ -1,3 +1,5 @@
 dist/
 _v2_1_staging/
-scripts/
+/scripts/
+/design/skill-creator/
+/design/staging-kf/

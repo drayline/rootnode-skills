@@ -1,6 +1,6 @@
 ---
 name: rootnode-repo-hygiene
-description: >
+description: >-
   Audits Claude Code repositories. Two-phase workflow — Phase 1 sweeps 14
   hygiene categories (permissions, hooks, CLAUDE.md bloat, Skills hygiene,
   process-abstraction, plus structural) and an optional 7-layer leak check.
@@ -14,19 +14,13 @@ description: >
   with rootnode-critic-gate. CC-only — does not scan Claude Projects. Do NOT
   use for building a Skill (use rootnode-skill-builder), compiling a prompt
   (use rootnode-prompt-compilation), scoring a single prompt (use
-  rootnode-prompt-validation), or auditing a Project (use rootnode-project-audit).
+  rootnode-prompt-validation), or auditing a Project (use
+  rootnode-project-audit).
 license: Apache-2.0
 metadata:
   author: rootnode
   version: "1.0"
-  original-source: |
-    Synthesized from root_AGENT_ENVIRONMENT_ARCHITECTURE.md (surface-invariant
-    placement discipline), root_CC_ENVIRONMENT_GUIDE.md (7-layer model,
-    discipline practices, hooks-vs-prompts boundary), root_AGENT_ANTI_PATTERNS.md
-    (canonical anti-pattern catalog with surface tags). Production-validated
-    against a CC deployment sweep on 2026-05-04 surfacing 23 findings across
-    14 categories with three-form authorization use and Path 3 commit-plan
-    adaptation accepted as defer-to-downstream.
+  original-source: "Synthesized from root_AGENT_ENVIRONMENT_ARCHITECTURE.md (surface-invariant placement discipline), root_CC_ENVIRONMENT_GUIDE.md (7-layer model, discipline practices, hooks-vs-prompts boundary), root_AGENT_ANTI_PATTERNS.md (canonical anti-pattern catalog with surface tags). Production-validated against a CC deployment sweep on 2026-05-04 surfacing 23 findings across 14 categories with three-form authorization use and Path 3 commit-plan adaptation accepted as defer-to-downstream."
   discipline_post: phase-30
 ---
 

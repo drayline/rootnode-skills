@@ -20,16 +20,7 @@ metadata:
   author: rootnode
   version: "2.1"
   predecessor: "rootnode-cc-design v2.0"
-  original-source: |
-    root.node seed Project KFs (post-Phase 27/28 methodology absorption:
-    root_AGENT_ENVIRONMENT_ARCHITECTURE.md, root_CC_ENVIRONMENT_GUIDE.md,
-    root_AGENT_ANTI_PATTERNS.md) + accumulated CC deployment research
-    (2026-05-04). v2 evolved REMEDIATE acceptance flow (three approval forms,
-    step-level risk tags) and critic-gate composition (required/optional)
-    to align with rootnode-repo-hygiene v1's contracts. Substantive rebuild
-    of cc-anti-patterns.md to canonical numbering. Brand-surface clean
-    (cchq references stripped or restructured; hyge contamination
-    anonymized to "production CC deployment 2026-05-04").
+  original-source: "root.node seed Project KFs (post-Phase 27/28 methodology absorption: root_AGENT_ENVIRONMENT_ARCHITECTURE.md, root_CC_ENVIRONMENT_GUIDE.md, root_AGENT_ANTI_PATTERNS.md) + accumulated CC deployment research (2026-05-04). v2 evolved REMEDIATE acceptance flow (three approval forms, step-level risk tags) and critic-gate composition (required/optional) to align with rootnode-repo-hygiene v1's contracts. Substantive rebuild of cc-anti-patterns.md to canonical numbering. Brand-surface clean (cchq references stripped or restructured; hyge contamination anonymized to \"production CC deployment 2026-05-04\")."
   discipline_post: phase-30
 ---
 

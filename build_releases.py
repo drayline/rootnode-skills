@@ -49,7 +49,7 @@ def zip_skill(skill_path: Path, dist_dir: Path) -> Path:
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for file in sorted(skill_path.rglob("*")):
             if file.is_file():
-                arcname = file.relative_to(skill_path)
+                arcname = file.relative_to(skill_path).as_posix()
                 zf.write(file, arcname)
 
     return zip_path
@@ -65,12 +65,12 @@ def main():
 
     DIST_DIR.mkdir(exist_ok=True)
 
-    print(f"Building {len(skills)} skill package(s) → dist/\n")
+    print(f"Building {len(skills)} skill package(s) -> dist/\n")
 
     for skill in skills:
         zip_path = zip_skill(skill, DIST_DIR)
         size_kb = zip_path.stat().st_size / 1024
-        print(f"  ✓ {zip_path.name} ({size_kb:.1f} KB)")
+        print(f"  [OK] {zip_path.name} ({size_kb:.1f} KB)")
 
     print(f"\nDone. {len(skills)} packages in dist/")
 

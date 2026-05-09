@@ -17,7 +17,7 @@ license: Apache-2.0
 metadata:
   author: rootnode
   version: "1.1"
-  original-source: DOMAIN_PACK_BUSINESS_STRATEGY.md
+  original-source: "DOMAIN_PACK_BUSINESS_STRATEGY.md"
 ---
 
 # Business Strategy Prompt Methodology

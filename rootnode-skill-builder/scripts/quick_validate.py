@@ -29,6 +29,8 @@ ALLOWED_METADATA_SUBFIELDS = {
     'version',
     'predecessor',
     'original-source',
+    'companion-files',
+    'changelog',
     'notes',
     'discipline_post',
 }

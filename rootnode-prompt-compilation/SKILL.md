@@ -19,7 +19,7 @@ license: Apache-2.0
 metadata:
   author: rootnode
   version: "1.2"
-  original-source: PROMPT_COMPILER.md, MASTER_FRAMEWORK.md
+  original-source: "PROMPT_COMPILER.md, MASTER_FRAMEWORK.md"
 ---
 
 # Prompt Compilation

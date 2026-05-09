@@ -19,7 +19,7 @@ license: Apache-2.0
 metadata:
   author: rootnode
   version: "1.2"
-  original-source: AUDIT_FRAMEWORK.md, PROJECT_OPTIMIZER.md
+  original-source: "AUDIT_FRAMEWORK.md, PROJECT_OPTIMIZER.md"
 ---
 
 # Claude Project Auditor

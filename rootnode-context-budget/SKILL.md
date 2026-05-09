@@ -19,7 +19,7 @@ license: Apache-2.0
 metadata:
   author: rootnode
   version: "5.0"
-  original-source: root_OPTIMIZATION_REFERENCE.md
+  original-source: "root_OPTIMIZATION_REFERENCE.md"
 ---
 
 # Context Budget Analysis

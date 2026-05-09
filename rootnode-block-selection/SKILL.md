@@ -19,7 +19,7 @@ license: Apache-2.0
 metadata:
   author: rootnode
   version: "1.1"
-  original-source: PROMPT_COMPILER.md, BLOCK_LIBRARY_IDENTITY.md, BLOCK_LIBRARY_REASONING.md, BLOCK_LIBRARY_OUTPUT.md
+  original-source: "PROMPT_COMPILER.md, BLOCK_LIBRARY_IDENTITY.md, BLOCK_LIBRARY_REASONING.md, BLOCK_LIBRARY_OUTPUT.md"
 ---
 
 # Approach Selection for Claude Prompts

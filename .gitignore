@@ -3,3 +3,5 @@ _v2_1_staging/
 /scripts/
 /design/skill-creator/
 /design/staging-kf/
+__pycache__/
+*.pyc

@@ -1,36 +1,88 @@
-<svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
-  <rect width="700" height="320" rx="12" fill="#0d1117"/>
-  <rect x="0.5" y="0.5" width="699" height="319" rx="12" fill="none" stroke="#21262d" stroke-width="1"/>
+<svg viewBox="0 0 700 434" xmlns="http://www.w3.org/2000/svg">
+  <rect width="700" height="434" rx="12" fill="#0d1117"/>
+  <rect x="0.5" y="0.5" width="699" height="433" rx="12" fill="none" stroke="#21262d" stroke-width="1"/>
 
+  <!-- Header -->
   <text x="350" y="36" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" font-weight="700" fill="#d97580" text-anchor="middle" letter-spacing="2">CLAUDE CODE SCOPE</text>
-  <text x="350" y="58" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14" font-weight="600" fill="#e6edf3" text-anchor="middle">Runtime governance for autonomous execution</text>
+  <text x="350" y="58" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14" font-weight="600" fill="#e6edf3" text-anchor="middle">The execution surface</text>
+  <text x="350" y="76" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#8b949e" text-anchor="middle">User-level config plus per-repo execution governance</text>
 
-  <!-- Coming Soon badge -->
-  <rect x="272" y="73" width="156" height="30" rx="15" fill="#3d1c20" stroke="#b8434a" stroke-width="1.2"/>
-  <text x="350" y="93" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" font-weight="700" fill="#d97580" text-anchor="middle" letter-spacing="2">COMING IN v2.2</text>
+  <!-- Global User Settings -->
+  <rect x="40" y="100" width="620" height="64" rx="8" fill="#2a1216"/>
+  <rect x="40" y="103" width="3" height="58" rx="1.5" fill="#d97580" opacity="0.7"/>
+  <text x="350" y="119" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Global User Settings</text>
+  <text x="350" y="134" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">~/.claude/ · applies to all Claude Code sessions</text>
 
-  <!-- Placeholder layer box (dashed border) -->
-  <rect x="40" y="116" width="620" height="184" rx="8" fill="#2a1216" opacity="0.6"/>
-  <rect x="40" y="116" width="620" height="184" rx="8" fill="none" stroke="#b8434a" stroke-width="1.2" stroke-dasharray="6 4" opacity="0.7"/>
+  <rect x="237" y="142" width="116" height="18" rx="9" fill="#3d1c20" stroke="#5c2f33" stroke-width="0.5"/>
+  <text x="295" y="154.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d97580" text-anchor="middle">skill-builder ⇄</text>
+  <rect x="361" y="142" width="102" height="18" rx="9" fill="#3d1c20" stroke="#5c2f33" stroke-width="0.5"/>
+  <text x="412" y="154.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d97580" text-anchor="middle">cc-design ⇄</text>
 
-  <text x="350" y="140" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Runtime Governance Layer</text>
-  <text x="350" y="158" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Profile-driven gates that control when work hands off to autonomous execution</text>
-  <text x="350" y="173" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">and which strictness applies per change</text>
+  <!-- Repo -->
+  <rect x="40" y="172" width="620" height="64" rx="8" fill="#2a1216"/>
+  <rect x="40" y="175" width="3" height="58" rx="1.5" fill="#d97580" opacity="0.7"/>
+  <text x="350" y="191" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Repo</text>
+  <text x="350" y="206" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">.claude/ · per-repo execution governance</text>
 
-  <!-- Functional concept chips (ghost style — outline only) -->
-  <rect x="206" y="194" width="120" height="22" rx="11" fill="none" stroke="#b8434a" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.85"/>
-  <text x="266" y="209" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#d97580" text-anchor="middle">Handoff Readiness</text>
+  <rect x="162" y="214" width="78" height="18" rx="9" fill="#3d1c20" stroke="#5c2f33" stroke-width="0.5"/>
+  <text x="201" y="226.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d97580" text-anchor="middle">critic-gate</text>
+  <rect x="248" y="214" width="84" height="18" rx="9" fill="#3d1c20" stroke="#5c2f33" stroke-width="0.5"/>
+  <text x="290" y="226.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d97580" text-anchor="middle">mode-router</text>
+  <rect x="340" y="214" width="88" height="18" rx="9" fill="#3d1c20" stroke="#5c2f33" stroke-width="0.5"/>
+  <text x="384" y="226.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d97580" text-anchor="middle">repo-hygiene</text>
+  <rect x="436" y="214" width="102" height="18" rx="9" fill="#3d1c20" stroke="#5c2f33" stroke-width="0.5"/>
+  <text x="487" y="226.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#d97580" text-anchor="middle">cc-design ⇄</text>
 
-  <rect x="356" y="194" width="138" height="22" rx="11" fill="none" stroke="#b8434a" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.85"/>
-  <text x="425" y="209" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#d97580" text-anchor="middle">Change Safety Review</text>
+  <!-- Dual-Surface band -->
+  <rect x="40" y="252" width="620" height="154" rx="8" fill="#ffffff" fill-opacity="0.03"/>
+  <rect x="40" y="252" width="620" height="154" rx="8" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="6 4"/>
 
-  <rect x="212" y="226" width="126" height="22" rx="11" fill="none" stroke="#b8434a" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.85"/>
-  <text x="275" y="241" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#d97580" text-anchor="middle">Mode-Aware Routing</text>
+  <!-- Dual-Surface header (centered) -->
+  <text x="350" y="272" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" font-weight="700" fill="#c9d1d9" text-anchor="middle" letter-spacing="1.5">⇄ DUAL-SURFACE</text>
+  <text x="350" y="288" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Skills that operate in both chat-Projects and Claude Code</text>
 
-  <rect x="368" y="226" width="120" height="22" rx="11" fill="none" stroke="#b8434a" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.85"/>
-  <text x="428" y="241" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#d97580" text-anchor="middle">Profile Authoring</text>
+  <line x1="80" y1="298" x2="620" y2="298" stroke="#ffffff" stroke-opacity="0.10" stroke-width="0.5"/>
 
-  <!-- Footer note -->
-  <line x1="80" y1="266" x2="620" y2="266" stroke="#5a2a30" stroke-width="0.5" opacity="0.6"/>
-  <text x="350" y="284" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#a08087" text-anchor="middle">Two Skills install to chat-Projects (CP-side)  ·  Two install to Claude Code (CC-side)</text>
+  <!-- Column divider -->
+  <line x1="350" y1="308" x2="350" y2="393" stroke="#ffffff" stroke-opacity="0.10" stroke-width="0.5"/>
+
+  <!-- COLUMN 1: skill-builder ⇄ (center x=198) -->
+  <rect x="138" y="310" width="120" height="22" rx="11" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.22" stroke-width="0.8"/>
+  <text x="198" y="325" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" font-weight="600" fill="#e6edf3" text-anchor="middle">skill-builder ⇄</text>
+  <text x="198" y="347" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Designs, builds, and validates Skills · six workflows</text>
+
+  <!-- skill-builder modes row 1: build, iterate, optimize -->
+  <rect x="117" y="355" width="42" height="16" rx="8" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.22" stroke-width="0.5"/>
+  <text x="138" y="366.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#e6edf3" text-anchor="middle">build</text>
+  <rect x="165" y="355" width="50" height="16" rx="8" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.22" stroke-width="0.5"/>
+  <text x="190" y="366.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#e6edf3" text-anchor="middle">iterate</text>
+  <rect x="221" y="355" width="58" height="16" rx="8" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.22" stroke-width="0.5"/>
+  <text x="250" y="366.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#e6edf3" text-anchor="middle">optimize</text>
+
+  <!-- skill-builder modes row 2: compare, review, revise -->
+  <rect x="120" y="377" width="52" height="16" rx="8" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.22" stroke-width="0.5"/>
+  <text x="146" y="388.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#e6edf3" text-anchor="middle">compare</text>
+  <rect x="178" y="377" width="46" height="16" rx="8" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.22" stroke-width="0.5"/>
+  <text x="201" y="388.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#e6edf3" text-anchor="middle">review</text>
+  <rect x="230" y="377" width="46" height="16" rx="8" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.22" stroke-width="0.5"/>
+  <text x="253" y="388.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#e6edf3" text-anchor="middle">revise</text>
+
+  <!-- COLUMN 2: cc-design ⇄ (center x=502) -->
+  <rect x="450" y="310" width="104" height="22" rx="11" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.22" stroke-width="0.8"/>
+  <text x="502" y="325" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" font-weight="600" fill="#e6edf3" text-anchor="middle">cc-design ⇄</text>
+  <text x="502" y="347" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Designs Claude Code environments · five modes</text>
+
+  <!-- cc-design modes row 1: design, evolve -->
+  <rect x="449" y="355" width="50" height="16" rx="8" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.22" stroke-width="0.5"/>
+  <text x="474" y="366.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#e6edf3" text-anchor="middle">design</text>
+  <rect x="505" y="355" width="50" height="16" rx="8" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.22" stroke-width="0.5"/>
+  <text x="530" y="366.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#e6edf3" text-anchor="middle">evolve</text>
+
+  <!-- cc-design modes row 2: research, template, remediate -->
+  <rect x="406" y="377" width="58" height="16" rx="8" fill="#3a2810" stroke="#5a3d18" stroke-width="0.5"/>
+  <text x="435" y="388.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#d29922" text-anchor="middle">research</text>
+  <rect x="470" y="377" width="58" height="16" rx="8" fill="#3a2810" stroke="#5a3d18" stroke-width="0.5"/>
+  <text x="499" y="388.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#d29922" text-anchor="middle">template</text>
+  <rect x="534" y="377" width="64" height="16" rx="8" fill="#3d1c20" stroke="#5c2f33" stroke-width="0.5"/>
+  <text x="566" y="388.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#d97580" text-anchor="middle">remediate</text>
 </svg>

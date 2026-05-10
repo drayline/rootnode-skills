@@ -1,41 +1,63 @@
-<svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <marker id="arrow-champagne" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#e8c97a" opacity="0.7"/>
-    </marker>
-  </defs>
+<svg viewBox="0 0 700 472" xmlns="http://www.w3.org/2000/svg">
+  <rect width="700" height="472" rx="12" fill="#0d1117"/>
+  <rect x="0.5" y="0.5" width="699" height="471" rx="12" fill="none" stroke="#21262d" stroke-width="1"/>
 
-  <rect width="700" height="360" rx="12" fill="#0d1117"/>
-  <rect x="0.5" y="0.5" width="699" height="359" rx="12" fill="none" stroke="#21262d" stroke-width="1"/>
-
+  <!-- Header -->
   <text x="350" y="36" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" font-weight="700" fill="#e8c97a" text-anchor="middle" letter-spacing="2">CONVERSATION SCOPE</text>
   <text x="350" y="58" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14" font-weight="600" fill="#e6edf3" text-anchor="middle">The current exchange</text>
   <text x="350" y="76" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#8b949e" text-anchor="middle">Where you interact with the Project. Skills activate here through natural language.</text>
 
-  <!-- Conversation Context box -->
-  <rect x="40" y="100" width="620" height="120" rx="8" fill="#2a2415"/>
-  <rect x="40" y="103" width="3" height="114" rx="1.5" fill="#e8c97a" opacity="0.7"/>
-  <text x="350" y="124" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14" font-weight="600" fill="#e6edf3" text-anchor="middle">Conversation Context</text>
-  <text x="350" y="142" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Active session state · message history · attached files · activated Skills</text>
+  <!-- Conversation Context band (solid) -->
+  <rect x="40" y="100" width="620" height="64" rx="8" fill="#2a2415"/>
+  <rect x="40" y="103" width="3" height="58" rx="1.5" fill="#e8c97a" opacity="0.7"/>
+  <text x="350" y="119" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Conversation Context</text>
+  <text x="350" y="134" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">Active session state · message history · attached files · activated Skills</text>
 
-  <line x1="80" y1="160" x2="620" y2="160" stroke="#5a4f30" stroke-width="0.5" opacity="0.6"/>
+  <!-- Conversation Context pills: blocks + domain-packs -->
+  <rect x="269" y="142" width="58" height="18" rx="9" fill="#3a311e" stroke="#5a4f30" stroke-width="0.5"/>
+  <text x="298" y="154.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#e8c97a" text-anchor="middle">blocks</text>
+  <rect x="339" y="142" width="92" height="18" rx="9" fill="#3a311e" stroke="#5a4f30" stroke-width="0.5"/>
+  <text x="385" y="154.5" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#e8c97a" text-anchor="middle">domain-packs</text>
 
-  <text x="350" y="180" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" font-weight="600" fill="#e8c97a" text-anchor="middle" letter-spacing="1.5">SUPPORTING SKILLS · ACTIVATE IN BACKGROUND</text>
-  <text x="350" y="201" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#a08f5a" text-anchor="middle">block-selection  ·  identity-blocks  ·  reasoning-blocks  ·  output-blocks  ·  5 domain packs</text>
+  <!-- Bridges sub-band (dashed, height 124) -->
+  <rect x="40" y="180" width="620" height="124" rx="8" fill="#ffffff" fill-opacity="0.03"/>
+  <rect x="40" y="180" width="620" height="124" rx="8" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="6 4"/>
 
-  <!-- Arrows down to bridge Skills -->
-  <line x1="240" y1="226" x2="240" y2="262" stroke="#e8c97a" stroke-width="1.2" opacity="0.65" marker-end="url(#arrow-champagne)"/>
-  <line x1="460" y1="226" x2="460" y2="262" stroke="#e8c97a" stroke-width="1.2" opacity="0.65" marker-end="url(#arrow-champagne)"/>
+  <text x="350" y="200" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" font-weight="700" fill="#e8c97a" text-anchor="middle" letter-spacing="1.5">↪ BRIDGES</text>
+  <text x="350" y="216" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">connect Projects and conversations across the chat-side ecosystem</text>
 
-  <!-- Bridge Skill: project-brief -->
-  <rect x="184" y="270" width="112" height="22" rx="11" fill="#3a311e" stroke="#5a4f30" stroke-width="0.8"/>
-  <text x="240" y="285" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" font-weight="600" fill="#e8c97a" text-anchor="middle">project-brief</text>
-  <text x="240" y="312" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#8b949e" text-anchor="middle">Cross-Project bridge</text>
-  <text x="240" y="328" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#6e7681" text-anchor="middle">Captures Project context for use elsewhere</text>
+  <line x1="80" y1="226" x2="620" y2="226" stroke="#ffffff" stroke-opacity="0.10" stroke-width="0.5"/>
 
-  <!-- Bridge Skill: session-handoff -->
-  <rect x="396" y="270" width="128" height="22" rx="11" fill="#3a311e" stroke="#5a4f30" stroke-width="0.8"/>
-  <text x="460" y="285" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" font-weight="600" fill="#e8c97a" text-anchor="middle">session-handoff</text>
-  <text x="460" y="312" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" fill="#8b949e" text-anchor="middle">Cross-Session continuity</text>
-  <text x="460" y="328" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="9.5" fill="#6e7681" text-anchor="middle">Preserves work state across conversations</text>
+  <!-- Bridges Row 1: project-brief (right edge at x=227) -->
+  <rect x="127" y="240" width="100" height="22" rx="11" fill="#3a311e" stroke="#5a4f30" stroke-width="0.8"/>
+  <text x="177" y="255" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" font-weight="600" fill="#e8c97a" text-anchor="middle">project-brief</text>
+  <line x1="237" y1="251" x2="285" y2="251" stroke="#e8c97a" stroke-opacity="0.5" stroke-width="0.5" shape-rendering="crispEdges"/>
+  <text x="295" y="255" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#c9d1d9" text-anchor="start">Cross-Project bridge → other Projects</text>
+
+  <!-- Bridges Row 2: session-handoff (right edge at x=227) -->
+  <rect x="117" y="270" width="110" height="22" rx="11" fill="#3a311e" stroke="#5a4f30" stroke-width="0.8"/>
+  <text x="172" y="285" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" font-weight="600" fill="#e8c97a" text-anchor="middle">session-handoff</text>
+  <line x1="237" y1="281" x2="285" y2="281" stroke="#e8c97a" stroke-opacity="0.5" stroke-width="0.5" shape-rendering="crispEdges"/>
+  <text x="295" y="285" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#c9d1d9" text-anchor="start">Cross-session continuity → other conversations</text>
+
+  <!-- Cross-Boundary sub-band (dashed, height 124) -->
+  <rect x="40" y="320" width="620" height="124" rx="8" fill="#ffffff" fill-opacity="0.03"/>
+  <rect x="40" y="320" width="620" height="124" rx="8" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="6 4"/>
+
+  <text x="350" y="340" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10" font-weight="700" fill="#d97580" text-anchor="middle" letter-spacing="1.5">↓ CROSS-BOUNDARY</text>
+  <text x="350" y="356" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#8b949e" text-anchor="middle">live in chat-Projects and prepare handoffs to Claude Code</text>
+
+  <line x1="80" y1="366" x2="620" y2="366" stroke="#ffffff" stroke-opacity="0.10" stroke-width="0.5"/>
+
+  <!-- Cross-Boundary Row 1: handoff-trigger-check (right edge at x=227) -->
+  <rect x="85" y="380" width="142" height="22" rx="11" fill="#3d1c20" stroke="#5c2f33" stroke-width="0.8"/>
+  <text x="156" y="395" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" font-weight="600" fill="#d97580" text-anchor="middle">handoff-trigger-check</text>
+  <line x1="237" y1="391" x2="285" y2="391" stroke="#d97580" stroke-opacity="0.5" stroke-width="0.5" shape-rendering="crispEdges"/>
+  <text x="295" y="395" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#c9d1d9" text-anchor="start">→ signals when a Project is ready to hand off to Claude Code</text>
+
+  <!-- Cross-Boundary Row 2: profile-builder (right edge at x=227) -->
+  <rect x="119" y="410" width="108" height="22" rx="11" fill="#3d1c20" stroke="#5c2f33" stroke-width="0.8"/>
+  <text x="173" y="425" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" font-weight="600" fill="#d97580" text-anchor="middle">profile-builder</text>
+  <line x1="237" y1="421" x2="285" y2="421" stroke="#d97580" stroke-opacity="0.5" stroke-width="0.5" shape-rendering="crispEdges"/>
+  <text x="295" y="425" font-family='-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#c9d1d9" text-anchor="start">→ builds configuration profiles consumed by mode-router</text>
 </svg>

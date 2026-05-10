@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/rootnode-logo-dark.svg" alt="root.node" width="280">
+  <img src="assets/rootnode-logo-dark.svg" alt="root.node" width="460">
 </div>
 
 <br>

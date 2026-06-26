@@ -25,6 +25,12 @@ Surface map (THE single place to edit if catalog surface assignments change):
 Full-build expectation: 22 cp-only + 3 cc-only + (2 dual x 2) = 29 artifacts
                         = 24 '-cp' (flat) + 5 '-cc' (wrapper).
 
+On a full build it also writes dist/rootnode-catalog-<VERSION>.zip: a single
+bundle of all 29 zips. Upload it to the catalog umbrella release so users can
+grab the whole catalog in one download. (Per-Skill releases still carry the
+individual zips; the bundle is the "give me everything" path.) The bundle is
+written only on a full build, never on a specific-skill subset.
+
 Usage:
     python build_release_artifacts.py             # all skills (asserts 29)
     python build_release_artifacts.py skill ...   # specific skills (by suffix or full name)
@@ -47,6 +53,10 @@ DUAL = {"skill-builder", "cc-design"}
 EXPECTED_TOTAL = 29
 EXPECTED_CP = 24
 EXPECTED_CC = 5
+
+# Names the all-Skills bundle written on full builds (uploaded to the
+# catalog-<ver> umbrella release). Bump this per catalog release.
+CATALOG_VERSION = "v3.1"
 
 # --- Exclusions (ported from package_skill.py) ---------------------------------
 EXCLUDE_DIRS = {"__pycache__", "node_modules"}
@@ -91,6 +101,18 @@ def write_zip(skill_path: Path, surface: str) -> Path:
     return zip_path
 
 
+def write_bundle(zip_paths: list[Path]) -> Path:
+    """Bundle every per-Skill zip into one archive for the catalog release, so a
+    user can download the whole catalog in a single file. Each inner zip sits at
+    the bundle root and remains the installable unit (unzip the bundle -> 29 zips
+    -> upload/install the ones you want)."""
+    bundle = DIST_DIR / f"rootnode-catalog-{CATALOG_VERSION}.zip"
+    with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as zf:
+        for z in sorted(zip_paths):
+            zf.write(z, z.name)
+    return bundle
+
+
 def find_skills(specific):
     skills = sorted(
         p for p in REPO_ROOT.iterdir()
@@ -118,11 +140,13 @@ def main():
 
     DIST_DIR.mkdir(exist_ok=True)
     cp_n = cc_n = 0
+    built: list[Path] = []
     print(f"Building release artifacts for {len(skills)} skill(s) -> dist/\n")
     for skill in skills:
         short = skill.name[len(SKILL_PREFIX):]
         for surface in surfaces_for(short):
             z = write_zip(skill, surface)
+            built.append(z)
             kb = z.stat().st_size / 1024
             shape = "flat" if surface == "cp" else "wrapper"
             print(f"  [OK] {z.name}  ({shape}, {kb:.1f} KB)")
@@ -146,6 +170,10 @@ def main():
             print("  FAIL (full build): " + "; ".join(problems)
                   + ". Check the surface map / catalog count.")
             sys.exit(2)
+        bundle = write_bundle(built)
+        mb = bundle.stat().st_size / (1024 * 1024)
+        print(f"\nBundle: {bundle.name}  ({len(built)} zips, {mb:.2f} MB)"
+              f"  -> upload to the catalog-{CATALOG_VERSION} release")
     print("Done.")
 
 

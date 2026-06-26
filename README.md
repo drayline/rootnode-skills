@@ -18,9 +18,9 @@
 
 These Skills install into two surfaces: **chat-Projects** (Claude.ai web app or Claude desktop app) and **Claude Code** (the execution surface). Most Skills are chat-Project-only. Three are Claude Code-only. Two operate in both.
 
-**For chat-Projects.** Go to [Releases](https://github.com/drayline/rootnode-skills/releases), download the `-cp.zip` files for the Skills you want, then upload them in **Settings → Capabilities → Skills**. No unzipping required. Skills install once and become available across every Project in your Claude account.
+**For chat-Projects.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest) — the catalog umbrella, with every Skill indexed by category. Download the individual `-cp.zip` files for the Skills you want (no unzipping required), or grab the all-Skills bundle `rootnode-catalog-v3.1.zip` and unzip it once. Upload the `-cp.zip` files in **Settings → Capabilities → Skills**. Skills install once and become available across every Project in your Claude account.
 
-**For Claude Code.** Go to [Releases](https://github.com/drayline/rootnode-skills/releases), download the `-cc.zip` files for the Skills you want, then extract them into `~/.claude/skills/` (user-level — available across every repo) or `.claude/skills/` (per-repo). Each archive expands to a folder matching the Skill name. Skills auto-activate from natural language prompts inside Claude Code sessions.
+**For Claude Code.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest), download the `-cc.zip` files for the Skills you want (or the all-Skills bundle `rootnode-catalog-v3.1.zip`, unzipped once), then extract the `-cc.zip` archives into `~/.claude/skills/` (user-level — available across every repo) or `.claude/skills/` (per-repo). Each `-cc.zip` expands to a folder matching the Skill name. Skills auto-activate from natural language prompts inside Claude Code sessions.
 
 The two dual-surface Skills (`rootnode-skill-builder` and `rootnode-cc-design`) publish both `-cp.zip` and `-cc.zip` variants — download the one matching your install target.
 

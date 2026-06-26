@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.1"
+  version: "1.1.1"
   original-source: "AUDIT_FRAMEWORK.md"
 ---
 
@@ -34,7 +34,7 @@ Never assert a pattern without citing the specific component that exhibits it. F
 
 ## Reasoning discipline
 
-Before declaring an anti-pattern present, walk through the evidence explicitly. State the observations (specific file contents, structural features, duplication instances, layer assignments), name the anti-pattern they match against detection criteria, then explain the severity and impact. Do not compress this sequence into a summary diagnosis.
+A defensible diagnosis shows its evidence. Observe the specific file contents, structural features, duplication instances, and layer assignments; name the anti-pattern they match against the detection criteria; then explain the severity and impact. A summary diagnosis without the observation-pattern-impact chain is harder to act on and harder to dispute — the hard rule (evidence-first, above) keeps the assertion valid; the walk-through keeps it actionable.
 
 If the diagnosis scope is unclear (which files are in scope? which Project layers? all seven patterns or a subset?), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 

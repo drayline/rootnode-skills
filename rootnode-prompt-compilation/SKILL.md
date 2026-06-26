@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.2"
+  version: "1.2.1"
   original-source: "PROMPT_COMPILER.md, MASTER_FRAMEWORK.md"
 ---
 
@@ -53,6 +53,8 @@ This Skill performs multi-stage construction across the four-stage pipeline (Par
 On non-Opus models (Sonnet 4.6, Haiku 4.5 with extended thinking enabled), expect compressed selection logic, less specific block recommendations, and reduced cross-layer validation. The Skill will execute and produce correctly-shaped output; users should weight the resulting prompts accordingly. Haiku without extended thinking is not a supported deployment target for this Skill.
 
 ## The Four-Stage Workflow
+
+Produce a complete, defensible prompt — identity, objective, context, reasoning, and output structure selected and assembled so the prompt yields the user's intended deliverable on first execution, with defaults flagged in a delivery note. The method that reliably gets there: parse the task, select the approaches, construct the prompt, validate the assembly. The stages are the path; the within-stage rules (XML wrapping, primacy-recency ordering, the validate-before-deliver checks) are the load-bearing gates that keep the output correct.
 
 ### Stage 1 — Parse
 

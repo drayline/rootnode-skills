@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.2"
+  version: "1.2.1"
   original-source: "NEW"
 ---
 
@@ -49,7 +49,7 @@ When producing any updated file — Custom Instructions, knowledge files, or any
 
 ## Reasoning discipline
 
-Before prescribing a Memory optimization, walk through the evidence explicitly. State the observations (specific Memory entries, content types, redundancies, staleness markers), name the placement pattern or principle they match (Memory vs. Custom Instructions vs. knowledge file vs. User Preferences), then apply the rebalancing prescription. Do not compress this sequence into a summary recommendation.
+A defensible prescription shows its grounding. Observe the specific Memory entries, content types, redundancies, and staleness markers; name the placement pattern or principle they match against (Memory vs. Custom Instructions vs. knowledge file vs. User Preferences); then apply the rebalancing prescription. A compressed summary recommendation is harder for the user to interrogate and easier to misroute — the explicit walk-through is what makes Stage 4 confirmation meaningful. The user-confirmation gate above stays load-bearing regardless.
 
 If the optimization scope is unclear (Memory-only? full context-layer rebalance? Codification-focused?), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 
@@ -86,6 +86,10 @@ Misalignment in any direction — orientation buried in a knowledge file, refere
 - User wants to edit a single Memory entry without broader optimization context → assist directly, no skill needed
 
 ---
+
+## The Optimization Pipeline
+
+Produce a Memory-and-context-layer prescription that is grounded in this project's actual mission (so it improves outcomes, not just appearances), evidence-cited (so the user can audit it), correctly layered (right fact, right layer, no duplication), and confirmation-gated before any Memory edit executes. The method that reliably gets there: comprehend the project, audit each layer, prescribe specific actions, deliver with explicit confirmation. The user-confirmation rule (above) and complete-file-output rule (above) are hard gates inside the pipeline.
 
 ## Stage 1: Project Comprehension
 

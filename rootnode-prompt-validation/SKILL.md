@@ -17,7 +17,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.1"
+  version: "1.1.1"
   original-source: "PROMPT_TESTING_GUIDE.md"
 ---
 
@@ -29,7 +29,7 @@ Evaluate whether a prompt is well-constructed, diagnose why it underperforms, an
 
 ## Reasoning discipline
 
-Before scoring any dimension, walk through the evidence explicitly. State the observations (specific prompt features, instruction clarity, structural elements, behavioral countermeasures), name the pattern or principle they match against the rubric anchors, then apply the 1-5 score. Do not compress this sequence into a summary score.
+A defensible score shows its work. Observe the specific prompt features — instruction clarity, structural elements, behavioral countermeasures — name the pattern or principle they match against the rubric anchors, then apply the 1-5 score. Compressing this into a summary score blurs the rubric and erodes auditability; the explicit walk-through is what makes the score interrogable. The hard rule (evidence-first scoring) lives below in Step 1 and stays load-bearing.
 
 If the evaluation scope is unclear (Scorecard only? Output Evaluation Rubric too? scoring or rewrite?), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 

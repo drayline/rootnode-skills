@@ -17,7 +17,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "2.0"
+  version: "2.0.1"
   original-source: "OPTIMIZATION_REFERENCE.md, CLAUDE_OPTIMIZATION_NOTES.md"
 ---
 
@@ -25,7 +25,7 @@ metadata:
 
 > **Calibration:** Tier 2, Opus-primary. See repository README for model compatibility.
 
-**Version 2.0 — 10-tendency taxonomy, Opus 4.7 calibration.**
+**Version 2.0 — 10-tendency taxonomy, Opus 4.8 calibration.**
 
 ## Purpose
 
@@ -35,7 +35,7 @@ This Skill does not evaluate a prompt's overall quality — for that, use `rootn
 
 ## Reasoning discipline
 
-Before recommending a countermeasure, walk through the evidence explicitly. State the observed symptom, identify which tendency it most closely matches, and only then apply the countermeasure template. Do not compress this sequence into a direct recommendation.
+A defensible countermeasure recommendation shows its work. Observe the symptom in the user's specific language, identify which tendency it most closely matches against the catalog below, then apply the countermeasure template — compressing this into a direct recommendation makes the diagnosis harder to interrogate and easier to mis-route between adjacent tendencies (1a vs. 1b, 9 vs. 10).
 
 If the deployment context is unclear (is this a chat interface prompt? a Project CI? a Claude Code system prompt? an API integration?), confirm with the user before proceeding. Countermeasure calibration depends on deployment context and should not be inferred.
 
@@ -409,7 +409,7 @@ When in doubt, apply the universal countermeasures (1a, 4, 8, 10) and confirm de
 
 ## Self-application
 
-This Skill, when running on Opus 4.7 Adaptive in a chat interface, is itself subject to tendencies 1b (persistent-preference dilution) and 10 (self-referential fabrication). When using this Skill, if Claude claims to have applied a countermeasure or completed a diagnosis, verify the output explicitly rather than accepting the claim. The Skill's own output is subject to the tendencies it diagnoses.
+This Skill, when running on Opus 4.8 Adaptive in a chat interface, is itself subject to tendencies 1b (persistent-preference dilution) and 10 (self-referential fabrication). When using this Skill, if Claude claims to have applied a countermeasure or completed a diagnosis, verify the output explicitly rather than accepting the claim. The Skill's own output is subject to the tendencies it diagnoses.
 
 ---
 

@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "1.0.1"
   original-source: "PROJECT_OPTIMIZER.md, AUDIT_FRAMEWORK.md, OPTIMIZATION_REFERENCE.md"
 ---
 
@@ -79,7 +79,7 @@ State explicitly what could not be evaluated due to missing information.
 
 ## The Full Stack Audit Pipeline
 
-The Full Stack Audit executes four components in sequence, then merges all findings into a unified action plan.
+Produce a comprehensive evaluation that identifies what's structurally wrong across all nine layers of the user's Claude environment and prescribes a single prioritized action plan they can work through sequentially — every finding traceable to quoted content, every cross-layer claim naming both conflicting elements. The method that reliably gets there: run the Project audit, the Global audit, the cross-layer alignment check, and the evolutionary recommendations engine, then merge all findings into the unified action plan. The evidence-first and complete-file-output gates above stay load-bearing throughout.
 
 ### Component 1: Project Audit
 

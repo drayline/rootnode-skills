@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "1.0.1"
   original-source: "Seed-project methodology synthesis"
 ---
 
@@ -41,6 +41,8 @@ Always output the complete brief as a single markdown document. Never partial se
 ---
 
 ## Generate Brief
+
+Produce a portable, structured brief that captures the source Project's identity, architecture, current state, ecosystem position, and key decisions — every fact traceable to an observable source, every gap explicitly marked, total token budget 2,000–6,000. The method that reliably gets there: inventory the project's layers, assess its ecosystem position, assess its health, assemble against the template, then validate-and-deliver. The extraction-not-fabrication and complete-file-output rules above are hard gates inside this pipeline.
 
 When the user asks to create a brief for the current Project:
 

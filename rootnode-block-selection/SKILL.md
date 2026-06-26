@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.1"
+  version: "1.1.1"
   original-source: "PROMPT_COMPILER.md, BLOCK_LIBRARY_IDENTITY.md, BLOCK_LIBRARY_REASONING.md, BLOCK_LIBRARY_OUTPUT.md"
 ---
 
@@ -51,7 +51,7 @@ This Skill provides selection logic and approach summaries. For the full approac
 
 ## Reasoning discipline
 
-Before recommending an approach, walk through the task characteristics explicitly. State the observations (task type, depth required, audience, output shape, constraints), name the approach pattern they match against the decision tree, then apply the selection. Do not compress this sequence into a summary recommendation.
+A defensible recommendation shows its work. Observe the task characteristics — task type, depth required, audience, output shape, constraints — then name the approach pattern they match against the decision tree, then apply the selection. Compressing the sequence into a summary recommendation blurs edge cases; the explicit walk-through produces selections the user (and a later reviewer) can interrogate.
 
 If the task scope is unclear (single-prompt selection? multi-block combination? architecture decision?), confirm scope with the user before proceeding. Do not proceed on inferred assumptions.
 

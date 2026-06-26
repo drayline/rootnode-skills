@@ -2,7 +2,7 @@
 
 Additional variants and placement patterns for the ten tendencies documented in SKILL.md. Each section below supplements the base countermeasure with identity-level embeddings, output-standards integrations, stronger variants for severe cases, and combination guidance when multiple tendencies co-occur.
 
-Updated for Opus 4.7 calibration. Countermeasures for tendencies that 4.7 calibration improvements have reduced (#1a, #2 on factual, #3, #5, #6, #7a) are lighter-touch than their pre-4.7 versions. Countermeasures for new or newly-emerged tendencies (#1b, #7b, #9, #10) are explicit enough to compensate for Adaptive effort weighting.
+Updated for Opus 4.8 calibration. Countermeasures for tendencies that 4.7 calibration improvements reduced (#1a, #2 on factual, #3, #5, #6, #7a) — and that 4.8 carries forward — are lighter-touch than their pre-4.7 versions. Countermeasures for tendencies new or newly-emerged in 4.7 (#1b, #7b, #9, #10) remain explicit enough to compensate for Adaptive effort weighting and persist on 4.8.
 
 ---
 

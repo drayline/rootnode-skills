@@ -1,8 +1,22 @@
 # root_CC_ENVIRONMENT_GUIDE.md
 
-The methodology for designing Claude Code (CC) environments — the autonomous execution surface where Claude operates against repository-aware context and version-controlled artifacts. Surface-specific application of the architectural principles in `root_AGENT_ENVIRONMENT_ARCHITECTURE.md`. Consult this KF when designing a new CC deployment, evolving an existing one, auditing a deployment for structural issues, or producing CLAUDE.md and supporting artifacts for a delivery project.
+The methodology for designing Claude Code (CC) environments — the execution surface where Claude operates against repository-aware context and version-controlled artifacts. Surface-specific application of the architectural principles in `root_AGENT_ENVIRONMENT_ARCHITECTURE.md`. Consult this KF when designing a new CC deployment, evolving an existing one, auditing a deployment for structural issues, or producing CLAUDE.md and supporting artifacts for a delivery project.
 
 This KF assumes familiarity with the surface-invariant principles in `root_AGENT_ENVIRONMENT_ARCHITECTURE.md` (placement discipline, decomposition by mechanism, source authority, evidence grounding, lean over comprehensive, files-as-context, halt-and-escalate, behavioral countermeasures). Those principles are not repeated here; this KF applies them to CC.
+
+---
+
+## Terminology
+
+CC is referred to throughout this KF as the **execution surface** — distinct from the chat-side **conversation surface** (Claude Projects). The execution-surface framing is deliberate: CC sessions span a continuum from highly interactive (operator confirms each step) to fully autonomous (agent runs unattended); the architecture should not bake in a runtime mode that may not match the deployment.
+
+**Avoid** as architectural labels: "autonomous execution surface," "autonomous CC," "agent-only context." These framings imply unattended operation as the default; many production CC deployments are operator-supervised by design. Architecture descriptions that imply autonomy create false expectations and constrain valid deployment patterns.
+
+**Use:** "execution surface" for CC. "Conversation surface" for chat-side Projects (CP). When the runtime mode matters (autonomous vs. supervised, scheduled vs. on-demand), specify explicitly in context — do not bake the assumption into the architectural label. Descriptive uses of "autonomous" remain valid where the context genuinely is autonomous (e.g., "autonomous iteration scope," "autonomous engine evolution," "long-running autonomous sessions"); the discipline applies to the surface label specifically, not to every appearance of the word.
+
+**Propagation.** This terminology is canonical for CC architecture descriptions. Downstream uses — references in `root_AGENT_ENVIRONMENT_ARCHITECTURE.md` to CC, Distribution project external materials (website copy, README, marketing language), blog posts and product documentation — should adopt the same terminology when describing CC at the architectural layer. The runtime-mode-neutral framing also matches the §8 Routines section's positioning (scheduled CC deployment surface), where the same architecture supports both unattended and operator-reviewed modes.
+
+`[generalizable; grounded in Block 4 from prior CV — operator's reasoning: CC sessions span manual to autonomous; architecture should not bake in runtime mode]`
 
 ---
 
@@ -142,7 +156,9 @@ These five sections must be present, regardless of deployment size or maturity. 
 
 **R4 — Halt-and-escalate triggers.** Conditions under which the agent must stop and surface to a human. Examples that apply broadly: authority-matrix tier boundary approach, schema or contract change between layers, test count drop, regression detected, ambiguity that cannot be resolved from CLAUDE.md alone. Specific triggers are deployment-specific. **Non-negotiable.** Without halt triggers, the failure mode is silent corruption — agents iterate themselves into a worse state without surfacing the change. For guarantees that absolutely cannot be missed, back the trigger with a hook — CLAUDE.md text alone is preference, not enforcement.
 
-**R5 — Pre-flight checklist.** What every agent must do before making changes. At minimum: read CLAUDE.md authority matrix, read change_log tail, run the test backstop, verify the orchestrator/build runs clean. Even on day 1 of a new deployment with no change_log yet, the pre-flight names the steps the agent will perform once those artifacts exist.
+**R5 — Pre-flight checklist.** What every agent must do before making changes. At minimum: enumerate available Skills, read CLAUDE.md authority matrix, read change_log tail, run the test backstop, verify the orchestrator/build runs clean. Even on day 1 of a new deployment with no change_log yet, the pre-flight names the steps the agent will perform once those artifacts exist.
+
+**Skill-availability enumeration.** Before reading other files or beginning work, the CC agent enumerates available Skills from the system reminder and confirms expected runtime tooling is loaded. If the agent expects to compose with `rootnode-critic-gate`, `rootnode-mode-router`, or another runtime Skill, verify it appears in the available-skills list. If a Skill is unexpectedly missing or unexpectedly present, halt and surface to operator before proceeding. This applies to all CC prompts regardless of whether composition is planned — preventive enumeration catches silent assumption errors at session start rather than mid-execution. `[generalizable; grounded in Phase 31d execution 2026-05-06 — prior CC agent inferred a runtime Skill was unavailable from repo source presence rather than checking its loaded tool list; R2 fallback absorbed the failure but masked the cause]`
 
 ### 2.2 Warranted sections (add when the inclusion test passes)
 
@@ -289,6 +305,22 @@ This is a surface-invariant principle (see `root_AGENT_ENVIRONMENT_ARCHITECTURE.
 - Compaction safety: project-root CLAUDE.md re-injects after `/compact`; nested files reload on demand. Conversation-only instructions are lost.
 - The named anti-pattern: **transcript dump** — pasting chat history into Claude Code as a prompt. Always restructure into a spec file first.
 
+### 5.6 Continuation-phrase ambiguity gate
+
+When operator response at a halt point (T3 escalation, end-of-phase checkpoint, end-of-step verification) could be parsed in multiple ways — for example, "Create a merge commit" could mean "I created the merge commit, proceed" or "you create the merge commit via gh pr merge" — the agent asks one targeted clarifying question rather than inferring continuation. Pattern: identify the ambiguity explicitly, enumerate the possible interpretations, ask which applies, halt until disambiguated. The cost of one extra round-trip is negligible compared to the cost of inferring wrong (premature scope-expanding action, or stalling when action was authorized).
+
+The discipline applies whether or not a session prompt specifies an exact continuation phrase. When a session prompt does specify exact phrases, ambiguity is any operator response that doesn't match the literal phrase or a clear semantic equivalent. When no exact phrase is specified, ambiguity is any response that admits two or more reasonable interpretations.
+
+`[generalizable; grounded in Phase 31d merge session 2026-05-07 — agent's halt-on-ambiguity correctly forced explicit operator authorization for `gh pr merge` scope expansion that was not in the original prompt's in-scope list]`
+
+### 5.7 Forward-state-aware artifact authoring
+
+When a CC agent authors an artifact (PR description, release notes, audit document, halt summary) that will itself be committed in a subsequent step, the artifact's references to repo state must anticipate the post-commit state, not the pre-authoring state. Common cases: (1) PR description authored before final audit-artifact commit lands needs to state the post-commit count, not the pre-commit count; (2) release notes authored before tag push needs to reference the tag URL pattern, not assume the tag already exists; (3) audit summaries authored mid-session need to reference SHAs that will exist by completion, not those existing at authoring time.
+
+The discipline: when authoring forward references, prefix with explicit temporal markers — "post-merge:" or "this PR will:" rather than declarative present tense ("is on main"). This prevents drift between authoring time and reading time. Artifacts read mid-flow should not assume completed state that hasn't happened yet; explicit temporal markers make the difference between current-state and expected-state visible.
+
+`[generalizable; grounded in Phase 31d merge session 2026-05-07 — author agent correctly anticipated the audit-artifact commit would change main..HEAD count from 10 → 11 and updated PR description proactively]`
+
 ---
 
 ## 6. Hooks-vs-prompts boundary
@@ -345,7 +377,47 @@ Design with the round-trip in mind. A deployment is one node in a workflow; the 
 
 ---
 
-## 8. Runtime tooling for CC
+## 8. Routines: scheduled CC deployment surface
+
+Claude Code Routines (released April 14, 2026) are scheduled, cloud-hosted CC sessions that run without an open interactive session. Each Routine is a saved CC configuration — prompt + repos + connectors — executed on a trigger (schedule, API call, or GitHub event). Routines are a deployment surface, not a separate runtime: every principle in §1–7 applies, but the absence of human-in-the-loop changes which patterns are safe and which become silent failure shapes. `[Anthropic primary docs]`
+
+### 8.1 How Routines differ from interactive CC sessions
+
+A Routine session has no inheritance from the user's interactive workspace: fresh state, fresh context window, only the configured connectors and the cloned repository's Skills available. Skills committed to the repo's `.claude/skills/` directory and account-level Skills configured on the Anthropic account are accessible; whether user-level Skills installed locally on a developer's machine propagate to cloud Routines is not documented and requires testing per deployment.
+
+The absence of human-in-the-loop is the more consequential difference. There is no checkpoint between "agent decides to mutate" and "mutation lands." Every safety affordance that interactive sessions get from human pauses — catching scope drift in real time, halting on ambiguous instructions, asking clarifying questions — must be designed into the Routine itself before the schedule fires.
+
+Routines on the cloud surface have a one-hour minimum cadence; sub-hourly cycles use `/loop` in an open session or local Desktop Tasks. Each Routine run draws against the account's usage limits the same way an interactive session does — daily cadence × multiple Routines compounds, and a single Routine running daily for a year is over a thousand sessions of usage cost.
+
+### 8.2 Scope authorization and halt discipline for scheduled agents
+
+Default scope for a Routine is read-only. Mutation authority is opt-in, not default, and must be specified explicitly in the Routine prompt. The reason is mechanical: a Routine that "accidentally" opens a PR or commits a change because its prompt was ambiguous about scope is the exact silent-failure shape that an unattended session produces. The scope-authorization principle from §4 applies but with stricter defaults — interactive sessions can rely on the human catching scope drift in real time; Routines cannot.
+
+Halt-and-escalate triggers in Routines are exhaustive lists of forbidden tool calls and operations, not abstract conditions. "Halt if scope expands" is preference; "Halt if you call Edit, Write, NotebookEdit, git commit, git push, gh pr create, gh issue create" is enforcement-language at the prompt level. For guarantees that absolutely cannot be missed, the structural backstop is hooks committed to the repo's `.claude/settings.json` — not the Routine prompt. Connectors with read-only scopes (e.g., a GitHub connector with read-only repo access) are the third defense layer; configure connector scopes to match the Routine's intended authority.
+
+### 8.3 Observation-before-action deployment phase
+
+New Routines deploy in observation-only mode for a meaningful window before any action authority is granted. The window's purpose is calibration: the user reads outputs, validates that the Routine surfaces the right signal, and develops the action discipline that mutation authority later requires. Skipping the calibration window and deploying mutation-capable Routines on day one is the dominant failure mode for first-time Routine users.
+
+Action authority, when granted, is narrow and explicit — "open draft PR with [specific change pattern]" yes, "merge to main" never; "comment on issue" yes, "close issue" never. Each action verb is enumerated. Expansion of authority happens only after the narrower scope has demonstrated reliable behavior over a meaningful window.
+
+### 8.4 Routine prompt design
+
+A Routine prompt is functionally a compressed CLAUDE.md tuned for a single repeated task. The R1–R5 sections from §2.1 still apply (mission, authority matrix, scope authorization, halt triggers, pre-flight checklist) but compressed because the prompt also carries the task specification. For single-purpose Routines (the common case), the prompt structure collapses to: identity/mission, scope authorization (read-only by default), halt triggers (exhaustive), task steps, output format spec, length cap.
+
+Length discipline matters more in Routines than in interactive sessions because the same prompt runs hundreds or thousands of times — a vague instruction that costs 100 extra tokens per run becomes meaningful at scale. Specify outputs as fixed structural formats (sections, ordered lists, length caps) so the consumer of the report — the user, or a downstream Routine that ingests it — reads predictable shape. Sonnet-tier models handle pattern-matching and integrity-check Routines; Opus is reserved for analytical Routines where multi-lens audit (`root_AGENT_ENVIRONMENT_ARCHITECTURE.md` §4.13) or deep reasoning carries the cost premium.
+
+### 8.5 Composition: daily-triad and weekly-audit patterns
+
+The proposed deployment pattern for scheduled agents on a single repo is a daily triad plus a weekly audit. The triad covers three orthogonal angles on the same data: what changed (commit interpretation), what's queued (release-readiness or merge-readiness diff), what's drifting (structural integrity scan). Three angles is the design target — fewer loses cross-validation between routines; more produces report fatigue and unfocused signal. `[proposal, not validated; pattern designed during rootnode-skills audit infrastructure work 2026-05-07]`
+
+The weekly comprehensive audit produces a structured findings report that REMEDIATE-mode CC consumes (`rootnode-cc-design` REMEDIATE) to execute remediation as a separate interactive session. The daily triad then verifies the executed changes on the next run. This closes the loop: weekly audit → remediation execution → daily verification → cycle. The pattern mirrors §3 verification topology at a different cadence — the weekly audit plays Critic, the remediation session plays Implementor, the daily triad plays Verifier.
+
+The pattern composes with the rest of the methodology — `rootnode-repo-hygiene` covers CC-environment audits; `rootnode-cc-design` REMEDIATE consumes findings; the daily triad plus weekly audit becomes the institutionalized version of "did the agent run cause regressions." When designing CC environments that include scheduled agents, treat the triad+audit as the default starting topology and remove components only when scope warrants. Validate the pattern through use; revisit guidance after the first 2–4 weeks of production runs.
+
+---
+
+## 9. Runtime tooling for CC
 
 The CC-side runtime Skills implement methodology patterns from this KF. They are profile-driven and orchestrator-agnostic — they work with Claude Code, n8n, custom orchestrators, or hand-invocation.
 
@@ -362,7 +434,7 @@ The CC-side runtime Skills implement methodology patterns from this KF. They are
 
 ---
 
-## 9. Common CC anti-patterns reference
+## 10. Common CC anti-patterns reference
 
 The full unified catalog with surface tags, signatures, causes, and fixes lives in `root_AGENT_ANTI_PATTERNS.md`. Most-cited CC-side patterns:
 
@@ -385,7 +457,7 @@ When auditing a deployment, scan for these patterns explicitly. The `rootnode-re
 
 ---
 
-## 10. Where to go next
+## 11. Where to go next
 
 For the unified architectural principle layer that governs both CP and CC: `root_AGENT_ENVIRONMENT_ARCHITECTURE.md`.
 

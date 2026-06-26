@@ -66,6 +66,8 @@ Three gates run before any Skill build work begins. Each gate has a pass conditi
 
 **Override mechanism.** A user can override Gate 2 with explicit reasoning ("I want this built despite thin warrant because [...]"). The override is captured in the promotion provenance audit artifact (§5). Future audits can see what was a warrant pass vs. an override.
 
+**Evidence discipline on classification — apply to both inclusions AND exclusions.** When a Gate 2 warrant table classifies content as included vs. excluded (e.g., "include cc-design in CP build" vs. "exclude critic-gate from CP build"), the evidence-grounding requirement applies to BOTH categories, not only the inclusions. A common failure mode is verifying borderline inclusions thoroughly (e.g., checking handoff-trigger-check's frontmatter to confirm CP-side intent) while taking exclusions at face value (assuming CC-only without checking the Skill's own positioning). The asymmetry produces incorrect classifications when an excluded item is actually dual-surface. Pattern: for every classification decision in the warrant table, cite frontmatter / SKILL.md / changelog evidence regardless of inclusion or exclusion direction. If the evidence supports the opposite classification, surface it before locking the decision. `[generalizable; grounded in Phase 31d cc-design reclassification 2026-05-07 — initially proposed as CC-only based on naming, reclassified as dual-surface (CP-native DESIGN/EVOLVE/RESEARCH/TEMPLATE + CC-specific REMEDIATE) after frontmatter check]`
+
 ### 2.3 Gate 3 — Ecosystem fit
 
 **The question.** Where does this Skill belong in the rootnode runtime tooling map, and does it duplicate existing capability?
@@ -95,6 +97,10 @@ After the build pipeline produces SKILL.md and references, the Skill is scored a
 **Pass evidence.** Cite character counts, line counts, file structure listing, frontmatter parse result.
 
 **Common catches.** Description over budget after YAML parse (block scalar expansion); body over 500 lines (move detail to references/); reserved-word collision in name; folder/name mismatch.
+
+**Rootnode catalog extension.** All Skills shipped under the `rootnode-` namespace must include tier-marker language in the SKILL.md body declaring model compatibility (e.g., "Opus recommended; non-Opus models may produce less complete output."). The marker signals to consumers which tier the Skill is calibrated for and sets graceful-degradation expectations. This check is rootnode-internal — not part of the Agent Skills spec — but is enforced at PR review for any new Skill or major version bump in the catalog. Common catch: CC-only runtime Skills (critic-gate, mode-router, repo-hygiene) shipped without tier-marker language because the calibration scope decision focused on chat-side Project Skills first; corrected during catalog audit.
+
+`[rootnode-specific; grounded in Phase 32 expansion catalog audit 2026-05-09 — 3 CC-only Skills missing tier-marker language]`
 
 ### 3.2 D2 — Activation precision
 
@@ -243,7 +249,7 @@ Three artifacts are produced during a Skill build event. Each documents a specif
 
 **Mandatory rule.** Always produced. Placement decisions are durable record even when nothing surfaces as a catch — they document which differentiation axes the user evaluated and which adjacent Skills were checked. Future Skills built into the same ecosystem read the prior placement notes to understand the differentiation landscape.
 
-**Content.** CP/CC surface placement; composition lineage (Producer→Consumer chains, lateral composition with critic-gate or mode-router, downstream composition deferred to v2.x); duplication audit table (each adjacent Skill, the differentiation axis); ship sequencing if applicable; the suggested entry for the runtime tooling catalog in `root_AGENT_ENVIRONMENT_ARCHITECTURE.md §6` (the Skill build does not auto-edit canonical KFs — methodology updates remain human-reviewed; the placement note surfaces the recommended entry for human review).
+**Content.** CP/CC surface placement; composition lineage (Producer→Consumer chains, lateral composition with critic-gate or mode-router, downstream composition documented as a roadmap item); duplication audit table (each adjacent Skill, the differentiation axis); ship sequencing if applicable; the suggested entry for the runtime tooling catalog in `root_AGENT_ENVIRONMENT_ARCHITECTURE.md §6` (the Skill build does not auto-edit canonical KFs — methodology updates remain human-reviewed; the placement note surfaces the recommended entry for human review).
 
 **Filing destination.** `Projects/{CODE}/research/` (or per-project equivalent). Filed alongside the deployable zip but separate from it.
 
@@ -287,7 +293,7 @@ The §4.1–4.3 filing destinations are not advisory. Audit artifacts MUST be fi
 
 **Closeout obligation.** The build CV's closeout protocol verifies filing happened. If a build CV closes without artifact filing, the next session's audit cannot reconstruct provenance. The Phase 31c audit found this gap directly: 5 post-discipline Skills had artifacts existing somewhere (in operator memory, scattered downloads, undocumented locations) but not filed at the canonical destination. The audit could not verify them; the operator was not previously informed retention was a requirement.
 
-**Why mandatory and not advisory.** The artifacts are the durable build provenance. Without them, future audits and v2.x builds cannot trace what was decided and why, what is preserved verbatim from a predecessor, what evolves and on what authority. The build can produce excellent runtime artifacts (zip) and still leave an unauditable methodology trail if the audit artifacts aren't filed. The Phase 31c experience proved this is a real failure mode, not theoretical.
+**Why mandatory and not advisory.** The artifacts are the durable build provenance. Without them, future audits and builds cannot trace what was decided and why, what is preserved verbatim from a predecessor, what evolves and on what authority. The build can produce excellent runtime artifacts (zip) and still leave an unauditable methodology trail if the audit artifacts aren't filed. The Phase 31c experience proved this is a real failure mode, not theoretical.
 
 **What the build's closeout looks like under this discipline.** The build CV's final action is artifact filing. Specifically: (1) zip is delivered to operator; (2) all three audit artifacts (or the conditional ones produced) are delivered to operator with explicit "file these at `Projects/{CODE}/research/`" instruction; (3) operator confirms filing or explicitly defers (deferral becomes a build-CV open item that future sessions track, not a forgotten obligation). The build is not "complete" until artifacts are at their filing destination.
 
@@ -313,6 +319,20 @@ To make audit-time provenance discrimination unambiguous, post-discipline Skills
 **Why heuristic discrimination by version field failed.** The Phase 31c audit relied on `metadata.version: "2.0"+` OR `metadata.predecessor:` as a provenance proxy. This produced misclassifications in both directions: high-version-number Skills that predate the discipline (false positives), and first-build-v1.0.x Skills built under the discipline with no predecessor (false negatives). Version numbers are per-Skill convention; they don't encode discipline state. The explicit marker corrects this.
 
 **Retroactive application.** Skills built post-Phase 31a where the marker was not yet emitted are eligible for retroactive marker addition. The Phase 31d remediation cycle adds `metadata.discipline_post: phase-30` to the 7 confirmed post-Phase-30 Skills (cc-design v2, repo-hygiene v1, critic-gate, mode-router, handoff-trigger-check, profile-builder, skill-builder v2). Pre-discipline Skills do not receive the marker — their absence of it is the correct signal.
+
+### 4.7 Two zip-packaging formats — wrapper vs. flat
+
+Two zip-packaging formats exist for two distinct purposes. They are not interchangeable; using the wrong format for a given consumer produces install failures or confused tooling.
+
+**Wrapper format** (`{skill-name}/SKILL.md` inside zip). Produced by `package_zip.py` — the in-Skill packaging utility ported into rootnode-skill-builder v3.0's tooling layer. Structure: `{skill-name}/SKILL.md` + `{skill-name}/references/` + `{skill-name}/scripts/` + `{skill-name}/agents/` (whichever subdirs apply). Use case: CC-environment install via direct extraction into `~/.claude/skills/`; PR evidence committed under `design/audit-artifacts/`.
+
+**Flat format** (SKILL.md at zip root). Produced by `build_releases.py` — the repo-level catalog distribution utility. Structure: SKILL.md + references/ + subdirs at zip root with no wrapper folder. Use case: Claude.ai Skills upload (the platform's installer expects flat layout); GitHub release attachment (consumed by users who upload via the Claude.ai UI).
+
+Both scripts ship as part of the rootnode-skills catalog. The release flow uses `build_releases.py` output staged in `/dist/`; the audit/PR-evidence flow uses `package_zip.py` output staged in `design/audit-artifacts/`. A build CV produces wrapper-format zip for PR evidence; the release CV produces flat-format zip for distribution. Mixing the two — e.g., attaching a wrapper-format zip to a GitHub release — produces install failure because the platform extracts at the wrapper-folder level.
+
+**Paired-output workflow rule.** Every Skill enhancement build that produces a release-grade zip must produce BOTH formats — wrapper (for PR audit evidence + CC-environment install) AND flat (for distribution + GitHub release attachment). These are paired outputs, not alternatives. Producing only one leaves a downstream consumer without the format it needs (PR review reads wrapper; user upload reads flat). Both `package_zip.py` and `build_releases.py` invocations are part of release readiness; verified at release pre-flight by checking both formats exist before tag creation.
+
+`[generalizable; grounded in Phase 32c pre-flight 2026-05-08 — operator surfaced that audit-artifacts zip was wrapper format (correct for CC-environment install) but not the right format for GitHub release distribution (which needs flat format). Reinforced in Phase 32 expansion 2026-05-09 — Tasks 1+2 PR + Task 3 release sequence revealed both formats needed for the same release event]`
 
 ---
 
@@ -478,6 +498,20 @@ In all three cases, the build CV incorporated the finding directly. No scope-loc
 
 This discipline emerged from the Phase 30 D-build CV under the question "Q-B3: when a build surfaces something that requires methodology correction, where is the surface boundary?" The discipline is the answer: implementation surface = build CV scope; methodology correction = recommendation surface only.
 
+### 8.4 Cross-model methodology validation for high-stakes design specs
+
+When a design spec carries significant methodology evolution (e.g., new dimensions in the quality gate, new workflows in a Skill, architectural shifts), running the locked spec through an alternate model surfaces improvements that single-model authoring misses. The pattern: lock spec at rev N (primary model), run cross-pass via secondary model with prompt "produce an equivalent spec applying these decisions," compare the two outputs structurally, port architectural improvements from secondary into rev N+1.
+
+This is not consensus engineering — the primary model's spec is canonical; the cross-pass surfaces blind spots. The two models are independent lenses on the same problem; the secondary model catches placement decisions, naming choices, and architectural patterns that the primary converged on suboptimally without realizing it.
+
+**When to apply.** Recommended for any design spec carrying ≥3 methodology evolutions or ≥1 architectural shift. The cost is one alternate-model CV pass; the benefit is catching architectural placement decisions before they ship.
+
+**Example.** Validated in v3.0 design (rev3.1 → rev3.2 transition, 2026-05-07): Opus 4.6 cross-pass surfaced content-class policy belonging at the methodology layer (not build-prompt-only), 3-question Kitchen Sink test (vs. the primary model's 5-question version), stable risk-register numbering principle, and right-scaling of the Phase 32c release prompt. Cost/benefit pattern emerged as repeatedly valuable across Phase 31d (which also used 4.6 cross-pass) and v3 design.
+
+**Relationship to multi-lens audit (`root_AGENT_ENVIRONMENT_ARCHITECTURE.md` §4.13).** Cross-model methodology validation is the design-spec-authoring application of the multi-lens audit principle — using independent lenses to catch blind spots in self-referential validation. Multi-lens applies to audit; cross-model validation applies to design spec authoring; the underlying principle is shared.
+
+`[generalizable; grounded in v3.0 design rev3.1 → rev3.2 transition 2026-05-07]`
+
 ---
 
 ## 9. Description refinement loop discipline
@@ -588,7 +622,82 @@ For per-script tier compatibility tables and detailed fallback patterns, see `ro
 
 ---
 
-## 11. Where to go next
+## 11. Catalog-wide consistency discipline
+
+When the rootnode-skill-builder methodology evolves a SKILL.md convention (frontmatter shape, required body structure, metadata field set, validator rules), all dependent Skills in the rootnode catalog should be audited for the same convention in a coordinated maintenance cycle. Without this discipline, the catalog drifts into mixed conventions over time, producing technical debt that compounds across releases.
+
+### 11.1 Trigger
+
+A catalog-wide audit + propagation cycle is warranted when any of the following occur:
+
+- A new methodology section is added to `root_SKILL_BUILD_DISCIPLINE.md` that imposes a convention on SKILL.md content or structure
+- The `quick_validate.py` allowlist or rule set changes
+- A skill-builder version bump (vX → vX+1) introduces canonical-shape changes
+- Multiple Skills exhibit packaging convention drift (mixed pre-vN and post-vN conventions across the catalog)
+
+### 11.2 Audit pattern
+
+For each affected convention, audit all `rootnode-*` Skills:
+
+1. **Inventory** — current state across all Skills in the catalog (identify pre-convention, post-convention, ambiguous)
+2. **Classify** — minor (cosmetic), moderate (functional but suboptimal), or critical (breaks tooling/install)
+3. **Coordinate** — for non-critical drift, schedule a single coordinated remediation PR rather than trickling fixes across many PRs (a single PR preserves the catalog-wide picture for reviewers)
+4. **Prioritize** — for critical drift, halt non-critical work until resolved before next release
+
+### 11.3 Validator alignment
+
+When a catalog audit reveals validator drift (the validator's rules don't match what production Skills carry by design), the validator update is part of the audit fix scope — not separate work. Treat validator drift as a symptom of the same catalog-wide consistency gap. Phase 32 expansion's Tasks 1+2 PR demonstrated this pattern: 27-Skill frontmatter normalization scope-expanded mid-session to include `quick_validate.py` allowlist update for `companion-files` and `changelog`, since the validator's restrictiveness was the same drift as the Skill-side variation.
+
+### 11.4 Anti-pattern: Methodology bump without catalog audit
+
+A methodology bump (skill-builder version, new convention, validator change) shipped without a coordinated catalog audit creates technical debt that compounds across releases. Phase 32 expansion's frontmatter normalization caught 27 Skills at mixed convention because skill-builder v3.0 shipped its canonical shape but didn't include a catalog audit step for sibling Skills. This pattern is now a queued maintenance discipline: every methodology bump triggers an "audit catalog for consistency" check.
+
+`[generalizable; grounded in Observation 15 from Phase 32 expansion]`
+
+---
+
+## 12. Validate before commit
+
+Two distinct disciplines, shared root cause: acting on under-validated assumptions before the validation cost has been paid. §12.1 fires when bug cause is opaque; §12.2 fires when operator intent is ambiguous. Different triggers, same fix shape: defer commitment until validation lands.
+
+### 12.1 Investigation precedes design
+
+When the cause of a bug is not directly observable, design work (fix prompts, transformation specs, multi-Skill operations) MUST come AFTER data collection, not before. The discipline is sequential: investigate → understand → design → execute. The investigation step is non-negotiable when cause is opaque.
+
+**Forensic investigation pattern.** When investigating an opaque bug:
+
+1. Read all relevant artifacts (source files, logs, output state) before generating any hypotheses
+2. Structural analysis — what shape do the artifacts have, what fields, what content
+3. Cross-group comparison — when working state and broken state both exist, byte-level compare to identify the actual differentiator
+4. Ranked findings — list candidate causes from most likely to least, with disconfirming evidence noted explicitly
+5. Conclude with explicit confidence level (HIGH/MEDIUM/LOW) before any fix design begins
+
+**Failure mode prevented.** "I think the cause is X. Let me design a fix for X. Didn't work. Now I think it's Y." Repeated wasted fix sessions chasing wrong hypotheses. The Phase 32 expansion frontmatter rendering investigation succeeded by following this pattern — five hypotheses tested empirically, all defeated, conclusion at HIGH confidence in one focused session rather than multiple wasted fix sessions.
+
+`[generalizable; grounded in Observation 12 from Phase 32 expansion]`
+
+### 12.2 Multi-property elicitation precedes drafting
+
+When an operator gives directional design instruction against an artifact with ≥2 properties that could each be the operator's actual concern, surface those properties explicitly as multiple-choice rather than committing to one interpretation.
+
+**Trigger.** Operator says "X is misaligned" or "Y looks wrong" or "tighten Z" against an artifact (SVG layout, prompt structure, code organization) where multiple properties could legitimately match the directional language.
+
+**Procedure.**
+
+1. Identify all properties that plausibly match the operator's wording
+2. Surface them as a multi-choice question with concrete trade-offs per option
+3. Wait for operator selection before drafting
+4. Draft against the chosen interpretation only
+
+**Failure mode prevented.** Drafting against the most natural-feeling interpretation, having it rejected, drafting against second interpretation, etc. Operator pays the cost of multiple revision cycles for a problem that elicitation would have surfaced upfront in one round-trip. Cost of asking is one round-trip; cost of guessing is N round-trips.
+
+**Why this is paired with §12.1.** Both disciplines target acting before validating. §12.1 fires when bug cause is opaque (validate empirically); §12.2 fires when operator intent is ambiguous (validate via elicitation). Different triggers, same root cause, same fix shape: defer commitment until validation lands. When in doubt about whether an operator instruction is actionable as-stated, treat it as ambiguous and elicit.
+
+`[generalizable; grounded in Block 6 from ecosystem-materials redesign Phase 2 (CC SVG draft, 2026-05-09)]`
+
+---
+
+## 13. Where to go next
 
 For surface-invariant principles that govern Skill behavior at runtime:
 

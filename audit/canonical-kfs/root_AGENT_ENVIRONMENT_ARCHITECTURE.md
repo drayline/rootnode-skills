@@ -220,6 +220,18 @@ The build CV (or runtime evaluation) determines tier applicability based on the 
 
 **Anti-pattern: silent environment assumptions.** An artifact authored without the discipline assumes its execution context — typically the context the build CV happened to run in — and fails opaquely in others. The user encounters the failure as "the Skill triggered but didn't produce output," with no path to diagnose whether the cause is methodology, configuration, or environment. The compatibility matrix and tier verdicts make environmental dependencies explicit at the artifact level so failure modes become diagnosable rather than mysterious.
 
+### 4.13 Multi-lens audit for self-referential validation
+
+When a framework is used to audit instances of itself, the audit cannot detect blind spots in the framework's own dimensions — definitionally. Skill-builder auditing a Skill against skill-builder's own quality gate cannot surface gaps in the gate. A prompt-validation Scorecard auditing prompts the Scorecard methodology produced cannot catch missing dimensions. Any single-framework audit of its own work product is logically constrained to find only failures the framework already knows how to find.
+
+The fix is multi-lens audit: combine independent frameworks whose blind spots do not overlap. When skill-builder's D1–D9 quality gate, prompt-validation's six-dimension Scorecard, and anti-pattern detection's structural scan all run against the same artifact, gaps in any single lens become visible because the other lenses score on different dimensions. The lenses do not need to be perfectly orthogonal — they need to be independently grounded. A single audit framework extended with new dimensions does not satisfy the principle; the new dimensions inherit the same intellectual lineage as the original ones.
+
+When multi-lens is required: any time a framework audits an artifact that the framework itself produced, or any artifact whose quality definition the framework also defines. Examples — Skills audited against skill-builder's gates; Projects audited against project-architecture principles produced by the same methodology; prompts audited against the Scorecard that defined them. When multi-lens is optional: audits where the audited artifact and the audit framework have independent provenance (e.g., auditing a third-party product against rootnode methodology, or auditing legacy work against newly-developed methodology).
+
+The composition discipline: each lens declares which dimensions it owns. Overlapping coverage is acceptable; conflicting coverage requires explicit reconciliation in the audit output. The audit identifies which lens surfaced each finding so that, when blind spots later become visible, traceability points to which lens needs updating rather than requiring re-derivation across all of them.
+
+The principle generalizes beyond Skills audit. It applies to Project audit (Project Architecture Guide + Audit Framework + Anti-Pattern catalog as three lenses), to prompt audit (prompt-validation + anti-pattern detection + behavioral-tuning), and to environment audit (CC Environment Guide + Anti-Pattern catalog + repo-hygiene). Anywhere root.node uses its own methodology to evaluate its own output, multi-lens applies. `[generalizable; grounded in Tier 3 design analysis 2026-05-07 — Skills catalog audit infrastructure design]`
+
 ---
 
 ## 5. Cross-surface composition
@@ -293,7 +305,21 @@ When a Skill produces an artifact that another Skill consumes (the Producer→Co
 
 **Producer rebuild rule.** When a Producer Skill is rebuilt (v1 → v2), the Consumer must be re-validated against the new Producer artifact before the v2 ship is announced. The cross-Skill contract is verified against the Producer's actual built artifact, not against the Producer's design spec. This was the R6 mitigation in the Phase 30 D-build CV: cc-design v2's contracts with repo-hygiene v1 were verified against the built `rootnode-repo-hygiene.zip`, not against the design spec `root_design_repo_hygiene_skill.md`. Design specs can drift from built artifacts during build CVs (within-scope-lock material findings per `root_SKILL_BUILD_DISCIPLINE.md §8.1`); the built artifact is the authoritative contract source.
 
-**Bidirectional handoff (deferred composition).** Some Producer→Consumer chains are bidirectional in principle but unidirectional in current implementation. Example: rootnode-repo-hygiene's Cat 14 process-abstraction findings can flow to rootnode-skill-builder Gate 2 as warrant evidence; rootnode-cc-design REMEDIATE could in principle do the same when it surfaces methodology-generalizable patterns. The forward chain (repo-hygiene → skill-builder Gate 2) is implemented; the parallel chain (cc-design REMEDIATE → skill-builder Gate 2) is documented as a v2.x roadmap item. Bidirectional contracts are valuable but cost-bound — implement when warranted.
+**Bidirectional handoff (deferred composition).** Some Producer→Consumer chains are bidirectional in principle but unidirectional in current implementation. Example: rootnode-repo-hygiene's Cat 14 process-abstraction findings can flow to rootnode-skill-builder Gate 2 as warrant evidence; rootnode-cc-design REMEDIATE could in principle do the same when it surfaces methodology-generalizable patterns. The forward chain (repo-hygiene → skill-builder Gate 2) is implemented; the parallel chain (cc-design REMEDIATE → skill-builder Gate 2) is documented as a roadmap item. Bidirectional contracts are valuable but cost-bound — implement when warranted.
+
+### 5.5 KF propagation chain — three landing locations for canonical updates
+
+When KF methodology is updated, the propagation chain has three landing locations that must all be synced for the update to be effective across the ecosystem:
+
+1. **Seed Project knowledge files** (chat-side CV use). Updated by operator upload after Phase 32a-style staging review.
+2. **Repo-local `audit/canonical-kfs/`** (CC session use). Updated as a precondition step on the relevant feature/release branch — the CC agent reads `@audit/canonical-kfs/` for methodology grounding during work.
+3. **Installed Skill copies** (runtime use — `~/.claude/skills/{skill-name}/` or platform-specific install paths). Updated when Skills are reinstalled from new release zips.
+
+Failure to sync any one of the three creates silent staleness: a CC agent may read older methodology from `audit/canonical-kfs/` even after the seed Project has newer content; a chat-side CV may read newer content from the seed Project even after a runtime Skill ships with older content embedded. Each sync point has a different responsibility model: (1) is operator manual after staging review; (2) is CC build prompt automatic per branch; (3) is release packaging automatic per Skill rebuild.
+
+Pattern: every methodology update CV documents which of the three landing locations it covers; the build prompt for any Skill that consumes the methodology covers location (2) as a precondition step (cf. v3.0 build prompt §32b.1.5 for the canonical-kfs/ sync example); release packaging covers location (3) by rebuilding affected Skill zips. Cross-cutting methodology updates (e.g., updates that affect multiple Skills) require multiple location-(3) syncs.
+
+`[generalizable; grounded in Phase 31d post-execution evaluation 2026-05-07 — surfaced when the v3.0 design spec's Phase 32a left a gap between staging-kf/ updates and audit/canonical-kfs/, requiring a §32b.1.5 precondition step to close]`
 
 ---
 

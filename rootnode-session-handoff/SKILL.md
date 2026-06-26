@@ -1,198 +1,170 @@
 ---
 name: rootnode-session-handoff
 description: >-
-  Produces structured XML session continuation documents for multi-session
-  workflows. Captures all active work streams, decisions with rationale,
-  uploaded file content, conversation knowledge, artifacts, and open items
-  into an ingestion-optimized handoff file. Generates closeout checklist
-  covering Memory updates, build_context.md assessment, propagation items,
-  and file delivery. Use when approaching context limits, wrapping up a
-  session, or managing complex work across multiple conversations. Trigger
-  on: "create a handoff," "session closeout," "wrap up this session,"
-  "prepare for handoff," "continue next session," "save our progress," "we're
-  running out of context," "context is getting long," "let's pick this up
-  next time." Do NOT use for Memory optimization, context budget analysis,
-  project audits, or simple conversation summaries with no continuation
-  intent (for related work, use rootnode-memory-optimization or
-  rootnode-context-budget if available).
+  Produces structured markdown session continuation documents for
+  multi-session workflows. Captures active work streams, decisions with
+  rationale, knowledge-file deltas learned during the session, the exact
+  files to load next conversation, ingested content, artifacts, and open
+  items into an ingestion-optimized handoff. Carries pending KF updates and
+  unresolved items forward across handoff chains so context never drops.
+  Generates a closeout checklist and echoes the starter prompt to chat. Use
+  when approaching context limits, wrapping up a session, or managing work
+  across conversations. Trigger on: "create a handoff," "session closeout,"
+  "wrap up this session," "build session handoff," "BSH," "continue next
+  session," "we're running out of context," "context is getting long." Do
+  NOT use for Memory optimization, context budget analysis, project audits,
+  deciding whether work is ready for autonomous/Claude Code execution (use
+  rootnode-handoff-trigger-check), or summaries with no continuation intent.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
-  original-source: "Seed-project methodology synthesis"
+  version: "2.0"
+  predecessor: "rootnode-session-handoff v1.0"
+  original-source: "Seed-project methodology synthesis + rootnode-session-handoff v1.0 source"
+  discipline_post: phase-32
 ---
 
 # Session Handoff
 
-> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 1, broad-tier. Built and calibrated for Opus 4.8; runs on Sonnet 4.6 and Haiku 4.5. See repository README for model compatibility.
 
-Produce structured session continuation documents when multi-session workflows need a clean breakpoint. The handoff file is an XML document optimized for Claude ingestion at the start of the next conversation. It captures everything the next session needs to resume work immediately — active tracks, decisions, ingested content, artifacts, and open items.
+> **Version 2.0:** Markdown output (was XML). Adds forced knowledge-file delta capture, a files-to-load-next-conversation list split by track, a chat echo of the starter prompt and load list, datetime-stamped naming with a Handoff Card, a completeness gate, and a carry-forward ledger that survives long handoff chains. v1.0 capture discipline preserved.
+
+Produce a markdown session continuation document when multi-session work needs a clean breakpoint. The document is the next session's only inheritance from this one — it carries active tracks, decisions, knowledge gained, the files to reload, and open items so work resumes immediately instead of being re-derived.
 
 ## Important
 
-**The handoff document replaces the conversation, not supplements it.** The next session's Claude has no access to this conversation. Everything that matters must be in the handoff document or in a persistent store (Memory, knowledge files, delivered files). If it only exists in conversation, it goes in the document at full fidelity.
+The handoff is everything the next session gets. **The next session's Claude has no access to this conversation.** Anything that matters lives in the handoff document or a persistent store (Memory, knowledge files, delivered files). Conversation-only content goes in the document at full fidelity, or it is lost.
 
-**Decisions without rationale are the #1 continuity failure.** A decision captured as "decided to use approach X" forces the next session to either blindly follow it or re-derive the reasoning. Always capture the why alongside the what.
+These are gates. Each runs every handoff; skipping any produces a broken artifact:
 
-**Each handoff is a clean snapshot, not an accumulating log.** When continuing from a prior handoff, the new document replaces the old one. Unresolved items carry forward explicitly. The document never grows by appending.
+- **Knowledge-file deltas are never silent.** Every handoff evaluates what the session learned that belongs in a knowledge file and emits drop-in KF blocks — or states `KF deltas this session: none — confirmed`. Absence is a deliberate, stated output, never an omission. This is the v2.0 headline: context gained in a session must reach the KFs, not evaporate.
+- **Decisions carry rationale.** A decision logged as "chose X" forces the next session to follow blindly or re-derive. Capture the why and the implications. This is the #1 continuity failure.
+- **The completeness gate runs before emit.** Verify every stream, decision, KF-delta evaluation, load list, carry-forward inheritance, and the starter prompt before finalizing. The gate is the backstop against silent drops.
+- **Output is markdown.** Always. Structured markdown parses reliably and stays human-readable for direct review. Preserve the section schema and the status vocabulary; never substitute freeform structure.
+- **Each handoff is a snapshot, not a log.** Continuing from a prior handoff replaces it. Unresolved items and pending KF deltas carry forward explicitly through the ledger. The document never grows by appending.
 
-**XML format is non-negotiable.** The handoff document is always XML. The structural parsing reliability outweighs any readability tradeoff. Users review the XML directly before uploading; pretty-printing is acceptable but the structure must remain valid.
+## What the handoff must achieve
 
----
+A correct handoff satisfies four outcomes. The method below is the reliable path to them, not a checklist to recite — lead with the outcome, let the steps serve it.
 
-## Pipeline
+1. **Complete capture.** Every active work stream, decision, and piece of conversation-only knowledge is present at full fidelity.
+2. **Persistence-correct.** Content that lives in a persistent store is referenced, not duplicated; content that exists only in this conversation is captured in full.
+3. **Forward-carrying.** Pending KF deltas and unresolved open items from this session and any predecessor survive into the next handoff until applied or resolved.
+4. **Ingestion-optimized.** Dense, specific, state-over-history, consistently structured, fast for the next session to act on.
 
-### Stage 1 — Inventory
+## How to get there
 
-Catalog everything from the current session. Work through each category:
+The method that reliably hits those outcomes:
 
-**Objectives.** What the session set out to accomplish. Pull from opening messages, any prior handoff document, or stated goals. If continuing from a prior handoff, reference it.
+**Inventory the session.** Catalog objectives, every activity track (starting state, progress, current state, next steps), decisions with rationale, uploaded content (working understanding, not raw text), conversation-only knowledge (most at-risk — exists nowhere else), artifacts, and open items. If continuing a chain, pull the predecessor's pending KF deltas and unresolved items.
 
-**Activity tracks.** Every concurrent work stream — active, deferred, or carried from a prior handoff. For each track: starting state, what was accomplished, current state, next steps. See references/handoff-template.md for the per-track XML structure.
+**Assess against the persistence test.** For each item: if the next session's Claude wouldn't have it without this document, it goes in at full fidelity; otherwise it becomes a reference pointer. Memory edits → reference. Knowledge files → reference by name. Delivered files → reference path + `{code}_` name. Conversation-only → full fidelity.
 
-**Decisions.** Every substantive decision with rationale and implications. This is the highest-value content.
+**Evaluate KF deltas (gate).** Separately from session progress, ask: what did this session learn or change that updates context for *future* sessions — methodology, principle, decision rationale, taxonomy, threshold, convention? Each qualifying item becomes a drop-in KF block (target file + section, action, the block, rationale), tagged with status and origin. If nothing qualifies, state it explicitly. Read `references/handoff-template.md` for the block format.
 
-**Uploaded content.** Files uploaded or loaded during the session. Capture the working understanding — relevant facts, constraints, data extracted — not raw content. Flag whether the next session needs the original re-uploaded.
+**Structure to the schema.** Organize into the markdown sections in `references/handoff-template.md`, leading with the Handoff Card. Apply ingestion optimization: density over prose, specific over summary, state over history (except rejected alternatives, which prevent re-proposal), consistent structure, re-upload flags on every ingested file.
 
-**Conversation knowledge.** Information from discussion that didn't come from files. Verbal context, discovered constraints, clarifications that shaped the work. This is the most at-risk content — it exists nowhere else.
+**Produce and verify.** Output the handoff as a downloadable markdown file. Run the completeness gate. Produce the closeout checklist in conversation (read `references/closeout-checklist.md`). Echo the starter prompt and files-to-load list into the chat.
 
-**Artifacts.** Files created, updated, or delivered. Track filenames (with `{code}_` prefix), locations, and content summaries.
+## Naming and the Handoff Card
 
-**Open items.** Unresolved questions, deferred items, blockers, follow-ups.
+**Filename:** `{code}_SH_{MMDDYY-HHMM}_{theme-slug}.md` — e.g. `root_SH_062426-1430_skill-calibration.md`.
 
-### Stage 2 — Assess
+- `{code}` is the project code; if not yet established, ask once, then it is known.
+- `{MMDDYY-HHMM}` is the datetime; chronological sort equals build order, so it is the unique sequence key — no integer is needed and none is written, which removes the duplication risk a manual counter would carry.
+- `{theme-slug}` is 1–3 words, lowercase, hyphenated, capturing the session theme.
+- Same-minute collision appends `-2`. A re-issued or corrected handoff for the same session appends `_v2` to the stem; versioning disambiguates revisions, not order.
 
-Apply the persistence test to each inventoried item: **if the next session's Claude wouldn't have it without this document, it goes in at full fidelity. Everything else gets a reference pointer.**
+**Handoff Card** — the first block of the document body, ~5 lines, glanceable, ID matching the filename stem:
 
-Check these persistence layers:
-- **Memory edits from this session** → reference, don't duplicate
-- **Project knowledge files** → reference by name, don't reproduce content
-- **Delivered files** → reference path and `{code}_` filename, capture only the summary
-- **build_context.md** → if updated this session, note it reflects current state; if not yet updated, flag needed updates in the closeout
-- **Conversation-only content** → full fidelity in the handoff
+```
+root · SH 062426-1430 · skill-calibration · v1
+Reach-back: Self-contained
+Carry-forward: 2 KF deltas pending, 1 open item carried
+Advances: 4.8 alignment | session-handoff redesign
+```
 
-### Stage 3 — Structure
+The reach-back line names the minimum predecessors needed to reconstruct this handoff (`Self-contained`, or `Requires SH 062326-0900, …`). When a stack of handoffs is loaded, chronological order of the datetime IDs is build order; orient by ID and reach-back rather than any written ordinal. Full card and reach-back rules: `references/handoff-template.md`.
 
-Organize the inventory into the XML handoff format. Read references/handoff-template.md for the complete schema. Apply ingestion optimization:
+## The forward-carry mechanism
 
-1. **Density over prose.** Every sentence carries information. No transitional phrases, no narrative connectors.
-2. **Specific over summary.** "4-stage pipeline: Inventory → Assess → Structure → Produce" beats "decided on the pipeline." The next session needs specifics.
-3. **State over history.** Where things stand, not how they got there. Exception: rejected alternatives that prevent the next session from re-proposing them.
-4. **Consistent structure.** Same XML schema every time. Predictable structure enables reliable parsing.
-5. **Self-contained on conversation knowledge.** Conversation-only content at full fidelity. Persistent-store content as reference pointers.
-6. **Re-upload flags.** Every ingested file gets an explicit true/false.
+KF deltas and open items each carry a `status` (`pending` / `applied` / `resolved`) and an `origin` (the datetime ID of the handoff where they first appeared). **When continuing a chain, inherit all still-pending KF deltas and unresolved open items from the predecessor(s), preserving origin** — applied and resolved items drop out, so the ledger self-prunes. This is what makes "context never silently drops" hold across a 20-handoff chain, not just one hop. Flag any item carried across 2+ handoffs: stale (remove) or blocked (escalate).
 
-### Stage 4 — Produce
+## Files to load next conversation
 
-Output the handoff document as a downloadable XML file. Then produce the closeout checklist in conversation. Read references/closeout-checklist.md for the full template and Memory update patterns.
+Distinct from project knowledge files (loaded into the Project, not the chat) and from per-source re-upload flags. List the conversation files needed to resume, split by track and by necessity — a "required to continue (all tracks)" group plus per-track groups marking each file required or optional. Derive from each track's next steps: which files do those steps depend on? Format: `references/handoff-template.md`.
 
-**File naming:** `{prefix}_session_handoff_{YYYY-MM-DD}.xml` (e.g., `support_session_handoff_2026-04-13.xml`). Multiple same-day handoffs append `_a`, `_b`.
+## Chat echo
 
----
+After delivering the handoff file and the closeout checklist, post to the current chat, copy-paste-ready: the starter prompt (fenced) and the files-to-load list. Both also live in the handoff; the echo exists so the next conversation launches fast without opening the handoff first.
 
-## Proactive vs. Requested Handoff
+## Proactive vs. requested
 
-**Requested** (user says "wrap up," "create a handoff," etc.): Full pipeline at full depth. Complete all in-flight deliverables that can be finished quickly first. Thoroughness is the priority.
+**Requested** ("wrap up," "create a handoff," "BSH"): full method at full depth. Finish in-flight deliverables that complete quickly first; thoroughness is the priority.
 
-**Proactive** (context pressure at ~70%): Urgency-aware pipeline. Same stages, adjusted execution:
+**Proactive** (context pressure ~70%): same outcomes and gates, urgency-aware execution. Inventory prioritizes in-flight over completed work; assess whether near-complete items (under ~10% of remaining budget) finish first; the document leads with active-track state and next steps, compresses completed work; the Card notes estimated remaining context. The KF-delta and completeness gates still run — pressure is not a reason to drop them.
 
-- Inventory prioritizes in-flight work over completed work
-- Before producing, assess whether near-complete items (estimated under 10% of remaining budget) should be finished first
-- Document leads with active track state and next steps; completed-work sections are compressed
-- Note estimated remaining context in the header
+## Conventions
 
----
+Recommended patterns, not platform requirements — adopt where they fit.
 
-## Conventions and Patterns
-
-These are recommended patterns for production use of the Skill. They are not platform requirements — adopt them where they fit your workflow, override where they do not.
-
-**File naming:** Use a project-specific prefix to keep handoffs identifiable across projects (e.g., `support_session_handoff_2026-04-13.xml`, `analytics_session_handoff_2026-04-13.xml`). Project-prefixed names route correctly when handoffs are stored in cross-project file systems.
-
-**Institutional memory file:** If your project maintains a `build_context.md` or equivalent file that tracks phases, decisions, and project evolution, the closeout should always assess whether that file needs updating and specify what. Projects without an institutional memory file skip this item.
-
-**Propagation tracking:** If the session changed system-wide facts (file counts, behavioral configurations, architectural state), the closeout should flag propagation items so downstream references stay in sync with reality. Where a propagation checklist exists in your project documentation, follow it.
-
-**Phase-gated work:** When projects use numbered build phases, the handoff captures current phase, phase objectives, and within-phase progress. Cross-phase sessions document both phases.
-
-**Cross-project handoffs:** Design specs or artifacts intended for another project are flagged with the target project name in the artifacts section and as explicit open items.
-
-**Sequential methodology:** Actions in the continuation plan are sequenced, not a parallel backlog. The starter prompt identifies the single first action. Adjust to parallel sequencing if your workflow favors it.
-
-**Terse starter prompts:** Match the user's communication style for starter prompts. Reference the handoff file, state what to resume, done. Avoid re-establishing context the handoff document already covers.
-
-**Complete file outputs:** Always output the full XML document. Never diffs or partial content.
-
-**Cloud storage as canonical:** When files are stored in cloud storage (Google Drive, Dropbox, OneDrive, S3, etc.) outside the conversation, reference paths/URIs in artifact tracking rather than reproducing content. Note the delivery output path explicitly so the next session can locate files.
-
----
+- **Institutional memory file:** if the project maintains a `build_context.md` or equivalent, the closeout assesses whether it needs updating and what. KF deltas captured in the handoff are often the source of that update.
+- **Propagation:** if the session changed system-wide facts, flag propagation items so downstream references stay in sync. KF deltas are a first-class propagation vehicle.
+- **Phase-gated work:** capture current phase, objectives, within-phase progress; cross-phase sessions document both.
+- **Cross-project artifacts:** flag with the target project name in artifacts and as an explicit open item.
+- **Terse starter prompts:** match the user's style; reference the handoff file, state the first action, done.
+- **Cloud storage as canonical:** reference paths/URIs for files stored outside the conversation; note the delivery output path.
 
 ## Examples
 
-### Example 1: Single-Track Session, Clean Break
+### Example 1 — Single track, clean break, with a KF delta
 
-**Input:** User has been designing a Skill spec for 2 hours. "Let's wrap this up for next time."
+A 2-hour Skill-design session. "Wrap this up."
 
-**Actions:**
-1. Inventory: one track (Skill design), decisions on pipeline stages and XML format, no uploaded files, several conversation knowledge items about design rationale.
-2. Assess: design spec file delivered to outputs (reference it). Decisions and conversation knowledge are conversation-only — full fidelity.
-3. Structure: one activity track at IN_PROGRESS, 3 decisions, no ingested content, 1 artifact, 2 open items.
-4. Produce: XML file + closeout checklist.
+Inventory: one track (Skill design), three decisions with rationale, no uploads, several conversation-only design-rationale items, one delivered spec file. Assess: spec file delivered → reference; decisions and rationale → full fidelity. **KF-delta evaluation:** the session established a reusable naming convention that future sessions must follow → one KF block (`target: build_context.md › conventions`, action ADD, the block, rationale), status `pending`, origin this handoff. Structure: Card, one track IN_PROGRESS, three decisions, one KF delta, one artifact, two open items, files-to-load (the spec, required), starter prompt. Produce + verify gate + echo.
 
-**Result:** `{prefix}_session_handoff_2026-04-13.xml` with focused single-track continuation plan. Starter prompt: "Uploading handoff from yesterday's design session. Resume with [specific next step]."
+Result: `{code}_SH_062426-1610_skill-design.md`. The naming convention reaches the KFs instead of living only in the dead conversation.
 
-### Example 2: Multi-Track with Cross-Project Handoff
+### Example 2 — Continuing a chain, carry-forward in action
 
-**Input:** Three tracks — design spec (complete), institutional memory file update (in progress), strategic positioning decision that needs to flow to a separate project in the portfolio. "Create a handoff."
+Session 3 in a chain. The prior handoff left 2 pending KF deltas and 1 unresolved open item; this session applied 1 delta and resolved nothing.
 
-**Actions:**
-1. Inventory: three tracks with mixed status. Cross-project artifact identified.
-2. Assess: completed design spec file delivered (reference). Institutional memory file changes are conversation-only (full fidelity). Strategic decision needs cross-project flag.
-3. Structure: Track 1 COMPLETE, Track 2 IN_PROGRESS, Track 3 DEFERRED. Artifacts section flags design spec as "cross-project → target project." Open items include strategic decision propagation to the receiving project.
-4. Produce: XML file. Closeout notes Memory updates and propagation items.
+Inventory pulls the predecessor's ledger. **Carry-forward:** the 1 still-pending KF delta re-surfaces with its *original* origin ID; the applied delta drops; the unresolved open item carries with its origin; this session adds 1 new delta. The item now carried across 3 handoffs is flagged — escalate or remove. Reach-back: this handoff integrated the predecessor's still-relevant decisions, so `Self-contained`; had it left a large ingested-content summary in the predecessor, it would name it.
 
-**Result:** Multi-track handoff with cross-project items explicitly flagged. Continuation plan sequences institutional memory file update first, then strategic decision propagation.
+Result: nothing from three sessions back falls through; the ledger shows exactly what is still pending and where each item originated.
 
-### Example 3: Proactive Trigger
+### Example 3 — Proactive trigger
 
-**Input:** Context pressure alert at ~70%. Two tracks — one at ~80% done, one at ~30%.
-
-**Actions:**
-1. Assess remaining budget. The ~80% track needs approximately 5% of remaining budget to complete — recommend finishing it.
-2. Complete the near-done track. Then run full pipeline for the handoff.
-3. Urgency-aware document: completed track compressed, 30%-done track at full detail.
-
-**Result:** One fewer open item in the handoff. Starter prompt focuses on the ~30% track.
-
----
+Context pressure ~70%. Two tracks, one ~80% done, one ~30%. The ~80% track needs ~5% of remaining budget — finish it first, then run the method. Document leads with the 30% track at full detail, compresses the completed one. KF-delta and completeness gates still run. Starter prompt focuses on the 30% track; Card notes remaining context.
 
 ## When to Use This Skill
 
-Use when:
-- Approaching context window limits and need to continue in a new session
-- Wrapping up a session with intent to continue the work
-- Managing complex multi-track work across conversation boundaries
-- Context pressure detected at ~70% and in-flight work cannot complete in remaining budget
+Use when approaching context limits and continuing in a new session, wrapping up a session with intent to continue, managing multi-track work across conversation boundaries, or when context pressure hits ~70% and in-flight work cannot complete.
 
-Do NOT use when:
-- Optimizing Memory layer content (use rootnode-memory-optimization if available)
-- Analyzing context budget health (use rootnode-context-budget if available)
-- Auditing project structure (use rootnode-project-audit if available)
-- Summarizing a conversation with no continuation intent
-- The session's work is fully complete with no pending items
-
----
+Do NOT use for optimizing Memory content (use rootnode-memory-optimization if available), analyzing context budget (use rootnode-context-budget if available), auditing project structure (use rootnode-project-audit if available), deciding whether work is ready for autonomous/Claude Code execution (use rootnode-handoff-trigger-check if available), summarizing with no continuation intent, or when work is fully complete with no pending items.
 
 ## Troubleshooting
 
-**Next session doesn't pick up where we left off:** The starter prompt is too vague or too short. It must reference the handoff file by name, state the first action, and orient Claude to the project. Check that conversation-only knowledge was captured at full fidelity, not summarized.
+**Next session doesn't resume cleanly:** starter prompt too vague, or conversation-only knowledge was summarized instead of captured at full fidelity. The prompt must name the handoff file, state the first action, and orient to the project.
 
-**Decisions get re-litigated in the next session:** Rationale is missing or too thin. Each decision needs not just the choice but the reasoning and implications. If the next session proposes an alternative that was already rejected, the handoff should have captured that rejection.
+**Decisions get re-litigated:** rationale missing or thin. Capture the reasoning, the implications, and any rejected alternative so it isn't re-proposed.
 
-**Uploaded file content lost between sessions:** Re-upload flag was set to false when it should have been true, or the key content summary was too thin. The summary should capture every fact, constraint, or data point that influenced the session's work — not just a description of the file.
+**Context gained in a session never reaches the KFs:** the KF-delta gate was skipped or produced an empty result without the explicit confirmation line. Every handoff emits blocks or `none — confirmed`. If deltas exist, they belong in the handoff body with status and origin, not only flagged in the closeout.
 
-**Handoff document is too long for the next session's context:** Too much completed-work detail. Compress completed tracks to essentials (what was done, final state). The next session needs current state and next steps, not a history of completed work.
+**Items fall through across sessions:** carry-forward inheritance didn't run. When continuing a chain, inherit all pending KF deltas and unresolved items with origin preserved. Check the ledger.
 
-**Open items fall through the cracks:** Check that `items_carried_forward` in the continuation plan includes unresolved items from any prior handoff. Each handoff must account for the full chain, not just the current session.
+**Handoff numbering or order is ambiguous:** rely on the datetime ID, not a written count — chronological order of `{MMDDYY-HHMM}` is build order. Use `_v2` only for a re-issue of the same handoff.
 
-**Cross-project items don't get actioned:** They need to appear in both the artifacts section (with target project flagged) and the open items section (with specific action needed). A cross-project item only in artifacts is easy to miss.
+**Uploaded file content lost between sessions:** re-upload flag wrong, or the key-content summary too thin. Capture every fact, constraint, or data point that influenced the work.
+
+**Handoff too long for the next context:** too much completed-work detail. Compress completed tracks to final state; the next session needs current state and next steps.
+
+## Reference table
+
+| Reference | When to read |
+|---|---|
+| `references/handoff-template.md` | The markdown schema — all section formats, status vocabulary, Handoff Card, KF-delta block, files-to-load, carry-forward ledger, reach-back, naming. Read when structuring and producing. |
+| `references/closeout-checklist.md` | The closeout checklist delivered in chat — Memory update patterns, build_context assessment, propagation (KF deltas as vehicle), chain handling, cross-project items, chat echo, completeness line. Read at produce. |
+
+*End of SKILL.md.*

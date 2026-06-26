@@ -1,181 +1,142 @@
 # Closeout Checklist Reference
 
-Template and guidance for the closeout actions produced after the handoff document. Read this file during Stage 4 (Produce) after outputting the XML handoff file.
-
-The closeout checklist is delivered in conversation (not in the XML file). It is the final output of the Skill.
+Template and guidance for the closeout produced after the handoff file. Read this at produce, after outputting the markdown handoff. The closeout is delivered in conversation (not in the handoff file) and is the Skill's final output, alongside the chat echo.
 
 ---
 
-## Closeout Checklist Template
+## Closeout checklist template
 
-Present this checklist after delivering the handoff document:
+Present after delivering the handoff document:
 
 ```
 ## Closeout Actions
 
-- [ ] **Handoff document delivered:** {filename} — saved to /mnt/user-data/outputs/
-- [ ] **Memory updates:** {specific recommendations or "none needed"}
-- [ ] **File delivery:** {all session artifacts accounted for, or list missing items}
-- [ ] **build_context.md:** {specific updates needed, or "current — no update needed"}
-- [ ] **Propagation items:** {items requiring cross-file updates, or "none"}
-- [ ] **Starter prompt:** Ready in the handoff document, Section 8
+- [ ] **Handoff delivered:** {filename} — /mnt/user-data/outputs/
+- [ ] **Completeness:** verified — every stream, decision (with rationale), KF-delta evaluation, load list, and carry-forward inheritance present
+- [ ] **KF deltas:** {N blocks captured in the handoff, status pending | "none — confirmed"}
+- [ ] **Memory updates:** {specific recommendations | "none needed"}
+- [ ] **build_context.md:** {specific updates needed | "current — no update needed"}
+- [ ] **Propagation:** {cross-file items | "none"}
+- [ ] **Files to load:** listed in the handoff and echoed to chat below
+- [ ] **Starter prompt:** in the handoff and echoed to chat below
 ```
+
+The `Completeness: verified` line is the visible result of the completeness gate. If the gate fails, the handoff isn't done — fix the gap before delivering.
 
 ---
 
-## Memory Update Recommendations
+## Chat echo
 
-The handoff Skill recommends Memory updates but does not execute them. Present recommendations as specific, actionable items.
+After the checklist, post to the current chat, copy-paste-ready, so the next conversation launches without opening the handoff:
 
-### What Qualifies as a Memory Update
+```
+**To start the next conversation:**
 
-Memory holds always-loaded orientation facts — things the next session (and all future sessions) should know without searching. A fact qualifies for Memory if it passes both tests:
+Starter prompt:
+```
+{the exact starter prompt from the handoff}
+```
 
-1. **Persistence test:** Will this fact still be relevant in 5+ sessions? If it's session-specific or will change soon, it stays in the handoff only.
-2. **Orientation test:** Does Claude need this fact to orient correctly at the start of every conversation? If Claude only needs it during specific tasks, it belongs in a knowledge file or the handoff, not Memory.
+Files to load:
+- {required file} — {why}
+- {track file} — {required / optional}
+```
 
-### Common Memory Update Patterns
+Both also live in the handoff. The echo is a convenience copy, not the source of truth.
 
-**Phase advancement:** "Phase N is COMPLETE. Phase N+1 is active." This is the most common update — phases are orientation-critical.
+---
 
-**Project state changes:** New knowledge files added/removed, new Skills installed, architectural decisions that change how the project operates.
+## Memory update recommendations
 
-**Workflow convention changes:** New patterns established that change how recurring work is handled (e.g., a deliverable that used to require multiple projects now happens in one).
+The Skill recommends Memory updates; it does not execute them. Present as specific, actionable items.
 
-**Key facts discovered:** Empirical findings, threshold values, or constraints discovered through work that will affect future sessions.
+A fact qualifies for Memory if it passes both tests: **persistence** (still relevant in 5+ sessions?) and **orientation** (does Claude need it to orient correctly at the start of *every* conversation?). Session-specific facts stay in the handoff; task-specific facts belong in a knowledge file.
 
-### What Does NOT Go in Memory
+Common patterns: **phase advancement** ("Phase N COMPLETE; Phase N+1 active" — the most common), **project-state changes** (KFs/Skills added, architectural decisions), **workflow-convention changes** (new recurring patterns), **key facts discovered** (thresholds, constraints, empirical findings).
 
-- Session progress details (too transient — belongs in the handoff)
-- Decisions about specific deliverables (belongs in the deliverable or build_context.md)
-- File contents or summaries (belongs in knowledge files)
-- Step-by-step plans (belongs in the handoff continuation plan)
-- Anything that duplicates content already in a knowledge file
-
-### Recommendation Format
+Does NOT go in Memory: session progress (handoff), deliverable-specific decisions (the deliverable or build_context), file contents (knowledge files), step-by-step plans (the continuation plan), anything duplicating a knowledge file.
 
 ```
 **Memory updates recommended:**
-1. ADD: "Phase {N} active — {brief description of current work}"
-2. UPDATE: Existing entry that's been superseded by a new decision or finding
-3. REMOVE: Outdated entry that no longer reflects the project's state
+1. ADD: "Phase {N} active — {brief description}"
+2. UPDATE: {entry superseded by a new decision/finding}
+3. REMOVE: {outdated entry}
 ```
 
-If no updates are needed, state: "No Memory updates needed — current entries are accurate."
+Or: "No Memory updates needed — current entries are accurate."
 
 ---
 
-## build_context.md Assessment
+## build_context.md assessment
 
-For projects with a build_context.md file, assess whether it needs updating. This file is institutional memory — it tracks phases, decisions, and project evolution.
+For projects with a `build_context.md`, assess whether it needs updating. This file is institutional memory — phases, decisions, evolution.
 
-### When build_context.md Needs Updating
+Needs updating when: a phase advanced, a significant architectural decision was made, KFs/Skills/components changed, a design spec was produced that drives future work, or operational state changed. Does NOT when: routine within-phase work (unless a milestone was hit), pure discussion with no deliverables, or work fully captured in the deliverable with no project-level effect.
 
-- A build phase was completed or advanced
-- A significant architectural decision was made that affects the project going forward
-- New knowledge files, Skills, or components were added or removed
-- A design spec was produced that will drive future work
-- The project's operational state changed (e.g., entered RAG mode, completed a major milestone)
-
-### When It Does NOT Need Updating
-
-- Routine work within an existing phase (unless a milestone within the phase was reached)
-- Conversations that were purely planning/discussion with no deliverables
-- Work that is fully captured in the deliverable itself and doesn't affect project-level state
-
-### Recommendation Format
+**KF deltas captured in the handoff are frequently the source of the build_context update** — a delta targeting `build_context.md` is both a carry-forward item and the content of the update. Cross-check: every `build_context.md`-targeted KF delta should appear here.
 
 ```
 **build_context.md update needed:** Yes
-- Add Build History entry for the work just completed
-- Update "next priorities" to reflect completion
-- Add to Skills inventory if a new Skill was built
+- Add Build History entry for the work completed
+- Update next-priorities to reflect completion
+- Apply KF Delta {n} (targets build_context.md)
 ```
 
 Or: "**build_context.md:** Current — no update needed this session."
 
 ---
 
-## Propagation Assessment
+## Propagation assessment
 
-If the session changed system-wide facts, flag propagation items per any propagation checklist your project documents (commonly tracked in `build_context.md` or an equivalent institutional memory file).
+If the session changed system-wide facts, flag propagation items per any propagation checklist the project documents (commonly in `build_context.md`).
 
-### System-Wide Facts That Trigger Propagation
+Triggers: file counts, block/approach counts, tendency-taxonomy changes, Compiler/Optimizer mode changes, architectural-state changes (new layer model, new thresholds), Skill-inventory changes.
 
-- File counts (knowledge files added/removed)
-- Block/approach counts (new reasoning or output approaches)
-- Tendency taxonomy changes (new behavioral tendencies identified)
-- Compiler or Optimizer mode changes
-- Architectural state changes (e.g., new layer model, new threshold values)
-- Skill inventory changes (new Skills created, existing Skills revised)
+Targets: **build_context.md** (always when system facts change), **CONTENTS_INDEX.md** (if KF inventory changed), **Memory** (if orientation facts changed), **CI / Custom Instructions** (if KF routing, Skill references, or modes changed — this is the *first* trigger when KFs are added), **dependent knowledge files** (anything referencing the changed fact).
 
-### Propagation Targets
-
-When propagation is needed, identify which files/stores need updating:
-
-1. **build_context.md** — always a target when system facts change
-2. **CONTENTS_INDEX.md** — if knowledge file inventory changed
-3. **Memory** — if orientation facts changed
-4. **CI (Custom Instructions)** — if knowledge file routing, Skill references, or operational modes changed
-5. **Dependent knowledge files** — any file that references the changed fact
-
-### Recommendation Format
+**KF deltas are a first-class propagation vehicle.** When a delta updates methodology that lives in multiple landing locations (seed Project KF, repo canonical copy, installed Skill copies, global CLAUDE.md for universal disciplines), list each location as a propagation item so the delta lands everywhere, not just the seed.
 
 ```
 **Propagation items:**
-1. New Skill (rootnode-session-handoff) → build_context.md Skills inventory, Memory, CONTENTS_INDEX.md if the Skill is backed by a knowledge file
-2. Workflow convention change → Memory entry capturing the new convention so future sessions follow the updated pattern
+1. KF Delta {n} (methodology change) → seed KF + canonical-kfs/ + installed Skill copies + (if universal) global CLAUDE.md
+2. New Skill / version bump → README, build_context.md Skills inventory, Memory, personal install
+3. Workflow-convention change → Memory entry so future sessions follow it
 ```
 
-Or: "**Propagation:** None — no system-wide facts changed this session."
+Or: "**Propagation:** None — no system-wide facts changed."
 
 ---
 
-## Chain-of-Handoff Handling
+## Chain-of-handoff handling
 
-When the current session started from a prior handoff document, the closeout must account for the chain.
+When this session started from a prior handoff, the closeout accounts for the chain.
 
-### Rules
-
-1. **The new handoff replaces the prior one.** The next session uploads only the new handoff — not both. The new document must be self-contained.
-
-2. **Carry forward unresolved items.** Check the prior handoff's `open_items` and `items_carried_forward`. Any item not resolved in this session must appear in the new handoff's `items_carried_forward` element with a note on why it wasn't addressed.
-
-3. **Reference, don't reproduce.** If the prior handoff's decisions or ingested content are still relevant, the new handoff captures them as part of its own decisions or ingested content sections. Don't create a "prior session" section — integrate the still-relevant content into the standard structure.
-
-4. **Break long chains.** If a handoff chain exceeds 3 sessions, audit for items that have been carried forward without action across multiple handoffs. These are likely either stale (remove them) or blocked (escalate their priority). Flag any item carried forward for 2+ handoffs.
-
-### Chain Awareness in the Closeout
+1. **The new handoff replaces the prior one.** The next session uploads only the new handoff (plus any files in its load list) — not the whole chain by default. The new document is self-contained unless its reach-back line names predecessors.
+2. **Carry forward via the ledger.** Every still-pending KF delta and unresolved open item from the predecessor is inherited with origin preserved; applied/resolved items drop. (See the ledger rules in `handoff-template.md`.)
+3. **Reference, don't reproduce.** Still-relevant predecessor decisions and ingested content are integrated into this handoff's own sections — no "prior session" section. This is what earns a `Self-contained` reach-back.
+4. **Audit long chains.** Flag any item carried across 2+ handoffs — stale (remove) or blocked (escalate). The datetime origin id makes "how long has this been carried" answerable at a glance.
 
 ```
-**Handoff chain:** This is session 3 in a chain (started from {prefix}_session_handoff_2026-04-11.xml → {prefix}_session_handoff_2026-04-12.xml → this session).
-- 1 item carried forward from session 1 (still unresolved — elevated to high priority)
-- 2 items from session 2 resolved this session
-- 1 new item added this session
+**Handoff chain:** Session 3 (SH 062326-0900 → SH 062426-1015 → this).
+- 1 KF delta carried from SH 062326-0900, still pending (elevated)
+- 1 open item from SH 062426-1015 resolved this session
+- 1 new KF delta added; reach-back Self-contained
 ```
 
-Or for a new chain: "**Handoff chain:** New chain — no prior handoff."
+Or: "**Handoff chain:** New chain — no prior handoff."
 
 ---
 
-## Cross-Project Handoff Items
+## Cross-project handoff items
 
-When session work produces artifacts or decisions intended for another project, the closeout flags them separately from within-project items.
+When session work produces artifacts or decisions for another project, flag them separately.
 
-### What Qualifies
-
-- Design specs intended for build in another project
-- Decisions that affect another project's architecture or content
-- Files that need to be loaded into another project's knowledge base
-- Information that should be propagated to another project's Memory or CI
-
-### Recommendation Format
+Qualifies: design specs for build elsewhere, decisions affecting another project's architecture, files to load into another project's knowledge base, information to propagate to another project's Memory or CI.
 
 ```
 **Cross-project items:**
-1. Design spec produced this session → target build project for implementation
-2. Strategic positioning update → strategy project (note any reference files that should be loaded into context for that work)
-3. Phase status update → cross-project registry, if your portfolio maintains one
+1. Design spec produced → target build project for implementation
+2. Strategic positioning update → strategy project (note reference files to load)
 ```
 
 Or: "**Cross-project items:** None — all work contained within this project."

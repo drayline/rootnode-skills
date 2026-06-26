@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "1.0.1"
   original-source: "PROJECT_OPTIMIZER.md, AUDIT_FRAMEWORK.md, OPTIMIZATION_REFERENCE.md"
 ---
 
@@ -77,6 +77,8 @@ The audit produces value at every information level. The minimum viable input is
 State explicitly what could not be evaluated due to missing information. Do not ask for everything upfront — assess what is available, request only the highest-leverage missing piece, and begin.
 
 ## The Global Audit Pipeline
+
+Produce a global-layer audit that names what's structurally weak in the user's foundation — User Preferences, Styles, Global Memory, Skills, Connectors — and prescribes evolution-aware fixes that strengthen every future Project. Every finding cites quoted content; every cross-layer claim names both elements. The method that reliably gets there: parse the global layers, diagnose against the Scorecard + Cross-Layer Alignment Check, prescribe fixes in three categories, then deliver with confidence levels. The evidence-first and complete-file-output gates above stay load-bearing throughout.
 
 ### Stage 1: Parse Global Layers
 

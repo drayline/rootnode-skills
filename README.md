@@ -10,7 +10,7 @@
 
 27 Skills that diagnose, build, and optimize every architectural layer across chat-Projects, conversations, and Claude Code repos.
 
-![Skills](https://img.shields.io/badge/Skills-27-CC8A0A) ![Version](https://img.shields.io/badge/Version-v3.0-CC8A0A) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Calibrated](https://img.shields.io/badge/Calibrated-Claude_Opus_4.7-8B929E)
+![Skills](https://img.shields.io/badge/Skills-27-CC8A0A) ![Version](https://img.shields.io/badge/Version-v3.1-CC8A0A) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Calibrated](https://img.shields.io/badge/Calibrated-Claude_Opus_4.8-8B929E)
 
 ---
 
@@ -28,7 +28,7 @@ The two dual-surface Skills (`rootnode-skill-builder` and `rootnode-cc-design`) 
 > Activate any Skill with natural language — no commands, no special syntax. Install all 27 for the full architecture system; every Skill also works standalone.
 
 > [!TIP]
-> **Calibrated for Claude Opus 4.7.** Most Skills work fully on every Claude model; a few produce best results on Opus. See [Model Compatibility](#model-compatibility) for details.
+> **Calibrated for Claude Opus 4.8.** Most Skills work fully on every Claude model; a few produce best results on Opus. See [Model Compatibility](#model-compatibility) for details.
 
 ---
 
@@ -106,13 +106,13 @@ These Skills install once and operate identically across the two surfaces, which
 
 ## Model Compatibility
 
-Skills are calibrated against Claude Opus 4.7 as the primary target. They use a three-tier compatibility model based on how each Skill behaves across model classes.
+Skills are calibrated against Claude Opus 4.8 as the primary target. They use a three-tier compatibility model based on how each Skill behaves across model classes.
 
 **Tier 1 — Model-compatible (13 Skills).** Catalog retrievals, template lookups, decision logic, routing, and selection. Work fully on Opus, Sonnet, and Haiku. Output quality is consistent across models because the Skill's job is structured retrieval or rule evaluation, not multi-dimension analysis.
 
 **Tier 2 — Sonnet-graceful (7 Skills).** Heavier analytical work that includes a token-budget awareness clause for graceful degradation. The Skill recognizes when running on a smaller model and adjusts depth without breaking. Output may be slightly less complete on Sonnet or Haiku, but every Skill component still produces.
 
-**Tier 3 — Opus-recommended (7 Skills).** Multi-dimension analysis, full audits, complete environment design, and comprehensive Skill builds. These Skills run cleanly on Opus 4.7. Sonnet output may be less complete; Haiku output may miss higher-order findings. Each T3 Skill prints an effort guidance note on activation when run on a non-Opus model so you know what to expect.
+**Tier 3 — Opus-recommended (7 Skills).** Multi-dimension analysis, full audits, complete environment design, and comprehensive Skill builds. These Skills run cleanly on Opus 4.8. Sonnet output may be less complete; Haiku output may miss higher-order findings. Each T3 Skill prints an effort guidance note on activation when run on a non-Opus model so you know what to expect.
 
 The tier values appear in every catalog table below. T1 and T2 Skills are safe to use on any model. T3 Skills are best on Opus when the deliverable is high-stakes — full audits, comprehensive Skill builds, complete environment scaffolds.
 

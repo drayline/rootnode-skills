@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.2"
+  version: "1.2.1"
   original-source: "AUDIT_FRAMEWORK.md, PROJECT_OPTIMIZER.md"
 ---
 
@@ -67,6 +67,8 @@ This Skill's primary scope is Project-level auditing. When the user also provide
 **When to recommend escalation:** If the audit detects multiple cross-layer issues (3+), or if issues require modifying global layers (not just the Project), recommend rootnode-global-audit or rootnode-full-stack-audit for comprehensive evaluation. This Skill does not modify global layers — it detects Project-side symptoms of global-layer problems.
 
 ## Audit Workflow
+
+Produce a Project audit that names what's structurally wrong, points to the specific evidence, and prescribes actionable fixes ordered by impact — every finding traceable to a quoted component, every fix concrete enough to paste. The method that reliably gets there: parse the architecture, score the six dimensions, run the anti-pattern sweep, produce ordered findings, then (Full Audit) run the holistic quality criteria. The evidence-first principle above is the load-bearing gate; the per-dimension "state score / cite evidence / explain mapping" rule inside Step 2 is the same gate at finer grain.
 
 ### Step 1: Parse the Project Architecture
 

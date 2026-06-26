@@ -91,6 +91,28 @@ Write the surfaced change to the session's audit artifact (e.g., `audit/<session
 
 ---
 
+## Packaging conventions
+
+Two zip shapes, one per surface. The source folder on disk (`rootnode-<skill>/`) is **un-suffixed**; the `-cp`/`-cc` suffix is a packaging-output naming convention applied to the zip, never to the source folder.
+
+- **`-cp` = flat.** Zip contents sit at the root — `SKILL.md`, `references/`, `agents/`, etc. directly, with no wrapper folder — because CP (Claude.ai Projects) Skill upload reads `SKILL.md` from the zip root.
+- **`-cc` = wrapper.** Zip contains a nested `rootnode-<skill>/` folder with the contents inside it. CC keeps each Skill as a folder at `~/.claude/skills/rootnode-<skill>/`, so the wrapper exists *so that extracting the zip yields the ready-named folder to drop in*. A flat `-cc` zip would extract loose files with no folder and break the install.
+
+Surface → shape → release artifact:
+
+- cp-only Skills → flat → `rootnode-<skill>-cp.zip` — **22**
+- cc-only Skills → wrapper → `rootnode-<skill>-cc.zip` — **3**
+- dual-surface Skills (`skill-builder`, `cc-design`) → both → `-cp.zip` + `-cc.zip` — **2 × 2 = 4**
+- **29 release artifacts from 27 source folders.**
+
+Shipping a CC Skill flat, or a CP Skill wrapped, is an install failure — not a cosmetic mismatch.
+
+**Release packaging:** `build_release_artifacts.py` is the single entry point. It reads the surface map (`CC_ONLY` = critic-gate / mode-router / repo-hygiene; `DUAL` = skill-builder / cc-design; all other `rootnode-*` = cp-only), emits flat for each `-cp` and wrapper for each `-cc`, applies the suffix, and self-asserts the 24 `-cp` + 5 `-cc` = 29 total. The underlying shapes come from `build_releases.py` (flat) and `package_skill.py` (wrapper); neither suffixes nor routes by surface, which is why the orchestrator exists.
+
+Canonical methodology lives in **SBD §4.7**, which needs three post-v3.1 fixes: (1) the surface → shape → suffix mapping above supersedes its "flat = the release form" framing — the release ships *both* shapes, surface-mapped; (2) the wrapper script is `package_skill.py`, not `package_zip.py`; (3) `package_skill.py` emits `.skill` while the release orchestrator emits `.zip`. Refinement queued.
+
+---
+
 ## When this CLAUDE.md is insufficient
 
 If a session reaches a decision point that this file does not address AND no session prompt provides explicit authorization, halt and ask Aaron for a decision rather than guessing. The cost of one round-trip is far less than a confident wrong action.

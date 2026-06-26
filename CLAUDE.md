@@ -53,7 +53,7 @@ In addition to `~/.claude/CLAUDE.md` universal halt triggers, halt for any of th
 2. **Force-push to any branch.** Halt; never force-push without explicit operator scope-expansion authorization.
 3. **Skill source modification outside an approved session prompt.** `rootnode-*/` content changes require a session prompt referencing a locked design spec.
 4. **Tag or release operations outside a release prompt.** Tagging and GitHub release creation belong to dedicated release prompts (e.g., `root_CC_skill_builder_v3_release.md`); do not improvise.
-5. **Modification of `audit/canonical-kfs/` outside an approved sync precondition step.** These files mirror approved seed Project KFs; only sync from `design/staging-kf/` as part of an approved release branch precondition (Phase 32b §32b.1.5 pattern).
+5. **Modification of `audit/canonical-kfs/` outside an approved sync precondition step.** These files mirror approved seed Project KFs; only sync from `design/staging-kf/` as part of an approved release branch precondition (Phase 32b §32b.1.5 pattern). Do not hand-edit them, even to fix a KF drift you notice mid-session — surface the change instead (see *Knowledge-file change surfacing* below).
 6. **Build prompt halt summary instructs continuation phrase mismatch.** If a session prompt specifies an exact continuation phrase to signal next phase (e.g., `"Phase 32a closed; proceed with Phase 32b."`) and operator response is ambiguous or different, halt and ask one targeted clarifying question.
 
 ---
@@ -68,6 +68,16 @@ Before any substantive work in this repo:
 4. For session prompts that modify Skill content: verify the referenced design spec exists at the path the session prompt cites.
 5. For session prompts that touch `audit/canonical-kfs/`: verify the corresponding `design/staging-kf/` files exist and reflect the expected v3 (or whichever version) methodology.
 6. Confirm `gh auth status` shows authenticated GitHub CLI access for sessions that involve PRs or releases.
+
+---
+
+## Knowledge-file change surfacing
+
+When a session's edits to Skill content (or any repo content that mirrors seed-Project methodology) imply a change to a knowledge file, **surface the KF-update block — do not silently skip it, and do not directly edit `audit/canonical-kfs/`.**
+
+Write the surfaced change to the session's audit artifact (e.g., `audit/<session>/kf-update-blocks.md`) as a delta: target KF, action (ADD / REVISE), the block, and the rationale. The seed Project is the authoritative source for KF content; surfaced blocks are applied to the seed-Project KFs first, staged to `design/staging-kf/`, then synced to `audit/canonical-kfs/` as a release-branch precondition (the sync path halt #5 authorizes).
+
+**Surfacing is not editing.** The no-direct-edit rule (halt #5) protects mirror integrity — the seed-vs-canonical staleness diff (Observation O10) only catches drift if `canonical-kfs/` is a controlled mirror of the approved seed KFs. The surfacing discipline ensures a needed KF update is captured and routed, never lost. A session that recalibrates Skills and notices a parallel KF line (e.g., a model-calibration line that also lives in the seed KFs and the mirror) surfaces the block; it does not reach into `canonical-kfs/` to fix it in place.
 
 ---
 

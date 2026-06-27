@@ -109,7 +109,13 @@ Shipping a CC Skill flat, or a CP Skill wrapped, is an install failure — not a
 
 **Release packaging:** `build_release_artifacts.py` is the single entry point. It reads the surface map (`CC_ONLY` = critic-gate / mode-router / repo-hygiene; `DUAL` = skill-builder / cc-design; all other `rootnode-*` = cp-only), emits flat for each `-cp` and wrapper for each `-cc`, applies the suffix, and self-asserts the 24 `-cp` + 5 `-cc` = 29 total. The underlying shapes come from `build_releases.py` (flat) and `package_skill.py` (wrapper); neither suffixes nor routes by surface, which is why the orchestrator exists.
 
-Canonical methodology lives in **SBD §4.7**, which needs three post-v3.1 fixes: (1) the surface → shape → suffix mapping above supersedes its "flat = the release form" framing — the release ships *both* shapes, surface-mapped; (2) the wrapper script is `package_skill.py`, not `package_zip.py`; (3) `package_skill.py` emits `.skill` while the release orchestrator emits `.zip`. Refinement queued.
+Canonical methodology lives in **SBD §4.7** (surface-mapped model, reconciled in the v3.1 propagation cycle): §4.7 frames the release as shipping *both* shapes surface-mapped (superseding the earlier "flat = the release form" framing); the repo-level wrapper tool is `package_skill.py` (emits `.skill`), and the orchestrator emits `.zip`. Note: the `skill-builder` Skill's internal `scripts/package_zip.py` is a *separate* build-pipeline packager (adapted from `package_skill.py` for `.zip` + `eval-viewer/` inclusion) — not the repo-level wrapper tool, and not to be conflated with it.
+
+---
+
+## Releases
+
+Before cutting a catalog release, read `docs/root_SKILLS_RELEASE_PLAYBOOK.md`. It carries the release model (27 per-Skill releases + a notes-plus-bundle `catalog-vN` umbrella marked `--latest` — catalog-index notes plus a `rootnode-catalog-vN.zip` bundle of all 29 artifacts), the two-phase branch-protection-aware process (content PR → operator merge → tags/releases off merged `main`), the packaging convention, tag naming, and the anti-churn rules. The executable step-by-step is the versioned release prompt (e.g. `root_CC_PROMPT_v3_1_release.md`); the playbook is the model and the standing rules behind it.
 
 ---
 

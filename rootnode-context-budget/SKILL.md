@@ -1,8 +1,8 @@
 ---
 name: rootnode-context-budget
 description: >-
-  Analyzes Claude Project context budget using the two-pool architecture:
-  knowledge files (~66,500 token RAG threshold) vs. threshold-exempt overhead.
+  Analyzes Claude Project context budget under the automatic-RAG-by-window
+  model: knowledge files vs. threshold-exempt overhead (Skills, MCPs, CI, Memory).
   Two modes: Quick Diagnostic and Full Budget Audit. Use when user says "check
   my context budget," "how much context am I using," "is my project too big,"
   "optimize my token usage," "tier my files," "optimize for RAG," "improve
@@ -13,20 +13,28 @@ description: >-
   Architecture ≤ 3. Do NOT use for content placement decisions (use
   rootnode-memory-optimization if available), full project audits (use
   rootnode-project-audit if available), or behavioral tuning (use
-  rootnode-behavioral-tuning if available). Opus recommended; non-Opus models
-  may produce less complete analysis.
+  rootnode-behavioral-tuning if available). Run on Opus 5 or Sonnet 5 at `high` effort (both defaults); depth
+  reduces on legacy models.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0"
+  version: "4.0.0"
   original-source: "root_OPTIMIZATION_REFERENCE.md"
 ---
 
 # Context Budget Analysis
 
-> **Calibration:** Tier 3, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) - run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
 
 Analyze Claude Project context budget health. Determine operating mode (full-context vs. retrieval). Produce tiered file placement recommendations with a strategy matched to the project's growth trajectory, work-phase timing, and content routing needs.
+
+## v4.0 update — context landscape (D6 rebuild)
+
+The v4.0 alignment cycle rebuilt the Context Budget Principles section of `root_OPTIMIZATION_REFERENCE.md` to reflect the current automatic-RAG-by-window model. Anthropic Projects now activate RAG when the knowledge base approaches or exceeds the underlying model's context window — no fixed token threshold. Under the current landscape (Fable 5, Opus 5, Sonnet 5 all at 1M tokens; Haiku 4.5 at 200K), Projects that were in retrieval mode under a 200K plan may now be in full-context mode without content changes. Verify current mode by checking for `project_knowledge_search` in Claude's available tools before scoring.
+
+The historical Phase 22 measurement (~66,500 tokens at ~33% of a 200K window against Opus 4.6) is preserved in OPT_REF as historical context. This Skill's per-file evaluation and tier-band recommendations still apply — the *reasoning* about placement, cross-file dependency, and content type is unchanged; only the *threshold framing* shifted from a fixed number to window-relative.
+
+When a specific number matters (borderline projects), measure empirically rather than assuming the 66,500 figure. See OPT_REF's "Empirical Threshold Measurement" section.
 
 ## Important
 
@@ -34,7 +42,7 @@ Analyze Claude Project context budget health. Determine operating mode (full-con
 
 **Evaluate files objectively.** Users may resist demoting files they authored or consider important. Score every file on the six dimensions regardless of stated preferences. If a file scores as Tier 3, say so clearly.
 
-**Do not assume full-context is always the goal.** With a ~66,500 token ceiling, many legitimate projects operate in retrieval mode. Assess the user's workload pattern before prescribing optimization strategy.
+**Do not assume full-context is always the goal.** Under the current automatic-RAG-by-window model, many legitimate projects operate in retrieval mode by design. Assess the user's workload pattern before prescribing optimization strategy.
 
 **Skills and MCPs cannot trigger RAG.** Do not recommend reducing Skills or disconnecting MCPs to recover knowledge file headroom. The two budget pools are independent for threshold purposes.
 
@@ -48,7 +56,7 @@ Analyze Claude Project context budget health. Determine operating mode (full-con
 
 This Skill performs per-file evaluation against the six File Evaluation Dimensions, growth trajectory analysis, content routing decisions, and phased optimization planning with compression safeguards. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, per-file evaluation and compression quality judgment may compress — set effort higher for intelligence-sensitive audits.
 
-On non-Opus models (Sonnet 4.6, Haiku 4.5 with extended thinking enabled), expect compressed per-file evaluation, surface-level tier recommendations, and reduced synthesis across the growth trajectory. Quick Diagnostic mode degrades less than Full Budget Audit mode. The Skill will execute and produce correctly-shaped output; users should weight findings accordingly. Haiku without extended thinking is not a supported deployment target for this Skill.
+On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and Haiku 4.5 with extended thinking, expect compressed per-file evaluation, surface-level tier recommendations, and reduced synthesis across the growth trajectory. Quick Diagnostic mode degrades less than Full Budget Audit mode. Fallback-graceful on Opus 4.8 (classifier-flagged requests may route there silently). The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them. Haiku 4.5 without extended thinking is out of scope.
 
 ## Core Concepts
 

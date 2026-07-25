@@ -16,17 +16,40 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.1"
+  version: "4.0.0"
   original-source: "DOMAIN_PACK_AGENTIC_CONTEXT.md"
 ---
 
 # Agentic & Context Engineering — Prompt Methodology
 
-> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) - runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured retrieval, rule evaluation, or template lookup - output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
 
 Specialized approaches for designing AI agent systems: the system prompts agents follow, the tool definitions they consume, the context architectures they operate within, the failure modes they encounter, and the evaluation criteria that measure their performance.
 
 **This Skill is about designing agents, not using them.** Use it when the task is authoring an agent's behavioral instructions, tool interfaces, or context management strategy. Do not use it for the software infrastructure that hosts agents (servers, APIs, deployment) — standard technical approaches cover that.
+
+## v4.0 update — refusal & fallback semantics (Opus 5, Fable 5)
+
+When designing agents that build on Opus 5 or Fable 5, account for safety-classifier refusals as a first-class signal — not an error condition.
+
+**Refusal categories** (from Anthropic's refusals-and-fallback page):
+- `cyber` — could enable cyber harm (malware, exploits). Benign cybersecurity work can also trigger.
+- `bio` — biological harm risk. Benign life-sciences work can also trigger.
+- `frontier_llm` — could assist development of competing AI models.
+- `reasoning_extraction` — asks the model to reproduce its internal reasoning in the response text. Fix: use adaptive thinking rather than asking for reproduced reasoning.
+- `general_harms` — catch-all category for other flagged content.
+
+**`fallback` content block and `usage.iterations` accounting.** A response served through a fallback carries a `fallback` content block marking the model boundary: `{"type": "fallback", "from": {"model": ...}, "to": {"model": ...}}`. The `usage.iterations` array records every attempt — each declined attempt as `type: "message"`, the served attempt as `type: "fallback_message"`. The top-level `model` field names the model that produced the returned message.
+
+**Server-side fallback API** — beta headers:
+- `server-side-fallback-2026-07-01` — supports both `"default"` mode (Anthropic-recommended per-category fallback routing) and explicit-list mode (up to 3 fallback models).
+- `server-side-fallback-2026-06-01` — legacy header, explicit-list only.
+
+Server-side fallback is Claude API only — not available on Amazon Bedrock, Google Cloud, or Microsoft Foundry. On those platforms use client-side SDK middleware.
+
+**Instrument refusals as their own signal.** A refusal is an HTTP 200 with `stop_reason: "refusal"`. Error-rate monitoring and 5xx dashboards never see refusals. Emit one event per refusal and one per fallback-served response (identified by the `fallback_message` entry in `usage.iterations`); alert on the gap between the two counts. When designing agents, treat refusal instrumentation as a required observability layer — the alert path is different from the error path.
+
+**Give sub-agent calls their own fallback.** The `fallbacks` parameter does not propagate into model calls made from inside tool execution. Each agent surface configures fallback independently.
 
 ## When to Use This Skill
 

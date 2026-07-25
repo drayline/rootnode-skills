@@ -19,12 +19,14 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0"
+  version: "4.0.0"
   original-source: "Synthesized from root_AGENT_ENVIRONMENT_ARCHITECTURE.md (surface-invariant placement discipline), root_CC_ENVIRONMENT_GUIDE.md (7-layer model, discipline practices, hooks-vs-prompts boundary), root_AGENT_ANTI_PATTERNS.md (canonical anti-pattern catalog with surface tags). Production-validated against a CC deployment sweep on 2026-05-04 surfacing 23 findings across 14 categories with three-form authorization use and Path 3 commit-plan adaptation accepted as defer-to-downstream."
   discipline_post: phase-30
 ---
 
 # rootnode-repo-hygiene
+
+> **Calibration:** Tier 3 (High-effort recommended) - run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
 
 A two-phase Skill for auditing and cleaning up Claude Code repositories. Phase 1 sweeps the repo across 14 categories of hygiene concern plus a cross-category 7-layer placement leak check, producing a `HYGIENE_REPORT.md`. Phase 2 reads `[APPROVED]` markers placed in that file and executes the marked findings under critic-gate composition with halt-on-failure discipline.
 

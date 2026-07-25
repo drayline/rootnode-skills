@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "3.0"
+  version: "4.0.0"
   predecessor: "rootnode-skill-builder v2.1"
   original-source: "root.node seed Project KFs (post-Phase 32a methodology updates) + rootnode-skill-builder v2.1 source"
   discipline_post: phase-30
@@ -26,7 +26,7 @@ metadata:
 
 # Skill Builder
 
-> **Calibration:** Tier 2, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 2 (Sonnet-graceful) — designed and tested against Opus 5 + Sonnet 5 dual-primary. Runs correctly on Sonnet 4.6 (legacy-graceful) with slightly less depth on multi-dimensional analysis; on Haiku 4.5 with extended thinking; fallback-graceful on Opus 4.8. Effort default is `high` on Opus 5 and Sonnet 5; step down to `medium` for cost-sensitive runs where evals show quality holds. D9a graders run on Opus 5 or Sonnet 5. See repository README for model compatibility.
 
 > **Version 3.0:** Methodology + tooling release. D9 expanded into D9a/D9b/D9c sub-levels (empirical Tier A / empirical Tier B / analytical floor). Adds Description Refinement Loop methodology (manual or automated via `scripts/description_optimizer.py`). Adds Tier A/B/C environment-adaptive degradation. Adds executable layer (`scripts/`, `agents/`, `eval-viewer/`) ported from upstream Anthropic skill-creator with content-class-policy adaptation. v2.1 build methodology preserved verbatim where unchanged.
 

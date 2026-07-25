@@ -15,13 +15,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.1"
+  version: "4.0.0"
   original-source: "DOMAIN_PACK_SOFTWARE_ENGINEERING.md"
 ---
 
 # Software Engineering Prompt Methodology
 
-> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) - runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured retrieval, rule evaluation, or template lookup - output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
 
 Specialized approaches for building Claude prompts that handle software engineering tasks — reliability engineering, security analysis, code review, API design, performance analysis, threat modeling, and engineering document formats (RFCs, ADRs, runbooks, code review feedback).
 
@@ -32,6 +32,26 @@ Specialized approaches for building Claude prompts that handle software engineer
 - 4 reasoning methodologies (Code & Design Review, API Design, Performance & Scalability Analysis, Threat Modeling) — see `references/reasoning-approaches.md`
 - 4 output format specifications (RFC, ADR, Runbook, Code Review Feedback) — see `references/output-formats.md`
 - Behavioral countermeasures for engineering-specific Claude failure modes
+
+## v4.0 update — Opus 5 cyber classifier posture
+
+Opus 5's cybersecurity classifiers are proportionally less restrictive than Fable 5's — expected to intervene approximately 85% less often (per Anthropic's Opus 5 announcement). For defensive-security software-engineering workflows, Opus 5 is the friction-optimal target.
+
+**Permitted on Opus 5:**
+- Source-code vulnerability finding and review.
+- Defensive analysis of application code, configurations, and infrastructure-as-code.
+- Threat modeling against source-available systems.
+
+**Blocked on Opus 5 (routes to fallback):**
+- Binary-based vulnerability scanning (opaque binaries analyzed for exploits).
+- Penetration testing (active exploitation against systems).
+- Exploit generation and weaponization.
+
+The 85%-less-often intervention estimate is Fable-5-relative, not absolute — Opus 5 classifiers still trigger on the blocked categories above.
+
+**Fallback destination.** On Claude.ai, Claude Code, and Claude Cowork, Opus 5 refusals fall back to Opus 4.8 by default. Skills designed for defensive-security workflows should produce correct-shape output on Opus 4.8 (fallback-graceful) as well as on Opus 5 (primary).
+
+**Conservative-review-instruction fix.** For code-review prompts, do NOT use `only report high-severity issues` or `be conservative` — Opus 5 follows literally and under-reports. Rewrite to report-everything-then-filter form: "Report every issue you find, categorized by severity. In a separate pass at the end, filter to [severity threshold] and list only those in the final report. Include the full list in an appendix." See `root_OPTIMIZATION_REFERENCE.md` "Prompt/environment-conditional defects" for details.
 
 ## How to Use This Skill
 

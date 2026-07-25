@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.1.2"
+  version: "4.0.0"
   original-source: "root.node design 2026 — runtime layer (gates, router, profile builder)"
   companion-files: "schema/profile.schema.json, profiles/strict.json, profiles/balanced.json, profiles/lenient.json, references/examples.md, references/troubleshooting.md, references/sensing-triggers-detailed.md"
   changelog: "1.1.2 (2026-05-05): Activation precision tuning. Added two symptom-phrased triggers (\"are we ready to ship this,\" \"should I just hand this off\") to broaden activation under user vocabulary that doesn't include the word 'handoff.' No methodology, schema, or workflow changes; behavior identical to 1.1.1 once activated. 1.1.1 (2026-05-01): Structural patch to align with rootnode authoring convention. Added references/ folder with three on-demand-loaded files (examples, troubleshooting, sensing-triggers-detailed). SKILL.md body slimmed ~23% via content extraction (Examples and Troubleshooting sections moved out; sensing-triggers detail expanded into a dedicated reference); behavior identical to 1.1. 1.1 (2026-05-01): Added Mode 2 (proactive sensing) and Mode 3 (conversational walkthrough). Mode 1 (deliberate gate) behavior unchanged from 1.0 — backward compatible. Deployment target: chat-Project (CP) side of CP/CC split."
@@ -27,9 +27,19 @@ metadata:
 
 # Handoff Trigger Check
 
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured 7-condition rubric evaluation — output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
+
 Evaluate whether work-in-design is ready to hand off to autonomous execution. Runs a 7-condition gate, applies the active profile's pass threshold, and returns a structured verdict. The single most important check before letting an agent runtime — Claude Code, an n8n workflow, an OpenClaw instance, or any other autonomous executor — take over from human-led design.
 
 The premise: **the costliest mistake in human/agent collaboration is holding work in human hands after it's ready to be executed.** A documented production case shipped 27 similar instances in under 24 hours of autonomous Claude Code time after a week of human-led ground-truth setup on the first instance; the week was necessary, but the cost was holding instances 2-27 in human hands for any time at all after the engine passed verification on instance 1. This Skill exists to make that handoff moment a measurable trigger, not a vibes call.
+
+## v4.0 update — condition 7 (token/usage budget headroom) under 1M windows
+
+Every current top-tier and mid-tier chat model — Fable 5, Opus 5, Sonnet 5 — supports a 1M-token context window (1M is both default and maximum on Opus 5; no smaller context variant). Haiku 4.5 remains at 200K. The token-headroom math in condition 7 should account for the larger window: a chat conversation that consumed ~150K tokens leaves substantial headroom on any 1M-window primary model, but crowds the 200K Haiku 4.5 window.
+
+**Effort defaults on Opus 5 / Sonnet 5.** Both models default to `high` on Claude API and Claude Code. Effort controls thinking depth, not visible response length — a long conversation approaching context limits is not fixed by lowering effort. If context is the binding constraint, condition 7 fails; take that as a signal to shorten the conversation or split the handoff, not to lower effort.
+
+**Sonnet 5 tokenizer note.** Sonnet 5 uses approximately 30% more tokens per unit of content than Sonnet 4.6 (per Anthropic's whats-new-sonnet-5 page). If the condition 7 evaluation is against a Sonnet-side conversation and the token estimate was calibrated to Sonnet 4.6, apply a ~1.30x multiplier to the estimate before comparing against the target-model window.
 
 ## Important
 

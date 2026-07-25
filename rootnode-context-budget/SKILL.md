@@ -28,14 +28,6 @@ metadata:
 
 Analyze Claude Project context budget health. Determine operating mode (full-context vs. retrieval). Produce tiered file placement recommendations with a strategy matched to the project's growth trajectory, work-phase timing, and content routing needs.
 
-## v4.0 update — context landscape (D6 rebuild)
-
-The v4.0 alignment cycle rebuilt the Context Budget Principles section of `root_OPTIMIZATION_REFERENCE.md` to reflect the current automatic-RAG-by-window model. Anthropic Projects now activate RAG when the knowledge base approaches or exceeds the underlying model's context window — no fixed token threshold. Under the current landscape (Fable 5, Opus 5, Sonnet 5 all at 1M tokens; Haiku 4.5 at 200K), Projects that were in retrieval mode under a 200K plan may now be in full-context mode without content changes. Verify current mode by checking for `project_knowledge_search` in Claude's available tools before scoring.
-
-The historical Phase 22 measurement (~66,500 tokens at ~33% of a 200K window against Opus 4.6) is preserved in OPT_REF as historical context. This Skill's per-file evaluation and tier-band recommendations still apply — the *reasoning* about placement, cross-file dependency, and content type is unchanged; only the *threshold framing* shifted from a fixed number to window-relative.
-
-When a specific number matters (borderline projects), measure empirically rather than assuming the 66,500 figure. See OPT_REF's "Empirical Threshold Measurement" section.
-
 ## Important
 
 **Token estimates are inherently approximate.** Always label token counts as "estimated" and note a ±15% margin. Never state a precise token count as fact. Use `ls -la /mnt/project/` for byte counts and divide by 4 for rough token estimates.
@@ -64,27 +56,47 @@ On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with
 
 Claude Projects operate in one of two modes:
 
-- **Full-context mode:** All knowledge files loaded into context every turn. Default when total knowledge file tokens are under the threshold.
-- **Retrieval mode (RAG):** Knowledge files searched via `project_knowledge_search`; only relevant chunks loaded per turn. Activates when knowledge files exceed the token threshold.
+- **Full-context mode:** All knowledge files loaded into context every turn. Default when total knowledge file tokens stay comfortably below the underlying model's context window.
+- **Retrieval mode (RAG):** Knowledge files searched via `project_knowledge_search`; only relevant chunks loaded per turn. Activates automatically when the knowledge base approaches or exceeds the model's context window (per Anthropic's support article — see `root_OPTIMIZATION_REFERENCE.md` "Context Budget Principles").
 
-**Detection:** Check whether `project_knowledge_search` is present in available tools. If present, retrieval mode is active. The "Indexing" label in the project UI files panel is also a visible indicator.
+**Detection:** Check whether `project_knowledge_search` is present in available tools. If present, retrieval mode is active. The "Indexing" label in the project UI files panel is also a visible indicator. Verify current mode by direct check, not by inference from token counts — the automatic-by-window rule means the same project may be in different modes under different models or plan states.
+
+### Context window ≠ RAG threshold
+
+Two conceptually distinct things that were numerically entangled in the 200K era:
+
+- **Context window** — the model's maximum input capacity, measured in tokens per model. Currently 1M for Fable 5 / Opus 5 / Sonnet 5; 200K for Haiku 4.5. Plan-dependent for Anthropic Projects.
+- **RAG threshold** — the platform-side decision point where Projects switch from full-context loading to retrieval mode. Now tracks the window (automatic per current article), rather than being a fraction of it.
+
+State the two separately in analysis. Do not carry a fixed number forward as a live threshold; the threshold moves with the model, plan, and platform. See "Historical context" below for the Phase 22 measurement that produced the ~66,500 figure previously used as an anchor.
 
 ### The Two-Pool Budget Architecture
 
-| Budget Pool | Allocation (200K window) | Contents | RAG Impact |
-|---|---|---|---|
-| Knowledge file budget | ~66,500 tokens (~33%) | Knowledge files only (all types: .md, .pdf, .docx, .xlsx, .csv, .txt, images, GitHub repos) | Exceeding triggers RAG |
-| Conversation budget | ~133,500 tokens (~67%) | Platform overhead, Skills, MCPs, CI, Memory, preferences, conversation, responses | Cannot trigger RAG |
+The knowledge-budget vs. conversation-budget distinction survives the platform change. The pools are functionally distinct: only the knowledge-file pool can trigger RAG activation; the conversation pool (platform overhead + Skills + MCPs + CI + Memory + Preferences + conversation history + responses) affects conversation quality but cannot cause a mode switch.
 
-**Key implication:** Adding Skills, connecting MCPs, or expanding Custom Instructions cannot trigger RAG mode. Conversely, reducing them cannot recover knowledge file headroom. The two pools are independent.
+| Budget Pool | Contents | RAG Impact |
+|---|---|---|
+| Knowledge file budget | Knowledge files only (all types: .md, .pdf, .docx, .xlsx, .csv, .txt, images, GitHub-connected repos) | Approaching / exceeding the model's window triggers RAG |
+| Conversation budget | Platform overhead, Skills, MCPs, CI, Memory, Preferences, conversation history, responses | Cannot trigger RAG regardless of size |
+
+**Key implication (preserved from the 200K era, still true):** Adding Skills, connecting MCPs, or expanding Custom Instructions cannot trigger RAG mode. Conversely, reducing them cannot recover knowledge file headroom. The two pools are independent for threshold purposes.
+
+Under 1M-window primary models the two pools sit further apart in absolute terms than they did under the 200K era — a project can be well below the RAG threshold while a long agentic conversation still triggers compaction. Under the 200K Haiku window, the two mechanisms sit closer together.
 
 ### Token Estimation
 
-Estimate knowledge file tokens: run `ls -la /mnt/project/` for byte sizes, divide each by 4, sum. Compare against the ~66,500 token threshold.
+Estimate knowledge file tokens: run `ls -la /mnt/project/` for byte sizes, divide each by 4, sum.
 
 Conversion rates: English prose ≈ 4 characters/token. Structured content (XML, code, tables) ≈ 3.25 characters/token. Mixed markdown ≈ 3.75 characters/token. Estimates are ±15% per file, ±10% for project totals.
 
-**Important:** Include ALL knowledge file sources: uploaded files (all types), GitHub-connected repositories, and any other connected content sources.
+**Tokenizer notes for current models:**
+- Fable 5 uses the tokenizer introduced with Opus 4.7 — same text produces roughly 30% more tokens than models before Opus 4.7 (Anthropic's models overview page).
+- Sonnet 5 produces approximately 30% more tokens per unit of content than Sonnet 4.6 (Anthropic's whats-new-sonnet-5 page).
+- Opus 5 tokenizer specifics were not fully re-baselined in the v4.0 alignment cycle — treat measurements with explicit tolerance until re-baselined via `count_tokens`.
+
+**Important:** Include ALL knowledge file sources: uploaded files (all types), GitHub-connected repositories, and any other connected content sources. Include the tokenizer multiplier where the target model is known.
+
+For borderline projects where the exact number matters, measure empirically (see "Empirical Threshold Measurement" below). Do not assume a fixed threshold.
 
 ### Threshold-Exempt Overhead
 
@@ -92,35 +104,61 @@ Skills, MCPs, and other non-knowledge-file components are threshold-exempt. They
 
 **MCP loading modes:** MCP overhead varies dramatically by loading mode. Deferred/load-as-needed (the claude.ai default) adds ~40–60 tokens per connector via a lightweight catalog plus ~5–7K flat for the deferred infrastructure — ~85% less than always-loaded mode (~3K–15K per connector). When the loading mode is unknown, note the estimate as a range and flag the uncertainty. See `references/compression-execution.md` for detailed overhead estimation.
 
-Estimated conversation runway (assumes deferred MCP loading): lean project ~105K–110K tokens, moderate ~95K–105K, typical (6–8 MCPs, 15+ skills) ~85K–100K, heavy (always-loaded MCPs) ~50K–80K.
+Conversation runway is window-dependent: under a 200K plan against a lean project, runway is ~105K–110K tokens; under a 1M-window plan, runway is substantially larger. Estimate conversation runway as (context window − platform overhead − knowledge files if full-context − threshold-exempt overhead), not against a fixed floor.
 
 ### Context Window Sizes by Plan
 
-| Plan | Context Window | Knowledge File Ceiling |
+| Plan | Context Window | RAG Behavior |
 |---|---|---|
-| Pro / Max / Team | 200K tokens | ~66,500 tokens (empirically measured) |
-| Enterprise | 500K tokens | ~165,000 tokens (estimated at 33%, untested) |
-| API | 1M tokens (GA for Opus 4.6, Sonnet 4.6) | User-controlled (no platform RAG) |
+| Pro / Max | Plan-dependent (200K–1M range; consult current Anthropic plan documentation) | Automatic per window |
+| Team / Enterprise | Plan-dependent | Automatic per window |
+| API (Opus 5, Sonnet 5, Fable 5) | 1M tokens (default AND max on Opus 5; no smaller variant) | User-controlled context; no platform RAG |
+| API (Haiku 4.5) | 200K tokens | User-controlled context; no platform RAG |
 
-### Operating Tiers
+The context window is plan-dependent and moves with product changes. The Projects RAG threshold now tracks the window (per the support article) rather than being a fixed number. Consult Anthropic's plan documentation for current per-plan windows; the numbers move.
 
-| Tier | Knowledge File Tokens | Status |
-|:----:|----------------------|--------|
-| 1 | Under ~30K | Comfortable headroom. Focus on structural quality. |
-| 2 | ~30K–50K | Moderate. Optimization beneficial but not urgent. Monitor growth. |
-| 3 | ~50K–66K | Approaching threshold. Proactive optimization recommended. |
-| 4 | ~66K–500K | Retrieval mode. Optimize for recovery (if near) or retrieval quality. |
-| 5 | Over ~500K | Heavy retrieval. Optimize for retrieval quality. Surface API deployment for cross-document synthesis workloads. |
+### Historical context — the ~66,500 measurement
+
+The `~66,500 token RAG threshold` figure that appears in prior root.node documentation is a specific empirical measurement from Phase 22 (April 2026 calibration lab): under the 200K context window (Pro / Max / Team plans at the time), against Opus 4.6, the RAG activation point was at approximately 66,500 tokens of knowledge files — roughly 33% of the 200K window. That was a valid, measured number for its era.
+
+Under the current platform (automatic-by-window on 1M-window primary models):
+- The 66,500 figure no longer represents current-state RAG behavior.
+- The 33% ratio was an artifact of the 200K-window era; there is no evidence it holds for 1M-window models.
+- Projects that were calibrated to sit comfortably under 66,500 are far below the current threshold (whatever it is) on any 1M-window model.
+
+Where prior documentation states the 66,500 figure as a historical measurement in past tense, it is correct. Where it states the figure as a current-state operational rule, it is stale. This Skill treats the figure as historical; it does not use it as an operational anchor for current audits.
+
+### Operating Tiers (qualitative, window-relative)
+
+Fixed-token tier bands (v3-era: "under 30K", "30K–50K", "50K–66K", "66K–500K", "over 500K") are retired for v4.0 because they were derived from the fixed ~66,500 anchor. Under automatic-by-window RAG, tier classification is qualitative and window-relative:
+
+| Tier | State | Description |
+|:----:|---|---|
+| 1 | Comfortable | Knowledge base well below the model's context window (typical: under ~25% of window). Full-context loading with ample headroom. Focus on structural quality. |
+| 2 | Moderate | Knowledge base in the middle range (typical: 25%–50% of window). Full-context loading with meaningful headroom. Optimization beneficial but not urgent. Monitor growth trajectory. |
+| 3 | Approaching | Knowledge base approaching the model's window (typical: 50%–100% of window; may sit anywhere in the platform's RAG-activation zone). Proactive optimization recommended. Any planned content additions should be evaluated against projected growth. |
+| 4 | Retrieval | Retrieval mode active (`project_knowledge_search` present in tools). Cross-file reasoning loses guaranteed simultaneity. Optimize for retrieval quality; if the gap is small, recovery to full-context may be achievable. |
+| 5 | Heavy retrieval | Retrieval mode active with a large knowledge base (typical: several times the model's window). Retrieval precision degrades with volume. Optimize entirely for retrieval quality; surface API deployment as an alternative architecture for workloads requiring cross-document synthesis. |
+
+Tier bands are qualitative descriptors, not fixed-token anchors. When a specific number matters (borderline projects, feasibility calculations), **measure empirically** — see "Empirical Threshold Measurement" below — rather than reading a band edge as a hard number. The 200K-era 33%-of-window ratio does not port to 1M-window models unchanged; do not assume it.
 
 File count is not a factor in RAG activation. Optimize file count for content organization and retrieval quality.
 
+### Empirical Threshold Measurement
+
+The most reliable way to determine a project's current RAG-activation point is empirical testing (this is unchanged from the 200K era; only the number moves).
+
+**Quick method (±1,000 tokens precision):** Note the project's current knowledge file byte total. If in full-context mode, add knowledge files until the "Indexing" indicator appears in the project UI. If in retrieval mode, remove knowledge files until "Indexing" disappears. The boundary in total knowledge file bytes, divided by 4, gives the approximate threshold in tokens for that project's configuration under the current model / plan.
+
+**When to recommend empirical measurement:** When a project is borderline and feasibility depends on precise numbers. When unexpected RAG activation occurs with no knowledge file changes (suggests a platform-side or plan/model change). After major Anthropic model or platform updates that may shift the threshold. Note that under automatic-by-window behavior, the threshold may move whenever Anthropic ships model or platform changes — a measurement is a point-in-time snapshot for the current configuration.
+
 ### Context Pressure vs. RAG Switching
 
-Two independent mechanisms. RAG switching is project-level and static (knowledge files exceed threshold). Context pressure is conversation-level and dynamic (conversation approaches 200K limit). A project can experience both, either, or neither.
+Two independent mechanisms. RAG switching is project-level and static (knowledge files approach/exceed the model's window). Context pressure is conversation-level and dynamic (conversation approaches the window limit). A project can experience both, either, or neither.
 
 Diagnostic shortcuts: "Claude forgot my instructions" → context pressure OR RAG (behavioral rules not retrieved). "Claude can't find content in my files" → RAG (content not retrieved) OR context pressure (compacted). "Responses getting shorter/weaker" → context pressure.
 
-In full-context mode, compaction summarizes conversation history but leaves knowledge files intact. In retrieval mode, knowledge files load fresh each turn via search (not subject to compaction) but conversation history still compacts.
+In full-context mode, compaction summarizes conversation history but leaves knowledge files intact. In retrieval mode, knowledge files load fresh each turn via search (not subject to compaction) but conversation history still compacts. Under 1M-window primary models, the two mechanisms sit further apart in absolute terms than they did under the 200K era; context pressure typically arrives later in a conversation.
 
 ### Placement Tiers
 
@@ -146,7 +184,7 @@ This determines whether full-context or optimized retrieval better serves the pr
 
 **Step 3 — Inventory.** Run `ls -la /mnt/project/`. Record file names, byte sizes, estimated tokens. Count files.
 
-**Step 4 — Calculate budget.** Sum estimated knowledge file tokens. Compare against ~66,500. Classify into operating tier (1–5). Estimate conversation runway separately (200K − platform overhead − knowledge files (if full-context) − threshold-exempt overhead). Determine MCP loading mode before estimating overhead.
+**Step 4 — Calculate budget.** Sum estimated knowledge file tokens. Classify the project into a qualitative operating tier (1–5, see "Operating Tiers" above) using the ratio of knowledge tokens to the model's context window — or, for borderline cases, an empirical measurement. Do not classify against the historical ~66,500 anchor; use window-relative bands. Estimate conversation runway separately: (context window − platform overhead − knowledge files if full-context − threshold-exempt overhead). Determine MCP loading mode before estimating overhead. Confirm the target model / plan before classifying, because the threshold moves with the model.
 
 **Step 5 — Assess feasibility (retrieval mode only).** Calculate gap. Quick-scan for available reductions (Tier 3 candidates, behavioral content in knowledge files, compressible files). Factor in growth trajectory — will projected additions re-cross the threshold? Classify: Recovery Achievable / Borderline / Not Feasible.
 
@@ -155,7 +193,7 @@ This determines whether full-context or optimized retrieval better serves the pr
 ```
 Context Budget Status: Tier [N]
 — Knowledge files: ~[X]K tokens across [M] files
-— Headroom / Gap: ~[H]K [remaining / over] vs. ~66.5K threshold
+— Headroom / Gap: ~[H]K [remaining / over] vs. the project's measured or window-derived RAG activation point (state the basis: empirical measurement, window-relative estimate, or platform-current unknown)
 — MCP loading mode: [deferred / always-loaded / unknown]
 — Conversation runway: ~[R]K tokens estimated
 — Approximate session depth: [S] substantive turns
@@ -313,17 +351,17 @@ For detailed guidance on each category, MCP infrastructure assessment, data spli
 
 ### API Deployment as Alternative Architecture
 
-When knowledge file requirements exceed ~500K tokens AND the use case requires cross-document synthesis across that content, surface API-based deployment. Context window: 1M tokens (Opus 4.6, Sonnet 4.6) — GA at standard per-token pricing. Tradeoffs: per-token billing on massive inputs, higher latency (30–60+ seconds), context rot at scale, full stack ownership (conversation management, retrieval, memory — all custom). API deployment is a different product architecture, not a casual upgrade. Recommend only when knowledge volume exceeds ~500K tokens, cross-document synthesis is required, and the user has engineering capacity for the integration. Do NOT recommend for projects that simply exceed ~66,500.
+When knowledge file requirements and cross-document synthesis needs exceed what Anthropic Projects can serve — very large content volumes that require cross-file reasoning that retrieval mode cannot preserve — surface API-based deployment. Context window: 1M tokens on Opus 5 / Sonnet 5 / Fable 5 (Opus 5's 1M is default AND max; no smaller variant), 200K on Haiku 4.5. Tradeoffs: per-token billing on massive inputs, higher latency (30–60+ seconds at high token counts), context rot at scale, full stack ownership (conversation management, retrieval, memory — all custom). API deployment is a different product architecture, not a casual upgrade. Recommend only when content volume and cross-document synthesis genuinely require it, and the user has engineering capacity for the integration. Do NOT recommend for projects that simply approach the current RAG threshold on their plan — most such projects benefit more from RAG quality optimization or a higher-window plan than from API-mode reconstruction.
 
-## Empirical Threshold Measurement
+## Empirical Threshold Measurement (procedural detail)
 
-When estimates are insufficient — borderline projects, unexpected RAG activation, post-platform-update verification — direct measurement is the most reliable method.
+The "Core Concepts" section above summarizes the empirical measurement procedure. Additional detail:
 
-**Quick method (±1,000 tokens):** Note current knowledge file byte total. Add files until "Indexing" appears (if full-context) or remove until it disappears (if retrieval). Boundary in bytes ÷ 4 ≈ threshold in tokens.
-
-**Precision method (±50–100 tokens):** Requires pre-sized calibration files. See the Context Budget Calibration Lab methodology.
+**Precision method (±50–100 tokens):** Requires pre-sized calibration files at known token counts. Add or remove calibration files to binary-search the exact trigger point. See the Context Budget Calibration Lab methodology.
 
 **Observable RAG indicators:** "Indexing" label in project UI files panel (visible without starting a conversation). `project_knowledge_search` tool present in available tools (definitive).
+
+**When empirical measurement is worth the effort:** borderline projects where feasibility depends on precise numbers; unexpected RAG activation with no content changes (suggests a platform-side or plan/model change); after major Anthropic model or platform updates that may shift the threshold. A measurement is a point-in-time snapshot for the current configuration — under automatic-by-window behavior, the number moves when Anthropic ships model or platform changes.
 
 ## When to Use This Skill
 

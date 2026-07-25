@@ -26,7 +26,7 @@ metadata:
 
 # Claude Code Design
 
-> **Calibration:** Tier 2 (Sonnet-graceful) - designed and tested against Opus 5 + Sonnet 5 dual-primary. Runs correctly on Sonnet 4.6 (legacy-graceful) with slightly less depth on multi-dimensional analysis; on Haiku 4.5 with extended thinking; fallback-graceful on Opus 4.8. Effort default is `high` on Opus 5 and Sonnet 5; step down to `medium` for cost-sensitive runs where evals show quality holds. See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
 
 Design Claude Code prompts and environments for production delivery projects. This Skill produces paste-ready artifacts — CLAUDE.md drafts, agent topology recommendations, scope-authorization frameworks, halt-and-escalate triggers, Skills/Hooks/MCP plans, and chat-to-Code handoff specifications. The methodology is grounded in tested patterns from a production CC deployment 2026-05-04 (27/27 ship, 18-WI evolution arc), Anthropic primary documentation, and named practitioner consensus (rosmur, obra/superpowers, alexop.dev, Shrivu Shankar, Marc Nuri).
 

@@ -40,12 +40,12 @@ Surface map (the authoritative assignment):
 
 ### 1.3 Packaging toolchain
 
-- **`build_release_artifacts.py` — THE release packager.** Single entry point. Reads the surface map, emits flat for `-cp` / wrapper for `-cc`, applies the suffix, and self-asserts 24+5=29 (non-zero exit on mismatch). On a **full build** it also runs `write_bundle()` to archive all 29 artifact zips into `dist/rootnode-catalog-vN.zip` — the umbrella bundle. This is what a release runs.
-- `build_releases.py` — produces the **flat** shape only, no suffix, no surface routing, no bundle (legacy half).
-- `package_skill.py` — produces the **wrapper** shape only, `.skill` extension, no suffix (legacy half).
-- `generate_release_notes.py`, `create_releases.py` — notes-assembly and release-blast helpers.
+- **`build_release_artifacts.py` — THE release packager.** Single entry point. Reads the surface map, emits flat for `-cp` / wrapper for `-cc`, applies the suffix, and self-asserts 24+5=29 (non-zero exit on mismatch). On a **full build** it also runs `write_bundle()` to archive all 29 artifact zips into `dist/rootnode-catalog-vN.zip` — the umbrella bundle. This is what a release runs. Both shape emitters live inside the orchestrator; wrapper-shape logic is ported from Anthropic's upstream `package_skill.py` (see `build_release_artifacts.py:7` and `:61`), which is **not** a tracked file in this repo.
+- `build_releases.py` — flat shape only, no suffix, no surface routing, no bundle. Superseded by the orchestrator; retained as a legacy reference only.
 
-Neither `build_releases.py` nor `package_skill.py` alone produces a correct release set — they each do one shape and neither suffixes, routes, nor bundles. Only `build_release_artifacts.py` does the full job (both shapes + suffix + 29-assert + bundle). Keep all of these tracked in the repo; an untracked packager means the next release has no packager.
+Notes-assembly and release-blast helpers used at v3.1 live at `audit/v3_1-release/` (`generate_release_notes.py`, `create_releases.py`) and are hardcoded to that cycle — they are cycle artifacts, not reusable release tooling. A v4.0+ release either replays their logic manually via `gh release create --notes-file` per Phase B or promotes them to version-agnostic scripts as a separate change.
+
+**Authoritative packager inventory: `audit/repo-catalog/`** (regenerated at the end of every release — see Phase B post-verification step). Where §1.3 and the catalog disagree, the catalog wins and this section is a defect to fix.
 
 ### 1.4 Tag naming
 
@@ -93,6 +93,10 @@ Neither `build_releases.py` nor `package_skill.py` alone produces a correct rele
 - README install/download links point at `/releases/latest`, resolve to the umbrella, and the umbrella is the only `--latest` release.
 - Show `gh release list` as evidence. Banned completion phrases: "should work," "probably fine," "looks good."
 
+### Post-verification — repo catalog regeneration
+
+10. **Regenerate `audit/repo-catalog/`.** After every Verification bullet above passes, produce a fresh `audit/repo-catalog/root_repo_catalog_<YYYYMMDD>.md` matching the section structure of the prior snapshot. Every section derives from a live command (`git ls-files`, `git tag --list`, `gh release list`, `ls`, `git log --oneline -20`), never from memory or the prior catalog. Regenerating **after** verification captures the new per-Skill tags, the umbrella release, and the current `--latest` — running the catalog pre-package would bake in staleness in the Tags and GitHub Releases sections. Commit on `main` via a follow-up hygiene PR (branch protection forbids direct commits); commit message convention `chore(catalog): regenerate for vN`. The catalog is what future sessions read as the ground truth for repo contents; failure to regenerate is what produced the v4.0 pre-flight defect (a month-stale catalog was unreachable and an incorrect playbook became authoritative in its place — see the reconciliation cycle 2026-07-25).
+
 ---
 
 ## 3. Decisions & conventions (with rationale)
@@ -136,7 +140,7 @@ The v3.1 session burned roughly a dozen turns on avoidable churn. Every instance
 
 ## 6. Known debt / next-cycle inputs
 
-- **SBD §4.7 refinement** (three fixes — **being applied this cycle**): name `build_release_artifacts.py` the canonical release orchestrator (24 `-cp` flat + 5 `-cc` wrapper + bundle); the surface→shape→suffix mapping supersedes its "flat = the release form" framing; the wrapper script is `package_skill.py` (not `package_zip.py`) and emits `.skill` while the orchestrator emits `.zip`.
+- **SBD §4.7 refinement** (partially applied at v3.1 propagation; residual): name `build_release_artifacts.py` the canonical release orchestrator (24 `-cp` flat + 5 `-cc` wrapper + bundle); the surface→shape→suffix mapping supersedes its "flat = the release form" framing. **Residual:** SBD §4.7 lines 335 and 337 (and the closing provenance italic at :343) still claim `package_skill.py` is a tracked repo file — it is not (see `audit/repo-catalog/REPO_CLAIM_RECONCILIATION.md` K1/K2). Correction routes to the next canonical-KF sync via the seed-Project edit path; not applied on the reconciliation branch (canonical KFs are Tier 1 mirror-exact).
 - **OPT_REF body recalibration** — header bumped to 4.8; ~40 body refs still 4.7-calibrated; full recalibration is v3.2/Phase 4. *Note:* the seed copy's header is on 4.8 but the `/mnt/project/` mount snapshot still shows 4.7 — confirm the repo `audit/canonical-kfs/` OPT_REF carries the 4.8 header at the next canonical sync.
 - **README compatibility-matrix + per-Skill tier-marker regeneration** — deferred to v3.2 (Phase 4, test-gated).
 - **Tag-naming standardization** — confirmed uniform (`rootnode-<skill>/vN`) at v3.1; close the historical v3.0 asymmetry note once verified across the catalog.

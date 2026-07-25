@@ -91,6 +91,12 @@ Write the surfaced change to the session's audit artifact (e.g., `audit/<session
 
 ---
 
+## Repo-fact authority
+
+`audit/repo-catalog/` is the ground truth for repo contents — tracked files, packagers, canonical-KF roster, cycle directories, tags, releases. Consult it before asserting any repo-content fact in a session, a doc edit, or a PR body. Where this CLAUDE.md, the release playbook, or a session's recollection disagrees with the catalog, the catalog wins and the disagreeing document is a defect to fix. The catalog is regenerated as the last step of every catalog release (playbook Phase B post-verification). Cycle-directory naming convention lives at `audit/README.md`.
+
+---
+
 ## Packaging conventions
 
 Two zip shapes, one per surface. The source folder on disk (`rootnode-<skill>/`) is **un-suffixed**; the `-cp`/`-cc` suffix is a packaging-output naming convention applied to the zip, never to the source folder.
@@ -107,9 +113,9 @@ Surface → shape → release artifact:
 
 Shipping a CC Skill flat, or a CP Skill wrapped, is an install failure — not a cosmetic mismatch.
 
-**Release packaging:** `build_release_artifacts.py` is the single entry point. It reads the surface map (`CC_ONLY` = critic-gate / mode-router / repo-hygiene; `DUAL` = skill-builder / cc-design; all other `rootnode-*` = cp-only), emits flat for each `-cp` and wrapper for each `-cc`, applies the suffix, and self-asserts the 24 `-cp` + 5 `-cc` = 29 total. The underlying shapes come from `build_releases.py` (flat) and `package_skill.py` (wrapper); neither suffixes nor routes by surface, which is why the orchestrator exists.
+**Release packaging:** `build_release_artifacts.py` is the single entry point. It reads the surface map (`CC_ONLY` = critic-gate / mode-router / repo-hygiene; `DUAL` = skill-builder / cc-design; all other `rootnode-*` = cp-only), emits flat for each `-cp` and wrapper for each `-cc`, applies the suffix, and self-asserts the 24 `-cp` + 5 `-cc` = 29 total. Both shape emitters live inside the orchestrator; wrapper-shape logic was ported from Anthropic's upstream `package_skill.py` (not tracked in this repo — see `build_release_artifacts.py:7` and `:61`). The only tracked sibling script is `build_releases.py` (flat shape only, superseded).
 
-Canonical methodology lives in **SBD §4.7** (surface-mapped model, reconciled in the v3.1 propagation cycle): §4.7 frames the release as shipping *both* shapes surface-mapped (superseding the earlier "flat = the release form" framing); the repo-level wrapper tool is `package_skill.py` (emits `.skill`), and the orchestrator emits `.zip`. Note: the `skill-builder` Skill's internal `scripts/package_zip.py` is a *separate* build-pipeline packager (adapted from `package_skill.py` for `.zip` + `eval-viewer/` inclusion) — not the repo-level wrapper tool, and not to be conflated with it.
+Canonical methodology lives in **SBD §4.7** (surface-mapped model, reconciled in the v3.1 propagation cycle): §4.7 frames the release as shipping *both* shapes surface-mapped (superseding the earlier "flat = the release form" framing). Note: the `skill-builder` Skill's internal `scripts/package_zip.py` is a *separate* build-pipeline packager (adapted from upstream `package_skill.py` for `.zip` + `eval-viewer/` inclusion) — not the release-time packager, and not to be conflated with the orchestrator.
 
 ---
 

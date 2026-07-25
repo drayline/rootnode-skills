@@ -140,8 +140,16 @@ The v3.1 session burned roughly a dozen turns on avoidable churn. Every instance
 
 ## 6. Known debt / next-cycle inputs
 
-- **SBD §4.7 refinement** (partially applied at v3.1 propagation; residual): name `build_release_artifacts.py` the canonical release orchestrator (24 `-cp` flat + 5 `-cc` wrapper + bundle); the surface→shape→suffix mapping supersedes its "flat = the release form" framing. **Residual:** SBD §4.7 lines 335 and 337 (and the closing provenance italic at :343) still claim `package_skill.py` is a tracked repo file — it is not (see `audit/repo-catalog/REPO_CLAIM_RECONCILIATION.md` K1/K2). Correction routes to the next canonical-KF sync via the seed-Project edit path; not applied on the reconciliation branch (canonical KFs are Tier 1 mirror-exact).
-- **OPT_REF body recalibration** — header bumped to 4.8; ~40 body refs still 4.7-calibrated; full recalibration is v3.2/Phase 4. *Note:* the seed copy's header is on 4.8 but the `/mnt/project/` mount snapshot still shows 4.7 — confirm the repo `audit/canonical-kfs/` OPT_REF carries the 4.8 header at the next canonical sync.
-- **README compatibility-matrix + per-Skill tier-marker regeneration** — deferred to v3.2 (Phase 4, test-gated).
-- **Tag-naming standardization** — confirmed uniform (`rootnode-<skill>/vN`) at v3.1; close the historical v3.0 asymmetry note once verified across the catalog.
+Closed in v4.0 alignment cycle (July 2026):
+
+- **SBD §4.7 refinement — CLOSED.** The K1/K2 residual (SBD §4.7 lines 335 / 337 / :343 asserting `package_skill.py` is a tracked repo file) was corrected during v4.0 W1 SBD recalibration via the seed-Project edit → staging → canonical-KF sync path. Corrections apply the exact replacement text from `audit/repo-catalog/REPO_CLAIM_RECONCILIATION.md` K1/K2: the wrapper shape is produced by `build_release_artifacts.py` directly (upstream origin: Anthropic's `package_skill.py` — not a tracked file). The `skill-builder`-internal `scripts/package_zip.py` remains a *separate* build-pipeline packager and stays disambiguated.
+- **OPT_REF body recalibration — CLOSED.** Full body recalibration completed as part of v4.0 W1. The header and body are calibrated to Opus 5 + Sonnet 5 dual-primary; the ~45 4.7-era body refs are updated to the 5-generation landscape; the tendency taxonomy expanded per design §9 (14 tendencies + 2 non-tendency defects); the Context Budget Principles section rebuilt per D6 (automatic-RAG-by-window, with the ~66,500 figure preserved as a historical Phase 22 measurement).
+- **README compatibility-matrix + per-Skill tier-marker regeneration — CLOSED at v4.0 Phase 2.** Regenerated against the v4.0 tier assignments (not the v3.1 ones) as part of the W2 mechanical sweep.
+- **Tag-naming standardization — CLOSED.** Uniform `rootnode-<skill>/vN` verified at v3.1; the v3.0 asymmetry is historical and closed. No further action.
+
+Remaining / carried forward:
+
 - **`rootnode-for-code` plugin bundle** — roadmap, owned by the Distribution project, out of scope for the catalog release.
+- **Tokenizer re-baselining** — Opus 5 and Sonnet 5 tokenizer specifics were not fully re-baselined against `count_tokens` in the v4.0 cycle. Carry as a Calibration Lab item for the next cycle; treat measurements with explicit tolerance until re-baselined.
+- **Landscape-volatility discipline (D8 methodology)** — codified in AEA §4.15 for v4.0. Design docs authored under this discipline isolate model landscape facts in a dated block that decisions reference; validate the pattern's ergonomics through the next design cycle's use.
+- **Structural anti-pattern candidates surfaced but not added (v4.0 AAP recommendation).** Two Opus-5-era behavioral patterns evaluated as candidates for promotion to structural entries in `root_AGENT_ANTI_PATTERNS.md`: *Verification-instruction accumulation* and *Subagent-verification harness pattern*. Both are documented as behavioral tendencies in `root_OPTIMIZATION_REFERENCE.md`; the recommendation is to promote at least the first if the sweep discipline recurs across CC deployments audited over the next cycle.

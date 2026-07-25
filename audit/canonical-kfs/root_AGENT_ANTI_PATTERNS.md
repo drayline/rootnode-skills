@@ -275,20 +275,28 @@ CC-only patterns with no CP analog: §4.2 MCP bloat, §4.4 Enforcement-as-prefer
 
 The patterns above are *structural* — they describe how content is organized. There is a parallel catalog of *behavioral* anti-patterns describing how the agent itself behaves under specific deployment conditions. Behavioral patterns include:
 
-- Agreeableness (output-content + persistent-preference)
+- Agreeableness (output-content + persistent-preference dilution)
 - Hedging
-- Verbosity
+- Verbosity — three-surface family (conversational response length / agentic progress narration / written-deliverable length)
 - List overuse
-- Fabricated precision
-- Over-exploration
+- Fabricated precision (external-fact)
+- Over-exploration (search breadth)
 - Tool miscalibration (over- and under-triggering)
 - LaTeX defaulting
 - Editorial drift
 - Self-referential fabrication
+- Over-verification (Opus 5 new — countermeasure is *removal* of self-directed re-check instructions)
+- Scope expansion (Opus 5 new — deliverable-boundary drift, distinct from over-exploration)
+- Subagent over-delegation (Opus 5 new — CC agent workloads)
+- Correction narration (Opus 5 new)
 
-These are documented in detail in `root_OPTIMIZATION_REFERENCE.md` (Behavioral Tendencies section) with countermeasure templates. They are surface-aware — some surface more in CP (hedging, list overuse, agreeableness on creative work), others more in CC (over-exploration, tool over-triggering, fabricated precision in code claims, verification-before-completion absence).
+Plus two prompt/environment-conditional defects that behave like tendencies but are handled by rewriting prompts or configuring the API differently rather than adding counter-tendency instructions: conservative-instruction literalism ("only report high-severity" / "be conservative" causes under-reporting on Opus 5 — rewrite to report-everything-then-filter), and thinking-disabled output artifacts (tool calls leak as text, `<thinking>` tags leak — keep thinking on and control cost with effort instead).
+
+These are documented in detail in `root_OPTIMIZATION_REFERENCE.md` (Behavioral Tendencies section) with countermeasure templates. They are surface-aware — some surface more in CP (hedging, list overuse, agreeableness on creative work, editorial drift, self-referential fabrication), others more in CC (over-exploration, tool over-triggering, fabricated precision in code claims, verification-before-completion absence). The four Opus-5-new tendencies (over-verification, scope expansion, subagent over-delegation, correction narration) surface most strongly on CC and API agent workloads because that is where agentic execution runs.
 
 When auditing a deployment, check both catalogs: this KF for structural patterns; `root_OPTIMIZATION_REFERENCE.md` for behavioral patterns. Most deployment friction traces to one or both.
+
+**Note on structural-catalog candidates surfaced this cycle (v4.0 alignment) but not added.** The v4.0 alignment cycle evaluated two Opus-5-era behavioral patterns as candidates for promotion to structural anti-patterns in this catalog: *Verification-instruction accumulation* (prompts and CLAUDE.md that have accumulated "double-check" / "re-verify" / "use a subagent to verify" instructions across model generations, which now compound with Opus 5's automatic self-verification), and *Subagent-verification harness pattern* (harness patterns that spawn a subagent to grade the parent agent's output — duplicate cost on Opus 5). Both are documented as behavioral tendencies in `root_OPTIMIZATION_REFERENCE.md` §11 and §13 respectively, with countermeasure guidance. They were flagged as structural-catalog candidates because they manifest at the CLAUDE.md / Skill-content layer (not only at the model-behavior layer), which is the AAP catalog's natural home. Recommendation surfaced for the next design cycle: promote at least *Verification-instruction accumulation* to a §4.x structural entry if the sweep discipline recurs across CC deployments audited over the next cycle.
 
 ---
 

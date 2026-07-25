@@ -1,8 +1,8 @@
 # Optimization Reference
 
-Claude-specific structural principles, behavioral patterns, and fix patterns for Project optimization. Calibrated for Claude Opus 4.8 (primary), with 4.6/4.7 as the prior generation (secondary). Opus 4.8 (released 5/28/26): API unchanged from 4.7; honesty/self-critique, tool-firing, and effort calibration improved (official); goal-oriented framing preferred over procedural (stronger planning). The ten-tendency taxonomy carries forward; per the 4.8 alignment rubric, countermeasure voice is lightened where 4.8 handles a behavior natively but retained for Sonnet 4.6 / Haiku 4.5. Consult this when diagnosing structural issues, checking behavioral countermeasures, and reconstructing system prompts or knowledge file architectures.
+Claude-specific structural principles, behavioral patterns, and fix patterns for Project optimization. Calibrated for Claude Opus 5 and Sonnet 5 (dual-primary), with Fable 5 integrated-aware for long-horizon agent workloads, Opus 4.8 fallback-graceful (users are silently served it on classifier-flagged requests), Sonnet 4.6 legacy-graceful, and Haiku 4.5 graceful-with-extended-thinking. Consult this when diagnosing structural issues, checking behavioral countermeasures, and reconstructing system prompts or knowledge file architectures. Model-fact statements defer to `root_CLAUDE_OPTIMIZATION_NOTES.md` Section 3 (5-Generation Model Landscape); this document assumes that reference.
 
-**Calibration scope:** Opus-primary, Sonnet-graceful, Haiku-graceful (with extended thinking enabled). Haiku 4.5 without extended thinking and Haiku 3.5 are out of scope. See `root_CALIBRATION_SCOPE_DECISION.md` for the full scope authority and operational definitions. When this document discusses model behavior without qualification, it refers to Opus. Non-Opus-specific notes are called out explicitly. See `root_SKILL_PORTABILITY_TIER_ASSIGNMENTS.md` for per-Skill tier assignments and Claude Code applicability classifications.
+**Calibration scope:** Opus 5 + Sonnet 5 **dual-primary**; Fable 5 **integrated-aware**; Opus 4.8 **fallback-graceful**; Sonnet 4.6 **legacy-graceful**; Haiku 4.5 **graceful-with-extended-thinking**. Haiku 4.5 without extended thinking and Haiku 3.5 are out of scope. Mythos 5 / Mythos Preview out of scope. See `root_CALIBRATION_SCOPE_DECISION.md` for the full scope authority and operational definitions. Where Opus 5 and Sonnet 5 diverge, both are documented; where Sonnet 5 behavior is not documented by Anthropic, the column reads "no delta documented" rather than inheriting from Sonnet 4.6. See `root_SKILL_PORTABILITY_TIER_ASSIGNMENTS.md` for per-Skill tier assignments and Claude Code applicability classifications.
 
 **Surface scope.** This document is primarily CP-side (Claude Project) optimization methodology. The Nine-Layer Architecture Model, system prompt architecture, Memory layer design, User Preference optimization, evolutionary optimization pathways, knowledge file design, context budget principles, RAG quality optimization, and most common structural fixes apply to chat-side Projects. The Behavioral Tendencies and Countermeasures section is surface-aware: tendencies and their deployment calibrations span CP, CC, and API contexts. The CC-side counterpart for environment design is `root_CC_ENVIRONMENT_GUIDE.md`. The surface-invariant principle layer is `root_AGENT_ENVIRONMENT_ARCHITECTURE.md`.
 
@@ -14,7 +14,7 @@ Optimization recommendations and audit findings produced from this methodology a
 
 | Tier | Source class | Authoritative on |
 |---|---|---|
-| 1 | Anthropic primary documentation (docs.claude.com, code.claude.com, official Anthropic engineering posts) | Claude behavior, API parameters, MCP spec, Skills architecture, Claude Code mechanics |
+| 1 | Anthropic primary documentation (platform.claude.com, code.claude.com, official Anthropic engineering posts) | Claude behavior, API parameters, MCP spec, Skills architecture, Claude Code mechanics |
 | 2 | Anthropic engineering blog and design intent posts | Design rationale, emerging patterns |
 | 3 | Tested production experience (root.node's own dogfooded patterns; user-validated deployments) | What was tried and what shipped, scoped to the deployment domain |
 | 4 | Named practitioners with public artifacts | Current state of practice; not authoritative on Claude internals |
@@ -120,13 +120,13 @@ BOTTOM (high attention, closest to generation):
 
 **Layer 2 — Core Rules.** Should contain 3-7 non-negotiable behavioral rules. Each rule should address a specific need — not restate generic best practices. Write as directives, not suggestions. Use the principle/default distinction: hard rules are stated as rules ("Never fabricate statistics"), preferences are stated as defaults ("Default to prose; use lists only for genuinely parallel items"). Fewer rules followed consistently beats many rules followed sporadically.
 
-**Note on instruction weight for current models (4.6 and 4.7):** Opus 4.6 and 4.7 are more responsive to system prompts than earlier models. Instructions that needed emphasis before (capitalization, repetition, "CRITICAL" prefixes) should be written in normal-weight language. Over-emphasized instructions now cause over-compliance — Claude follows the letter of the instruction too aggressively rather than applying judgment. Replace emphatic language (MUST, ALWAYS, CRITICAL, NEVER) with calibrated guidance. Normal-weight language achieves what required emphasis in earlier models. **Exception in 4.7 chat-interface deployments:** where you are specifically countering tendency 1b (persistent-preference dilution) or 7b (tool under-triggering), explicit enforcement language remains appropriate. See the Behavioral Tendencies section for details.
+**Note on instruction weight for current models (Opus 5 and Sonnet 5):** Opus 5 and Sonnet 5 follow instructions precisely — over-specified prompts produce rigid outputs rather than smoothed-over ones. Instructions that needed emphasis in pre-4.6 models (capitalization, repetition, "CRITICAL" prefixes) should be written in normal-weight language. Emphatic legacy language now causes over-compliance. Replace `MUST`, `ALWAYS`, `CRITICAL`, `NEVER` with calibrated guidance. **Exception on chat-interface deployments:** where you are specifically countering tendency 1b (persistent-preference dilution) or 7b (tool under-triggering), explicit enforcement language remains appropriate. See the Behavioral Tendencies section for details.
 
 **Layer 3 — Knowledge File Guide.** Each file gets a name, a one-sentence purpose description, and a routing signal: "Consult this when [specific trigger condition]." Routing descriptions should be functional, not decorative — they tell Claude when a file is relevant, not just what it contains. Every file in the Project must appear here.
 
 **Layer 4 — Operational Modes.** Each mode needs: a trigger condition (how Claude recognizes this mode applies), distinct behavioral instructions, a reasoning approach appropriate to the task type, and an output structure. Modes should pass the differentiation test: would the same input produce noticeably different output across modes? If not, the modes are cosmetic and should be consolidated.
 
-**Layer 5 — Output Standards.** Should include: format defaults (prose vs. structured), length guidance, tone calibration, audience-specific adjustments, and a pre-response verification check. Positioned at the bottom to leverage the recency effect — these instructions are closest to where Claude begins generating.
+**Layer 5 — Output Standards.** Should include: format defaults (prose vs. structured), length guidance, tone calibration, audience-specific adjustments, and a pre-response verification check that grounds against external artifacts (not self-directed re-checking — see tendency #11). Positioned at the bottom to leverage the recency effect — these instructions are closest to where Claude begins generating.
 
 ### XML Tag Structure
 
@@ -145,11 +145,9 @@ Within modes, nest subsections with descriptive names rather than generic tags. 
 
 ## Behavioral Tendencies and Countermeasures
 
-Opus 4.7 introduces meaningful behavioral changes from 4.6. Several tendencies that required active countermeasures in 4.6 are partially or fully reduced at the model level — agreeableness on output content, hedging on factual claims, fabricated precision on external facts, and over-exploration are all somewhat mitigated. This is asymmetric upside: countermeasures for these tendencies still work but may be unnecessary token spend in many contexts. **Targeted application is now more important than universal application.** Apply countermeasures when you observe the failure mode in the Project's domain and deployment context, not preemptively.
+The tendency taxonomy expanded for Opus 5. Verbosity refactored into a three-surface family (#3a/#3b/#3c) with distinct triggers and countermeasures. Four new tendencies added for Opus 5 (#11–#14). Two prompt/environment-conditional defects are treated separately at the end of this section rather than as model tendencies. Total: 14 model tendencies + 2 non-tendency defects.
 
-At the same time, two new tendencies have emerged that did not appear in the 8-tendency 4.6 taxonomy: editorial drift (#9) and self-referential fabrication (#10). And one tendency has split into facets requiring distinct handling: tool trigger miscalibration now includes both over-triggering (the 4.6 problem, now reduced) and under-triggering (NEW in 4.7 Adaptive chat-interface deployment). Agreeableness similarly splits into output-content agreeableness (1a, persistent across models) and persistent-preference dilution (1b, NEW in 4.7 chat interface).
-
-Ten behavioral tendencies affect Project output. During audits, check whether the Project's domain and deployment context is likely to trigger each tendency, and whether an appropriate countermeasure is present. The first eight retain structural continuity with the 4.6 taxonomy (with calibration updates and facets where applicable); tendencies 9 and 10 are new in 4.7.
+During audits, check whether the Project's domain and deployment context is likely to trigger each tendency, and whether an appropriate countermeasure is present. Countermeasure calibration varies by deployment — a countermeasure essential on the chat interface may be wasted tokens on Claude Code, and Opus 5's new tendencies (#11–#14) surface strongly on Claude Code specifically because that is where agentic workloads run.
 
 ### The Deployment Context Model
 
@@ -157,26 +155,26 @@ Countermeasure relevance varies by deployment surface. Four contexts matter:
 
 | Deployment | Default Effort | Tendency Surface |
 |---|---|---|
-| Chat interface (claude.ai web/mobile) | Adaptive | HIGH for #1b, #7b, #9, #10; MEDIUM for #1a |
-| Claude Projects | Adaptive (CI anchors) | MEDIUM for #1b, #9; LOW for most others |
-| Claude Code | xhigh (default) | LOW for most tendencies |
-| API | Developer-controlled | Depends on effort level (≥high behaves like Claude Code) |
+| Chat interface (claude.ai web/mobile) | Adaptive | HIGH for #1b, #7b, #9, #10; MEDIUM for #1a, #3a, #14 |
+| Claude Projects | Adaptive (CI anchors) | MEDIUM for #1b, #9, #14; LOW for most others |
+| Claude Code | `high` default (Opus 5 / Sonnet 5) | HIGH for #11, #12, #13; LOW for chat-interface-specific tendencies |
+| API | Developer-controlled effort; developer-selected model | Depends on effort level and model |
 
-Each tendency below includes a deployment calibration line indicating where it most strongly applies. Before applying a countermeasure, identify the Project's deployment context. A countermeasure essential on the chat interface may be wasted tokens in Claude Code.
+Each tendency below includes a deployment calibration line indicating where it most strongly applies. Before applying a countermeasure, identify the Project's deployment context.
 
-**Note on Claude Code applicability (per-Skill, not universal).** The "Claude Code: LOW" classifications in each tendency's deployment calibration below apply at the Project / prompt design level — they describe how the tendency manifests when a Project is deployed in a Claude Code environment. For Skill design decisions (description optimization, 250-char listing cap, trigger language), Claude Code applicability is per-Skill: some Skills are first-class Claude Code targets, others are Claude.ai Projects-native and out-of-domain for Claude Code users. See `root_SKILL_PORTABILITY_TIER_ASSIGNMENTS.md` for HIGH / MEDIUM / LOW / NONE classifications.
+**Note on Claude Code applicability (per-Skill, not universal).** The Claude Code column in each tendency's deployment calibration below applies at the Project / prompt design level. For Skill design decisions (description optimization, 250-char listing cap, trigger language), Claude Code applicability is per-Skill — some Skills are first-class Claude Code targets, others are Claude.ai Projects-native and out-of-domain for Claude Code users. See `root_SKILL_PORTABILITY_TIER_ASSIGNMENTS.md` for HIGH / MEDIUM / LOW / NONE classifications.
 
-**Note on countermeasure language design.** Countermeasure effectiveness depends not just on *what* the countermeasure says but *how* it says it. LLMs respond to the same persuasion principles as humans: authority framing ("YOU MUST," "No exceptions"), commitment mechanisms (requiring announcement before action, creating TodoWrite checklists), scarcity framing ("BEFORE proceeding"), and social proof. Research (Meincke et al. 2025, N=28,000 AI conversations) found that persuasion techniques more than doubled LLM compliance rates (33% → 72%, p < .001). The countermeasure templates below already implicitly use authority and commitment framing — the note here makes the mechanism explicit so that users writing custom countermeasures can apply the same principles deliberately. Strong imperative language is appropriate for discipline-enforcing countermeasures (tendencies #1, #5, #7b, #10); calibrated language is appropriate for tendency reduction where overcorrection is the risk (#3 verbosity, #6 over-exploration).
+**Note on countermeasure language design.** Countermeasure effectiveness depends not just on *what* the countermeasure says but *how* it says it. LLMs respond to the same persuasion principles as humans: authority framing ("YOU MUST," "No exceptions"), commitment mechanisms (requiring announcement before action, creating TodoWrite checklists), scarcity framing ("BEFORE proceeding"), and social proof. Research (Meincke et al. 2025, N=28,000 AI conversations) found that persuasion techniques more than doubled LLM compliance rates (33% → 72%, p < .001). The countermeasure templates below implicitly use authority and commitment framing — the note here makes the mechanism explicit so that users writing custom countermeasures can apply the same principles deliberately. Strong imperative language is appropriate for discipline-enforcing countermeasures (#1, #5, #7b, #10, #12); calibrated language is appropriate for tendency reduction where overcorrection is the risk (#3a verbosity, #6 over-exploration). **For over-verification (#11), the countermeasure is REMOVAL of instructions — a new countermeasure shape.**
 
-### 1. Agreeableness Bias — reduced in 4.7, persistent
+### 1. Agreeableness Bias
 
-**What it looks like:** Claude agrees with the user's framing even when the framing is flawed. Accepts stated premises without examination. Validates the user's preferred approach rather than evaluating it objectively. Opus 4.7's calibration improvements reduce the most flagrant manifestations but the tendency persists in subtle forms.
+**What it looks like:** Claude agrees with the user's framing even when the framing is flawed. Accepts stated premises without examination. Validates the user's preferred approach rather than evaluating it objectively.
 
 **Two facets:**
 
-**1a — Output-content agreeableness.** Validating user ideas in responses ("Great question!", "That's a solid approach"), opening with premise validation, softening disagreement under follow-up. Reduced in 4.7 but not eliminated.
+**1a — Output-content agreeableness.** Validating user ideas in responses ("Great question!", "That's a solid approach"), opening with premise validation, softening disagreement under follow-up. Reduced in Opus 5 but not eliminated.
 
-**1b — Persistent-preference dilution.** Configured preferences (User Preferences, Project CI rules) are weighted less heavily against immediate-prompt framing as conversations extend. Configured rules hold for the first several turns then gradually drift in long chat sessions. Emerged as a distinct failure mode in 4.7 Adaptive chat-interface deployment. Verified through seed-project self-observation in April 2026 calibration session.
+**1b — Persistent-preference dilution.** Configured preferences (User Preferences, Project CI rules) are weighted less heavily against immediate-prompt framing as conversations extend. Configured rules hold for the first several turns then gradually drift in long chat sessions.
 
 **Domains most affected:** Advisory and strategy projects (where users state preferred directions), evaluation projects (where the user has a position), coaching projects, any project deployed on the chat interface with substantive User Preferences (1b).
 
@@ -196,17 +194,17 @@ name the conflict before proceeding. Do not silently drop preferences over a
 long conversation. At every turn, the full Preference and CI ruleset applies.
 ```
 
-**Placement:** 1a in identity block or core rules (high-attention position to override default agreeableness). 1b in core rules at the high-attention top, with optional reinforcement in output standards for projects with extended conversation patterns.
+**Placement:** 1a in identity block or core rules. 1b in core rules at the high-attention top, with optional reinforcement in output standards for projects with extended conversation patterns.
 
 **Deployment calibration:**
 - Chat interface (Adaptive): HIGH for 1b, MEDIUM for 1a
-- Claude Projects: MEDIUM for 1b (CI partially mitigates), LOW for 1a
-- Claude Code (xhigh): LOW for both
+- Claude Projects: MEDIUM for 1b, LOW for 1a
+- Claude Code: LOW for both
 - API (effort ≥ high): LOW for both
 
-### 2. Hedging and Over-Qualification — reduced in 4.7 on factual claims, persistent on editorial framings
+### 2. Hedging and Over-Qualification
 
-**What it looks like:** Findings are qualified. Conclusions are softened. Recommendations come with cascading caveats. Language patterns: "it depends," "there are many factors," "this is just one perspective," "it's worth considering." Opus 4.7's calibration improvements reduce hedging on factual claims (the model is more willing to state confident assertions backed by evidence). Hedging persists on editorial and recommendation framings.
+**What it looks like:** Findings are qualified. Conclusions are softened. Recommendations come with cascading caveats. Language patterns: "it depends," "there are many factors," "this is just one perspective," "it's worth considering." Well-controlled on Opus 5 for factual claims; persists on editorial and recommendation framings.
 
 **Domains most affected:** Research and analysis projects (advisory framings specifically), health and medical adjacent projects, financial advisory projects, any domain where Claude perceives liability risk.
 
@@ -223,42 +221,77 @@ do not hedge on well-established facts or best practices.
 **Deployment calibration:**
 - Chat interface (Adaptive): MEDIUM (advisory framings)
 - Claude Projects: MEDIUM (advisory framings)
-- Claude Code (xhigh): LOW
+- Claude Code: LOW
 - API (effort ≥ high): LOW
 
-### 3. Verbosity Drift — further reduced in 4.7, recalibrate countermeasures
+### 3. Verbosity — three-surface family (refactored for Opus 5)
 
-**What it looks like:** Responses grow longer over a conversation. Unrequested sections appear (summaries, follow-up suggestions, background context the user did not ask for). Paragraphs expand beyond what the content warrants. Opus 4.7 is naturally more concise than 4.6 — which was already more concise than earlier models.
+Opus 5's default responses are longer than Opus 4.8 on multiple surfaces. The verbosity tendency refactored into three distinct surfaces with different triggers and countermeasures. Applying a single verbosity countermeasure now under-fits at least one surface — treat 3a, 3b, and 3c as separate diagnostic targets.
 
-**Domains most affected:** Research projects, educational projects, any project where Claude is in "explain" mode. The reverse problem (Claude being too terse) is now more common in 4.7 than the original verbosity problem.
+**Effort does not shorten responses.** The `effort` parameter controls how much the model **thinks**, not how much it **says**. Lowering effort can reduce thinking volume without reliably shortening the visible response. Prompt for response length explicitly.
 
-**Updated guidance:** Use verbosity countermeasures only when you observe actual verbosity in outputs. For most tasks, Opus 4.7's natural conciseness is appropriate without intervention. Verbosity countermeasures designed for pre-4.6 era models will over-correct.
+#### 3a. Conversational response length
 
-**Countermeasure template — when verbosity is observed:**
+Default user-facing responses run longer on Opus 5.
+
+**Countermeasure:**
 ```
-Respond only with what was requested. Do not add unrequested sections,
-summaries, or follow-up suggestions unless they are critical to the task.
-Match response length to task complexity — simple questions get short answers.
-```
-
-**Reverse countermeasure — when Claude is too terse (more common in 4.7):**
-```
-After completing a task that involves tool use, provide a quick summary
-of the work you've done. When producing analysis or reports, aim for
-thoroughness — include supporting detail and reasoning, not just conclusions.
+Keep responses focused, brief, and concise. Keep disclaimers and caveats short,
+and spend most of the response on the main answer. When asked to explain
+something, give a high-level summary unless an in-depth explanation is
+specifically requested.
 ```
 
-**Placement:** Output standards (closest to generation, where length decisions are made). Use the standard countermeasure only when verbosity is observed; do not include by default in 4.6+ era Projects.
+In a long system prompt, pair the primary concision instruction with a short reminder near the end:
+```
+<tone_preference>Keep outputs reasonably concise.</tone_preference>
+```
 
 **Deployment calibration:**
-- Chat interface (Adaptive): LOW (verbosity), MEDIUM (terseness)
-- Claude Projects: LOW (verbosity), MEDIUM (terseness)
-- Claude Code (xhigh): LOW (verbosity), LOW (terseness — code output tends to be appropriately scoped)
-- API (effort ≥ high): LOW (verbosity), MEDIUM (terseness — high-effort responses can be unexpectedly compact)
+- Chat interface: MEDIUM
+- Projects: MEDIUM
+- Claude Code: LOW (most workloads are agentic where 3b dominates)
+- API (effort ≥ high): MEDIUM
 
-### 4. List and Bullet Overuse — persistent, countermeasure unchanged
+#### 3b. Agentic progress narration
 
-**What it looks like:** Claude converts narrative explanations into bullet points. Analytical prose becomes lists of points. Every response defaults to structured formats even when prose would be more appropriate and readable. No model-level reduction in 4.7.
+Opus 5 narrates readily during agentic work — announcing what it is about to do and giving longer per-message output in agentic sessions than prior models.
+
+**Countermeasure — describe the cadence and shape (positive examples beat prohibitions):**
+```
+Before your first tool call, say in one sentence what you're about to do.
+While working, give a brief update only when you find something important
+or change direction. When you finish, lead with the outcome: your first
+sentence should answer "what happened" or "what did you find," with
+supporting detail after it for readers who want it.
+```
+
+**Deployment calibration:**
+- Chat interface: LOW (agentic surfaces are elsewhere)
+- Projects: LOW
+- Claude Code: HIGH (this is where agentic sessions live)
+- API (agent workloads): HIGH
+
+#### 3c. Written-deliverable length
+
+Files that Opus 5 writes to disk (reports, Markdown documents, summaries) are often longer than on prior models — separate from conversational verbosity.
+
+**Countermeasure — explicit length calibration:**
+```
+Match the length of written documents to what the task needs: cover the
+substance, but do not pad with filler sections, redundant summaries, or
+boilerplate.
+```
+
+**Deployment calibration:**
+- Chat interface: MEDIUM (for Skills that author documents)
+- Projects: HIGH (report-authoring Projects)
+- Claude Code: HIGH (any Skill that writes .md files)
+- API: HIGH (document-generation workloads)
+
+### 4. List and Bullet Overuse
+
+**What it looks like:** Claude converts narrative explanations into bullet points. Analytical prose becomes lists of points. Every response defaults to structured formats even when prose would be more appropriate and readable. Persists across Opus 4.6 → 4.7 → 4.8 → 5.
 
 **Domains most affected:** All domains, but especially problematic in content/communications projects (where prose quality matters), advisory projects (where nuanced argument matters), and research projects (where synthesis requires connected reasoning).
 
@@ -274,16 +307,16 @@ explanations, analytical reasoning, or recommendations into bullet points.
 **Deployment calibration:**
 - Chat interface (Adaptive): MEDIUM
 - Claude Projects: MEDIUM
-- Claude Code (xhigh): LOW (code output is structurally formatted regardless)
+- Claude Code: LOW (code output is structurally formatted regardless)
 - API (effort ≥ high): MEDIUM
 
-### 5. Fabricated Precision (External-Fact) — reduced in 4.7, scope narrowed
+### 5. Fabricated Precision (External-Fact)
 
 **What it looks like:** Claude generates specific statistics, percentages, or quantitative claims about external facts (research findings, market data, citations, sources) that are not grounded in provided data. Outputs contain authoritative-sounding numbers that were confabulated. Particularly dangerous because the output looks credible.
 
-**Important scope change in 4.7:** In the 4.6 taxonomy, this tendency covered all forms of fabrication. In 4.7, model-level honesty improvements significantly reduce external-fact fabrication. The scope of this tendency is now narrowed to **external-fact fabrication only**. Self-referential fabrication — claims about what the model has done, checked, or loaded — is a distinct failure mode tracked as tendency #10. Do not collapse the two into a single countermeasure; they have different mechanisms and different countermeasure language.
+**Scope:** external-fact fabrication only. Self-referential fabrication — claims about what the model has done, checked, or loaded — is a distinct failure mode tracked as tendency #10. Do not collapse the two into a single countermeasure; they have different mechanisms.
 
-**Domains most affected:** Research and analysis projects, financial projects, health projects, any domain where specific numbers carry weight. The tendency persists in 4.7 in domains with thin training-data coverage or where pressure to produce specific numbers is high.
+**Domains most affected:** Research and analysis projects, financial projects, health projects, any domain where specific numbers carry weight. The tendency persists in domains with thin training-data coverage or where pressure to produce specific numbers is high.
 
 **Countermeasure template:**
 ```
@@ -292,19 +325,21 @@ not estimate one — state what data would be needed. Never invent a statistic,
 percentage, or quantitative claim to fill a gap in the available information.
 ```
 
-**Placement:** Core rules (this is typically a non-negotiable constraint). For research-heavy projects, add a secondary check in output standards: "Before delivering, verify that every quantitative claim is sourced from provided data."
+**Placement:** Core rules (this is typically a non-negotiable constraint). For research-heavy projects, add a secondary check in output standards: "Before delivering, verify that every quantitative claim is grounded in the provided sources."
 
 **Deployment calibration:**
-- Chat interface (Adaptive): MEDIUM (lower than 4.6 due to model-level honesty improvements)
+- Chat interface (Adaptive): MEDIUM
 - Claude Projects: MEDIUM
-- Claude Code (xhigh): LOW
+- Claude Code: LOW
 - API (effort ≥ high): LOW
 
-### 6. Over-Exploration and Overthinking — partially reduced in 4.7
+### 6. Over-Exploration (search breadth)
 
-**What it looks like:** Claude pursues too many lines of investigation before producing output. It reads many files, runs multiple searches, explores tangential angles, or adds features and improvements beyond what was asked. Opus 4.7 is better calibrated about when exploration adds value than 4.6, but the tendency persists for complex agentic workflows, especially at higher effort settings.
+**What it looks like:** Claude pursues too many lines of investigation before producing output. It reads many files, runs multiple searches, explores tangential angles.
 
-**Domains most affected:** Agentic projects, research projects, software engineering projects (where Claude may refactor beyond the request), any project where Claude has access to tools and files.
+**Distinct from #12 (scope expansion):** #6 is search *breadth* within a defined task. #12 is delivering *beyond* the task. A prompt with both tendencies looks the same on the surface — "the model did too much" — but they have different fixes.
+
+**Domains most affected:** Agentic projects, research projects, software engineering projects (where Claude may explore beyond the request), any project where Claude has access to tools and files.
 
 **Countermeasure template:**
 ```
@@ -316,18 +351,16 @@ or make improvements beyond what was asked.
 **Placement:** Core rules or output standards. For projects with tool access, add specific tool-use guidance: "Use [tool] when it would enhance your understanding of the problem — not as a default action on every request."
 
 **Deployment calibration:**
-- Chat interface (Adaptive): LOW (model already calibrates well at Adaptive)
+- Chat interface (Adaptive): LOW
 - Claude Projects: LOW
-- Claude Code (xhigh): MEDIUM (xhigh defaults amplify exploration on complex tasks)
+- Claude Code (`high` default): MEDIUM (higher-effort settings amplify exploration on complex tasks)
 - API (effort = xhigh): MEDIUM
 
-### 7. Tool Trigger Miscalibration — now two facets in 4.7
+### 7. Tool Trigger Miscalibration — two facets
 
-In 4.6 this was a single tendency: over-triggering caused by emphatic tool-use language. In 4.7, the tendency has split into two distinct facets requiring different countermeasures.
+**Facet 7a — Tool over-triggering** (largely reduced on Opus 5).
 
-**Facet 7a — Tool over-triggering** (from 4.6, reduced in 4.7).
-
-Claude uses tools aggressively even when the task could be answered from existing context. Caused by system prompt instructions tuned for pre-4.6 models — emphatic tool-use language ("CRITICAL: You MUST use this tool," "ALWAYS search first," "Never answer without checking") triggered overcompliance in 4.6. Reduced at the 4.7 model level but still triggered by emphatic legacy language.
+Claude uses tools aggressively even when the task could be answered from existing context. Caused by system prompt instructions tuned for pre-4.6 models — emphatic tool-use language ("CRITICAL: You MUST use this tool," "ALWAYS search first," "Never answer without checking") triggered overcompliance in earlier models. Reduced at the Opus 5 model level but still triggered by emphatic legacy language.
 
 **Domains most affected:** Any project with tool access where the system prompt was written for pre-4.6 models and has not been recalibrated.
 
@@ -346,9 +379,9 @@ changed since your training. For well-established facts and concepts,
 answer directly.
 ```
 
-**Facet 7b — Tool under-triggering** (NEW in 4.7 Adaptive).
+**Facet 7b — Tool under-triggering**.
 
-On the chat interface at Adaptive effort, Skills can fail to fire on legitimate triggers because the model weights persistent context (Skill descriptions loaded via progressive disclosure) less heavily than immediate prompts. The user asks a question that should route to a specific Skill; the model answers from general reasoning without invoking the Skill. Also affects explicit tool-use directives in User Preferences.
+On the chat interface at Adaptive effort, Skills can fail to fire on legitimate triggers because the model weights persistent context (Skill descriptions loaded via progressive disclosure) less heavily than immediate prompts. The user asks a question that should route to a specific Skill; the model answers from general reasoning without invoking the Skill.
 
 This is the structural inverse of 7a — emphatic enforcement language is appropriate here, not in 7a.
 
@@ -363,19 +396,17 @@ substitute general reasoning for the specified tool unless the tool is
 unavailable in the current environment.
 ```
 
-**Placement:** 7a — wherever tool-use instructions appear in the system prompt; the fix is recalibration of existing instructions, not addition of a new countermeasure. 7b — core rules or User Preferences with explicit reference to specific tools that have been observed to under-fire.
-
 **Deployment calibration:**
 - Chat interface (Adaptive): 7b is HIGH; 7a is LOW (legacy language should be removed)
 - Claude Projects: 7b is MEDIUM (CI partially anchors)
-- Claude Code (xhigh): 7b is LOW
+- Claude Code: 7b is LOW
 - API (effort ≥ high): 7b is LOW
 
-**General principle for current models:** Replace emphatic language (MUST, ALWAYS, CRITICAL, NEVER) with calibrated guidance for general tool use. Reserve emphatic language for the specific case where you need to override 7b on chat-interface deployments. This is the only context in current-era prompt design where emphatic language is the right answer.
+**General principle:** Replace emphatic language (MUST, ALWAYS, CRITICAL, NEVER) with calibrated guidance for general tool use. Reserve emphatic language for the specific case where you need to override 7b on chat-interface deployments.
 
-### 8. LaTeX Defaulting — persistent, countermeasure unchanged
+### 8. LaTeX Defaulting
 
-**What it looks like:** Claude Opus defaults to LaTeX notation for mathematical expressions, equations, and technical explanations. Outputs contain `\frac{}{}`, `\sum`, `$...$`, and other LaTeX markup. This is appropriate for academic and technical contexts but problematic for plain-text outputs, non-technical audiences, or downstream systems that do not render LaTeX. Persists in 4.7.
+**What it looks like:** Claude Opus defaults to LaTeX notation for mathematical expressions, equations, and technical explanations. Outputs contain `\frac{}{}`, `\sum`, `$...$`, and other LaTeX markup. Appropriate for academic and technical contexts; problematic for plain-text outputs, non-technical audiences, or downstream systems that do not render LaTeX. Persists across Opus generations.
 
 **Domains most affected:** Financial projects, educational projects, any project involving quantitative analysis or mathematical expressions for non-academic audiences.
 
@@ -387,21 +418,21 @@ Write math expressions using standard text characters (/ for division,
 * for multiplication, ^ for exponents).
 ```
 
-**Placement:** Output standards. Only needed when the output context does not render LaTeX. For academic or technical projects where LaTeX is appropriate, this countermeasure is unnecessary.
+**Placement:** Output standards. Only needed when the output context does not render LaTeX.
 
 **Deployment calibration:**
 - Chat interface (Adaptive): MEDIUM (plain-text contexts), LOW (rendered contexts)
-- Claude Projects: MEDIUM (plain-text contexts), LOW (rendered contexts)
-- Claude Code (xhigh): LOW (technical context where LaTeX is rare in code output)
+- Claude Projects: MEDIUM (plain-text), LOW (rendered)
+- Claude Code: LOW (technical context where LaTeX is rare in code output)
 - API (effort ≥ high): MEDIUM (depends on downstream rendering)
 
-### 9. Editorial Drift — NEW in 4.7
+### 9. Editorial Drift
 
 **What it looks like:** Claude produces unsolicited commentary on its own boundaries, the act of responding, or its constraints. Symptoms: meta-statements about what the model can or cannot do that were not asked for; disclaimers about response scope inserted into otherwise direct answers; preamble explaining why the model is approaching a question a particular way; closing commentary about what the user might want to consider next.
 
-This tendency emerged in Opus 4.7 deployments and is most pronounced on the chat interface where Adaptive effort and the absence of tight CI scaffolding allow editorial content to leak into responses.
+Most pronounced on the chat interface where Adaptive effort and the absence of tight CI scaffolding allow editorial content to leak into responses.
 
-**Domains most affected:** Advisory and coaching projects (where the model may add disclaimers about what it is or isn't doing), any project on the chat interface without strong output standards, projects with extensive User Preferences that the model attempts to acknowledge in responses.
+**Domains most affected:** Advisory and coaching projects, any project on the chat interface without strong output standards, projects with extensive User Preferences that the model attempts to acknowledge in responses.
 
 **Countermeasure template:**
 ```
@@ -417,14 +448,14 @@ question; stop when the answer is complete.
 **Deployment calibration:**
 - Chat interface (Adaptive): HIGH
 - Claude Projects: MEDIUM (CI mitigates)
-- Claude Code (xhigh): LOW
+- Claude Code: LOW
 - API (effort ≥ high): LOW
 
-### 10. Self-Referential Fabrication — NEW in 4.7
+### 10. Self-Referential Fabrication
 
 **What it looks like:** Claude claims to have performed an action, checked a state, or inspected its own runtime context without actually doing so. The claim is plausibility-driven — it sounds like what the model should have done, but the action was not verified.
 
-**Distinct from #5 (Fabricated Precision, External-Fact):** #5 is about content (statistics, sources, citations); #10 is about process (claims about what the model itself did). Existing "don't fabricate" countermeasures targeting external facts do not address #10 because the failure surface is different. The conclusion the model is supporting may be correct; the process claim is what is fabricated.
+**Distinct from #5 (Fabricated Precision, External-Fact):** #5 is about content (statistics, sources, citations); #10 is about process (claims about what the model itself did).
 
 **Symptom profile:**
 - "I searched and found X" when no search was performed
@@ -459,15 +490,147 @@ conclusion already reached. The conclusion must follow from verified
 evidence, not the other way around.
 ```
 
-**Placement:** Core rules (high-attention position to override the asymmetric default). For Projects deploying audit Skills or any Skill that reports on actions, this countermeasure is essentially universal. For lighter Projects, deploy when the failure mode is observed.
+**Placement:** Core rules (high-attention position to override the asymmetric default). For Projects deploying audit Skills or any Skill that reports on actions, this countermeasure is essentially universal.
 
 **Deployment calibration:**
 - Chat interface (Adaptive): HIGH
-- Claude Projects: MEDIUM (CI partially anchors; verified via seed-project self-observation in April 2026 calibration session)
-- Claude Code (xhigh): LOW
+- Claude Projects: MEDIUM (CI partially anchors)
+- Claude Code: LOW
 - API (effort ≥ high): LOW
 
 For the full countermeasure template with CI-level and User-Preferences-level variants, see `root_SELF_REFERENTIAL_FABRICATION_COUNTERMEASURE.md`.
+
+### 11. Over-Verification (NEW in Opus 5)
+
+**What it looks like:** Opus 5 verifies its own work automatically. Instructions telling it to "double-check your answer," "re-verify before responding," "include a final verification step," or "use a subagent to verify" compound with the model's own behavior and cause over-verification — token spend without a quality gain.
+
+**Countermeasure — REMOVAL of self-directed re-checking instructions.**
+
+This is a new countermeasure shape for the taxonomy: the fix is *removal of instructions*, not addition. Prompts that grew over multiple model generations often carry accumulated verification instructions layered on top of each other. On Opus 5, these compound rather than adding value.
+
+**The critical distinction — self-directed re-checking vs external-artifact verification:**
+
+- **Self-directed re-checking** (REMOVE) asks the model to re-examine its own reasoning or output with no new information. Opus 5 already does this. Instructing it compounds the behavior.
+- **External-artifact verification** (KEEP, and keep imperative) asks the model to check a claim against a source outside its own output. Opus 5 does NOT automatically do this. It has to be told to.
+
+**Remove (self-directed re-checking):**
+```
+double-check your answer
+re-verify before responding
+include a final verification step
+use a subagent to verify your work
+before presenting your final answer, verify your reasoning
+```
+
+**Keep and keep imperative (external-artifact verification):**
+```
+verify the file exists at the path claimed
+check the rendered page — a stored-body assert is not proof of clean render
+diff the artifact against the source
+confirm the tag resolves against actual repo state
+run the tests and verify they pass
+grep for the symbol to confirm it exists before recommending it
+```
+
+**Deployment calibration:**
+- Chat interface: MEDIUM (chat workloads are less verification-heavy)
+- Claude Projects: MEDIUM
+- Claude Code: HIGH (agentic workloads with verification scaffolding accumulated over prior model generations)
+- API (agent workloads at effort ≥ high): HIGH
+
+**Audit note:** the pattern set that identifies this tendency in existing prompts is `double-check`, `re-verify`, `verify your (own )?work`, `verification step`, `subagent to verify`, `check your answer`. Not every hit is a removal target — some phrasings are ambiguous (see external-artifact examples above). Classify item-by-item, do not batch-apply.
+
+### 12. Scope Expansion (NEW in Opus 5)
+
+**What it looks like:** Opus 5 expands the scope of a task, adding steps that weren't requested or applying its own judgment about what the task should be. This is deliverable-boundary drift.
+
+**Distinct from #6 (over-exploration):** #6 is search breadth within a task; #12 is delivering beyond the task. A prompt with both tendencies produces work that is both wandering AND expanded. The fixes address different mechanisms.
+
+**Countermeasure — constrain scope explicitly:**
+```
+Deliver what was asked, at the scope intended. Make routine judgment calls
+yourself, and check in only when different readings of the request would
+lead to materially different work. If the request seems mistaken or a better
+approach exists, say so in a sentence and continue with the task as asked
+rather than quietly narrowing, widening, or transforming it. Finish the
+whole task, and stop short of actions that are clearly beyond what was asked.
+```
+
+**Placement:** Core rules for tightly-scoped Projects; output standards otherwise.
+
+**Deployment calibration:**
+- Chat interface: MEDIUM
+- Claude Projects: MEDIUM
+- Claude Code: HIGH (agentic sessions where the model can act on scope expansion by writing files, spawning subagents, etc.)
+- API (agent workloads at effort ≥ high): HIGH
+
+### 13. Subagent Over-Delegation (NEW in Opus 5)
+
+**What it looks like:** Opus 5 delegates to subagents more readily than prior models. Delegation pays off on genuinely independent, sizeable tracks of work but multiplies cost and time when applied to small tasks. Also — and this is a load-bearing correction — Opus 5 will use a subagent to "verify" its own work, which is a specific form of over-verification (see #11) that costs a full subagent invocation for no quality gain.
+
+**Countermeasure — cap delegation:**
+```
+Delegate to a subagent only for large tasks that are genuinely independent
+and parallelizable, such as a wide multi-file investigation. Do not delegate
+work you can finish yourself in a handful of tool calls, and do not use
+subagents to verify or double-check your own work. If one subagent can
+complete the task, use one rather than several, and keep spawn counts low.
+```
+
+**Deployment calibration:**
+- Chat interface: N/A (no subagent surface)
+- Claude Projects: N/A (no subagent surface)
+- Claude Code: HIGH (this is the primary subagent surface)
+- API (multi-agent workloads): HIGH
+
+### 14. Correction Narration (NEW in Opus 5)
+
+**What it looks like:** Opus 5 narrates corrections to its earlier statements more than prior models — including corrections that don't materially change the user's outcome.
+
+**Countermeasure — restrict corrections to material ones:**
+```
+Only correct an earlier statement when the error would change the user's
+code, conclusions, or decisions. State corrections plainly and briefly, then
+continue the task. For slips that change nothing for the user, make the fix
+and move on without noting it.
+```
+
+**Deployment calibration:**
+- Chat interface: MEDIUM (extended conversations accumulate corrections)
+- Claude Projects: MEDIUM
+- Claude Code: LOW (agentic sessions are largely action-driven; correction narration is a smaller share)
+- API: LOW
+
+### Prompt/environment-conditional defects (not model tendencies)
+
+Two failure modes track cleanly to the prompt or the runtime configuration rather than the model. They are handled by writing prompts differently or configuring the API differently, not by adding counter-tendency instructions.
+
+#### Conservative-instruction literalism
+
+Opus 5 follows "only report high-severity issues" or "be conservative" literally, which causes under-reporting. This is a **prompt defect** exposed by the model, not a model tendency.
+
+**Fix — ask for everything, filter in a separate pass.** Rewrite review prompts to two stages: (1) report every issue found; (2) filter to the severity level or subset the user wants. Do not compress "report everything" and "filter to high severity" into one instruction. This applies to audit Skills (project-audit, full-stack-audit, prompt-validation, global-audit, repo-hygiene, critic-gate) in particular.
+
+Sweep pattern for prompts that carry this defect: `only report`, `only flag`, `be conservative`, `high-severity` (as an instruction, not as an output label). Replace with report-everything-then-filter form.
+
+#### Thinking-disabled output artifacts
+
+With `thinking: {"type": "disabled"}` on Opus 5, two artifacts can occasionally appear in the model's visible output:
+
+- **Tool calls as text.** The model writes a tool call into user-facing text instead of emitting a structured `tool_use` block. The call never runs; in agentic loops the leaked text stays in the conversation history and affects later turns. Most common on tool-heavy workloads such as search.
+- **Internal XML tags in visible response.** `<thinking>` tags or other internal tags leak into the visible response.
+
+Both are **API-configuration failure modes** — the fix is not to prompt around them but to keep thinking on and control cost via effort. For most tasks, thinking-on at `low` effort outperforms thinking-off at similar cost.
+
+**Sub-finding — a system-prompt rule against thinking increases tag leakage.** Do NOT add instructions like "do not think" or "do not reason" to a system prompt while thinking is disabled — that instruction increases tag leakage rather than suppressing it. If a mitigation instruction is required (for integrations that must keep thinking disabled), use the general form rather than naming the tags:
+
+```
+When you use a tool, you may say a brief sentence first. If no tool can
+express what the user asked for, say so instead of guessing. Do not include
+internal or system XML tags in your response.
+```
+
+**Reminder — thinking-disabled breaking change on Opus 5:** `thinking: {"type": "disabled"}` is accepted only at effort `high` or below. Setting it at `xhigh` or `max` returns a 400 error. This is a breaking change vs Opus 4.8.
 
 ---
 
@@ -655,97 +818,84 @@ Behavioral instructions ("always do X," "never do Y") belong in Custom Instructi
 
 ## Context Budget Principles
 
-Claude Projects operate in one of two modes depending on the knowledge file load: full-context loading (all knowledge files injected into the context window simultaneously) or retrieval mode (files searched on demand via `project_knowledge_search`). The transition is automatic and threshold-based.
+Anthropic Projects operate in one of two modes depending on the knowledge file load relative to the underlying model's context window: **full-context loading** (all knowledge files injected into the context window simultaneously) or **retrieval mode** (files searched on demand via `project_knowledge_search`). The transition is **automatic and window-relative** — RAG activates when your project approaches or exceeds what fits in the model's context window, not at a fixed token threshold.
 
 The optimization objective is to maximize the quality of Claude's content access for the project's actual workload. Full-context loading is optimal for projects that depend on cross-file reasoning — Claude can connect content across files in a single generation. Retrieval mode loses this capability but offers greater capacity and works well when queries target specific documents rather than requiring cross-file synthesis. Both are valid architectures. The right target depends on the project's workload, not on a universal preference for full-context.
 
-### Tokenizer Note for Opus 4.7
+**Sources:** Anthropic support article — `support.claude.com/en/articles/11473015-retrieval-augmented-generation-rag-for-projects` (verbatim: "RAG automatically activates when your project approaches or exceeds the context window limits"). Landscape reference: `root_CLAUDE_OPTIMIZATION_NOTES.md` §3.
 
-Opus 4.7 uses a revised tokenizer. Anthropic's published range maps the same input to 1.0x–1.35x of prior measurements. Independent measurement on markdown-heavy and technical content clocks 1.45x–1.47x — above the published range for that content class. The empirical thresholds and budget math documented in this section were measured against the prior tokenizer. Two implications:
+### Context window is not the RAG threshold — a preserved distinction
 
-1. **Threshold value vs. content volume.** Whether the absolute ~66,500 token threshold has shifted under the new tokenizer requires re-measurement. Pending revalidation, treat the math as approximate. The content volume the threshold corresponds to has likely changed even if the absolute number holds.
-2. **Project measurements should be re-baselined.** Projects measured at specific token counts under prior models will measure higher under 4.7. The seed project's documented ~134K token measurement projects to approximately ~180–200K under the 4.7 tokenizer on markdown-heavy content — content unchanged, measurement methodology changed.
+Under the 200K-window era, the RAG threshold was numerically entangled with the window (empirically ~66,500 tokens on 200K plans, roughly a third of the window). That made the fixed number look like a stable rule of thumb, and it conflated two concepts that are conceptually distinct:
 
-Re-baselining is queued for a future Calibration Lab session using the `count_tokens` API against `claude-opus-4-7`. In the interim, treat token measurements with explicit tolerance (e.g., "approximately 134K under prior tokenizer, projected 180–200K under 4.7" rather than a single point estimate).
+- **Context window** — the model's maximum input capacity (measured in tokens per model; 1M for current top-tier models, 200K for Haiku 4.5).
+- **RAG threshold** — the platform-side decision point where Projects switch from full-context loading to retrieval mode. Now tracks the window (automatic per current article), rather than being a fraction of it.
 
-### The Two-Pool Budget Architecture
+Under 1M-window models, the RAG threshold has moved with the window. State the two separately in prompt/Project design; do not carry the ~66,500 figure forward as a live threshold. See "Historical context" below for the measurement that produced that figure and why it is preserved as history but not as current-state guidance.
 
-Empirical testing (April 2026, calibration lab with precision-sized files on the 200K context window) established that the platform evaluates knowledge files against a dedicated budget pool, separate from all other context consumers:
+### The Two Modes
 
-| Budget Pool | Allocation | Contents | RAG Impact |
-|---|---|---|---|
-| **Knowledge file budget** | ~66,500 tokens (~33% of 200K) | Knowledge files only | Exceeding this triggers RAG |
-| **Conversation budget** | ~133,500 tokens (~67% of 200K) | Platform overhead, Skills, MCPs, CI, Memory, preferences, conversation history, responses | Cannot trigger RAG |
+**Full-context mode.** All knowledge files loaded into every turn. Cross-file reasoning fully available. Chunk coherence is not a concern (the whole file is present). Optimization focus: file organization, one-purpose-per-file, front-loading of critical content.
 
-The RAG decision is made on knowledge file tokens alone, before other components are injected. The platform follows this sequence:
+**Retrieval mode.** `project_knowledge_search` tool present in Claude's available tools; knowledge is retrieved as chunks per query. Cross-file reasoning loses guaranteed simultaneity. Optimization focus: chunk coherence, routing description quality, retrieval pool signal-to-noise, migration of behavioral content to always-loaded layers (Skills, CI, Memory).
 
-1. Calculate total knowledge file tokens in the project.
-2. If knowledge file tokens exceed the threshold (~66,500 for 200K windows): activate retrieval mode and inject the `project_knowledge_search` tool. Only relevant chunks are retrieved per query.
-3. If under threshold: inject all knowledge files as complete document blocks (full-context mode).
-4. Inject all other components: platform system prompt, tool schemas, Skills, MCP definitions, Custom Instructions, Memory, User Preferences.
-5. Remaining budget becomes conversation runway.
+**Detection.** The presence of `project_knowledge_search` in Claude's available tools is the reliable indicator that retrieval mode is active. In full-context mode, this tool is absent. The UI also shows a visual indicator ("Indexing" label in the files panel). For programmatic detection in a Project, check whether the system prompt includes the search tool.
 
-This two-pool architecture means that adding Skills, connecting MCPs, or expanding Custom Instructions cannot trigger RAG mode — they consume conversation budget exclusively. Conversely, reducing Skills or disconnecting MCPs cannot recover knowledge file headroom. The two pools are independent for threshold purposes.
+### What triggers RAG activation
+
+**Trigger:** Knowledge base approaches or exceeds the underlying model's context window.
+
+The threshold is window-relative — a Project that loads full-context under Opus 5's 1M window may switch to retrieval under Haiku 4.5's 200K window. Neither the article nor the current models overview publishes per-model threshold numbers. If a specific number matters for architectural decisions on a specific project, measure empirically (see "Empirical Threshold Measurement" below).
+
+**Threshold-exempt overhead.** Skills, MCP integrations, Custom Instructions, Memory, and User Preferences consume conversation budget but are not part of the knowledge-file total that triggers RAG activation. Adding or removing them cannot switch a Project between modes. This distinction was true under the 200K-era platform (empirically confirmed) and remains true under current platform behavior; the split between "knowledge budget" (triggers RAG) and "conversation budget" (does not) survives the platform change.
+
+### Historical context — the ~66,500 measurement
+
+The `~66,500 token RAG threshold` figure that appears in prior root.node documentation is a specific empirical measurement from Phase 22 (April 2026 calibration lab): under the 200K context window (Pro/Max/Team plans at the time), against Opus 4.6, the RAG activation point was at approximately 66,500 tokens of knowledge files — roughly 33% of the 200K window. That was a valid, measured number for its era.
+
+Under the current platform (automatic-by-window on 1M-window primary models):
+- The 66,500 figure no longer represents current-state RAG behavior.
+- The 33% ratio was an artifact of the 200K-window era; there is no evidence it holds for 1M-window models.
+- Projects that were calibrated to sit comfortably under 66,500 are far below the current threshold (whatever it is) on any 1M-window model.
+
+Where prior documentation states the 66,500 figure as a historical measurement in past tense, it is correct. Where it states the figure as a current-state operational rule, it is stale. The distinction matters for context-budget audit calibration in current-era Projects.
 
 ### Token Estimation
 
-Claude cannot count tokens precisely but can estimate with sufficient accuracy for architectural decisions. English prose converts at approximately 4 characters per token; structured content (XML, code, tables) at approximately 3.25 characters per token; mixed markdown at approximately 3.75 characters per token. One page of prose is roughly 500 words, 3,000 characters, or 750 tokens. These estimates are ±15% accurate for individual files and ±10% for totals across a project under the prior tokenizer; the 4.7 tokenizer change introduces additional uncertainty (Anthropic-published 1.0x–1.35x, independently measured 1.45x–1.47x on markdown-heavy content) until revalidated. The goal is reliable threshold detection and relative sizing, not exact accounting.
+Claude cannot count tokens precisely but can estimate with sufficient accuracy for architectural decisions. Rough conversion for English prose: approximately 4 characters per token; structured content (XML, code, tables) at approximately 3.25 characters per token; mixed markdown at approximately 3.75 characters per token. One page of prose is roughly 500 words, 3,000 characters, or 750 tokens.
 
-To estimate a project's knowledge file token load: run `ls -la /mnt/project/` for byte sizes, divide each by 4, and sum. Compare against the ~66,500 token threshold. Note that GitHub-connected repositories loaded as knowledge sources count toward this total — they are functionally equivalent to uploaded files.
+**Tokenizer notes for current models:**
+- **Fable 5** uses the tokenizer introduced with Opus 4.7 — compared to models before Opus 4.7, the same text produces roughly 30% more tokens (Anthropic's models overview page).
+- **Sonnet 5** produces approximately 30% more tokens per unit of content than Sonnet 4.6 (Anthropic's whats-new page: "approximately 30% more tokens than on Claude Sonnet 4.6").
+- **Opus 5** tokenizer specifics were not fully re-baselined in the v4.0 alignment cycle. Treat measurements with explicit tolerance until re-baselined via `count_tokens`.
 
-### Threshold-Exempt Overhead
+Estimates are approximate. For architectural decisions where precise numbers matter (borderline threshold cases, empirical measurement), use `count_tokens` against the target model rather than character-based heuristics.
 
-Skills, MCP integrations, and other non-knowledge-file components consume the conversation budget but are exempt from the RAG threshold calculation. This was confirmed empirically: 16 installed Skills and 8 connected MCP integrations were active while knowledge files sat ~50 tokens below the threshold, and RAG did not activate.
-
-The practical implication is that recommendations to reduce Skills or disconnect MCPs for knowledge file headroom are incorrect. These components cannot affect whether a project enters RAG mode. However, they do reduce conversation runway — the number of substantive turns before context pressure causes message truncation. A project with heavy MCP integrations will have shorter productive conversations, even if its knowledge files are in full-context mode.
-
-When diagnosing unexpected RAG activation, check knowledge file tokens first. If a project recently entered RAG mode with no knowledge file changes, investigate whether GitHub-connected repo content increased, or whether the platform updated in a way that increased knowledge file overhead (Anthropic may adjust the threshold or counting methodology over time).
+To estimate a project's knowledge file token load in Anthropic Projects: run `ls -la /mnt/project/` for byte sizes, divide each by 4, and sum. GitHub-connected repositories loaded as knowledge sources count toward this total — they are functionally equivalent to uploaded files.
 
 ### Conversation Budget Components
 
-While threshold-exempt, these components still matter for conversation quality:
+While threshold-exempt (do not trigger RAG), these components still matter for conversation quality:
 
 - **Platform system prompt** (~20–25K tokens): Non-removable. Includes behavior rules, search/copyright instructions, tool schemas, computer use instructions, memory system, past chats, visualizer, and Skills catalog. This baseline is relatively stable.
-- **MCP integrations** (variable — depends on loading mode): MCP connector overhead varies dramatically based on the loading mode. Three patterns exist. (1) **Always-loaded:** Full tool schemas injected every turn. ~3K for simple connectors (2–3 tools) to ~15K+ for complex ones (20+ tools). (2) **Deferred / load-as-needed:** Tools listed by name and brief description (~40–60 tokens each) in a lightweight catalog; full schemas load on demand via tool search. The deferred infrastructure adds a flat ~5–7K tokens regardless of connector count — an ~85% reduction versus always-loaded. This is the standard mode in claude.ai when connectors are set to "load as needed." (3) **Hybrid:** Some connectors always-load a few primary tools while deferring the rest. The overhead is the always-loaded schemas plus the shared deferred catalog cost. With deferred loading (the common case in claude.ai Projects), 8 connectors typically add ~8–12K total, not ~40–80K. Dynamic overhead also accrues within a conversation as deferred tools are activated and tool results accumulate in history.
+- **MCP integrations** (variable — depends on loading mode): MCP connector overhead varies dramatically based on the loading mode. Three patterns exist. (1) **Always-loaded:** Full tool schemas injected every turn. ~3K for simple connectors (2–3 tools) to ~15K+ for complex ones (20+ tools). (2) **Deferred / load-as-needed:** Tools listed by name and brief description (~40–60 tokens each) in a lightweight catalog; full schemas load on demand via tool search. The deferred infrastructure adds a flat ~5–7K tokens regardless of connector count — an ~85% reduction versus always-loaded. This is the standard mode in claude.ai when connectors are set to "load as needed." (3) **Hybrid:** Some connectors always-load a few primary tools while deferring the rest. With deferred loading (the common case), 8 connectors typically add ~8–12K total, not ~40–80K. Dynamic overhead also accrues within a conversation as deferred tools are activated and tool results accumulate in history.
 - **Skills** (minimal per skill): Only skill name and description (~30–50 tokens each) load at startup. Full SKILL.md loads on demand when triggered. The startup cost of 16 skills is roughly 500–800 tokens — negligible for budget purposes.
 - **Custom Instructions** (variable): The system prompt text. Estimate with bytes ÷ 4.
 - **Memory** (typically 500–3K tokens): Manual edits plus auto-generated entries.
 - **User Preferences** (200–1,500 tokens): Global preference text.
 
-Estimated conversation runway after all overhead (assumes deferred MCP loading, the standard for claude.ai):
-
-- **Lean project** (no MCPs, few skills, short CI): ~105K–110K tokens for conversation.
-- **Moderate project** (2–3 MCPs deferred, standard skills): ~95K–105K tokens.
-- **Typical project** (6–8 MCPs deferred, 15+ skills, standard CI): ~85K–100K tokens.
-- **Heavy project** (6+ MCPs always-loaded, extensive CI, large Memory): ~50K–80K tokens.
-
-If MCP connectors are always-loaded (not deferred), use the heavy project estimate regardless of connector count. The difference between deferred and always-loaded is typically 30K–60K tokens for 6+ connectors. When the loading mode is unknown, note the estimate as a range spanning both modes.
-
-These estimates help users understand how many substantive turns they can expect before context pressure triggers message compaction. Overhead also affects context quality on every turn: as total context grows, the model's attention per token decreases (context rot). Minimizing unnecessary overhead improves output quality even when conversation runway appears healthy.
+Overhead affects context quality on every turn: as total context grows, the model's attention per token decreases (context rot). Minimizing unnecessary overhead improves output quality even when the conversation window appears healthy.
 
 ### Context Window Sizes by Plan
 
-| Plan | Context Window | Knowledge File Ceiling (empirical) |
+| Plan | Context Window | Notes |
 |---|---|---|
-| Pro / Max / Team | 200K tokens | ~66,500 tokens (pending 4.7 tokenizer revalidation) |
-| Enterprise | 500K tokens | ~165,000 tokens (estimated at 33%, untested) |
-| API (Opus 4.6, 4.7, Sonnet 4.6) | 1M tokens (GA, standard pricing) | User-controlled (no platform RAG) |
+| Pro / Max | 200K–1M tokens (plan-dependent; consult current Anthropic plan documentation) | RAG threshold is automatic per window |
+| Team / Enterprise | Plan-dependent | RAG threshold is automatic per window |
+| API (Opus 5, Sonnet 5, Fable 5) | 1M tokens (default AND max; no smaller variant on Opus 5) | User-controlled context; no platform RAG |
+| API (Haiku 4.5) | 200K tokens | User-controlled context; no platform RAG |
 
-The context window is plan-dependent, not model-dependent. Switching between Opus and Sonnet within a Claude Project does not change the window size or RAG threshold. The Enterprise estimate is extrapolated from the 33% ratio observed on 200K windows and should be validated empirically if used for architectural decisions.
-
-### Five-Tier Operating Model
-
-Projects operate in one of five tiers based on their knowledge file token load. The tiers are calibrated to the empirically measured ~66,500 token RAG threshold on 200K context windows (Pro/Max/Team plans). File count is not a factor — RAG activation depends on total knowledge file tokens only.
-
-**Tier 1 — Full-Context, Comfortable (under ~30K knowledge tokens).** All files loaded with substantial headroom. Cross-file reasoning fully functional. Optimization is not budget-driven but may still be valuable: file organization, chunk coherence, and routing description quality improve output even when the budget is healthy. If a user requests optimization at this tier, focus on structural quality rather than token reduction.
-
-**Tier 2 — Full-Context, Moderate (~30K–50K knowledge tokens).** All files loaded with meaningful headroom. Cross-file reasoning works. Approaching the range where growth should be monitored. Optimization is beneficial but not urgent — focus on preventing unnecessary content accumulation and maintaining structural quality.
-
-**Tier 3 — Full-Context, Tight (~50K–66K knowledge tokens).** All files loaded, but approaching the threshold. Proactive optimization recommended to maintain headroom. Any planned content additions should be evaluated against the budget. This is the zone where a few large file additions could push the project into retrieval mode.
-
-**Tier 4 — Retrieval Mode (~66K–500K knowledge tokens).** Retrieval active. Cross-file reasoning is not available for content that spans multiple knowledge files, but single-file and within-section reasoning works well. Effective for reference-heavy projects, documentation sets, and projects where queries typically target specific documents. Optimization focus: retrieval pool quality, chunk coherence, routing accuracy, behavioral content separation, and Skill migration for procedural content. See RAG Quality Optimization Principles below. For projects near the lower end of this tier (66K–100K), full-context recovery may be achievable with moderate optimization.
-
-**Tier 5 — Retrieval Mode, Heavy (over ~500K knowledge tokens).** Retrieval active at scale. Large document collections. Retrieval precision degrades with volume — the larger the pool, the more noise competes with signal. Mitigation: clear file naming, explicit document targeting in prompts, a CONTENTS_INDEX.md navigation file, aggressive noise removal from the retrieval pool, and Skill migration for all behavioral content. For projects at this scale where the use case demands cross-document synthesis that RAG fundamentally cannot serve, an API-based deployment offers a fundamentally different architecture — see API Deployment as Alternative Architecture below.
+The context window is plan-dependent. The Projects RAG threshold now tracks the window (per the support article), rather than being a fixed number. Consult Anthropic's plan documentation for current per-plan windows; the numbers move with product changes.
 
 ### Context Pressure vs. RAG Switching
 
@@ -753,64 +903,64 @@ These are two distinct mechanisms that operate independently:
 
 | Mechanism | Trigger | Effect | Scope |
 |---|---|---|---|
-| **RAG switching** | Knowledge files exceed ~66,500 tokens | Changes how knowledge is loaded (all vs. retrieved chunks) | Project-level, static per configuration |
-| **Context pressure** | Cumulative context approaches 200K limit during conversation | Earlier messages truncated or summarized via compaction | Conversation-level, dynamic per turn |
+| **RAG switching** | Knowledge files approach or exceed the model's context window | Changes how knowledge is loaded (all vs. retrieved chunks) | Project-level, static per configuration |
+| **Context pressure** | Cumulative context approaches window limit during conversation | Earlier messages truncated or summarized via compaction | Conversation-level, dynamic per turn |
 
 Context pressure affects conversation quality — earlier context is lost as the conversation grows. RAG switching affects knowledge access quality — retrieval returns fragments instead of complete files. A project can experience both simultaneously (large knowledge base in RAG mode with a long conversation causing compaction) or either independently.
 
-A project with 60K tokens of knowledge files in full-context mode will have approximately 80K–110K tokens for conversation (depending on other overhead). The same project, if pushed over the threshold into RAG mode, would recover most of that knowledge file allocation as conversation runway but lose guaranteed access to all knowledge content on every turn.
+Under 200K-window models (Haiku 4.5) both mechanisms sit closer together numerically. Under 1M-window models (Fable 5, Opus 5, Sonnet 5), the two mechanisms sit further apart in absolute terms — a Project can be well under the RAG threshold while a long agentic conversation still triggers compaction.
 
 ### When Retrieval Mode Is the Right Architecture
 
-Retrieval mode is the appropriate architecture for projects that primarily query individual documents — documentation sets, knowledge bases, reference manuals, large codebases. Testing with 113 articles showed accurate semantic retrieval for focused queries. Retrieval mode also handles projects with content volumes that exceed the ~66,500 token budget, provided the architecture is designed for retrieval quality (see RAG Quality Optimization Principles below).
+Retrieval mode is the appropriate architecture for projects that primarily query individual documents — documentation sets, knowledge bases, reference manuals, large codebases. Testing with 113 articles (April 2026, under 200K-era platform) showed accurate semantic retrieval for focused queries.
 
 The quality concern is specific to projects that depend on cross-file reasoning, where Claude needs simultaneous awareness of multiple files to produce correct output. For these projects, full-context loading is worth pursuing if achievable. When it is not achievable, the mitigation is architectural: consolidate cross-dependent content into fewer files to eliminate cross-file dependencies, move independent content to Skills, and ensure the remaining knowledge files are self-contained.
 
+Under 1M-window primary models, more Projects can operate in full-context mode than under the 200K era. Recheck a Project's current mode by looking for `project_knowledge_search` — a Project that was in retrieval mode under the 200K era may have moved to full-context under Opus 5 / Sonnet 5 without any content changes.
+
 ### API Deployment as Alternative Architecture
 
-For knowledge bases exceeding ~500K tokens where the use case demands cross-document synthesis that retrieval mode fundamentally cannot serve, an API-based deployment provides a different architecture: 1M token context windows (Opus 4.6, 4.7, Sonnet 4.6) now generally available at standard per-token pricing with no surcharge or beta header, no platform-imposed RAG threshold, and full user control over what enters context.
+For knowledge bases and workloads where Anthropic Projects' automatic RAG behavior doesn't fit the use case (very large content volumes with cross-document synthesis requirements, or explicit control over retrieval), an API-based deployment provides a different architecture: 1M-token windows on Opus 5, Sonnet 5, Fable 5; developer control over what enters context; no platform-imposed RAG.
 
-The tradeoffs are significant. Cost is substantially higher (per-token billing on massive inputs every turn). Latency increases with context size (30–60+ seconds at high token counts). Accuracy and recall degrade as total context grows toward 1M (context rot). The lost-in-the-middle effect reduces recall of content positioned in the middle of very large contexts. The user owns the full stack — conversation management, retrieval logic, memory persistence, and all platform features must be built and maintained.
+Tradeoffs are significant. Cost is substantially higher (per-token billing on massive inputs every turn). Latency increases with context size (30–60+ seconds at high token counts). Accuracy and recall degrade as total context grows toward 1M (context rot). The lost-in-the-middle effect reduces recall of content positioned in the middle of very large contexts. The user owns the full stack — conversation management, retrieval logic, memory persistence, and all platform features must be built and maintained.
 
-API deployment is not a casual escalation from Claude Projects. It is a different product architecture with different economics and engineering requirements. Recommend it only when the content volume and cross-document synthesis requirements make retrieval mode genuinely unworkable, not simply because a project exceeds the knowledge file budget.
-
-### Detection and Monitoring
-
-The presence of `project_knowledge_search` in Claude's available tools is the reliable indicator that retrieval mode is active. In full-context mode, this tool is absent. The UI also shows a visual indicator ("Indexing" label in the files panel, plus a threshold marker on the storage progress bar). For programmatic detection in a Project, check whether the system prompt includes the search tool.
+API deployment is not a casual escalation from Claude Projects. It is a different product architecture with different economics and engineering requirements. Recommend it only when the content volume and cross-document synthesis requirements make Anthropic Projects genuinely unworkable.
 
 ### Empirical Threshold Measurement
 
-The most reliable way to determine a project's exact RAG threshold is empirical testing. This method accounts for all platform behavior automatically.
+The most reliable way to determine a project's exact RAG activation point on the current platform is empirical testing.
 
-**Quick method (±1,000 tokens precision):** Note the project's current knowledge file byte total. If in full-context mode, add knowledge files until the "Indexing" indicator appears in the project UI. If in retrieval mode, remove knowledge files until "Indexing" disappears. The boundary in total knowledge file bytes, divided by 4, gives the threshold in tokens for that project's configuration.
+**Quick method (±1,000 tokens precision):** Note the project's current knowledge file byte total. If in full-context mode, add knowledge files until the "Indexing" indicator appears in the project UI. If in retrieval mode, remove knowledge files until "Indexing" disappears. The boundary in total knowledge file bytes, divided by 4, gives the approximate threshold in tokens for that project's configuration.
 
-**Precision method (±50–100 tokens):** Requires pre-sized calibration files at known token counts. Add or remove calibration files to binary-search the exact trigger point. See the Context Budget Calibration Lab methodology for the full procedure.
+**Precision method (±50–100 tokens):** Requires pre-sized calibration files at known token counts. Add or remove calibration files to binary-search the exact trigger point.
 
-**When to recommend empirical measurement:** When a project is borderline and feasibility depends on precise numbers. When unexpected RAG activation occurs with no knowledge file changes (suggests a platform-side change). After major Anthropic model or platform updates that may shift the threshold (4.7 release queued for revalidation).
+**When to recommend empirical measurement:** When a project is borderline and feasibility depends on precise numbers. When unexpected RAG activation occurs with no knowledge file changes (suggests a platform-side change or a plan/model change). After major Anthropic model or platform updates that may shift the threshold. Note that under automatic-by-window behavior, the threshold may move whenever Anthropic ships model or platform changes; a measurement is a point-in-time snapshot.
 
 ### Feasibility Assessment for Full-Context Recovery
 
 When a project is in retrieval mode, the first question is whether full-context loading is a realistic target. This assessment determines the optimization strategy.
 
-**Step 1: Calculate the gap.** Estimate the project's current knowledge file token load. Compare against the ~66,500 token threshold. Calculate the reduction needed.
+**Step 1: Determine current mode and estimated load.** Check for `project_knowledge_search` presence to confirm current mode. Estimate the project's knowledge file token load using the character-to-token heuristics.
 
-**Step 2: Identify available reductions.** Using the placement tier analysis, estimate the token savings from each optimization priority: archiving Tier 3 files, relocating Tier 2 files to Skills or other layers, and compressing Tier 1 files. Sum the projected savings.
+**Step 2: Determine whether the current mode was set under an older plan or model.** Under 1M-window models, a Project that was in retrieval mode under a 200K plan may already be in full-context mode without any content changes. Verify current state before optimizing.
 
-**Step 3: Classify feasibility.**
+**Step 3: Identify available reductions.** Using the placement tier analysis, estimate the token savings from each optimization priority: archiving Tier 3 files, relocating Tier 2 files to Skills or other layers, and compressing Tier 1 files. Sum the projected savings.
 
-Recovery Achievable — projected reductions bring the project below the ~66,500 token threshold without removing content critical to the project's core function. The reductions involve archiving stale content, migrating behavioral content to Skills (where it works better anyway), and compressing files that have clear redundancy. Typical profile: project is at 70K–100K tokens and 20K–40K of that is clearly relocatable or removable.
+**Step 4: Classify feasibility.**
 
-Borderline — projected reductions bring the project close to the threshold but require trade-offs: removing content that is used occasionally, consolidating files that serve different purposes, or compressing files where the quality impact is uncertain. Full-context is possible but not guaranteed, and the cost may exceed the benefit. Typical profile: project is at 80K–130K tokens with moderate optimization potential.
+*Recovery Achievable* — projected reductions bring the project below the estimated (or empirically measured) threshold without removing content critical to the project's core function. Under 1M-window primary models, most historically-retrieval-mode Projects fall into this category with modest cleanup. Typical profile: Project was calibrated to a 200K-era threshold and now has substantial headroom on 1M models.
 
-Not Feasible — the project's content volume exceeds the threshold by more than the available reductions can close, or the reductions required would remove content critical to the project's function. This includes projects where knowledge file tokens exceed 2x the threshold (~130K+) with limited removable content. Typical profile: project is at 150K+ tokens, or at 100K+ with content that is genuinely load-bearing.
+*Borderline* — projected reductions bring the project close to the threshold but require trade-offs: removing content that is used occasionally, consolidating files that serve different purposes, or compressing files where the quality impact is uncertain. Full-context is possible but not guaranteed, and the cost may exceed the benefit.
 
-**Step 4: Set the strategy.**
+*Not Feasible* — the project's content volume exceeds the threshold by more than the available reductions can close, or the reductions required would remove content critical to the project's function. This includes projects at scales (hundreds of thousands of tokens or more) where even under 1M-window models, full-context is not the right architecture.
 
-If Recovery Achievable: optimize toward full-context as the primary objective. Execute the optimization priorities in order. RAG quality improvements (chunk coherence, routing, behavioral separation) are side benefits during the transition and serve as insurance if the threshold turns out to be slightly lower than expected.
+**Step 5: Set the strategy.**
+
+If Recovery Achievable: optimize toward full-context as the primary objective. Execute the optimization priorities in order. RAG quality improvements are side benefits during the transition and serve as insurance if the threshold turns out to be lower than expected.
 
 If Borderline: present both paths. Estimate the effort and trade-offs for full-context recovery. Estimate the quality improvement from RAG optimization without pursuing full-context. Let the user choose based on their priorities. If the user's project depends heavily on cross-file reasoning, the full-context path is worth the trade-offs. If the project primarily queries individual files, RAG optimization may deliver better ROI.
 
-If Not Feasible: optimize entirely for retrieval quality. Do not prescribe aggressive token reduction strategies aimed at a threshold the project will not reach. Instead, invest optimization effort in the five RAG Quality Principles: clean the retrieval pool, improve chunk coherence, separate behavioral content, migrate procedural content to Skills, and sharpen routing descriptions. Token reduction is still valuable (less noise in the pool), but it is a means to retrieval quality, not a means to full-context.
+If Not Feasible: optimize entirely for retrieval quality. Do not prescribe aggressive token reduction strategies aimed at a threshold the project will not reach. Instead, invest optimization effort in the five RAG Quality Principles (see next section): clean the retrieval pool, improve chunk coherence, separate behavioral content, migrate procedural content to Skills, and sharpen routing descriptions.
 
 ---
 
@@ -910,7 +1060,7 @@ Related: OPTIMIZATION_REFERENCE.md (fix patterns for issues found in audits)
 
 Route to it in Custom Instructions: "When uncertain which file contains the needed information, or when a query could match multiple files, consult CONTENTS_INDEX.md first to identify the correct target."
 
-The index file is only useful in retrieval mode. In full-context mode, Claude sees all files simultaneously and routes by content, making an index redundant. If a project transitions from retrieval to full-context, the index file can remain (it's small enough to be harmless) or be removed.
+The index file is only useful in retrieval mode. In full-context mode, Claude sees all files simultaneously and routes by content, making an index redundant. If a project transitions from retrieval to full-context (a common effect of moving from a 200K-era plan to a 1M-window model), the index file can remain (it's small enough to be harmless) or be removed.
 
 ---
 
@@ -964,22 +1114,27 @@ Addresses the **Monolithic standing context** pattern (`root_AGENT_ANTI_PATTERNS
 ### Fix: Missing Countermeasures → Domain- and Deployment-Targeted Selection
 
 1. Identify the Project's domain, primary task types, and deployment context (chat / Projects / Claude Code / API).
-2. Check each of the ten behavioral tendencies against the domain and deployment combination. Use the deployment calibration tables in the Behavioral Tendencies section to filter — a tendency at LOW for the deployment context generally does not need a countermeasure regardless of domain match.
-3. For each relevant tendency, add the countermeasure template (customized to the domain's language). For Tool Trigger Miscalibration (#7), apply the specific facet (7a or 7b) that matches the failure mode observed.
+2. Check each of the 14 numbered behavioral tendencies (#1–#14, with facets 1a/1b under #1, 3a/3b/3c under #3, 7a/7b under #7) against the domain and deployment combination. Use the deployment calibration tables in the Behavioral Tendencies section to filter — a tendency at LOW for the deployment context generally does not need a countermeasure regardless of domain match.
+3. For each relevant tendency, add the countermeasure template (customized to the domain's language). For Tool Trigger Miscalibration (#7), apply the specific facet (7a or 7b). For Verbosity (#3), apply the specific surface (3a conversational, 3b agentic narration, 3c written deliverables).
 4. Place at the appropriate attention position (identity or core rules for critical countermeasures, output standards for format-level countermeasures).
-5. Do not add countermeasures for tendencies this domain or deployment does not trigger — they are noise that diminishes Claude 4.6/4.7's strong instruction following.
-6. For Projects deployed on the chat interface specifically: prioritize countermeasures for #1b (persistent-preference dilution), #7b (tool under-triggering), #9 (editorial drift), and #10 (self-referential fabrication). These are the tendencies most pronounced on the chat-interface Adaptive deployment and most underweighted in pre-4.7 prompt designs.
-7. For Projects upgrading from a 4.6-era system prompt: audit for now-redundant countermeasures targeting tendencies #1a, #2 (factual claims), #3 (verbosity), #5 (external-fact), #6 (over-exploration), and #7a — these are partially or fully reduced at the 4.7 model level. Where the failure mode is no longer observed, remove the countermeasure to free token budget for the new tendencies.
+5. Do not add countermeasures for tendencies this domain or deployment does not trigger — they are noise that diminishes current models' strong instruction following.
+6. For Projects deployed on the chat interface specifically: prioritize countermeasures for #1b (persistent-preference dilution), #7b (tool under-triggering), #9 (editorial drift), and #10 (self-referential fabrication).
+7. For Projects deployed on Claude Code specifically (or agent workloads on the API): prioritize countermeasures for #3b (agentic narration), #11 (over-verification — REMOVE self-directed re-check instructions), #12 (scope expansion), #13 (subagent over-delegation). These are the tendencies Opus 5 introduces or amplifies on agentic surfaces.
+8. For Projects upgrading from a 4.6-era or 4.8-era system prompt: audit for now-redundant countermeasures targeting tendencies #1a, #2 (factual claims), #3a (verbosity), #5 (external-fact), #6 (over-exploration), and #7a — these are partially or fully reduced at the model level. Where the failure mode is no longer observed, remove the countermeasure to free token budget for the new tendencies.
+9. For audit Skills specifically: apply the conservative-instruction literalism fix. Replace "only report high-severity issues" / "be conservative" language with report-everything-then-filter form.
 
 ### Fix: Pre-4.6 System Prompt → Recalibrate for Current Models
 
-When a Project's system prompt was written for earlier Claude models (pre-4.6):
-1. Audit for emphatic language (MUST, ALWAYS, CRITICAL, NEVER, "If in doubt, always...") and replace with calibrated guidance. Exception: where you are specifically countering tendency 7b (tool under-triggering) on chat-interface deployments, explicit enforcement language remains appropriate.
-2. Audit for aggressive tool-use triggers and dial back to conditional language for general tool use. Reserve emphatic enforcement for specific tools that have been observed to under-fire.
-3. Audit for verbosity countermeasures that may now over-correct — remove or soften preemptive anti-verbosity instructions. Check for the reverse problem (terseness) which is more common in 4.7 than verbosity.
+When a Project's system prompt was written for earlier Claude models (pre-4.6, or pre-Opus-5):
+1. Audit for emphatic language (MUST, ALWAYS, CRITICAL, NEVER, "If in doubt, always...") and replace with calibrated guidance. Exception: where you are specifically countering tendency 7b on chat-interface deployments, explicit enforcement language remains appropriate.
+2. Audit for aggressive tool-use triggers and dial back to conditional language for general tool use.
+3. Audit for verbosity countermeasures that may now over-correct — remove or soften preemptive anti-verbosity instructions. Check for the specific surface (3a conversational, 3b agentic, 3c written) rather than applying a single generic verbosity countermeasure.
 4. Check for prefill-dependent formatting (no longer supported in 4.6+) and migrate to explicit instructions.
 5. Verify that the instruction density is appropriate — current models follow instructions more precisely, so noisy "just in case" instructions cause more harm than in earlier models.
-6. For chat-interface deployments: add countermeasures for #1b, #7b, #9, and #10 if not already present. These are the tendencies that emerged or split in 4.7 and are most pronounced on the Adaptive chat-interface deployment.
+6. For chat-interface deployments: add countermeasures for #1b, #7b, #9, and #10 if not already present.
+7. For agentic deployments (Claude Code, API agent workloads): audit for accumulated verification instructions (double-check, re-verify, verification step, subagent to verify). Distinguish self-directed re-checking (REMOVE per tendency #11) from external-artifact verification (KEEP). This is the highest-value single audit on prompts that migrated from 4.7/4.8 into Opus 5.
+8. For audit-Skills and review prompts: apply the conservative-instruction literalism fix (see Fix: Missing Countermeasures step 9).
+9. Audit effort settings: on Opus 5, the default is `high` and the recommendation is to re-run an effort sweep rather than carry over from prior models. Prompts hardcoded to `xhigh` from the 4.7/4.8 era should be re-evaluated — `xhigh` is now the *step-up* for demanding work, not the *default*.
 
 ### Fix: Misaligned Context Layers → Rebalance Memory and Knowledge Files
 
@@ -1002,13 +1157,13 @@ When User Preferences are missing, bloated, or contain domain-specific content:
 
 ### Fix: Context Budget Optimization → Right-Size and Right-Place Knowledge Files
 
-When a Project's knowledge files exceed the ~66,500 token threshold, or when a user requests optimization at any tier:
+When a Project's knowledge files trigger RAG activation, or when a user requests optimization at any load level:
 
-1. Estimate the total token load across all knowledge files using the character-to-token heuristics (see Token Estimation above). Check for `project_knowledge_search` presence to confirm current mode. Include GitHub-connected repos in the inventory — these count as knowledge files.
-2. Classify the project's operating tier (1–5). For Tier 1 projects where the user requests optimization, proceed with a structural quality focus rather than token reduction.
-3. Evaluate each file for tier placement using six dimensions. (a) Cross-reference density: how many other files reference this file? High cross-reference files are load-bearing. (b) Behavioral vs. referential content: does this file contain rules Claude should follow (behavioral) or information Claude should consult (referential)? Behavioral content must be in always-loaded layers. (c) Query frequency: is this file consulted in most conversations or only for specific task types? (d) Degradation severity: what happens to output quality if this file is not loaded? (e) Token cost: how large is this file relative to the ~66,500 token budget? (f) Cross-file dependency density: how much does this file reference or depend on content in other files? High-dependency files are the most harmed by retrieval mode because cross-references won't resolve when only fragments are loaded. Assessment: Low dependency — file is self-contained, a reader needs no other file to understand it. Medium dependency — file references 1–2 other files for specific details, but is broadly understandable alone. High dependency — file assumes knowledge from 3+ other files, contains frequent cross-references, or has sections that are meaningless without content from another file.
-4. For files that score as behavioral, high cross-reference, high frequency, or critical degradation: keep as knowledge files (Placement Tier 1). These are load-bearing. High-dependency files are either Placement Tier 1 candidates (keep in-context so cross-references resolve) or candidates for consolidation (merge the dependent content to eliminate the cross-file dependency). When two files are mutually dependent (each references the other frequently), they should either both be in Tier 1 or consolidated into a single file.
-5. For files that score as referential, low frequency, moderate or low degradation: candidate for compression, relocation to a Skill, or session-specific upload (Placement Tier 2). High-dependency files that cannot be Tier 1 (budget won't allow) should be restructured to reduce their dependencies — inline the critical cross-references rather than pointing to other files.
+1. Check current mode: is `project_knowledge_search` present in Claude's available tools? Present = retrieval mode; absent = full-context mode. Note also which model the Project is running under — a Project historically in retrieval mode under a 200K plan may already be in full-context mode under a 1M-window primary model.
+2. Estimate the total token load across all knowledge files using the character-to-token heuristics (see Token Estimation above). Include GitHub-connected repos in the inventory — these count as knowledge files.
+3. Evaluate each file for tier placement using six dimensions. (a) Cross-reference density: how many other files reference this file? High cross-reference files are load-bearing. (b) Behavioral vs. referential content: does this file contain rules Claude should follow (behavioral) or information Claude should consult (referential)? Behavioral content must be in always-loaded layers. (c) Query frequency: is this file consulted in most conversations or only for specific task types? (d) Degradation severity: what happens to output quality if this file is not loaded? (e) Token cost: how large is this file relative to the estimated (or measured) threshold? (f) Cross-file dependency density: how much does this file reference or depend on content in other files? High-dependency files are the most harmed by retrieval mode because cross-references won't resolve when only fragments are loaded.
+4. For files that score as behavioral, high cross-reference, high frequency, or critical degradation: keep as knowledge files (Placement Tier 1). These are load-bearing. High-dependency files are either Placement Tier 1 candidates (keep in-context so cross-references resolve) or candidates for consolidation.
+5. For files that score as referential, low frequency, moderate or low degradation: candidate for compression, relocation to a Skill, or session-specific upload (Placement Tier 2). High-dependency files that cannot be Tier 1 should be restructured to reduce their dependencies — inline the critical cross-references rather than pointing to other files.
 6. For files that are stale, rarely consulted, or substantially redundant: archive, merge into another file, or remove (Placement Tier 3).
 7. Execute optimization in priority order: archive Tier 3 first (lowest risk, immediate savings), then relocate Tier 2 files, then compress Tier 1 files (highest risk, evaluate carefully).
 
@@ -1024,6 +1179,6 @@ Three compression approaches, ordered from safest to most aggressive:
 
 Never compress by removing section headers, introductory context, or cross-reference pointers. These are retrieval infrastructure, not redundancy.
 
-8. After optimization, verify the project is operating effectively in its target mode. If the target was full-context: confirm `project_knowledge_search` is absent and test cross-file reasoning with a query that requires content from two files. If the project is remaining in retrieval mode: run the RAG Quality Checklist (see RAG Quality Optimization Principles above) to verify that optimization improved retrieval quality — check that behavioral content is out of knowledge files, that routing descriptions are specific, that the retrieval pool is free of noise files, and that large files have coherent section structure.
+8. After optimization, verify the project is operating effectively in its target mode. If the target was full-context: confirm `project_knowledge_search` is absent and test cross-file reasoning with a query that requires content from two files. If the project is remaining in retrieval mode: run the RAG Quality Checklist (see RAG Quality Optimization Principles above).
 
-For comprehensive context budget analysis including dependency graphs, per-file dimension scoring, and projected savings, use the Context Budget Architect methodology (available as a standalone Skill when installed).
+For comprehensive context budget analysis including dependency graphs, per-file dimension scoring, and projected savings, use the Context Budget Architect methodology (available as the `rootnode-context-budget` Skill when installed).

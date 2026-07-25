@@ -54,7 +54,7 @@ When a specific number matters (borderline projects), measure empirically rather
 
 ## Model requirements
 
-This Skill performs per-file evaluation against the six File Evaluation Dimensions, growth trajectory analysis, content routing decisions, and phased optimization planning with compression safeguards. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, per-file evaluation and compression quality judgment may compress — set effort higher for intelligence-sensitive audits.
+This Skill performs per-file evaluation against the six File Evaluation Dimensions, growth trajectory analysis, content routing decisions, and phased optimization planning with compression safeguards. Run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code — the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Effort controls thinking depth, not visible output length — deep per-file evaluation benefits from `high` or higher.
 
 On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and Haiku 4.5 with extended thinking, expect compressed per-file evaluation, surface-level tier recommendations, and reduced synthesis across the growth trajectory. Quick Diagnostic mode degrades less than Full Budget Audit mode. Fallback-graceful on Opus 4.8 (classifier-flagged requests may route there silently). The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them. Haiku 4.5 without extended thinking is out of scope.
 

@@ -40,7 +40,7 @@ When producing reconstructed Custom Instructions, optimized User Preferences, or
 
 ## Model requirements
 
-This Skill performs the most complex analysis in the catalog — combining Project audit (six-dimension Project Scorecard, seven anti-patterns) with Global audit (six-dimension Global Layer Scorecard) plus cross-layer alignment checks and evolutionary recommendations across all nine layers. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, the multi-scorecard synthesis may compress — set effort higher for intelligence-sensitive audits.
+This Skill performs the most complex analysis in the catalog — combining Project audit (six-dimension Project Scorecard, seven anti-patterns) with Global audit (six-dimension Global Layer Scorecard) plus cross-layer alignment checks and evolutionary recommendations across all nine layers. Run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code — the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Effort controls thinking depth, not visible output length — the multi-scorecard synthesis benefits from `high` or higher.
 
 On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and Haiku 4.5 with extended thinking, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across the Project and Global layers. Fallback-graceful on Opus 4.8. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them. Haiku 4.5 without extended thinking is out of scope.
 

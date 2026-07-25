@@ -40,7 +40,7 @@ When producing any updated content — optimized User Preferences, Memory edit p
 
 ## Model requirements
 
-This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Global Layer Scorecard, detects eight cross-layer failure modes, and synthesizes evolutionary recommendations across four pathways. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, cross-layer synthesis may compress — set effort higher for intelligence-sensitive audits.
+This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Global Layer Scorecard, detects eight cross-layer failure modes, and synthesizes evolutionary recommendations across four pathways. Run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code — the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Effort controls thinking depth, not visible output length — deep cross-layer synthesis benefits from `high` or higher.
 
 On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and Haiku 4.5 with extended thinking, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across the five global layers. Fallback-graceful on Opus 4.8. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them. Haiku 4.5 without extended thinking is out of scope.
 

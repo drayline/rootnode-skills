@@ -299,7 +299,7 @@ or other hedging addenda. Do not close with invitations to continue
 exploring the topic unless the user asked for follow-up options.
 ```
 
-**Note on deployment:** Editorial drift is primarily a chat-interface phenomenon at Adaptive effort. Claude Code and API at high/xhigh exhibit this much less. Apply the countermeasure only where observed.
+**Note on deployment:** Editorial drift is primarily a chat-interface phenomenon at Adaptive effort. Claude Code and API at `high` (the Opus 5 / Sonnet 5 default) and above exhibit this much less. Apply the countermeasure only where observed.
 
 ---
 
@@ -421,8 +421,8 @@ Before finalizing a countermeasure package, walk through this checklist:
 - Is the deployment context confirmed? (chat / Projects / Claude Code / API)
 - For chat interface deployments: are 1b, 7b, 9, 10 countermeasures included if their tendencies are observed?
 - For Projects: are 1b and 9 countermeasures included if long-conversation patterns exist?
-- For Claude Code: have the countermeasures for tendencies that xhigh already mitigates (5, 6, 7a, 9) been excluded unless actually observed?
-- For API at lower effort: has the effort-level recommendation been surfaced to the user ("set effort to `high` minimum for intelligence-sensitive use")?
+- For Claude Code (`high` default on Opus 5 / Sonnet 5): have the countermeasures for tendencies that `high` and above already mitigate (5, 6, 7a, 9) been excluded unless actually observed? For deeper work stepping up to `xhigh`, the same mitigation strengthens.
+- For API at lower effort: has the effort-level recommendation been surfaced to the user? Opus 5 and Sonnet 5 default to `high` on the Claude API; `low`/`medium` are legitimate primary cost controls where evals show quality holds. Do not carry `xhigh` defaults over from Opus 4.7/4.8 without re-running an effort sweep.
 - Is emphatic language (MUST / ALWAYS / NEVER) used only for tendency #7b?
 - Does the countermeasure set fit within 4-5 rules, or has consolidation been applied?
 

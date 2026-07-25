@@ -40,10 +40,13 @@ Surface map (the authoritative assignment):
 
 ### 1.3 Packaging toolchain
 
+Repo-root script roster is **three** (as of v4.0):
+
 - **`build_release_artifacts.py` — THE release packager.** Single entry point. Reads the surface map, emits flat for `-cp` / wrapper for `-cc`, applies the suffix, and self-asserts 24+5=29 (non-zero exit on mismatch). On a **full build** it also runs `write_bundle()` to archive all 29 artifact zips into `dist/rootnode-catalog-vN.zip` — the umbrella bundle. This is what a release runs. Both shape emitters live inside the orchestrator; wrapper-shape logic is ported from Anthropic's upstream `package_skill.py` (see `build_release_artifacts.py:7` and `:61`), which is **not** a tracked file in this repo.
 - `build_releases.py` — flat shape only, no suffix, no surface routing, no bundle. Superseded by the orchestrator; retained as a legacy reference only.
+- **`generate_release_notes.py` — the version-agnostic release-notes generator** (added v4.0 per D7 expansion). Takes `VERSION`, `TIER_LABEL`, `CATALOG_RELEASE`, `VARIANT_A/B/C`, and `EXPECTED_COUNTS` from a per-cycle Python config file. Preserves the three variant templates (`-cp` flat / `-cc` wrapper / dual) and the 22+3+2=29-artifact count assertion from the v3.1 artifact it succeeded. Per-cycle configs live under `audit/v<N>-*/` (e.g., `audit/v4_0-alignment/release-notes-v4.0-config.py`).
 
-Notes-assembly and release-blast helpers used at v3.1 live at `audit/v3_1-release/` (`generate_release_notes.py`, `create_releases.py`) and are hardcoded to that cycle — they are cycle artifacts, not reusable release tooling. A v4.0+ release either replays their logic manually via `gh release create --notes-file` per Phase B or promotes them to version-agnostic scripts as a separate change.
+Historical v3.1 cycle tooling — `audit/v3_1-release/generate_release_notes.py` (the version-hardcoded artifact this repo-root generator succeeded) and `audit/v3_1-release/create_releases.py` — remains as cycle-artifact history at its original path. Do not use it for post-v3.1 releases; use `generate_release_notes.py` at repo root instead.
 
 **Authoritative packager inventory: `audit/repo-catalog/`** (regenerated at the end of every release — see Phase B post-verification step). Where §1.3 and the catalog disagree, the catalog wins and this section is a defect to fix.
 

@@ -13,18 +13,18 @@ description: >-
   Do NOT use for auditing only a Project (use rootnode-project-audit if
   available) or only global layers (use rootnode-global-audit if available). Do
   NOT use for single prompt evaluation (use rootnode-prompt-validation if
-  available). Opus recommended; non-Opus models may produce less complete
-  analysis.
+  available). Run on Opus 5 or Sonnet 5 at `high` effort (both defaults); depth
+  reduces on legacy models.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0.1"
+  version: "4.0.0"
   original-source: "PROJECT_OPTIMIZER.md, AUDIT_FRAMEWORK.md, OPTIMIZATION_REFERENCE.md"
 ---
 
 # Full Stack Auditor
 
-> **Calibration:** Tier 3, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) - run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
 
 You perform the comprehensive health check of a user's entire Claude environment — both their Project architecture and their global configuration, evaluated together. You are the only audit mode that has simultaneous visibility into all nine layers, which means you detect cross-layer issues invisible to Project-only or global-only audits.
 
@@ -40,9 +40,9 @@ When producing reconstructed Custom Instructions, optimized User Preferences, or
 
 ## Model requirements
 
-This Skill performs the most complex analysis in the catalog — combining Project audit (six-dimension Project Scorecard, seven anti-patterns) with Global audit (six-dimension Global Layer Scorecard) plus cross-layer alignment checks and evolutionary recommendations across all nine layers. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, the multi-scorecard synthesis may compress — set effort higher for intelligence-sensitive audits.
+This Skill performs the most complex analysis in the catalog — combining Project audit (six-dimension Project Scorecard, seven anti-patterns) with Global audit (six-dimension Global Layer Scorecard) plus cross-layer alignment checks and evolutionary recommendations across all nine layers. Run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code — the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Effort controls thinking depth, not visible output length — the multi-scorecard synthesis benefits from `high` or higher.
 
-On non-Opus models (Sonnet 4.6, Haiku 4.5 with extended thinking enabled), expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across the Project and Global layers. The Skill will execute and produce correctly-shaped output; users should weight findings accordingly. Haiku without extended thinking is not a supported deployment target for this Skill.
+On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and Haiku 4.5 with extended thinking, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across the Project and Global layers. Fallback-graceful on Opus 4.8. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them. Haiku 4.5 without extended thinking is out of scope.
 
 ## When to Use This Skill
 

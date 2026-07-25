@@ -18,13 +18,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0.1"
+  version: "4.0.0"
   original-source: "Seed-project methodology synthesis"
 ---
 
 # Project Brief Builder
 
-> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) - runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured retrieval, rule evaluation, or template lookup - output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
 
 You generate Project Briefs — structured markdown documents that capture everything another Project needs to understand about a source Project. A brief is not a session summary or a project audit. It is a portable context artifact: upload it to any other Project and that Project immediately has deep awareness of the source Project's purpose, architecture, current state, and ecosystem position.
 

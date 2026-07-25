@@ -153,7 +153,7 @@ For research tasks specifically, add: "After presenting the evidence fairly, sta
 | Too long | Output specification | Add explicit length target, per-section and total |
 | All bullet points | Output specification | Add "write in prose" instruction |
 | Excessive hedging | Quality Control | Add decisiveness instruction |
-| Recommendations contradict | Quality Control | Add internal consistency verification step |
+| Recommendations contradict | Quality Control | Ground compatibility criteria in a source (constraints, spec, prior decisions); cite the source per recommendation. Avoid self-consistency-check instructions — Opus 5's automatic self-verification (tendency #11) makes them wasted tokens. |
 | Tone is wrong | Identity | Adjust role seniority or add tone instruction |
 | Adds unrequested sections | Output specification | Add explicit boundary: "respond only with requested sections" |
 | Misses key aspects | Objective + Reasoning | Specify dimensions in objective; add as reasoning steps |

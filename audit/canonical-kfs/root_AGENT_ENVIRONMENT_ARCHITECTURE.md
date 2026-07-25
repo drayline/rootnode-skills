@@ -46,7 +46,7 @@ Each surface has its own layer architecture. Both are real; neither subsumes the
 | 4 | Skills (global) | Global, cross-Project | On-demand by description match |
 | 5 | MCP Connectors | Global, cross-Project | Tool schemas in context, data on demand |
 | 6 | Custom Instructions | Project-scoped | Always loaded |
-| 7 | Knowledge Files | Project-scoped | RAG retrieval (above ~66.5K tokens) or full-context (below) |
+| 7 | Knowledge Files | Project-scoped | Automatic RAG retrieval when knowledge approaches/exceeds the model's context window; full-context loading below that. See `root_OPTIMIZATION_REFERENCE.md` (Context Budget Principles) for the current landscape and the historical ~66,500 measurement from the 200K era. |
 | 8 | Project Memory (RAM) | Project-scoped | Always loaded |
 | 9 | Conversation | Conversation-scoped | Live context |
 
@@ -152,11 +152,11 @@ When to halt is design-specific. Examples that apply broadly: authority-matrix t
 
 ### 4.8 Behavioral countermeasures
 
-Claude has known behavioral tendencies that surface differently in different deployment contexts. The 10-tendency taxonomy (documented in `root_OPTIMIZATION_REFERENCE.md`) covers: agreeableness, hedging, verbosity, list overuse, fabricated precision, over-exploration, tool miscalibration (over- and under-triggering), LaTeX defaulting, editorial drift, self-referential fabrication.
+Claude has known behavioral tendencies that surface differently in different deployment contexts. The 14-tendency taxonomy (documented in `root_OPTIMIZATION_REFERENCE.md`) covers: agreeableness (1a output-content / 1b persistent-preference dilution), hedging, verbosity three-surface family (3a conversational / 3b agentic narration / 3c written deliverables), list overuse, fabricated precision (external-fact), over-exploration (search breadth), tool miscalibration (7a over-triggering / 7b under-triggering), LaTeX defaulting, editorial drift, self-referential fabrication, over-verification (Opus 5 new), scope expansion (Opus 5 new), subagent over-delegation (Opus 5 new), correction narration (Opus 5 new). Two prompt/environment-conditional defects (conservative-instruction literalism and thinking-disabled output artifacts) are treated separately from the tendency list — they are prompt or API-configuration failure modes, not model tendencies.
 
-Countermeasures are surface-aware. Some tendencies surface more in CP (hedging, list overuse, agreeableness on creative work) where conversational scaffolding is the dominant interaction. Others surface more in CC (over-exploration, tool over-triggering, fabricated precision in code claims, verification-before-completion absence) where autonomous execution amplifies the cost of behavioral drift.
+Countermeasures are surface-aware. Some tendencies surface more in CP (hedging, list overuse, agreeableness on creative work) where conversational scaffolding is the dominant interaction. Others surface more in CC (over-exploration, subagent over-delegation, scope expansion, verification-instruction accumulation) where autonomous execution amplifies the cost of behavioral drift. The four Opus-5 new tendencies (over-verification, scope expansion, subagent over-delegation, correction narration) surface most strongly on CC and API agent workloads.
 
-The principle: identify the tendencies most likely to surface in the deployment's context, and apply targeted countermeasures in the always-loaded layer (CI for CP, CLAUDE.md for CC). Do not apply all 10 countermeasures to every deployment — that produces bloat. Apply the ones the deployment actually needs.
+The principle: identify the tendencies most likely to surface in the deployment's context, and apply targeted countermeasures in the always-loaded layer (CI for CP, CLAUDE.md for CC). Do not apply all countermeasures to every deployment — that produces bloat. Apply the ones the deployment actually needs. Note that over-verification (Opus 5 tendency #11) is unique: its countermeasure is *removal* of instructions rather than addition. See §4.14.
 
 ### 4.9 Evidence grounding
 
@@ -231,6 +231,41 @@ When multi-lens is required: any time a framework audits an artifact that the fr
 The composition discipline: each lens declares which dimensions it owns. Overlapping coverage is acceptable; conflicting coverage requires explicit reconciliation in the audit output. The audit identifies which lens surfaced each finding so that, when blind spots later become visible, traceability points to which lens needs updating rather than requiring re-derivation across all of them.
 
 The principle generalizes beyond Skills audit. It applies to Project audit (Project Architecture Guide + Audit Framework + Anti-Pattern catalog as three lenses), to prompt audit (prompt-validation + anti-pattern detection + behavioral-tuning), and to environment audit (CC Environment Guide + Anti-Pattern catalog + repo-hygiene). Anywhere root.node uses its own methodology to evaluate its own output, multi-lens applies. `[generalizable; grounded in Tier 3 design analysis 2026-05-07 — Skills catalog audit infrastructure design]`
+
+### 4.14 Verification-instruction discipline
+
+Verification instructions in prompts, Skills, and standing context divide cleanly into two classes with opposite prescriptions on any model that verifies its own work automatically. Anthropic's Opus 5 prompting guide is the specific published guidance grounding this discipline; Sonnet 5 behavior in this area is not documented equivalently (V2 partial from the v4.0 alignment cycle), so the model-specific claims below cite Opus 5 while the discipline itself is surface-invariant and applies wherever the same behavior surfaces. Applying the wrong prescription costs quality: instructing self-directed re-checking causes over-verification (tendency #11) that compounds token cost without a quality gain; removing external-artifact verification lets the model skip evidence grounding it does not automatically perform. The discipline names the two classes and prescribes the correct treatment for each.
+
+**Self-directed re-checking (REMOVE from instructions).** An instruction that asks the model to re-examine its own reasoning or output with no new information. Opus 5 already re-checks its own work automatically; the instruction compounds the behavior. Examples: "double-check your answer," "re-verify before responding," "include a final verification step for any non-trivial task," "use a subagent to verify your work," "before presenting your final answer, verify your reasoning."
+
+**External-artifact verification (KEEP, and keep imperative).** An instruction that asks the model to check a claim against a source outside its own output. Opus 5 does NOT automatically do this — it has to be told to, and the imperative voice is load-bearing. Examples: "verify the file exists at the path claimed," "check the rendered page — a stored-body assert is not proof of clean render," "diff the artifact against the source," "confirm the tag resolves against actual repo state," "run the tests and verify they pass," "grep for the symbol to confirm it exists before recommending it."
+
+**Application to root.node infrastructure.** Quality gates that check an artifact against an independent reviewer or a separate evidence source are external-artifact verification and survive — the D9 quality gate (an independent grader on a separate artifact), the critic-gate Skill (an independent re-derivation of a *different* agent's proposed change), the O10 staleness diff (canonical KFs against staged seed KFs). Instructions telling the model to double-check its own output do not survive. When a quality gate reads to the model as "re-check yourself," it needs rewording; when it reads as "check against evidence X," it stays.
+
+**Sweep discipline.** When auditing a prompt or a Skill for verification-instruction accumulation, classify each hit before acting. Some phrasings are unambiguous ("double-check your answer" — remove; "verify the file exists" — keep). Some are context-dependent ("verify" in an agent-role context may refer to reviewing another agent's work — keep). Do not batch-apply. The Phase 0 sweep patterns for this discipline are `double-check`, `re-verify`, `verify your (own )?work`, `verification step`, `subagent to verify`, `check your answer`.
+
+**Related — conservative-instruction literalism (a prompt defect, not a tendency).** Opus 5 follows "only report high-severity issues" or "be conservative" literally, causing under-reporting. This is a prompt defect exposed by the model. Rewrite affected prompts to two-stage form: (1) report every issue found; (2) filter to the severity level the user wants. Do not compress the two steps into one instruction. Sweep patterns: `only report`, `only flag`, `be conservative`, `high-severity` (as an instruction, not as an output label).
+
+The discipline is surface-invariant. It governs verification content in CP-side Custom Instructions and Skill files equally to CC-side CLAUDE.md and Skill files.
+
+`[generalizable; grounded in Tier 1 Anthropic guidance — the Opus 5 prompting guide at platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5 verbatim: "instructions like these cause over-verification on Claude Opus 5, and removing them reduces wasted tokens with no loss in quality." See also §5 of `root_CLAUDE_OPTIMIZATION_NOTES.md` (tendency #11).]`
+
+### 4.15 Landscape-volatility discipline
+
+Model landscape facts change on release cadences that are shorter than root.node's methodology evolution cadence. Between two design cycles, Anthropic can (and does) release new models, reclassify existing models to legacy, invert effort-guidance rules, change API defaults, and add breaking changes. When those facts are embedded in decision records rather than referenced from a dated landscape block, a landscape refresh invalidates the decision record wholesale, which forces re-decision when the underlying decision may not have actually changed.
+
+**The discipline.** Isolate model landscape facts (model IDs, prices, context windows, effort defaults, thinking behavior, fallback semantics, deprecation dates) as a **dated, independently-versioned landscape block** that decision records *reference* rather than embed. When the landscape refreshes, the landscape block updates; decisions that depended only on the substance (e.g., "we prefer the dual-primary architecture because it distributes calibration risk") survive without re-decision. Decisions that depended on specific facts (e.g., "we chose Opus 4.8 as primary because it is the current front-page recommendation") are the ones a landscape refresh legitimately unlocks — but even those unlock cleanly rather than requiring the whole decision record to be re-derived.
+
+**Application in this cycle.** The v4.0 alignment cycle's design doc `root_skill_5gen_alignment_design.md` §1 is the landscape block — a dated table of the five current models with their facts, verified from official sources on 2026-07-24/25. The decision records (D1–D8) reference §1 rather than embedding its content, so a Sonnet 6 / Opus 5.x release refreshes §1 without invalidating D3 (release-as-major), D4 (verification-instruction discipline), or D5 (prompt-compilation contract shift) — those decisions have rationales independent of specific model identities. D1 (calibration scope) and D2 (effort tables) are the two decisions that would legitimately re-open, and both would re-open through the landscape-block update rather than through a full design-doc re-derivation.
+
+**Design-doc pattern for future cycles.** New design docs that touch model calibration follow this pattern:
+- **§1 (or equivalent) — Model landscape.** Dated, source-cited, treated as the reference block. Refresh at each cycle-start.
+- **Decision records.** Reference §1 by section rather than embedding model IDs, prices, or effort defaults inline.
+- **Explicit revision triggers.** Each decision names the landscape conditions under which it re-opens (e.g., "revision trigger: a Sonnet 6 / Opus 5.x release, or a Fable pricing change making it routine, re-opens D1").
+
+**Not a substitute for verification.** The discipline structures where landscape facts live and how they update. It does not remove the need to re-verify facts against Anthropic sources at each cycle-start — the landscape block is only correct if the verification is done. Pair with §4.9 (evidence grounding).
+
+`[generalizable; grounded in Tier 3 methodology observation — v4.0 alignment cycle experience where a v1.3 design doc locked D1–D3 against a landscape that shifted three days later when Opus 5 shipped, forcing a return-to-chat and full re-decision. The discipline codified here is the structural fix.]`
 
 ---
 

@@ -17,13 +17,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "2.0.1"
+  version: "4.0.0"
   original-source: "OPTIMIZATION_REFERENCE.md, CLAUDE_OPTIMIZATION_NOTES.md"
 ---
 
 # Behavioral Tuning for Claude
 
-> **Calibration:** Tier 2, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 2 (Sonnet-graceful) — designed and tested against Opus 5 + Sonnet 5 dual-primary. Runs correctly on Sonnet 4.6 (legacy-graceful) with slightly less depth on multi-dimensional analysis; on Haiku 4.5 with extended thinking; fallback-graceful on Opus 4.8. Effort default is `high` on Opus 5 and Sonnet 5; step down to `medium` for cost-sensitive runs where evals show quality holds. See repository README for model compatibility.
 
 **Version 2.0 — 10-tendency taxonomy, Opus 4.8 calibration.**
 
@@ -64,7 +64,7 @@ Claude validates user ideas, hedges disagreement, softens negative assessment. R
 **Deployment calibration:**
 - Chat interface (Adaptive): HIGH for 1b, MEDIUM for 1a
 - Claude Projects: MEDIUM for 1b (CI partially mitigates), LOW for 1a
-- Claude Code (xhigh default): LOW for both facets
+- Claude Code (`high` default): LOW for both facets
 - API (effort ≥ high): LOW for both facets
 
 **Countermeasure template (for 1a):**
@@ -100,7 +100,7 @@ Claude qualifies findings, softens conclusions, and appends cascading caveats. R
 **Deployment calibration:**
 - Chat interface (Adaptive): MEDIUM on editorial framings; LOW on factual claims
 - Claude Projects: MEDIUM on editorial; LOW on factual
-- Claude Code (xhigh): LOW
+- Claude Code (`high` default on Opus 5 / Sonnet 5): LOW
 - API (effort ≥ high): LOW
 
 **Countermeasure template (editorial hedging):**
@@ -127,7 +127,7 @@ Claude produces longer-than-needed responses, repeats context already establishe
 **Deployment calibration:**
 - Chat interface (Adaptive): LOW to MEDIUM
 - Claude Projects: LOW to MEDIUM
-- Claude Code (xhigh): LOW (verbosity); MEDIUM (over-terse code explanations observed)
+- Claude Code (`high` default on Opus 5 / Sonnet 5): LOW (verbosity); MEDIUM (over-terse code explanations observed)
 - API (effort ≥ high): LOW
 
 **Countermeasure template (softer, 4.7-calibrated):**
@@ -153,7 +153,7 @@ Claude defaults to bullet points and numbered lists even when prose would be mor
 **Deployment calibration:**
 - Chat interface (Adaptive): MEDIUM
 - Claude Projects: MEDIUM
-- Claude Code (xhigh): LOW (code output is structurally formatted regardless)
+- Claude Code (`high` default on Opus 5 / Sonnet 5): LOW (code output is structurally formatted regardless)
 - API (effort ≥ high): MEDIUM
 
 **Countermeasure template:**
@@ -180,7 +180,7 @@ Claude produces specific numbers, dates, citations, or statistics without verify
 **Deployment calibration:**
 - Chat interface (Adaptive): LOW to MEDIUM (4.7 improvements meaningful)
 - Claude Projects: LOW to MEDIUM
-- Claude Code (xhigh): LOW
+- Claude Code (`high` default on Opus 5 / Sonnet 5): LOW
 - API (effort ≥ high): LOW
 
 **Countermeasure template (lighter touch for 4.7):**
@@ -206,7 +206,7 @@ Claude pursues too many investigative threads, adds features beyond what was ask
 **Deployment calibration:**
 - Chat interface (Adaptive): LOW (model calibrates well at Adaptive)
 - Claude Projects: LOW to MEDIUM
-- Claude Code (xhigh): MEDIUM (xhigh defaults amplify exploration on complex tasks)
+- Claude Code (`high` default on Opus 5 / Sonnet 5): MEDIUM (`xhigh` and `max` settings amplify exploration on complex tasks)
 - API (effort ≥ high): MEDIUM on complex tasks
 
 **Countermeasure template (softened for 4.7):**
@@ -231,7 +231,7 @@ Claude invokes tools aggressively even when the task doesn't require them. Reduc
 
 **Deployment calibration:**
 - Chat interface (Adaptive): LOW
-- Claude Code (xhigh): LOW
+- Claude Code (`high` default on Opus 5 / Sonnet 5): LOW
 - API: LOW
 
 **Countermeasure template (softened):**
@@ -253,7 +253,7 @@ Claude fails to fire tools even when user preferences or Project CI explicitly r
 **Deployment calibration:**
 - Chat interface (Adaptive): HIGH
 - Claude Projects: MEDIUM
-- Claude Code (xhigh): LOW
+- Claude Code (`high` default on Opus 5 / Sonnet 5): LOW
 - API (effort ≥ high): LOW
 
 **Countermeasure template (7b — explicit enforcement):**
@@ -281,7 +281,7 @@ Claude formats mathematical expressions in LaTeX even when plain text would be m
 **Deployment calibration:**
 - Chat interface (Adaptive): MEDIUM
 - Claude Projects: MEDIUM
-- Claude Code (xhigh): LOW
+- Claude Code (`high` default on Opus 5 / Sonnet 5): LOW
 - API (effort ≥ high): MEDIUM (depends on rendering environment)
 
 **Countermeasure template:**
@@ -308,7 +308,7 @@ Claude produces unsolicited commentary on its own boundaries, the act of respond
 **Deployment calibration:**
 - Chat interface (Adaptive): HIGH
 - Claude Projects: MEDIUM (CI partially anchors)
-- Claude Code (xhigh): LOW
+- Claude Code (`high` default on Opus 5 / Sonnet 5): LOW
 - API (effort ≥ high): LOW
 
 **Countermeasure template:**
@@ -337,7 +337,7 @@ Claude claims to have performed an action, checked a state, or inspected its own
 **Deployment calibration:**
 - Chat interface (Adaptive): HIGH
 - Claude Projects: MEDIUM (CI partially anchors; verified via seed-project self-observation)
-- Claude Code (xhigh default): LOW
+- Claude Code (`high` default): LOW
 - API (effort ≥ high): LOW
 
 **Countermeasure template:**
@@ -400,8 +400,8 @@ Not all countermeasures apply equally across deployment contexts. Before applyin
 
 - **Chat interface (Adaptive effort):** Tendencies 1b, 7b, 9, and 10 are most pronounced here. Strong countermeasures recommended. The Adaptive effort default weights persistent context lower than immediate prompts — this is the primary driver of 1b, 7b, 9, and 10.
 - **Claude Projects:** Tendencies 1b and 9 are mitigated by strong Custom Instructions but not eliminated. Moderate countermeasures appropriate. Tendency 10 is also MEDIUM here — verified via seed-project self-observation.
-- **Claude Code (xhigh default):** Most tendencies mitigated at the model level. Countermeasures for 5, 6, 7a, and 9 are generally unnecessary. Applicability of this Skill itself is per-Skill: not all rootnode Skills are first-class Claude Code targets.
-- **API (developer-controlled effort):** Countermeasure calibration depends on effort level. At `high` or `xhigh`, behaves similarly to Claude Code. At lower effort, behaves similarly to chat interface. Anthropic's Opus 4.7 migration guide recommends a minimum of `high` for intelligence-sensitive use cases.
+- **Claude Code (`high` default):** Most tendencies mitigated at the model level. Countermeasures for 5, 6, 7a, and 9 are generally unnecessary. Applicability of this Skill itself is per-Skill: not all rootnode Skills are first-class Claude Code targets.
+- **API (developer-controlled effort):** Countermeasure calibration depends on effort level. At `high` or `xhigh`, behaves similarly to Claude Code. At lower effort, behaves similarly to chat interface. Anthropic's Opus 5 guidance recommends starting at the default `high` and adjusting based on evals — step up to `xhigh` for demanding coding/agentic work; `low`/`medium` are legitimate primary cost controls where quality holds.
 
 When in doubt, apply the universal countermeasures (1a, 4, 8, 10) and confirm deployment context before applying the conditional ones.
 
@@ -409,7 +409,7 @@ When in doubt, apply the universal countermeasures (1a, 4, 8, 10) and confirm de
 
 ## Self-application
 
-This Skill, when running on Opus 4.8 Adaptive in a chat interface, is itself subject to tendencies 1b (persistent-preference dilution) and 10 (self-referential fabrication). When using this Skill, if Claude claims to have applied a countermeasure or completed a diagnosis, verify the output explicitly rather than accepting the claim. The Skill's own output is subject to the tendencies it diagnoses.
+This Skill, when running on the current dual-primary tier (Opus 5 / Sonnet 5) at chat-interface Adaptive effort, is itself subject to tendencies 1b (persistent-preference dilution) and 10 (self-referential fabrication). When using this Skill, if Claude claims to have applied a countermeasure or completed a diagnosis, verify the output explicitly rather than accepting the claim. The Skill's own output is subject to the tendencies it diagnoses.
 
 ---
 
@@ -461,7 +461,7 @@ Do NOT use this Skill when:
 **Actions:**
 1. Match the symptom: #3 (verbosity drift).
 2. Deployment context not stated — before applying the countermeasure, confirm: chat? Projects? Claude Code? API?
-3. Upon answer, apply the calibrated countermeasure. On Claude Code (xhigh), verbosity is LOW — countermeasure may be unnecessary; check first whether verbosity is actually observed.
+3. Upon answer, apply the calibrated countermeasure. On Claude Code (`high` default on Opus 5 / Sonnet 5), verbosity is LOW — countermeasure may be unnecessary; check first whether verbosity is actually observed.
 
 ---
 

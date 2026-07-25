@@ -66,9 +66,9 @@ MCP overhead depends on the loading mode configured for each connector. Three pa
 
 ## Budget-Constrained Projects
 
-When a project is in Tier 3 (50K–66K tokens) and needs to stay in full-context:
+When a project is in Tier 3 (approaching the model's RAG-activation point, whether measured empirically or estimated relative to the window) and needs to stay in full-context:
 
-- Every file consuming >25% of the ~66,500 budget (~16K+ tokens) should be evaluated for splitting or aggressive compression regardless of other scores.
+- Every file consuming a substantial share of the project's measured (or estimated) RAG activation point should be evaluated for splitting or aggressive compression regardless of other scores. The retired 200K-era "~25% of ~66,500 = ~16K" rule of thumb was derived from a fixed anchor that no longer holds; the v4.0 alignment cycle did not carry forward a replacement percentage because a plausible-sounding number would inherit the same environment-boundedness. When the number matters, measure the project's actual RAG activation point empirically (see the `rootnode-context-budget` Skill's "Empirical Threshold Measurement" procedure) and set the size-flag threshold relative to the measurement.
 - Skill migration is the highest-leverage move: relocating a 10K-token behavioral file to a Skill saves 10K tokens AND improves content fidelity (Skills load completely when triggered vs. partial retrieval).
 - When knowledge file optimization is exhausted and the project is still Tier 3: evaluate whether remaining content could move to Memory (orientation-level facts), CI (behavioral rules), or session-specific uploads (per-conversation reference material).
 
@@ -103,7 +103,7 @@ Run this assessment after every compression round. It is mandatory — do not sk
 ## Compression Checkpoint — Round [N]
 
 Cumulative savings: ~[X]K tokens ([Y]% of gap closed)
-Remaining gap: ~[Z]K tokens to ~66.5K threshold
+Remaining gap: ~[Z]K tokens to the project's RAG activation point (state the basis: measured, window-relative estimate, or platform-current unknown)
 Next targets: [file names] — [Type A / Type B / mixed]
 
 Quality cost of continuing: [specific risks]
@@ -131,7 +131,7 @@ When the Diminishing Returns Checkpoint recommends STOP or REASSESS, present the
 ```
 ## RAG-Acceptance Decision
 
-Current state: ~[X]K tokens (down from ~[Y]K). [Z]K remaining to threshold.
+Current state: ~[X]K tokens (down from ~[Y]K). [Z]K remaining to the project's RAG activation point (state the basis).
 Compression completed: [N] rounds, [M]K tokens saved.
 Remaining targets: [files] — predominantly Type B.
 
@@ -139,7 +139,7 @@ Remaining targets: [files] — predominantly Type B.
 - Target: [next file]
 - Projected savings: ~[S]K tokens
 - Quality risk: [specific content at risk]
-- Likelihood of reaching threshold: [assessment]
+- Likelihood of reaching the activation point (measured or estimated): [assessment]
 
 **Option B — Accept RAG mode and optimize retrieval quality:**
 - Current retrieval quality issues: [from RAG Quality Checklist or quick assessment]

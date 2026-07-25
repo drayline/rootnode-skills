@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "2.0"
+  version: "4.0.0"
   predecessor: "rootnode-session-handoff v1.0"
   original-source: "Seed-project methodology synthesis + rootnode-session-handoff v1.0 source"
   discipline_post: phase-32
@@ -26,7 +26,7 @@ metadata:
 
 # Session Handoff
 
-> **Calibration:** Tier 1, broad-tier. Built and calibrated for Opus 4.8; runs on Sonnet 4.6 and Haiku 4.5. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) - runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured retrieval, rule evaluation, or template lookup - output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
 
 > **Version 2.0:** Markdown output (was XML). Adds forced knowledge-file delta capture, a files-to-load-next-conversation list split by track, a chat echo of the starter prompt and load list, datetime-stamped naming with a Handoff Card, a completeness gate, and a carry-forward ledger that survives long handoff chains. v1.0 capture discipline preserved.
 

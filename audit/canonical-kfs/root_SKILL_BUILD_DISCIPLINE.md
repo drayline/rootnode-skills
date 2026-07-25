@@ -187,7 +187,7 @@ For the Skill-internal scan procedure see skill-builder `references/anti-pattern
 
 D9 was a single-tier recommendation in v2.1. v3.0 expands D9 into three sub-levels — D9a / D9b / D9c — that reflect the empirical strength of the evidence captured at validation time. Each sub-level has its own pass conditions and tier of evidence; the **build summary records which sub-level was applied** so future audits can read the evidentiary basis for the D9 verdict. The dimension itself remains RECOMMENDED, not REQUIRED.
 
-The sub-levels exist because validation infrastructure differs across build environments. Tier A environments (subagents available, runnable execution available) can run with-Skill vs. without-Skill comparison empirically. Tier B environments (execution available, no subagents) can confirm execution under realistic test prompts but cannot run baseline comparison. Tier C environments (neither subagents nor execution available) fall back to analytical reasoning grounded in the 10-tendency taxonomy. The three sub-levels are degradation paths, not parallel options — the build CV applies the strongest tier the environment supports. The environment-adaptive degradation discipline (§10) is the operational model that determines tier applicability; the description refinement loop discipline (§9) is the methodology that D9b/D9c invoke when generating the trigger eval set used to confirm execution.
+The sub-levels exist because validation infrastructure differs across build environments. Tier A environments (subagents available, runnable execution available) can run with-Skill vs. without-Skill comparison empirically. Tier B environments (execution available, no subagents) can confirm execution under realistic test prompts but cannot run baseline comparison. Tier C environments (neither subagents nor execution available) fall back to analytical reasoning grounded in the 14-tendency taxonomy. The three sub-levels are degradation paths, not parallel options — the build CV applies the strongest tier the environment supports. The environment-adaptive degradation discipline (§10) is the operational model that determines tier applicability; the description refinement loop discipline (§9) is the methodology that D9b/D9c invoke when generating the trigger eval set used to confirm execution.
 
 #### 3.9a D9a — Empirical Tier A (strongest evidence)
 
@@ -199,7 +199,9 @@ The sub-levels exist because validation infrastructure differs across build envi
 
 **Required infrastructure.** Subagent execution available; execution environment available; trigger eval set generated per §9 procedure; rubric assertions defined per `references/behavioral-validation.md`.
 
-**Pass evidence.** Cite the scenario set, the trigger evals run, the grader outputs (pass/fail per assertion for both GREEN and RED), and the differential analysis. Captured in the build summary as `D9: Tier A — empirical comparison (N scenarios, GREEN/RED differential = X%)`.
+**Grader model.** Run the grader subagent on **Opus 5 or Sonnet 5** (the current dual-primary tier). Fable 5 is acceptable but wastes cost for the grading task. Opus 4.8 remains valid as a fallback if Opus 5 refuses the grading prompt. The grader is external-artifact verification (it grades a different run's output against a rubric) and survives D4's verification-instruction discipline unchanged — it is independent grading of a different agent's output, not the change agent re-checking its own work.
+
+**Pass evidence.** Cite the scenario set, the grader model used, the trigger evals run, the grader outputs (pass/fail per assertion for both GREEN and RED), and the differential analysis. Captured in the build summary as `D9: Tier A — empirical comparison (grader: <model>, N scenarios, GREEN/RED differential = X%)`.
 
 #### 3.9b D9b — Empirical Tier B (moderate evidence)
 
@@ -218,7 +220,7 @@ The sub-levels exist because validation infrastructure differs across build envi
 **Pass conditions** (all must be met OR the skip condition applies):
 
 1. **Pressure scenario documented.** At least one scenario is described where Claude, without the Skill loaded, would produce incorrect behavior the Skill is designed to prevent.
-2. **Baseline failure credibly expected.** The expected without-Skill failure is grounded in a documented Claude behavioral tendency from the 10-tendency taxonomy or in production-observed failure modes. Citation required.
+2. **Baseline failure credibly expected.** The expected without-Skill failure is grounded in a documented Claude behavioral tendency from the 14-tendency taxonomy (14 numbered entries #1–#14, with facets 1a/1b, 3a/3b/3c, 7a/7b, expanded for Opus 5 per `root_OPTIMIZATION_REFERENCE.md`) or in production-observed failure modes. Citation required.
 3. **Compliance with Skill credibly expected.** The Skill's countermeasure formulation is shown to address the identified tendency. The reasoning chain from tendency → countermeasure → expected compliance is explicit.
 
 **Required infrastructure.** None — analytical reasoning only. Tier C is the fallback when neither subagent execution nor a runnable environment is available, and the discipline floor when validation infrastructure is absent.
@@ -231,7 +233,7 @@ The sub-levels exist because validation infrastructure differs across build envi
 
 **Cross-references.** The trigger eval set referenced by D9a/D9b is generated per the description refinement loop discipline (§9). The tier applicability decision is made per the environment-adaptive degradation discipline (§10).
 
-**Disposition.** Advisory for v3.0. Future evolution may tighten D9a to REQUIRED for discipline-enforcing Skills (tendencies #1–#10 countermeasures) when subagent infrastructure is broadly available, while keeping the lower tiers as fallbacks.
+**Disposition.** Advisory for v3.0. Future evolution may tighten D9a to REQUIRED for discipline-enforcing Skills (tendencies #1–#14 countermeasures) when subagent infrastructure is broadly available, while keeping the lower tiers as fallbacks.
 
 **Source pattern.** The pressure-testing methodology was identified during the CC ecosystem analysis (May 2026) from Superpowers v5.1.0's `writing-skills` skill, which applies TDD to skill authoring — write pressure test scenarios with subagents, watch Claude fail without the skill, write the skill to address observed rationalizations, verify compliance. The Meincke et al. (2025, N=28,000) finding that persuasion techniques more than doubled LLM compliance rates (33% → 72%) provides the research grounding for why countermeasure language design matters enough to validate empirically. The Tier A/B/C sub-level formalism was added in v3.0 from the Opus 4.6 cross-pass analysis (§5.2) of Anthropic's `skill-creator` empirical pipeline.
 
@@ -330,17 +332,16 @@ Release packaging produces two zip *shapes*, and each Skill ships the shape(s) i
 
 **Surface map → shape.** Which shape a Skill ships is fixed by its surface, not by build-vs-release context: CP-surface Skills ship **flat** (`-cp`); CC-surface Skills ship **wrapper** (`-cc`); dual-surface Skills ship **both**. Across the catalog that is **29 release artifacts = 24 `-cp` (flat) + 5 `-cc` (wrapper)** from 27 source folders (22 cp-only + 3 cc-only + 2 dual). The `-cp`/`-cc` suffix is applied by the packager and is never present on the source folder. (Authoritative surface map: playbook §1.2.)
 
-**The orchestrator (canonical release packager).** `build_release_artifacts.py` is the single release packager: it reads the surface map, emits flat for `-cp` / wrapper for `-cc`, applies the suffix, self-asserts the 24 + 5 = 29 count (non-zero exit on mismatch), and on a full build runs `write_bundle()` to archive all 29 artifact zips into `dist/rootnode-catalog-vN.zip` (the catalog-umbrella bundle). A release runs this. The two legacy half-tools each produce one shape and neither suffixes, routes by surface, nor bundles:
-- `build_releases.py` — flat shape only, `.zip`, no suffix/routing.
-- `package_skill.py` — wrapper shape only, `.skill` extension, single-skill, no suffix.
+**The orchestrator (canonical release packager).** `build_release_artifacts.py` is the single release packager: it reads the surface map, emits flat for `-cp` / wrapper for `-cc`, applies the suffix, self-asserts the 24 + 5 = 29 count (non-zero exit on mismatch), and on a full build runs `write_bundle()` to archive all 29 artifact zips into `dist/rootnode-catalog-vN.zip` (the catalog-umbrella bundle). A release runs this. Both shape emitters live inside the orchestrator — the wrapper-shape logic is ported from Anthropic's upstream `package_skill.py` (a skill-creator packager that is **not** a tracked file in this repo; see [build_release_artifacts.py:7](build_release_artifacts.py#L7) and [:61](build_release_artifacts.py#L61) for the porting attribution). The tracked sibling is:
+- `build_releases.py` — flat shape only, `.zip`, no suffix/routing. Legacy half-tool; superseded by the orchestrator but retained as a reference. Neither `build_releases.py` alone nor the orchestrator plus a nonexistent upstream `package_skill.py` produces a correct release set; only `build_release_artifacts.py` does.
 
-Neither legacy tool alone produces a correct release set; only `build_release_artifacts.py` does. Keep all three tracked in the repo — an untracked packager means the next release has no packager.
+Keep the orchestrator and `build_releases.py` tracked in the repo. For the authoritative packager inventory, see `audit/repo-catalog/`.
 
 **Shape must match surface (the failure mode).** Attaching a flat zip where CC install expects a wrapper extracts loose files into `~/.claude/skills/` and breaks the install; attaching a wrapper zip where Claude.ai upload expects flat fails the platform installer (it reads for `SKILL.md` at the zip root and finds a folder instead). The suffix encodes the shape so the two cannot be confused.
 
 **Build-vs-release framing (reframed).** Earlier text framed this as "flat is the release form, wrapper is the PR-evidence form." That is only true for CP-surface Skills. The accurate model: the **release ships the surface-mapped set** — flat for CP-surface Skills, wrapper for CC-surface Skills, both for dual — produced by the orchestrator at release time. Separately, a **single-Skill enhancement build** produces the shape(s) for that Skill's surface(s) and additionally produces a wrapper for local install testing / PR audit evidence regardless of distribution surface (you install into `~/.claude/skills/` to test). So a CP-only Skill distributes flat but may carry a wrapper as build evidence; a CC-only Skill distributes the same wrapper shape it tests with; a dual Skill distributes both. Release pre-flight verifies the surface-mapped set exists (the orchestrator's 29-assert) before tag creation.
 
-`[generalizable; grounded in Phase 32c pre-flight 2026-05-08 (operator surfaced that an audit-artifacts wrapper zip is correct for CC install but not for a flat-expecting Claude.ai upload) and the catalog v3.1 release 2026-06-25/26 (the surface-mapped orchestrator build_release_artifacts.py + the umbrella bundle settled the model; supersedes the prior "flat = the release form" framing). Script-name correction: the wrapper tool is package_skill.py (emits .skill), not package_zip.py; the orchestrator emits .zip.]`
+`[generalizable; grounded in Phase 32c pre-flight 2026-05-08 (operator surfaced that an audit-artifacts wrapper zip is correct for CC install but not for a flat-expecting Claude.ai upload) and the catalog v3.1 release 2026-06-25/26 (the surface-mapped orchestrator build_release_artifacts.py + the umbrella bundle settled the model; supersedes the prior "flat = the release form" framing). Script-name correction (v4.0 alignment cycle 2026-07-25): upstream `package_skill.py` is not a tracked repo file — it is Anthropic's skill-creator packager whose wrapper-shape exclusion rules were ported into the orchestrator; the orchestrator emits `.zip`. The `skill-builder` Skill's internal `scripts/package_zip.py` is a *separate* build-pipeline packager (adapted from the same upstream `package_skill.py` for `.zip` + `eval-viewer/` inclusion) — not the release-time packager, and not to be conflated with the orchestrator.]`
 
 ---
 
@@ -350,16 +351,16 @@ Reference files have a soft guideline of ≤5000 tokens each. The guideline supp
 
 ### 5.1 Design-time estimation
 
-At build time, the actual Opus 4.7 tokenizer is not always available locally. The design-time estimation discipline:
+At build time, the target-model tokenizer is not always available locally for direct measurement. The design-time estimation discipline:
 
 - **Lower bound:** chars / 4. Conservative estimate that holds for non-technical English.
-- **Upper bound:** chars / 4 × 1.45 for technical/markdown content. The 1.45× multiplier comes from independent measurement on technical-markdown content (1.45–1.47× empirically observed; sourced as Tier 3 — tested production); Anthropic publishes a 1.0–1.35× tokenizer multiplier range in primary documentation (Tier 1), but markdown formatting overhead, code fence handling, and technical vocabulary push the effective multiplier higher.
+- **Upper bound:** chars / 4 × 1.45 for technical/markdown content. The 1.45× multiplier comes from independent measurement on technical-markdown content against the tokenizer introduced with Opus 4.7 and carried into Fable 5 (1.45–1.47× empirically observed; sourced as Tier 3 — tested production); Anthropic publishes a 1.0–1.35× tokenizer multiplier range in primary documentation (Tier 1) but the markdown formatting overhead, code fence handling, and technical vocabulary push the effective multiplier higher. Sonnet 5 uses approximately 30% more tokens per unit of content than Sonnet 4.6 (Anthropic's whats-new-sonnet-5 page); Opus 5 tokenizer specifics were not fully re-baselined in the v4.0 alignment cycle — treat measurements with explicit tolerance until re-baselined via `count_tokens`.
 
 For a 22,000-character reference: lower bound ~5,500 tokens, upper bound ~7,975 tokens. The lower-bound exceeds 5,000 — the reference is flagged for review. Whether to split depends on the upper-bound under actual measurement.
 
 ### 5.2 Install-time authoritative measurement
 
-The actual Opus 4.7 tokenizer at install time is the authoritative measurement. The install-time discipline:
+The target-model tokenizer at install time is the authoritative measurement. The install-time discipline:
 
 1. After install, verify the reference token counts against the actual tokenizer (e.g., via `count_tokens` API).
 2. If a reference materially exceeds 5,000 tokens (rough threshold: 6,500+), consider splitting.
@@ -441,7 +442,7 @@ Incompatible with preservation (requires fresh Gate 2 evidence):
 
 - **New substantive claims.** Adding a new pattern to the AP catalog; introducing a new agent design rule; adding a new tier to the source authority hierarchy; documenting a new placement mechanism.
 - **Modified substantive claims.** Changing an existing claim's scope, criteria, or applicability.
-- **New behavioral countermeasures.** Adding to the 10-tendency taxonomy, modifying countermeasure templates with new evidence.
+- **New behavioral countermeasures.** Adding to the 14-tendency taxonomy, modifying countermeasure templates with new evidence.
 - **New cross-Skill contracts.** Introducing a new field, threshold, or composition pattern that downstream consumers must align to.
 
 For each item in this category, the promotion provenance audit artifact (§4.2) carries a row documenting the warrant evidence (or override reasoning).
@@ -722,7 +723,7 @@ For the build tool itself:
 
 For Project-level context budget (different concern):
 
-- **Two-pool budget architecture and the ~66,500 token RAG threshold:** `root_OPTIMIZATION_REFERENCE.md` (context budget principles section). That KF covers Project-level token economy. This KF's §5 covers Skill-internal token discipline at the reference-file level.
+- **Context Budget Principles (automatic-RAG-by-window; historical Phase 22 ~66,500 measurement preserved as context):** `root_OPTIMIZATION_REFERENCE.md` (Context Budget Principles section). That KF covers Project-level token economy; the current-state rule is automatic RAG when the knowledge base approaches or exceeds the model's context window, with the 200K-era fixed-threshold measurement preserved as historical context. This KF's §5 covers Skill-internal token discipline at the reference-file level.
 
 For the broader Skill ecosystem evolution narrative:
 

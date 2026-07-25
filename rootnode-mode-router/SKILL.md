@@ -19,7 +19,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.0.2"
+  version: "4.0.0"
   original-source: "root.node design 2026 — runtime layer (gates, router, profile builder)"
   companion-files: "schema/router-config.schema.json, configs/example-router.json, examples/routing-walkthrough.md, references/trigger-types-detailed.md, references/compound-trigger-semantics.md, references/troubleshooting.md"
   changelog: "1.0.2 (2026-05-05): Brand-strip patch per Phase 27/28 methodology absorption. Body line 34 cchq reference replaced with rootnode runtime layer framing; behavior identical to 1.0.1. No structural or methodology changes. 1.0.1 (2026-05-01): Structural patch to align with rootnode authoring convention. Added references/ folder with three on-demand-loaded files (trigger-types-detailed, compound-trigger-semantics, troubleshooting). SKILL.md body slimmed via content extraction; behavior identical to 1.0. Deployment target: Claude Code (CC) side of CP/CC split."
@@ -27,6 +27,8 @@ metadata:
 ---
 
 # Mode Router
+
+> **Calibration:** Tier 1 (Model-compatible) - runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured retrieval, rule evaluation, or template lookup - output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
 
 Selects the active profile from triggering context. The piece that ties everything together: gates apply profiles, gates need to know which profile is active, the router decides.
 

@@ -13,18 +13,18 @@ description: >-
   Connectors to avoid redundancy and flag gaps. Do NOT use for auditing
   existing prompts (use rootnode-prompt-validation if available) or
   diagnosing existing Projects (use rootnode-project-audit if available).
-  Opus recommended; non-Opus models may produce less complete prompt
-  construction.
+  Run on Opus 5 or Sonnet 5 at `high` effort (both defaults); depth
+  reduces on legacy models.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.2.1"
+  version: "4.0.0"
   original-source: "PROMPT_COMPILER.md, MASTER_FRAMEWORK.md"
 ---
 
 # Prompt Compilation
 
-> **Calibration:** Tier 3, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) - run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
 
 Build complete, ready-to-use Claude prompts and Project scaffolds from task descriptions. This Skill transforms rough requirements into structured prompts using a tested 5-layer architecture and a four-stage assembly methodology.
 
@@ -48,9 +48,9 @@ Not every task needs the full 5-layer treatment. Match prompt complexity to task
 
 ## Model requirements
 
-This Skill performs multi-stage construction across the four-stage pipeline (Parse, Select, Construct, Validate) and three modes (Prompt, Project, Prep), with decision trees spanning identity × reasoning × output × domain selection. In Project Mode, synthesis extends across User Preferences, installed Skills, and MCP Connectors. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, block selection and validation steps may compress — set effort higher for intelligence-sensitive compilations.
+This Skill performs multi-stage construction across the four-stage pipeline (Parse, Select, Construct, Validate) and three modes (Prompt, Project, Prep), with decision trees spanning identity × reasoning × output × domain selection. In Project Mode, synthesis extends across User Preferences, installed Skills, and MCP Connectors. Run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code — the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Effort controls thinking depth, not visible output length — deep block selection and validation benefit from `high` or higher.
 
-On non-Opus models (Sonnet 4.6, Haiku 4.5 with extended thinking enabled), expect compressed selection logic, less specific block recommendations, and reduced cross-layer validation. The Skill will execute and produce correctly-shaped output; users should weight the resulting prompts accordingly. Haiku without extended thinking is not a supported deployment target for this Skill.
+On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and Haiku 4.5 with extended thinking, expect compressed selection logic, less specific block recommendations, and reduced cross-layer validation. Fallback-graceful on Opus 4.8. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight the resulting prompts by the model that produced them. Haiku 4.5 without extended thinking is out of scope.
 
 ## The Four-Stage Workflow
 
@@ -222,12 +222,16 @@ Use this quick-reference to route tasks to the right approaches. When a task mat
 
 ### Project Mode Delivery
 
-When the user needs a full Claude Project scaffold (multiple related tasks, ongoing usage, reference material needed across conversations), deliver each file as a separately copyable unit. Do not combine the Custom Instructions and knowledge files into a single document — the user will paste each into their Project individually.
+When the user needs a full Claude Project scaffold (multiple related tasks, ongoing usage, reference material needed across conversations), **deliver each scaffold artifact as a separate file on disk** — the Custom Instructions and each knowledge file as its own uploadable file. This is a v4.0 contract change (per D5 of the 5-generation alignment cycle) from the prior inline-code-block delivery contract: inline code blocks force the user to copy-and-paste each block into a separate upload dialog, which is friction the file-per-artifact contract eliminates.
 
-1. Present the complete Custom Instructions in its own code block, using XML tags for all section boundaries (`<identity>`, `<core_rules>` or `<core_instructions>`, `<knowledge_file_guide>` or `<knowledge_routing>`, `<operational_modes>`, `<output_standards>`, and any other top-level sections). Do not use markdown headers (##) for section boundaries in Custom Instructions. The user should be able to copy this code block directly into the Custom Instructions field.
-2. Present each knowledge file in its own code block, preceded by the filename and a one-line purpose statement. Each file's code block must be independently copyable — the user pastes it as a new knowledge file. For critical files, write the full content. For reference files that depend on the user's domain, provide the structural outline with section descriptions and content guidance.
-3. Follow with an architecture note explaining key decisions.
+1. **Create the Custom Instructions file** at a filename the user can upload directly: `{code}_CI.md` where `{code}` is the project's short identifier (e.g., `hyge_CI.md`, `modelcast_CI.md`). Contents: the complete Custom Instructions, using XML tags for all section boundaries (`<identity>`, `<core_rules>` or `<core_instructions>`, `<knowledge_file_guide>` or `<knowledge_routing>`, `<operational_modes>`, `<output_standards>`, and any other top-level sections). Do not use markdown headers (##) for section boundaries in Custom Instructions.
+2. **Create each knowledge file** at a filename the user can upload directly: `{code}_{NAME}.md` (e.g., `hyge_PIPELINE.md`, `hyge_STUDY_PROGRESS.md`). Contents: the file's complete content. For critical files, write the full content. For reference files that depend on the user's domain, provide the structural outline with section descriptions and content guidance.
+3. **Follow with an architecture note** (as chat prose, not a file) explaining key decisions and mapping each created file to its role.
 4. Be explicit about what the user needs to supply vs. what you have provided.
+
+**Inline-fallback exception.** If the current runtime cannot create files on disk (e.g., a chat surface without file-creation capability), fall back to inline code-block delivery and **explicitly state that the runtime constraint forced the fallback**. The inline form is not the default and should be flagged when used. Runtimes that can create files (Claude Code, Claude.ai with file-creation support, any environment where the model has Write tool access) should always use the file-per-artifact contract.
+
+**Filename discipline.** Prefix per Aaron Long / root.node convention: `{code}_` for project-specific files; `shared_` for cross-project shared files (rare in scaffolds). Never use session numbers in filenames. Confirm the `{code}` with the user before creating files; if uncertain, ask rather than invent.
 
 **Global Layer Advisory (Project Mode only, when global layer information is available):**
 
@@ -265,7 +269,7 @@ Apply the same No-Interrogation Principle: batch dimensions, drop those already 
 
 **Claude agrees with a flawed premise.** Quality control layer does not include pushback permission. Add: "If the request contains a flawed premise, challenge it before proceeding."
 
-**Recommendations contradict each other.** No internal consistency check. Add a verification step requiring Claude to check that recommendations are mutually compatible.
+**Recommendations contradict each other.** Cross-recommendation compatibility isn't grounded in an evidence rule. On Opus 5, adding a "verify your recommendations are consistent" step compounds automatic self-verification (see `root_OPTIMIZATION_REFERENCE.md` tendency #11) without adding a check the model wasn't already doing. Better fix: specify the compatibility criteria the recommendations must satisfy against a source (project constraints, spec, prior decisions) — external-artifact verification the model would not otherwise perform. Example: "Every recommendation must be consistent with the constraints in `<project_constraints>` and the decisions listed in `<prior_decisions>`; cite the specific constraint or decision each recommendation aligns with."
 
 **Output keeps growing across turns.** No length constraint combined with verbosity drift. Specify target length in the output layer. Restate when asking follow-up questions.
 

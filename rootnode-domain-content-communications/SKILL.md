@@ -16,13 +16,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.1"
+  version: "4.0.0"
   original-source: "DOMAIN_PACK_CONTENT_COMMUNICATIONS.md"
 ---
 
 # Content & Communications Prompt Methodology
 
-> **Calibration:** Tier 1, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) - runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured retrieval, rule evaluation, or template lookup - output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
 
 Build Claude prompts that produce high-quality content — articles, copy, content strategy, messaging frameworks, email sequences, and editorial evaluations. This Skill provides tested identity, reasoning, and output approaches tuned for content and communications work.
 

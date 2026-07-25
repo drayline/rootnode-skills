@@ -80,9 +80,13 @@ The Skill design and packaging methodology lives in the `rootnode-skill-builder`
 
 Subagents are focused specialists with their own context window. The parent conversation invokes a subagent for a specific task; the subagent runs with its own prompt, tool access, and context, then returns a result. The parent conversation's context is not polluted with the subagent's working set.
 
-**Use subagents for:** verification tasks where independent perspectives matter (a code reviewer, a test writer, a docs proofreader); research-heavy side tasks that would flood the main conversation with file contents not referenced again; work that requires a fresh perspective uninfluenced by the implementation conversation; specialized roles that recur across sessions.
+**Use subagents for:** independent review of a *different* agent's work (a code reviewer reviewing the implementation agent's diff, a test writer producing tests against a spec another agent authored, a docs proofreader reviewing content another agent drafted); research-heavy side tasks that would flood the main conversation with file contents not referenced again; work that requires a fresh perspective uninfluenced by the implementation conversation; specialized roles that recur across sessions.
+
+**Do not use subagents to verify the model's own work.** Opus 5 verifies its own work automatically (see `root_OPTIMIZATION_REFERENCE.md` Behavioral Tendencies §11 — over-verification). A subagent spawned to "double-check" the parent's output is duplicate cost for no quality gain, and the "use a subagent to verify" pattern is one of the specific instructions Anthropic's Opus 5 prompting guide names for removal. The Critic role (see §3.2) survives this rule because it is independent re-derivation of a *different* agent's proposed change against invariants — not the same agent re-checking itself.
 
 **Do not use subagents for:** "coverage" — using more agents because more is better is anti-pattern; sequential work where each step depends on the previous (subagents block on each other); same-file edits (two subagents editing the same file in parallel produces conflicts); single-perspective tasks where one thorough audit beats four shallow ones; small tasks where delegation overhead exceeds the benefit.
+
+**Delegation caps on Opus 5.** Opus 5 delegates to subagents more readily than prior Opus models. On CC deployments running Opus 5, cap delegation explicitly in CLAUDE.md or Skill instructions — for example: "Delegate to a subagent only for large tasks that are genuinely independent and parallelizable. Do not delegate work you can finish in a handful of tool calls. If one subagent can complete the task, use one rather than several, and keep spawn counts low." Anthropic's Opus 5 prompting guide names this as required prompting discipline for Opus-5-based deployments.
 
 **Built-in subagents first.** Claude Code ships three built-in subagents — Explore (read-only, codebase search), Plan (read-only, used in plan mode), general-purpose (full tools, complex multi-step work). Default to built-ins where they fit; create custom subagents only when a recurring specialist role emerges with clear warrant.
 
@@ -223,9 +227,19 @@ If none of these apply, the expansion is over-engineering — recommend deferrin
 
 The Critic role is available as a standalone Skill (`rootnode-critic-gate`) without requiring the full Orchestrator+Scribe expansion. When per-change governance is warranted but the full expansion would be over-engineering, the Critic Skill alongside a verification topology is a middle ground.
 
+**The Critic role and the Opus 5 self-verification-instruction discipline.** The Critic role reviews a *different* agent's proposed change against the authority matrix and invariants — it is independent re-derivation, not the change agent re-checking its own output. This is external-artifact verification (`root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.14`) and it survives on Opus 5 unchanged. What does not survive on Opus 5: any prompt or Skill instruction that tells the change agent to "use a subagent to verify your own work." Opus 5 already verifies its own work automatically; a subagent doing the same thing is duplicate cost. The Critic Skill's invocation guidance should read as "invoke critic-gate to review this change" (external-artifact verification of a different agent's work), not as "spawn a subagent to double-check your output" (self-directed re-checking).
+
 ### 3.3 Agent prompt grounding
 
 Every agent prompt has concrete, verifiable tasks. Never "brainstorm creatively" or "consider all angles." Each agent has a checklist of verifiable assertions, not open-ended exploration. Subagent prompts should also specify the return format (summary, finding list with priority, diff with rationale) so the parent conversation can integrate results without re-injecting raw file content.
+
+### 3.4 Claude Code defaults on Opus 5 and Sonnet 5
+
+**Effort default:** on Claude Code, `effort` defaults to `high` for both Opus 5 and Sonnet 5. This is the Anthropic-recommended starting point (per the models overview and the Opus 5 whats-new page). Do not carry over `xhigh` defaults from Opus 4.7/4.8 prompts without re-running an effort sweep on the deployment's own evals — the inverted rule (`high` is the start; `xhigh` steps up for demanding work; `low`/`medium` are legitimate primary cost controls) applies on CC as it applies everywhere else.
+
+**Model default:** the Claude Code default model moves with Claude Code product releases and is not restated here (consult Anthropic's Claude Code documentation at update time rather than hardcoding a value that will drift). Design deployments to work under the model the user is running, not under a specific model version assumed at design time.
+
+**Breaking-change reminder:** on Opus 5, `thinking: {"type": "disabled"}` at `xhigh` or `max` returns 400. For CC deployments that need thinking disabled, drop effort to `high` or below.
 
 ---
 
@@ -448,7 +462,10 @@ The full unified catalog with surface tags, signatures, causes, and fixes lives 
 - **Missing managed policy where required** — compliance-sensitive context with no ceiling-level enforcement.
 - **Path-scoped rules opportunity missed** — per-path conventions still in CLAUDE.md, not migrated to `.claude/rules/`.
 - **Auto memory misuse** — team-relevant content in machine-local auto memory instead of CLAUDE.md.
-- **Verification-before-completion absent** — speculative language ("should work," "looks good") without test evidence.
+- **Verification-before-completion absent** — speculative language ("should work," "looks good") without test evidence. This is external-artifact verification and remains required on Opus 5 — the model does not automatically read the test output.
+- **Verification-instruction accumulation (Opus 5)** — CLAUDE.md or Skills instructing the model to "double-check," "re-verify," "include a verification step," or "use a subagent to verify" the model's own output. Opus 5 does this automatically; the instructions compound into over-verification. Remove self-directed re-check instructions; keep external-artifact verification (see `root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.14`).
+- **Subagent over-delegation (Opus 5)** — no explicit cap on subagent spawning; Opus 5 delegates readily on its own and compounds when the CLAUDE.md or Skill invites more. Add a delegation cap in the CLAUDE.md.
+- **Conservative-review literalism** — audit or review prompts that say "only report high-severity issues" or "be conservative." Opus 5 follows literally and under-reports. Rewrite to report-everything-then-filter form.
 - **Skills/Commands legacy mix** — overlapping `.claude/commands/` and `.claude/skills/` directories.
 - **Kitchen-sink session** — 100+ turn sessions mixing unrelated tasks; no `/clear` discipline.
 - **Stale CLAUDE.md** — months out of date, references dead patterns.

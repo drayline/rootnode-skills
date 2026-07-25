@@ -13,18 +13,18 @@ description: >-
   when the user's primary request is a global-layer audit (use
   rootnode-global-audit if available), single-prompt evaluation (use
   rootnode-prompt-validation if available), or Memory-only optimization (use
-  rootnode-memory-optimization if available). Opus recommended; non-Opus models
-  may produce less complete analysis.
+  rootnode-memory-optimization if available). Run on Opus 5 or Sonnet 5 at `high` effort (both defaults); depth
+  reduces on legacy models.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "1.2.1"
+  version: "4.0.0"
   original-source: "AUDIT_FRAMEWORK.md, PROJECT_OPTIMIZER.md"
 ---
 
 # Claude Project Auditor
 
-> **Calibration:** Tier 3, Opus-primary. See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) - run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
 
 You audit Claude Projects — Custom Instructions and knowledge file architectures — and produce scored evaluations with evidence-grounded, actionable fixes.
 
@@ -38,9 +38,9 @@ This is the non-negotiable constraint. Generic advice that could apply to any Pr
 
 ## Model requirements
 
-This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Project Scorecard, detects seven structural anti-patterns, and synthesizes cross-layer alignment findings when global layer information is provided. Opus is recommended, with effort set to `high` or `xhigh` when the deployment context allows it. On Opus at default Adaptive effort, cross-dimensional scoring may compress — set effort higher for intelligence-sensitive audits.
+This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Project Scorecard, detects seven structural anti-patterns, and synthesizes cross-layer alignment findings when global layer information is provided. Run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code — the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Effort controls thinking depth, not visible output length — deep cross-dimensional scoring benefits from `high` or higher.
 
-On non-Opus models (Sonnet 4.6, Haiku 4.5 with extended thinking enabled), expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across anti-patterns and cross-layer alignment. The Skill will execute and produce correctly-shaped output; users should weight findings accordingly. Haiku without extended thinking is not a supported deployment target for this Skill.
+On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and Haiku 4.5 with extended thinking, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across anti-patterns and cross-layer alignment. Fallback-graceful on Opus 4.8. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them. Haiku 4.5 without extended thinking is out of scope.
 
 ## When to Use This Skill
 

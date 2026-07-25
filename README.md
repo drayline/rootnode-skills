@@ -10,7 +10,7 @@
 
 27 Skills that diagnose, build, and optimize every architectural layer across chat-Projects, conversations, and Claude Code repos.
 
-![Skills](https://img.shields.io/badge/Skills-27-CC8A0A) ![Version](https://img.shields.io/badge/Version-v3.1-CC8A0A) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Calibrated](https://img.shields.io/badge/Calibrated-Claude_Opus_4.8-8B929E)
+![Skills](https://img.shields.io/badge/Skills-27-CC8A0A) ![Version](https://img.shields.io/badge/Version-v4.0-CC8A0A) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Calibrated](https://img.shields.io/badge/Calibrated-Opus_5_%2B_Sonnet_5-8B929E)
 
 ---
 
@@ -18,9 +18,9 @@
 
 These Skills install into two surfaces: **chat-Projects** (Claude.ai web app or Claude desktop app) and **Claude Code** (the execution surface). Most Skills are chat-Project-only. Three are Claude Code-only. Two operate in both.
 
-**For chat-Projects.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest) — the catalog umbrella, with every Skill indexed by category. Download the individual `-cp.zip` files for the Skills you want (no unzipping required), or grab the all-Skills bundle `rootnode-catalog-v3.1.zip` and unzip it once. Upload the `-cp.zip` files in **Settings → Capabilities → Skills**. Skills install once and become available across every Project in your Claude account.
+**For chat-Projects.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest) — the catalog umbrella, with every Skill indexed by category. Download the individual `-cp.zip` files for the Skills you want (no unzipping required), or grab the all-Skills bundle `rootnode-catalog-v4.0.zip` and unzip it once. Upload the `-cp.zip` files in **Settings → Capabilities → Skills**. Skills install once and become available across every Project in your Claude account.
 
-**For Claude Code.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest), download the `-cc.zip` files for the Skills you want (or the all-Skills bundle `rootnode-catalog-v3.1.zip`, unzipped once), then extract the `-cc.zip` archives into `~/.claude/skills/` (user-level — available across every repo) or `.claude/skills/` (per-repo). Each `-cc.zip` expands to a folder matching the Skill name. Skills auto-activate from natural language prompts inside Claude Code sessions.
+**For Claude Code.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest), download the `-cc.zip` files for the Skills you want (or the all-Skills bundle `rootnode-catalog-v4.0.zip`, unzipped once), then extract the `-cc.zip` archives into `~/.claude/skills/` (user-level — available across every repo) or `.claude/skills/` (per-repo). Each `-cc.zip` expands to a folder matching the Skill name. Skills auto-activate from natural language prompts inside Claude Code sessions.
 
 The two dual-surface Skills (`rootnode-skill-builder` and `rootnode-cc-design`) publish both `-cp.zip` and `-cc.zip` variants — download the one matching your install target.
 
@@ -28,7 +28,7 @@ The two dual-surface Skills (`rootnode-skill-builder` and `rootnode-cc-design`) 
 > Activate any Skill with natural language — no commands, no special syntax. Install all 27 for the full architecture system; every Skill also works standalone.
 
 > [!TIP]
-> **Calibrated for Claude Opus 4.8.** Most Skills work fully on every Claude model; a few produce best results on Opus. See [Model Compatibility](#model-compatibility) for details.
+> **Calibrated for Claude Opus 5 + Sonnet 5 (dual-primary), v4.0.** Fable 5 integrated-aware; Opus 4.8 fallback-graceful (Skills produce correct-shape output there when classifier-flagged requests fall back silently); Sonnet 4.6 legacy-graceful; Haiku 4.5 with extended thinking enabled. Most Skills work fully across the current model landscape; a few produce best results on Opus 5 or Sonnet 5 at `high` effort. See [Model Compatibility](#model-compatibility) for details.
 
 ---
 
@@ -106,15 +106,21 @@ These Skills install once and operate identically across the two surfaces, which
 
 ## Model Compatibility
 
-Skills are calibrated against Claude Opus 4.8 as the primary target. They use a three-tier compatibility model based on how each Skill behaves across model classes.
+Skills are calibrated for the 5-generation Claude landscape as of Opus 5 GA (2026-07-24). The calibration scope: **Opus 5 + Sonnet 5 dual-primary**, Fable 5 integrated-aware, Opus 4.8 fallback-graceful (a model users are *silently served* on classifier-flagged requests in Claude.ai / Claude Code / Cowork — Skills must produce correct-shape output there without user awareness), Sonnet 4.6 legacy-graceful, and Haiku 4.5 graceful-with-extended-thinking. Haiku 4.5 without extended thinking, Haiku 3.5, and Mythos 5 / Mythos Preview are out of scope.
 
-**Tier 1 — Model-compatible (13 Skills).** Catalog retrievals, template lookups, decision logic, routing, and selection. Work fully on Opus, Sonnet, and Haiku. Output quality is consistent across models because the Skill's job is structured retrieval or rule evaluation, not multi-dimension analysis.
+Skills use a three-tier compatibility model based on how each Skill behaves across model classes.
 
-**Tier 2 — Sonnet-graceful (7 Skills).** Heavier analytical work that includes a token-budget awareness clause for graceful degradation. The Skill recognizes when running on a smaller model and adjusts depth without breaking. Output may be slightly less complete on Sonnet or Haiku, but every Skill component still produces.
+**Tier 1 — Model-compatible (13 Skills).** Catalog retrievals, template lookups, decision logic, routing, and selection. Work fully on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Output shape does not depend on the underlying model because the Skill's job is structured retrieval or rule evaluation, not multi-dimension analysis. Also produce correct-shape output on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful).
 
-**Tier 3 — Opus-recommended (7 Skills).** Multi-dimension analysis, full audits, complete environment design, and comprehensive Skill builds. These Skills run cleanly on Opus 4.8. Sonnet output may be less complete; Haiku output may miss higher-order findings. Each T3 Skill prints an effort guidance note on activation when run on a non-Opus model so you know what to expect.
+**Tier 2 — Sonnet-graceful (7 Skills).** Designed and tested against Opus 5 + Sonnet 5 dual-primary. Runs correctly on Sonnet 4.6 (legacy-graceful) with slightly less depth on multi-dimensional analysis; on Haiku 4.5 with extended thinking; fallback-graceful on Opus 4.8. Effort default is `high` on Opus 5 and Sonnet 5 (both Claude API and Claude Code); step down to `medium` for cost-sensitive runs where your evals show quality holds.
 
-The tier values appear in every catalog table below. T1 and T2 Skills are safe to use on any model. T3 Skills are best on Opus when the deliverable is high-stakes — full audits, comprehensive Skill builds, complete environment scaffolds.
+**Tier 3 — High-effort recommended (7 Skills).** Multi-dimension analysis, full audits, complete environment design, and comprehensive Skill builds. Run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code — the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). Each T3 Skill notes graceful-degradation behavior in its body text.
+
+**Effort ladder (Opus 5 and Sonnet 5).** `low` → `medium` → `high` → `xhigh` → `max`. Both models default to `high` on Claude API and Claude Code — the Anthropic-recommended starting point. Use `low`/`medium` liberally as the primary cost control wherever your evals show quality holds; step up to `xhigh` for demanding coding/agentic work; use `max` when a task justifies unconstrained spend. Do not carry effort settings over from prior models — re-run an effort sweep on your own evals.
+
+**Fallback semantics.** On Claude.ai, Claude Code, and Cowork, Opus 5 refusals fall back to Opus 4.8 by default. Skills should produce correct-shape output on Opus 4.8 without the user knowing a fallback fired. On the Claude API, the `fallbacks` parameter is configurable (beta headers `server-side-fallback-2026-07-01` for full features / `2026-06-01` for explicit-list only). Refusals return HTTP 200 with `stop_reason: "refusal"` — instrument monitoring accordingly; error-rate dashboards never see them.
+
+The tier values appear in every catalog table below. T1 and T2 Skills are safe to use across the supported model landscape. T3 Skills are best on Opus 5 or Sonnet 5 at `high` effort or above when the deliverable is high-stakes — full audits, comprehensive Skill builds, complete environment scaffolds.
 
 ---
 
@@ -146,7 +152,7 @@ These operate directly on the architectural layers. They are the primary tools f
 |---|---|---|---|
 | `rootnode-behavioral-tuning` | T2 | Chat | Diagnoses ten Claude behavioral tendencies (verbosity, hedging, agreeableness, fabricated precision, and others) with countermeasure templates ready to deploy. |
 | `rootnode-memory-optimization` | T2 | Chat | Rebalances content across Memory, Custom Instructions, knowledge files, and User Preferences. Produces edit prescriptions and trimming recommendations. |
-| `rootnode-context-budget` | T3 | Chat | Full context budget analysis: two-pool architecture (~66,500 token RAG threshold), per-file evaluation across six dimensions, content routing by category, growth trajectory assessment, retrieval quality audit, and phased optimization with compression safeguards. |
+| `rootnode-context-budget` | T3 | Chat | Full context budget analysis under the current automatic-RAG-by-window model: per-file evaluation across six dimensions, content routing by category, growth trajectory assessment, retrieval quality audit, and phased optimization with compression safeguards. Rebuilt for the 1M-window primary landscape; historical 200K-era measurements preserved as context. |
 
 ### Cross-Layer
 

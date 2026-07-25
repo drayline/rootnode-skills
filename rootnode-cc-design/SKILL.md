@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "2.1"
+  version: "4.0.0"
   predecessor: "rootnode-cc-design v2.0"
   original-source: "root.node seed Project KFs (post-Phase 27/28 methodology absorption: root_AGENT_ENVIRONMENT_ARCHITECTURE.md, root_CC_ENVIRONMENT_GUIDE.md, root_AGENT_ANTI_PATTERNS.md) + accumulated CC deployment research (2026-05-04). v2 evolved REMEDIATE acceptance flow (three approval forms, step-level risk tags) and critic-gate composition (required/optional) to align with rootnode-repo-hygiene v1's contracts. Substantive rebuild of cc-anti-patterns.md to canonical numbering. Brand-surface clean (cchq references stripped or restructured; hyge contamination anonymized to \"production CC deployment 2026-05-04\")."
   discipline_post: phase-30
@@ -26,11 +26,23 @@ metadata:
 
 # Claude Code Design
 
+> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
+
 Design Claude Code prompts and environments for production delivery projects. This Skill produces paste-ready artifacts — CLAUDE.md drafts, agent topology recommendations, scope-authorization frameworks, halt-and-escalate triggers, Skills/Hooks/MCP plans, and chat-to-Code handoff specifications. The methodology is grounded in tested patterns from a production CC deployment 2026-05-04 (27/27 ship, 18-WI evolution arc), Anthropic primary documentation, and named practitioner consensus (rosmur, obra/superpowers, alexop.dev, Shrivu Shankar, Marc Nuri).
 
 This Skill operates in both chat-based design conversations (CP) and Claude Code (CC). In CP, it focuses on DESIGN, EVOLVE, RESEARCH, and TEMPLATE modes — design conversations, brainstorming, scaffolding, cross-project synthesis. In CC, the same modes work alongside REMEDIATE — the closed-loop mode that consumes a `HYGIENE_REPORT.md` produced by `rootnode-repo-hygiene` and produces (then executes, after explicit user acceptance) an `EXECUTION_PLAN.md` against the actual repo.
 
 The Skill produces design artifacts in all modes. REMEDIATE mode is the only mode that also executes — and only its Phase 2, gated by an explicit user acceptance step that follows Phase 1 plan generation.
+
+## v4.0 update — Opus 5 CC deployments
+
+**Subagent-delegation caps.** Opus 5 delegates to subagents more readily than prior Opus models. CLAUDE.md drafts and design specs authored by this Skill for Opus-5-based CC deployments should include an explicit delegation cap. See `root_OPTIMIZATION_REFERENCE.md` §13 for the standard template.
+
+**Verification topology (D4).** Independent review of a *different* agent's work — the Critic role, code reviewer subagent, test writer subagent, docs proofreader subagent — remains a valid subagent pattern under Opus 5. What does NOT remain valid: "spawn a subagent to verify your own output." Opus 5 already self-verifies; a subagent doing the same thing is duplicate cost. When designing CC verification topology, distinguish the two: independent-review-of-different-agent survives; self-directed re-checking (whether via subagent or via prompt instruction) is removed. See `root_AGENT_ENVIRONMENT_ARCHITECTURE.md` §4.14 and `root_CC_ENVIRONMENT_GUIDE.md` §1.4 for the discipline.
+
+**CC defaults.** On Claude Code, `effort` defaults to `high` for both Opus 5 and Sonnet 5 (per Anthropic's models overview and Opus 5 whats-new page). The Claude Code default *model* moves with Claude Code product releases and is not restated here — consult Anthropic's Claude Code documentation at update time rather than hardcoding a value that will drift.
+
+**Fable / Opus 5 / Sonnet 5 CC selection tradeoff.** For most CC workloads, Opus 5 at `high` is the recommended default (near-Fable capability at half the cost). Fable 5 is integrated-aware — reserve for long-horizon autonomous agent workloads and 1M-context long-context work where its edge is worth the $10/$50 pricing. Sonnet 5 at `high` is the cost-optimal target for lighter agentic workloads where Opus-5 depth is not required.
 
 ## Important
 

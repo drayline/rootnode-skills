@@ -178,9 +178,11 @@ Subagents are spawned with their own context window. They isolate context that w
 
 | Subagent | Model | Tools | Use for |
 |---|---|---|---|
-| **Explore** | Haiku | Read-only | Codebase search, "find me where X is implemented", cheap context-gathering |
+| **Explore** | inherits main conversation (capped at Opus on the Claude API) | Read-only | Codebase search, "find me where X is implemented", cheap context-gathering |
 | **Plan** | (planning-mode) | Read-only | Used in plan mode for research before plan production |
 | **general-purpose** | (default) | Full tools | Complex multi-step work that requires context isolation |
+
+**Explore's default changed in v2.1.198.** The built-in Explore no longer defaults to Haiku — it inherits the main conversation's model. A deployment that wants a genuinely cheap scout must define a project subagent named `Explore` with `model: haiku` (the project definition overrides the built-in and keeps its own `model` field). Explore and Plan also skip CLAUDE.md and git status, so any rule they must obey is restated in the delegation prompt rather than assumed; both are one-shot and cannot be resumed. See `cc-delegation-patterns.md` §1. **[Anthropic docs]**
 
 **When to add a custom subagent:** when the same kind of subagent keeps getting requested (a security reviewer, a test writer, a docs proofreader), define it once. **[Anthropic docs framing]**
 

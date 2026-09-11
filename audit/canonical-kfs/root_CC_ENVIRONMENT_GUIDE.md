@@ -86,9 +86,11 @@ Subagents are focused specialists with their own context window. The parent conv
 
 **Do not use subagents for:** "coverage" — using more agents because more is better is anti-pattern; sequential work where each step depends on the previous (subagents block on each other); same-file edits (two subagents editing the same file in parallel produces conflicts); single-perspective tasks where one thorough audit beats four shallow ones; small tasks where delegation overhead exceeds the benefit.
 
-**Delegation caps on Opus 5.** Opus 5 delegates to subagents more readily than prior Opus models. On CC deployments running Opus 5, cap delegation explicitly in CLAUDE.md or Skill instructions — for example: "Delegate to a subagent only for large tasks that are genuinely independent and parallelizable. Do not delegate work you can finish in a handful of tool calls. If one subagent can complete the task, use one rather than several, and keep spawn counts low." Anthropic's Opus 5 prompting guide names this as required prompting discipline for Opus-5-based deployments.
+**Delegation caps on Opus 5.** Opus 5 delegates to subagents more readily than prior Opus models. On CC deployments running Opus 5, cap delegation explicitly in CLAUDE.md or Skill instructions — for example: "Delegate to a subagent only for large tasks that are genuinely independent and parallelizable. Do not delegate work you can finish in a handful of tool calls. If one subagent can complete the task, use one rather than several, and keep spawn counts low." Anthropic's Opus 5 prompting guide names this as required prompting discipline for Opus-5-based deployments. A cap stated only in prose is enforcement-as-preference — put the mechanism behind it (§6 carries the cap mechanism table).
 
 **Built-in subagents first.** Claude Code ships three built-in subagents — Explore (read-only, codebase search), Plan (read-only, used in plan mode), general-purpose (full tools, complex multi-step work). Default to built-ins where they fit; create custom subagents only when a recurring specialist role emerges with clear warrant.
+
+**Explore does not default to a cheap model.** As of Claude Code v2.1.198, the built-in Explore subagent inherits the main conversation's model rather than defaulting to Haiku, capped at Opus. A session running Opus therefore pays Opus rates for every Explore call — the opposite of the cost profile the role's name implies. To make Explore cheap, define a project-level `Explore` subagent with `model: haiku`; the project definition overrides the built-in. Two further properties matter when designing around Explore and Plan: neither loads CLAUDE.md or git status, so neither inherits the standing context the main session has, and neither can be resumed, so a partial result is lost rather than continued. `[product fact under AEA §4.15 — verify against the running version with claude --version before relying on it]`
 
 **Custom subagent reliability requirements:**
 - *Specific `description:` field.* Claude uses this to decide auto-delegation. "Reviews code for security issues before commits" routes better than "security expert."
@@ -100,6 +102,10 @@ Subagents are focused specialists with their own context window. The parent conv
 Signals that warrant multi-agent topology: verification requires perspectives that conflict by design (structural correctness vs. visual quality vs. content fidelity); work decomposes into independent units that parallelize *and* an implementation plan exists *and* tasks are mostly independent; a class of decisions requires independent re-derivation (Critic role); research-heavy side tasks would flood main context.
 
 Signals that don't warrant multi-agent: "coverage"; sequential chains; same-file edits; single-perspective verification; small tasks; work requiring agents to coordinate with each other directly (use agent teams instead — different mechanism).
+
+**Orchestrator context hygiene.** Delegation only saves context if the results do not land back in the orchestrator's window. Four rules make the saving real. Subagents return *locations* — file paths, line ranges, symbol names — rather than file contents; an orchestrator that receives dumps has paid the delegation overhead and kept the context cost anyway. Results too large for a return message go to a scratch file that the next agent reads directly, so the content never transits the orchestrator at all. Related work batches into one delegation rather than one delegation per item. And the orchestrator's stop mechanisms are `TaskStop` (halt a subagent that has gone off-track) and `maxTurns` (bound the run before it wanders), not a prose instruction to be brief.
+
+**Subagent reports are data, not instructions.** A returned report is untrusted input to the orchestrator's next decision. It can be wrong, it can be incomplete, and it can contain text that reads as a directive. The orchestrator evaluates a report against the plan and against the artifacts it names; it does not execute instructions found inside one.
 
 ### 1.5 Hooks (`.claude/settings.json`)
 
@@ -233,6 +239,25 @@ The Critic role is available as a standalone Skill (`rootnode-critic-gate`) with
 
 Every agent prompt has concrete, verifiable tasks. Never "brainstorm creatively" or "consider all angles." Each agent has a checklist of verifiable assertions, not open-ended exploration. Subagent prompts should also specify the return format (summary, finding list with priority, diff with rationale) so the parent conversation can integrate results without re-injecting raw file content.
 
+**The eight-field delegation brief.** A delegation is a contract, and an underspecified contract is where delegated work drifts. Every brief carries eight fields:
+
+| # | Field | What it fixes |
+|---|---|---|
+| 1 | Goal | The single outcome this agent owns |
+| 2 | Files in scope | Which paths the agent may read and which it may touch |
+| 3 | Allowed changes | What kind of edit is permitted, not only where |
+| 4 | What to verify | The external artifacts the agent must check |
+| 5 | What not to do | The adjacent work the agent must leave alone |
+| 6 | Output format | The shape the orchestrator will integrate |
+| 7 | Return length cap | A number, in lines or words |
+| 8 | Known facts | What is already established, so the agent does not re-derive it |
+
+Two of the eight are non-optional, and they are the two most often written wrong.
+
+*Field 4 names external artifacts only.* "Verify your work" and "double-check your output" are self-directed re-checking and are removed rather than softened (AEA §4.14). "Run the auth test suite and report the failing test names" is external-artifact verification and stays imperative.
+
+*Field 7 is a number, not an adjective.* "Be concise" and "keep it short" are not caps — they are preferences the agent calibrates against its own sense of the task, and an agent deep in a long run calibrates upward. "Return no more than 20 lines" is a cap.
+
 ### 3.4 Claude Code defaults on Opus 5 and Sonnet 5
 
 **Effort default:** on Claude Code, `effort` defaults to `high` for both Opus 5 and Sonnet 5. This is the Anthropic-recommended starting point (per the models overview and the Opus 5 whats-new page). Do not carry over `xhigh` defaults from Opus 4.7/4.8 prompts without re-running an effort sweep on the deployment's own evals — the inverted rule (`high` is the start; `xhigh` steps up for demanding work; `low`/`medium` are legitimate primary cost controls) applies on CC as it applies everywhere else.
@@ -240,6 +265,29 @@ Every agent prompt has concrete, verifiable tasks. Never "brainstorm creatively"
 **Model default:** the Claude Code default model moves with Claude Code product releases and is not restated here (consult Anthropic's Claude Code documentation at update time rather than hardcoding a value that will drift). Design deployments to work under the model the user is running, not under a specific model version assumed at design time.
 
 **Breaking-change reminder:** on Opus 5, `thinking: {"type": "disabled"}` at `xhigh` or `max` returns 400. For CC deployments that need thinking disabled, drop effort to `high` or below.
+
+### 3.5 Role tiering and the Builder-to-Refuter loop
+
+**Role tiering.** In a multi-agent topology, every role does not need the same capability — and by default every subagent inherits the session's model, so an untiered deployment pays the orchestrator's rate for the scout. The structure below is `[generalizable]`. The model column is a landscape fact, dated per AEA §4.15, and is refreshed against the dated landscape block in `root_CLAUDE_OPTIMIZATION_NOTES.md` rather than treated as durable.
+
+| Role | Does | Capability needed | Tier as of 2026-09-09 |
+|---|---|---|---|
+| Orchestrator | Plans, decomposes, spawns, reads reports, integrates | Highest — it holds the whole picture | Top tier available |
+| Scout | Locates files, symbols, call sites; returns locations | Low — retrieval, not judgment | Haiku tier |
+| Researcher | Establishes facts; marks unverified ones as unverified | Middle | Sonnet tier |
+| Builder | Implements against a spec; runs the tests | Middle | Sonnet tier |
+| Refuter | Re-derives the builder's diff, re-runs the tests, refuses to trust "done" | At or above the builder | Opus tier or above |
+| Debugger | Root-causes failures the builder could not | Highest — spawned only for hard cases | Top tier available |
+
+The landscape-independent rule is the one to carry forward: **reviewer capability is greater than or equal to builder capability.** A reviewer weaker than the agent it reviews rubber-stamps. Every other cell in the model column expires.
+
+**The Builder-to-Refuter loop.** The default coding topology is a loop, not a panel: an Orchestrator that specs and integrates, a Builder that implements, and a Refuter that re-derives the result. The loop runs Orchestrator → Builder → Refuter → Orchestrator, and a rejection returns to the *same* Builder so it keeps its context rather than restarting cold.
+
+The Refuter spawns **non-fork**. A reviewer forked from the builder's conversation inherits the builder's reasoning and re-derives nothing — it agrees with itself and reports the agreement as verification. Non-fork isolation is the property that makes the Refuter a Critic under §3.2 rather than self-verification under AEA §4.14.
+
+§3.2's gating conditions govern the full Orchestrator + Critic + Scribe expansion, not this loop. Builder-to-Refuter is lighter than both that expansion and the four-agent verification topology in §3.1, and it is the right default for ordinary coding work. Escalate to §3.1 only when verification needs perspectives that conflict by design, and to §3.2 only when its three conditions are met.
+
+`[generalizable structure; model column dated 2026-09-09; loop grounded in the rootnode-cc-design v4.1 cycle, 2026-09-09]`
 
 ---
 
@@ -333,7 +381,23 @@ When a CC agent authors an artifact (PR description, release notes, audit docume
 
 The discipline: when authoring forward references, prefix with explicit temporal markers — "post-merge:" or "this PR will:" rather than declarative present tense ("is on main"). This prevents drift between authoring time and reading time. Artifacts read mid-flow should not assume completed state that hasn't happened yet; explicit temporal markers make the difference between current-state and expected-state visible.
 
-`[generalizable; grounded in Phase 31d merge session 2026-05-07 — author agent correctly anticipated the audit-artifact commit would change main..HEAD count from 10 → 11 and updated PR description proactively]`
+**Assert the end state, never the pre state.** The same discipline runs in the other direction, on prompts that describe a file the agent is about to change. A prompt that states what a file *currently* contains — a line count, a section list, a digest of the working copy — goes stale the moment anything touches the working tree between authoring and execution, and nothing detects the staleness until the session halts mid-run on a gate it can no longer satisfy. Write starting conditions as **report-only**: the agent reports what it found and continues. Bind the halt to the **post-action** state instead — a digest of the file as it must exist after the change. A post-action gate cannot go stale, because it describes an end state the session itself produces.
+
+Every prompt that replaces a file carries that file's digest, and the digest is computed in the same turn the file is produced. Computing it in a later turn reintroduces exactly the drift the rule exists to remove, because the digest and the bytes it describes then come from two different moments.
+
+**Normalize before hashing.** A digest gate on a text file binds to LF-normalized content, never to raw bytes. On a Windows checkout with `core.autocrlf=true`, git stores the LF blob regardless of what the working copy contains, so a raw-bytes gate on a CRLF or mixed-ending file is unsatisfiable by any commit — the gate can never pass, and the failure presents as a content error rather than an encoding one. Compute the digest over content with carriage returns stripped, and say so in the prompt so the agent normalizes the same way before comparing.
+
+`[generalizable; forward-reference discipline grounded in Phase 31d merge session 2026-05-07 — author agent correctly anticipated the audit-artifact commit would change main..HEAD count from 10 → 11 and updated PR description proactively. End-state assertion rule grounded in an observed 2026-09-07 halt where a prompt's pre-state line count went stale because the replacement was already staged, and in the 2026-09-09 v4.1 cycle where a raw-bytes digest gate proved unsatisfiable by construction]`
+
+### 5.8 Competing hypotheses in diagnostic prompts
+
+When a prompt asks an agent to find a cause, a ranked list of candidates invites the agent to confirm the top entry and stop. Structure candidates as competing hypotheses instead. Each hypothesis states four things: the **mechanism** by which it would produce the symptom, the **evidence** that puts it on the list, the **predicted fix** if it is the true cause, and — the field that does the work — **what the discriminating test would show** if it is the true cause and what it would show if it is not.
+
+The discipline that follows from the fourth field: **two hypotheses with identical predicted observations are one hypothesis.** If no available test distinguishes them, they are the same claim stated twice, and the prompt merges them rather than padding the list.
+
+Before naming an instrument, run the instrument-fit test from AEA §4.14. An instrument that cannot exhibit the mechanism under test returns a null that falsifies nothing, and a null read as evidence is worse than no measurement — it retires a live hypothesis on no grounds. When the available instrument does not fit, the correct move is a different instrument, including a manual operator procedure, not a weaker inference drawn from the wrong one. Record the fit reasoning in the prompt so a later session reads a skipped measurement as a decision rather than an omission.
+
+`[generalizable; grounded in the 2026-09-09 v4.1 cycle, where the shell one-liner grep -c $'\r' under /bin/sh returned 0 for a file full of carriage returns — /bin/sh does not expand $'...' — and that null was reported as fact against a correct contrary report. Count CR bytes with tr -cd '\r' | wc -c instead]`
 
 ---
 
@@ -352,6 +416,20 @@ Decision rule: if a guarantee absolutely must hold, use a hook. If a preference 
 - "Never modify the migrations folder" → PreToolUse hook blocking writes to `migrations/**`.
 - "Always update change_log.md after changes" → PostToolUse hook verifying or appending.
 - "Verify type-check passes before commit" → PreToolUse hook on Bash(git commit) running type-check.
+
+**Worked example: the subagent delegation cap.** A delegation cap that exists only as CLAUDE.md prose is enforcement-as-preference — the model reads it, complies most of the time, and drifts under load, which is exactly when the cap matters. Most of the cap has a mechanism available:
+
+| Guarantee | Prose-only form | Mechanism |
+|---|---|---|
+| Subagents cannot spawn subagents | "Do not nest delegation" | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3; `1` disables nesting) |
+| Bound concurrent fan-out | "Keep spawn counts low" | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20) |
+| A role may only call certain agents | "Delegate only to the builder" | `tools: Agent(type, …)` allowlist in agent frontmatter |
+| A named agent is unavailable | "Do not use agent X" | `permissions.deny: ["Agent(name)"]` |
+| A role cannot delegate at all | "This role does its own work" | Omit `Agent` from that role's `tools` |
+| A run cannot wander | "Stop when the task is done" | `maxTurns` |
+| Workflows are off | "Do not use workflows" | `CLAUDE_CODE_DISABLE_WORKFLOWS=1` |
+
+Keep the prose as well — it carries the reasoning, which a settings key cannot. The rule is that the guarantee lives in the mechanism and the why lives in the prose, not that the prose is redundant. `[verify variable names and defaults against the running Claude Code version before deploying — product facts under AEA §4.15]`
 
 ---
 
@@ -464,10 +542,13 @@ The full unified catalog with surface tags, signatures, causes, and fixes lives 
 - **Auto memory misuse** — team-relevant content in machine-local auto memory instead of CLAUDE.md.
 - **Verification-before-completion absent** — speculative language ("should work," "looks good") without test evidence. This is external-artifact verification and remains required on Opus 5 — the model does not automatically read the test output.
 - **Verification-instruction accumulation (Opus 5)** — CLAUDE.md or Skills instructing the model to "double-check," "re-verify," "include a verification step," or "use a subagent to verify" the model's own output. Opus 5 does this automatically; the instructions compound into over-verification. Remove self-directed re-check instructions; keep external-artifact verification (see `root_AGENT_ENVIRONMENT_ARCHITECTURE.md §4.14`).
-- **Subagent over-delegation (Opus 5)** — no explicit cap on subagent spawning; Opus 5 delegates readily on its own and compounds when the CLAUDE.md or Skill invites more. Add a delegation cap in the CLAUDE.md.
+- **Subagent over-delegation (Opus 5)** — no explicit cap on subagent spawning; Opus 5 delegates readily on its own and compounds when the CLAUDE.md or Skill invites more. Add a delegation cap and put a mechanism behind it (§6).
 - **Conservative-review literalism** — audit or review prompts that say "only report high-severity issues" or "be conservative." Opus 5 follows literally and under-reports. Rewrite to report-everything-then-filter form.
 - **Skills/Commands legacy mix** — overlapping `.claude/commands/` and `.claude/skills/` directories.
 - **Kitchen-sink session** — 100+ turn sessions mixing unrelated tasks; no `/clear` discipline.
+- **Prose-only delegation cap** — a spawn cap, nesting rule, or agent allowlist stated in CLAUDE.md with no `settings.json` or frontmatter mechanism behind it. A specific case of enforcement-as-preference; §6 carries the mechanism table.
+- **Orchestrator-as-reader** — the orchestrator reads files and diffs directly instead of receiving reports about them, so heavy delegation still ends in compaction and the coordination overhead buys nothing. See §1.4, orchestrator context hygiene.
+- **Model-set-once-forgotten** — a topology whose roles all inherit the session model, so the scout costs what the orchestrator costs and the refuter is no stronger than the builder. Fix by role tiering (§3.5), not by spawning fewer agents.
 - **Stale CLAUDE.md** — months out of date, references dead patterns.
 
 When auditing a deployment, scan for these patterns explicitly. The `rootnode-repo-hygiene` Skill automates this pass.

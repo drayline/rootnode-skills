@@ -566,7 +566,7 @@ whole task, and stop short of actions that are clearly beyond what was asked.
 
 ### 13. Subagent Over-Delegation (NEW in Opus 5)
 
-**What it looks like:** Opus 5 delegates to subagents more readily than prior models. Delegation pays off on genuinely independent, sizeable tracks of work but multiplies cost and time when applied to small tasks. Also — and this is a load-bearing correction — Opus 5 will use a subagent to "verify" its own work, which is a specific form of over-verification (see #11) that costs a full subagent invocation for no quality gain.
+**What it looks like:** Opus 5 delegates to subagents more readily than prior models. Delegation pays off on genuinely independent, sizeable tracks of work but multiplies cost and time when applied to small tasks. Also — and this is a load-bearing correction — Opus 5 will use a subagent to "verify" its own work, which is a specific form of over-verification (see #11) that costs a full subagent invocation for no quality gain. A second symptom is quieter and costs more over a session: every subagent inherits the session's model unless its role definition sets one, so a topology run on a top-tier model pays that rate for its scouts and its formatters as well as for its reasoning roles. The fix for that symptom is **role tiering, not a lower spawn count** — cutting agents to control cost when the real problem is uniform model assignment removes parallelism that was earning its keep and leaves the per-agent rate untouched.
 
 **Countermeasure — cap delegation:**
 ```
@@ -577,11 +577,27 @@ subagents to verify or double-check your own work. If one subagent can
 complete the task, use one rather than several, and keep spawn counts low.
 ```
 
+**Countermeasure — mechanism (Claude Code).** The prose cap above is advisory. The model reads it and complies most of the time, then drifts under load — which is precisely when the cap matters. On Claude Code the cap has settings behind it, and the guarantee belongs in the settings rather than in the prose. This is the template:
+
+| Guarantee | Mechanism |
+|---|---|
+| Subagents cannot spawn subagents | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3; `1` disables nesting) |
+| Bound concurrent fan-out | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20; ultracode runs exempt) |
+| A role may delegate only to named agents | `tools: Agent(type, …)` allowlist in the agent's frontmatter |
+| A named agent is unavailable | `permissions.deny: ["Agent(name)"]` in `settings.json` |
+| A role cannot delegate at all | omit `Agent` from that role's `tools` |
+| A run cannot wander | `maxTurns` on the delegation |
+| Workflows are off | `CLAUDE_CODE_DISABLE_WORKFLOWS=1` |
+
+Keep the prose countermeasure alongside the mechanism. The prose carries the reasoning, which a settings key cannot express, and the model needs that reasoning at the edges the settings do not cover. Prose with no mechanism behind it is the prose-only-delegation-cap anti-pattern; a mechanism with no prose produces compliance the model cannot extend to an unanticipated case.
+
+`[verify variable names and defaults against the running Claude Code version before deploying — these are product facts and drift with releases. CC-side application detail is in root_CC_ENVIRONMENT_GUIDE.md §6 (cap mechanism table) and §3.5 (role tiering)]`
+
 **Deployment calibration:**
 - Chat interface: N/A (no subagent surface)
 - Claude Projects: N/A (no subagent surface)
-- Claude Code: HIGH (this is the primary subagent surface)
-- API (multi-agent workloads): HIGH
+- Claude Code: HIGH (this is the primary subagent surface; the mechanism template above applies here)
+- API (multi-agent workloads): HIGH (prose cap only — the Claude Code settings keys do not apply; enforce in the orchestration code)
 
 ### 14. Correction Narration (NEW in Opus 5)
 

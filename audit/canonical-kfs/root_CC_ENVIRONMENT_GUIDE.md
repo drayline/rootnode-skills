@@ -266,6 +266,8 @@ Two of the eight are non-optional, and they are the two most often written wrong
 
 **Breaking-change reminder:** on Opus 5, `thinking: {"type": "disabled"}` at `xhigh` or `max` returns 400. For CC deployments that need thinking disabled, drop effort to `high` or below.
 
+**Ultracode:** a session setting, not a model effort level. It sends `xhigh` to the model and has Claude orchestrate dynamic workflows (orchestration scripts that fan work across many subagents) for substantive tasks. Ultracode sessions are exempt from the subagent concurrency limit, so a session-wide opt-in removes the one numeric cap on fan-out. Default it off and opt in per task; it fits codebase-wide audits, large migrations and cross-checked research, not routine editing. Disable it by mechanism with `CLAUDE_CODE_DISABLE_WORKFLOWS=1` or `disableWorkflows` in managed settings (§6 cap mechanism table), and state the default and the opt-in path in the design's prose. `[product fact 2026-09-09 — verify against the running Claude Code version]`
+
 ### 3.5 Role tiering and the Builder-to-Refuter loop
 
 **Role tiering.** In a multi-agent topology, every role does not need the same capability — and by default every subagent inherits the session's model, so an untiered deployment pays the orchestrator's rate for the scout. The structure below is `[generalizable]`. The model column is a landscape fact, dated per AEA §4.15, and is refreshed against the dated landscape block in `root_CLAUDE_OPTIMIZATION_NOTES.md` rather than treated as durable.

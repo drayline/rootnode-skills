@@ -7,14 +7,9 @@ description: >-
   remediation plans. Five modes: DESIGN (new CC deployments), EVOLVE (updates
   from friction), RESEARCH (evaluate a CC tool/pattern), TEMPLATE (reusable
   artifacts), REMEDIATE (consume hygiene findings → produce + execute plan).
-  Use when user says "design CC for X", "build CC environment", "design
-  CLAUDE.md", "build a CC prompt", "design a CC prompt for X", "write a
-  session prompt", "we hit X friction in CC", "should we adopt Y for CC",
-  "give me a CLAUDE.md skeleton", "remediate the hygiene findings". Do NOT
-  use REMEDIATE for direct cleanup (Cat 1–10 — use rootnode-repo-hygiene
-  Phase 2; REMEDIATE handles Cat 11–14 + 7-layer leaks). Do NOT use for
-  hygiene scanning (use rootnode-repo-hygiene). Do NOT use for chat prompts
-  (rootnode-prompt-validation) or chat Projects (rootnode-project-audit).
+  Do NOT use REMEDIATE for direct cleanup (Cat 1–10 — use rootnode-repo-hygiene
+  Phase 2). Do NOT use for hygiene scanning (rootnode-repo-hygiene), chat
+  prompts (rootnode-prompt-validation), or chat Projects (rootnode-project-audit).
 license: Apache-2.0
 metadata:
   author: rootnode
@@ -33,6 +28,22 @@ Design Claude Code prompts and environments for production delivery projects. Th
 This Skill operates in both chat-based design conversations (CP) and Claude Code (CC). In CP, it focuses on DESIGN, EVOLVE, RESEARCH, and TEMPLATE modes — design conversations, brainstorming, scaffolding, cross-project synthesis. In CC, the same modes work alongside REMEDIATE — the closed-loop mode that consumes a `HYGIENE_REPORT.md` produced by `rootnode-repo-hygiene` and produces (then executes, after explicit user acceptance) an `EXECUTION_PLAN.md` against the actual repo.
 
 The Skill produces design artifacts in all modes. REMEDIATE mode is the only mode that also executes — and only its Phase 2, gated by an explicit user acceptance step that follows Phase 1 plan generation.
+
+## Activation
+
+Auto-invoke on these trigger phrases. Column two names the mode the phrase routes to; confirm mode in one line at the start of the response.
+
+| Trigger phrase | Mode |
+|---|---|
+| "design CC for X" | DESIGN |
+| "build CC environment" | DESIGN |
+| "design CLAUDE.md" | DESIGN |
+| "build a CC prompt" / "design a CC prompt for X" | DESIGN |
+| "write a session prompt" | DESIGN |
+| "give me a CLAUDE.md skeleton" | TEMPLATE |
+| "we hit X friction in CC" / "the agent keeps doing Y" | EVOLVE |
+| "should we adopt Y for CC" / "is Z worth using" | RESEARCH |
+| "remediate the hygiene findings" / "close the loop on the report" | REMEDIATE |
 
 ## v4.0 update — Opus 5 CC deployments
 

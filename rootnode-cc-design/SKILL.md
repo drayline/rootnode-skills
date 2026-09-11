@@ -45,21 +45,9 @@ Auto-invoke on these trigger phrases. Column two names the mode the phrase route
 | "should we adopt Y for CC" / "is Z worth using" | RESEARCH |
 | "remediate the hygiene findings" / "close the loop on the report" | REMEDIATE |
 
-## v4.0 update — Opus 5 CC deployments
+## Delegation architecture
 
-**Subagent-delegation caps.** Opus 5 delegates to subagents more readily than prior Opus models. CLAUDE.md drafts and design specs authored by this Skill for Opus-5-based CC deployments include an explicit delegation cap. The prose cap explains the intent; the cap itself is placed in `settings.json` or agent frontmatter, because a cap that only exists as CLAUDE.md prose is enforcement-as-preference (`cc-anti-patterns.md` §4.4). See the cap mechanism table in `references/cc-delegation-patterns.md` and the countermeasure template in `root_OPTIMIZATION_REFERENCE.md` (subagent over-delegation tendency). Every Claude Code setting a draft names — a `CLAUDE_CODE_*` variable, its default, a managed-settings key — carries the dated product-fact marker on every line that names it — in JSON, on the line after the block — per the emission rule above that table; the settings drift with releases, and an unmarked setting reads as verified.
-
-**Verification topology (D4).** Independent review of a *different* agent's work — the Critic role, code reviewer subagent, test writer subagent, docs proofreader subagent — remains a valid subagent pattern under Opus 5. What does NOT remain valid: "spawn a subagent to verify your own output." Opus 5 already self-verifies; a subagent doing the same thing is duplicate cost. When designing CC verification topology, distinguish the two: independent-review-of-different-agent survives; self-directed re-checking (whether via subagent or via prompt instruction) is removed. See `root_AGENT_ENVIRONMENT_ARCHITECTURE.md` §4.14 and `root_CC_ENVIRONMENT_GUIDE.md` §1.4 for the discipline.
-
-**CC defaults.** On Claude Code, `effort` defaults to `high` for both Opus 5 and Sonnet 5 (per Anthropic's models overview and Opus 5 whats-new page). The Claude Code default *model* moves with Claude Code product releases and is not restated here — consult Anthropic's Claude Code documentation at update time rather than hardcoding a value that will drift.
-
-**Fable / Opus 5 / Sonnet 5 CC selection tradeoff.** For most CC workloads, Opus 5 at `high` is the recommended default (near-Fable capability at half the cost). Fable 5 is integrated-aware — reserve for long-horizon autonomous agent workloads and 1M-context long-context work where its edge is worth the $10/$50 pricing. Sonnet 5 at `high` is the cost-optimal target for lighter agentic workloads where Opus-5 depth is not required.
-
-## v4.1 update — delegation architecture
-
-Role tiering is a design decision, not a default: every subagent resolves a model, an effort level, a tool set, an isolation mode, and a return contract, and leaving them unset bills mechanical work at orchestrator rates. The role table is a menu, not a roster: add a role only for work the orchestrator cannot do from what it already holds. Integrating what the agents returned — composing the report, merging the result — is the orchestrator's own row, not a new role. The landscape-independent rule is that reviewer capability is greater than or equal to builder capability. **Explore no longer defaults to Haiku** — as of Claude Code v2.1.198 it inherits the main conversation's model, capped at Opus on the Claude API, so a cheap scout requires a project `Explore` defined with `model: haiku`. **[Anthropic docs, verified 2026-09-09]** Recommend the Builder-to-Refuter loop as the default coding topology and escalate to the four-agent verification topology only when the agent-warranted test shows verification perspectives that conflict by design. Every delegation carries a brief and a numeric return cap; unbounded delegation is the mechanism behind both subagent over-delegation and orchestrator context bloat.
-
-Role table, brief fields, loop mechanics, cap mechanisms, and the reasoning behind each are in `references/cc-delegation-patterns.md`.
+See `references/cc-delegation-patterns.md` for the role table, delegation briefs, Builder-to-Refuter loop, cap mechanisms, and the orchestrator/worker model. See `references/cc-methodology-patterns.md` for the verification topology and the agent-warranted test.
 
 ## Important
 

@@ -15,7 +15,7 @@ metadata:
   author: rootnode
   version: "4.1.0"
   predecessor: "rootnode-cc-design v4.0"
-  original-source: "root.node seed Project KFs (post-Phase 27/28 methodology absorption: root_AGENT_ENVIRONMENT_ARCHITECTURE.md, root_CC_ENVIRONMENT_GUIDE.md, root_AGENT_ANTI_PATTERNS.md) + accumulated CC deployment research (2026-05-04). v2 evolved REMEDIATE acceptance flow (three approval forms, step-level risk tags) and critic-gate composition (required/optional) to align with rootnode-repo-hygiene v1's contracts. Substantive rebuild of cc-anti-patterns.md to canonical numbering. Brand-surface clean (cchq references stripped or restructured; hyge contamination anonymized to \"production CC deployment 2026-05-04\"). v4.1 adds the end-state assertion rule to Step 4 output standards (observed 2026-09-07: a file-replacement prompt asserted a pre-state line count that had gone stale between authoring and execution, halting the run), and absorbs the orchestrator/worker delegation architecture — role-tiered subagents, the delegation-brief contract, the Builder-to-Refuter loop, and mechanism-enforced delegation caps — grounded in Anthropic subagent documentation verified 2026-09-09 and in community practitioner reports graded Tier 5 (signal-only)."
+  original-source: "root.node seed KFs (AEA, CCEG, AAP) + CC deployment research; v4.x evolves delegation architecture and REMEDIATE mode from v3 base"
   discipline_post: phase-30
 ---
 

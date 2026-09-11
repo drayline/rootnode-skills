@@ -109,7 +109,7 @@ Read the relevant references before producing output. Each mode draws from a spe
 - **Delegation briefs are complete or absent.** Any role the plan names carries a model, an effort level, a tool set, an isolation mode, and a return contract including a numeric length cap. Verification clauses name external artifacts; never instruct an agent to re-check its own output.
 - **Token budgets.** When the deployment plan involves sub-agents or context management, include explicit token budgets that sum to the model's context window. A context plan without numbers is not a context plan.
 - **Source-tagged claims.** Every substantive technical claim carries an inline source tag.
-- **CC-prompt-specific output discipline.** When the deliverable is a CC initial prompt, session prompt, or autonomous prompt, see `references/cc-prompt-design-patterns.md` § Output discipline for CC prompts for additional output standards (shell-agnostic syntax, pre-flight Skill enumeration, continuation-phrase ambiguity gate, forward-state-aware authoring).
+- **CC-prompt-specific output discipline.** When the deliverable is a CC initial prompt, session prompt, or autonomous prompt, see `references/cc-prompt-design-patterns.md` § Output discipline for CC prompts for additional output standards (shell-agnostic syntax, pre-flight Skill enumeration, continuation-phrase ambiguity gate, forward-state-aware authoring, competing hypotheses and instrument fit for diagnostic prompts).
 
 ### Step 5 — Surface the chat→Code handoff explicitly
 

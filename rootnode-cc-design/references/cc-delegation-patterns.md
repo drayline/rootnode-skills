@@ -23,7 +23,7 @@ Delegation is a context-isolation primitive with a cost dial attached. This refe
 
 Every subagent resolves a model, an effort level, a tool set, and an isolation mode. Leaving these unset resolves them to the main conversation's model, which is the expensive default. **[Anthropic docs]**
 
-Model resolution order, highest first: the per-invocation `model` parameter, the subagent definition's `model` frontmatter (`inherit` selects the main model), the `CLAUDE_CODE_SUBAGENT_MODEL` environment variable, then the main conversation's model. Setting `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` overrides all of them, including the built-ins. **[Anthropic docs]**
+Model resolution order, highest first: the per-invocation `model` parameter, the subagent definition's `model` frontmatter (`inherit` selects the main model), the `CLAUDE_CODE_SUBAGENT_MODEL` environment variable, then the main conversation's model. Setting `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` overrides all of them, including the built-ins. **[Anthropic docs]** Both variables are product facts; a design that names them carries the §5 emission marker.
 
 The reference role table. The structure is `[generalizable]`; the **Model** column is a landscape fact, dated below and refreshed rather than re-derived (AEA §4.15).
 
@@ -101,15 +101,21 @@ The default coding topology, and the shape to recommend before anything heavier:
 
 A cap that exists only as CLAUDE.md prose is enforcement-as-preference (`cc-anti-patterns.md` §4.4). Keep the prose as the explanation and place the enforcement here. **[Anthropic docs]**
 
+**Emission rule.** The environment variables, defaults, `/config` toggles and managed-settings keys in this table are product facts that change with Claude Code releases (AEA §4.15). The **[Anthropic docs]** tag records where this reference got them; it is not a marker a generated design inherits. When a draft CLAUDE.md, `settings.json`, agent file or design spec names any of them, it carries this marker on the same line as the name — as a trailing comment inside a code block:
+
+`[product fact 2026-09-09 — verify against the running Claude Code version]`
+
+A setting emitted without the marker is a grounding defect even when the name is correct, because the reader cannot tell a verified setting from a remembered one.
+
 | Guarantee | Mechanism |
 |---|---|
-| Nesting depth | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3; `1` disables nesting) |
-| Concurrency | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20; ultracode sessions are exempt) |
+| Nesting depth | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3; `1` disables nesting) — product fact, emit with marker |
+| Concurrency | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20; ultracode sessions are exempt) — product fact, emit with marker |
 | Which types may be spawned | `tools: Agent(builder, refuter, scout)` on an `--agent` main thread; `permissions.deny: ["Agent(name)"]` elsewhere |
 | A specific agent may not delegate | omit `Agent` from that agent's `tools`, or add it to `disallowedTools` |
 | Per-agent runaway | `maxTurns` in frontmatter |
-| Automatic workflow orchestration | `CLAUDE_CODE_DISABLE_WORKFLOWS=1`, the `/config` toggle, or `disableWorkflows` in managed settings |
-| One model for every subagent | `CLAUDE_CODE_SUBAGENT_MODEL` plus `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` |
+| Automatic workflow orchestration | `CLAUDE_CODE_DISABLE_WORKFLOWS=1`, the `/config` toggle, or `disableWorkflows` in managed settings — product fact, emit with marker |
+| One model for every subagent | `CLAUDE_CODE_SUBAGENT_MODEL` plus `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` — product fact, emit with marker |
 | Tool reach per role | `tools` allowlist or `disallowedTools` denylist; read-only for review roles |
 
 Tool restriction remains the cheapest reliability gain available. A Refuter with no write tools cannot quietly fix what it was asked to judge.

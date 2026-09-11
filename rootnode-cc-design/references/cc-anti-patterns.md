@@ -140,7 +140,7 @@ For the placement-rule patterns these anti-patterns relate to, see `cc-environme
 
 **Sweep category mapping:** Cat 8 (subagent hygiene). When repo-hygiene produces a finding tagged `Cat 8 + §4.5`, REMEDIATE looks up this entry for the fix recipe.
 
-**Signature:** 10+ custom subagents in `.claude/agents/`; many rarely invoked; agents that duplicate built-in Explore/Plan/general-purpose; subagents created for sequential work that doesn't parallelize.
+**Signature:** 10+ custom subagents in `.claude/agents/`; many rarely invoked; agents that duplicate built-in Explore/Plan/general-purpose; subagents created for sequential work that doesn't parallelize; combined subagent `description` fields exceeding 15,000 tokens (Claude Code emits a startup warning at this threshold — detail belongs in each subagent's system prompt, which loads only when that subagent runs). **[Anthropic docs]**
 
 **Cause:** Treating subagents as a default multiplier instead of a context-isolation primitive. Often: "more agents = better."
 

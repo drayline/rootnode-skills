@@ -114,6 +114,8 @@ When verification requires conflicting perspectives, a four-agent topology — S
 
 **When NOT to use:** If only one perspective is needed (e.g., a CLI tool with unit tests as the single verification surface), one thorough auditor beats four shallow ones. Apply the agent-warranted test (§1) before recommending S/B/C/X.
 
+**Lighter default for implementation work — the Builder-to-Refuter loop.** For ordinary implementation work — build from a spec, verify against the spec — the Builder-to-Refuter loop (Orchestrator → Builder in isolated worktree → fresh Refuter → Orchestrator) is the recommended default. S/B/C/X is the *escalation*, warranted only when the agent-warranted test surfaces verification perspectives that conflict by design (structural vs. behavioral vs. content-fidelity as distinct bug classes with independent detection). See `cc-delegation-patterns.md` §4. **[generalizable]**
+
 **Forward-looking expansion (recommend with caution):** Some deployments may benefit from adding Orchestrator + Critic + Scribe agents on top of S/B/C/X for goal decomposition, per-change governance, and institutional memory updates. This is a hypothesis, not a validated pattern. Recommend only when (a) multiple production runs per session require goal decomposition, (b) changes have high blast radius and per-change governance is needed, or (c) institutional memory updates are recurring overhead. Otherwise, the expansion is over-engineering. **[forward-looking proposal]**
 
 ---

@@ -201,6 +201,8 @@ The sub-levels exist because validation infrastructure differs across build envi
 
 **Grader model.** Run the grader subagent on **Opus 5 or Sonnet 5** (the current dual-primary tier). Fable 5 is acceptable but wastes cost for the grading task. Opus 4.8 remains valid as a fallback if Opus 5 refuses the grading prompt. The grader is external-artifact verification (it grades a different run's output against a rubric) and survives D4's verification-instruction discipline unchanged — it is independent grading of a different agent's output, not the change agent re-checking its own work.
 
+**D9a arm hygiene.** Install each arm's Skill into its project before launching the generation session — Skills load at launch. Verify the arm by a loaded-Skill listing plus the SKILL.md LF digest; `metadata.version` cannot distinguish commits inside one PR. Park any user-level copy of the same Skill name for generation. Keep the grader's environment identical to the run it is compared with. Pin and report the model ID from the harness transcript, never from an alias.
+
 **Pass evidence.** Cite the scenario set, the grader model used, the trigger evals run, the grader outputs (pass/fail per assertion for both GREEN and RED), and the differential analysis. Captured in the build summary as `D9: Tier A — empirical comparison (grader: <model>, N scenarios, GREEN/RED differential = X%)`.
 
 #### 3.9b D9b — Empirical Tier B (moderate evidence)
@@ -230,6 +232,8 @@ The sub-levels exist because validation infrastructure differs across build envi
 **Skip condition.** The Skill is reference-only, data-carrying, or configuration-driven — it has no behavioral compliance to test. Examples: context carriers, profile schemas, block libraries used by other Skills. Mark as `D9: SKIPPED — no behavioral compliance surface` with one-sentence justification. The skip condition applies regardless of which sub-level the build environment otherwise supports.
 
 **Classification.** D9 remains RECOMMENDED, not REQUIRED. All three sub-levels carry the same dimensional weight; the verdict per dimension specifies which sub-level applied. A Skill that passes D1–D8 but lacks D9 validation is shippable. The sub-level architecture allows Skills to record the strongest evidence available without forcing build halts when stronger evidence cannot be produced.
+
+**Validation stopping rule.** One behavioral test pass and one fix pass, then ship. A single-line miss after the fix pass goes to the next patch release, not another loop. Stop when a round's findings fall to wording gaps. Reserve blind multi-session methods for claims that will be published. The acceptance bar is the Skill's stated goals, not zero findings.
 
 **Cross-references.** The trigger eval set referenced by D9a/D9b is generated per the description refinement loop discipline (§9). The tier applicability decision is made per the environment-adaptive degradation discipline (§10).
 

@@ -101,7 +101,7 @@ The default coding topology, and the shape to recommend before anything heavier:
 
 A cap that exists only as CLAUDE.md prose is enforcement-as-preference (`cc-anti-patterns.md` §4.4). Keep the prose as the explanation and place the enforcement here. **[Anthropic docs]**
 
-**Emission rule.** The environment variables, defaults, `/config` toggles and managed-settings keys in this table are product facts that change with Claude Code releases (AEA §4.15). The **[Anthropic docs]** tag records where this reference got them; it is not a marker a generated design inherits. When a draft CLAUDE.md, `settings.json`, agent file or design spec names any of them, it carries this marker on the same line as the name — as a trailing comment inside a code block:
+**Emission rule.** The environment variables, defaults, `/config` toggles and managed-settings keys in this table are product facts that change with Claude Code releases (AEA §4.15). The **[Anthropic docs]** tag records where this reference got them; it is not a marker a generated design inherits. When a draft CLAUDE.md, `settings.json`, agent file or design spec names any of them, it carries this marker on every line that names one, restatements included — as a trailing comment inside a code block, or, in JSON, which has no comments, on the line directly after the block:
 
 `[product fact 2026-09-09 — verify against the running Claude Code version]`
 

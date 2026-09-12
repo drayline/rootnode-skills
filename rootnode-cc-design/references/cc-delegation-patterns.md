@@ -42,7 +42,7 @@ The reference role table. The structure is `[generalizable]`; the **Model** colu
 
 **Built-in behavior that changed.** As of Claude Code v2.1.198, the built-in Explore subagent inherits the main conversation's model rather than always running on Haiku; on the Claude API that inherited model is capped at Opus. A project or user subagent named `Explore` overrides the built-in and keeps its own `model` field, which is how a deployment gets a genuinely cheap scout. Explore and Plan also skip CLAUDE.md and git status, so any rule they must obey is restated in the delegation prompt rather than assumed. Explore and Plan are one-shot and cannot be resumed. **[Anthropic docs]**
 
-**Effort per role.** `effort` is a supported frontmatter field and overrides the session effort for that subagent; available levels depend on the model. Cheap mechanical stages take the low tiers, judgment and verification stages take the high tiers. **[Anthropic docs]**
+**Effort per role.** `effort` is a supported frontmatter field and overrides the session effort for that subagent; available levels depend on the model. Cheap mechanical stages take the low tiers, judgment and verification stages take the high tiers. **[Anthropic docs]** `thinking: disabled` at `xhigh` or `max` effort returns HTTP 400 on Opus 5 (v2.1.198+ behavior) — pair those effort levels with the model's own thinking budget rather than suppressing it. **[Anthropic docs]**
 
 **Do not tier for its own sake.** The agent-warranted test (`cc-methodology-patterns.md` §1) governs whether a role should exist at all. A one-line fix or a single grep is done by the orchestrator; delegation overhead exceeds the benefit below a task floor that each deployment finds for itself.
 

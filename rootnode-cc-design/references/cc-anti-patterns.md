@@ -1,6 +1,6 @@
 # Claude Code Anti-Patterns
 
-A catalog of 15 recurring failure modes in Claude Code deployments, drawn from the convergence of Anthropic primary documentation, named practitioners (rosmur, obra/superpowers, Shrivu Shankar, Marc Nuri, alexop.dev, Daniel Miessler), and community sources. These are the patterns where 3+ independent sources converged.
+A catalog of 17 recurring failure modes in Claude Code deployments, drawn from the convergence of Anthropic primary documentation, named practitioners (rosmur, obra/superpowers, Shrivu Shankar, Marc Nuri, alexop.dev, Daniel Miessler), and community sources. These are the patterns where 3+ independent sources converged.
 
 **This Skill's role with the catalog:** rootnode-cc-design uses this catalog as a **fix-recipe library**. Each pattern includes a structural cause and a structural fix; REMEDIATE mode looks up the fix when consuming a hygiene finding tagged with the pattern's canonical reference. EVOLVE mode references it when diagnosing user-reported friction. DESIGN mode uses it as a "things to avoid creating" checklist.
 
@@ -29,6 +29,8 @@ For the placement-rule patterns these anti-patterns relate to, see `cc-environme
 | `root_AGENT_ANTI_PATTERNS.md §4.12` | Skills/Commands legacy mix | CC | Cat 10 |
 | `root_AGENT_ANTI_PATTERNS.md §4.13` | Kitchen-sink session (operational) | CC | Cat 12 |
 | `root_AGENT_ANTI_PATTERNS.md §4.14` | Stale CLAUDE.md | CC | Cat 9, 12 |
+| `root_CC_ENVIRONMENT_GUIDE.md §10` | Verification-instruction accumulation | CC | Cat 13 |
+| `root_CC_ENVIRONMENT_GUIDE.md §10` | Conservative-review literalism | CC | Cat 13 |
 
 ---
 
@@ -332,6 +334,46 @@ For the placement-rule patterns these anti-patterns relate to, see `cc-environme
 
 ---
 
+## §10a — Verification-instruction accumulation
+
+**Canonical:** `root_CC_ENVIRONMENT_GUIDE.md §10`
+
+**Surface tag:** `[CC]`
+
+**Sweep category mapping:** Cat 13 (verification discipline). When repo-hygiene produces a finding tagged `Cat 13 + §10a`, REMEDIATE looks up this entry for the fix recipe.
+
+**Signature:** Self-verification instructions ("double-check your work," "re-read your output," "verify your reasoning") accumulate in CLAUDE.md, Skills, and prompts across evolution cycles. Each individual instruction seems harmless; the aggregate drives duplicate cost on models that already self-verify.
+
+**Cause:** Each session's author added "verify X" defensively without auditing whether existing verification instructions already covered the case. Historical accretion; no periodic pruning pass.
+
+**Symptoms in agent behavior:** Long response times with no proportional quality gain; verbose meta-commentary about the agent's own checks; token spend disproportionate to task complexity.
+
+**Fix:** Audit CLAUDE.md, Skills, and prompt libraries for instructions telling the agent to re-check its own output. Remove them. Keep only instructions that name an external artifact to verify against (run the suite, read the diff, resolve the tag, inspect the rendered page). External-artifact verification is different from self-review and stays. See `cc-delegation-patterns.md` §7 ("Delegating self-verification") for the delegation-layer analogue.
+
+**Source:** `root_CC_ENVIRONMENT_GUIDE.md §10`; AEA §4.14 (verification-instruction discipline); rootnode-cc-design v4.1 validation observations.
+
+---
+
+## §10b — Conservative-review literalism
+
+**Canonical:** `root_CC_ENVIRONMENT_GUIDE.md §10`
+
+**Surface tag:** `[CC]`
+
+**Sweep category mapping:** Cat 13 (verification discipline). When repo-hygiene produces a finding tagged `Cat 13 + §10b`, REMEDIATE looks up this entry for the fix recipe.
+
+**Signature:** Review prompts contain qualifiers like "only report high-severity findings," "be conservative," "focus on critical issues only." On current models the qualifier is followed literally; the review under-reports and misses medium-severity findings that would have been surfaced without the qualifier.
+
+**Cause:** The qualifier was added for an older model that over-reported low-severity noise. The prompt was not revisited when the model changed and now instructs literal filtering rather than editorial judgment.
+
+**Symptoms when it bites:** Post-review issues surface in production that a full-fidelity review would have caught; the review looks clean but the code isn't.
+
+**Fix:** Remove the qualifier. Ask the review agent for the full finding set. Do severity filtering separately — in a second pass, in the delegation-brief return format, or in the operator's own reading — rather than at the model's own judgment layer. Pair with a return-length cap (`cc-delegation-patterns.md` §2) if unbounded output is the underlying concern.
+
+**Source:** `root_CC_ENVIRONMENT_GUIDE.md §10`; observed in the v3-alignment cycle when a conservative-review prompt under-reported after the model tier moved.
+
+---
+
 ## How to use this catalog
 
 **In REMEDIATE mode:** the catalog is a fix-recipe library. When consuming a `HYGIENE_REPORT.md` finding tagged with a canonical reference (e.g., `§4.2`), look up the corresponding entry here. The "Fix" line provides the structural remediation; expand it into concrete plan steps in EXECUTION_PLAN.md (e.g., §4.2 fix → step 1: edit `.mcp.json` to remove unused servers; step 2: validate count; step 3: append CHANGELOG entry).
@@ -340,9 +382,9 @@ For the placement-rule patterns these anti-patterns relate to, see `cc-environme
 
 **In DESIGN mode:** use as a "things to avoid creating" checklist when producing the deployment plan. Confirm explicitly that the plan does NOT introduce any of these patterns.
 
-**Catalog completeness note:** these are the 15 patterns where 3+ independent sources converged. Project-specific patterns documented in a project's own design materials complement this catalog. Add new entries via the design Project's methodology evolution discipline; promote to a generalizable catalog only after cross-project recurrence.
+**Catalog completeness note:** these are the 17 patterns where 3+ independent sources converged. Project-specific patterns documented in a project's own design materials complement this catalog. Add new entries via the design Project's methodology evolution discipline; promote to a generalizable catalog only after cross-project recurrence.
 
-**The catalog is shared with rootnode-repo-hygiene.** That Skill uses the same 15 patterns as its scan checklist (audit verb); this Skill uses them as fix recipes (remediate / evolve / avoid verbs). When a new generalizable pattern is added, add to both Skills' references to keep them in sync.
+**The catalog is shared with rootnode-repo-hygiene.** That Skill uses the same 17 patterns as its scan checklist (audit verb); this Skill uses them as fix recipes (remediate / evolve / avoid verbs). When a new generalizable pattern is added, add to both Skills' references to keep them in sync.
 
 ---
 

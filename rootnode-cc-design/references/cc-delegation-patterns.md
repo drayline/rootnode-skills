@@ -16,6 +16,7 @@ Delegation is a context-isolation primitive with a cost dial attached. This refe
 6. Ultracode and dynamic workflows
 7. Anti-patterns specific to delegation
 8. Source grading of the community delegation reports
+9. Orchestration primitives
 
 ---
 
@@ -155,6 +156,24 @@ These extend `cc-anti-patterns.md` §4.5 (subagent overuse) and §4.6 (underuse)
 The role-tiering strategy in this reference was prompted by two community practitioner reports (2026-09) describing an orchestrator/worker split with model tiering, strict per-agent marching orders, a Builder-to-Refuter loop, and a ticket-and-worktree review cycle. Those reports are **Tier 5 — signal-only, unverified authorship, unverified usage claims** (`source-grading-and-tagging.md`). None of their throughput or usage-limit claims are reproduced here.
 
 What was adopted was adopted because an Anthropic-documented mechanism backs it: per-subagent `model`, `effort`, `tools`, `maxTurns`, `isolation: worktree`, resume-by-ID, the spawn-depth and concurrency variables, the `Agent(...)` allowlist, and the workflow toggles. What was not adopted: the ticket-queue, seat-minting, and automatic branch-lifecycle machinery in the second report, which is custom tooling the author built around Claude Code rather than a Claude Code feature. Deployments wanting that shape should reach for agent teams, background sessions, or their own CI — `[verify the native surface against Anthropic's agent-teams and worktrees documentation before designing against it]`.
+
+---
+
+## 9. Orchestration primitives
+
+*(Dated landscape content — refresh per AEA §4.15. Facts below dated 2026-09-11.)*
+
+Claude Code exposes three orchestration primitives that sit at different scopes and follow different limit regimes. The subagent-centric patterns in §1–§8 apply mainly to the first row; a deployment that reaches for the second or third is choosing a different governance model, not extending the subagent one.
+
+| Primitive | Scope | Isolation model | Limit governance |
+|---|---|---|---|
+| Subagents | Single session, in-process delegation | Own context window; optional `worktree` isolation per subagent | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20, v2.1.217+), `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3, v2.1.219+), `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION` (default 200, v2.1.212+) |
+| Agent Teams | Multiple sessions, team-lead session breaks down work and spawns teammates | Split-pane teammates run as separate CC processes with their own model; in-process teammates share the parent | Teammate and workflow-agent limits are separate from the subagent concurrency cap |
+| Dynamic Workflows | JavaScript-orchestrated script fans work across many subagents with deterministic control flow | Script holds the loop; the workflow agents it spawns do the work | Workflow-agent limits are separate; the `Workflow` tool is removed from subagent tool pools |
+
+**When each fits.** Subagents are the default for context isolation and per-role scoping inside one session. Agent Teams fit when work needs multiple full CC processes coordinated by a lead — larger blast radius, more governance surface, own limits. Dynamic Workflows fit when the orchestration itself is deterministic — fan-out over hundreds of units, adversarial checking patterns, intermediate-result composition that cannot be expressed as a single subagent tree. **[Anthropic docs]**
+
+**Governance consequence.** A design that only reasons about subagent caps but reaches for teams or workflows has un-modeled fan-out. Name the primitive in the deployment plan and pair it with the matching limit regime.
 
 ---
 

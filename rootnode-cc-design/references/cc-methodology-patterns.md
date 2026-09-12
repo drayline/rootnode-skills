@@ -283,4 +283,35 @@ Patterns drawn from working examples are tagged in every output as one of:
 
 ---
 
+## Routines as a CC deployment surface
+
+*(Dated landscape content — Claude Code Routines are in research preview; refresh per AEA §4.15. Facts below dated 2026-09-11.)*
+
+Routines are a Claude Code deployment surface distinct from interactive sessions and adjacent to session-scoped scheduling primitives like `/loop`. A routine is a saved CC configuration (prompt + repos + connectors) that runs on Anthropic-managed cloud infrastructure or a self-hosted environment. **[Anthropic docs]**
+
+**Three trigger types, combinable on one routine:**
+
+| Trigger | Mechanism |
+|---|---|
+| Scheduled | Hourly, nightly, weekly, or once at a future time |
+| API | Per-routine HTTPS endpoint + bearer token; POST fires a session |
+| GitHub | Webhook on repo events (PR opened, release, etc.); one session per PR, follow-ups feed into the same session |
+
+**Cloud vs local distinction.** Routines run as full CC cloud sessions and are distinct from local session-scoped scheduling. Compare:
+
+| Surface | Scope | Persistence |
+|---|---|---|
+| Routines | Cloud CC session, full Skills and connectors, admin toggle | Independent of any local process |
+| Desktop scheduled tasks | Local machine; fires while app is open | Survives restarts |
+| CLI `/loop` + cron tools | Session-scoped; dies when session exits | 7-day auto-expiry on recurring tasks |
+| `/goal` | Session-scoped; continues until condition met | Session only |
+
+**Design considerations.** Routines run without the interactive permission-mode picker and without approval prompts during the run, so the design must front-load authority via `settings.json`, subagent frontmatter, and managed-policy scoping rather than relying on operator confirmation mid-execution. Daily-run limits apply per plan tier (Pro 5, Max 15, Team/Enterprise 25), with extra usage billed beyond that. Team/Enterprise admins can disable Routines at `claude.ai/admin-settings/claude-code`. Self-hosted environments are supported and get their own cloud environment configuration (network access, env vars, setup scripts). **[Anthropic docs]**
+
+**When to recommend.** Recommend Routines when the deployment needs unattended, repeatable work tied to a clear trigger and outcome — nightly audit sweeps against a repo, a PR-opened responder that runs a fixed check bundle, an API endpoint that produces a review on demand. Do not recommend Routines for session-scoped polling (that is `/loop`), for local reactive workflows (that is Desktop scheduled tasks), or for open-ended exploration (that is an interactive session).
+
+**Version-stability note.** Routines are in research preview and the API surface may change; treat this section as dated landscape content and re-verify against the current documentation before authoring a deployment that depends on the specific trigger set above.
+
+---
+
 ## End of methodology patterns reference

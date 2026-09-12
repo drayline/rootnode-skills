@@ -120,6 +120,8 @@ See `references/chat-to-code-handoff-patterns.md` for the readiness signals, art
 
 The rootnode runtime Skills (handoff-trigger-check, critic-gate, mode-router, profile-builder) are external tooling. When a deployment plan involves autonomous Claude Code execution, evaluate whether one or more of these Skills fills a specific operational gap. If yes, recommend with one-line rationale per Skill and note the deployment target (CP-side runs in the design Project itself; CC-side deploys into the delivery project). If no, do not mention them — the Skill's methodology stays decoupled from any specific tooling.
 
+For scheduled and automated CC deployments, consult the Routines section in `references/cc-methodology-patterns.md`.
+
 ---
 
 ## Reference Files

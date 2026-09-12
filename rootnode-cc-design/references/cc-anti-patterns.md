@@ -10,6 +10,30 @@ For the placement-rule patterns these anti-patterns relate to, see `cc-environme
 
 ---
 
+## Table of contents
+
+- [Catalog](#catalog)
+- [§2.1 — Bloated CLAUDE.md / Monolithic standing context](#21--bloated-claudemd--monolithic-standing-context)
+- [§4.1 — Transcript dump](#41--transcript-dump)
+- [§4.2 — MCP bloat](#42--mcp-bloat)
+- [§4.3 — Manual-only Skills](#43--manual-only-skills)
+- [§4.4 — Enforcement-as-preference](#44--enforcement-as-preference)
+- [§4.5 — Subagent overuse](#45--subagent-overuse)
+- [§4.6 — Subagent underuse](#46--subagent-underuse)
+- [§4.7 — bypassPermissions outside sandbox](#47--bypasspermissions-outside-sandbox)
+- [§4.8 — Missing managed policy](#48--missing-managed-policy)
+- [§4.9 — Path-scoped rules opportunity missed](#49--path-scoped-rules-opportunity-missed)
+- [§4.10 — Auto memory misuse](#410--auto-memory-misuse)
+- [§4.11 — Verification-before-completion absent](#411--verification-before-completion-absent)
+- [§4.12 — Skills/Commands legacy mix](#412--skillscommands-legacy-mix)
+- [§4.13 — Kitchen-sink session (operational)](#413--kitchen-sink-session-operational)
+- [§4.14 — Stale CLAUDE.md](#414--stale-claudemd)
+- [§10a — Verification-instruction accumulation](#10a--verification-instruction-accumulation)
+- [§10b — Conservative-review literalism](#10b--conservative-review-literalism)
+- [How to use this catalog](#how-to-use-this-catalog)
+
+---
+
 ## Catalog
 
 | Canonical reference | Name | Surface | Sweep category mapping |

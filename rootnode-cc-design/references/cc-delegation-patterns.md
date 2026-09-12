@@ -73,6 +73,8 @@ Two clauses that are not optional. First, verification clauses name external art
 
 ## 3. Return contracts and orchestrator context hygiene
 
+**No fixed threshold.** There is no single numeric limit that bounds when the orchestrator context is "too full." The practice is qualitative: return locations rather than contents, use scratch-file handoff for oversized results, and specify a numeric return cap in every delegation brief. The 15,000-token subagent-description warning below is a separate startup guard, not a runtime context threshold.
+
 Delegation isolates the subagent's working set, not its report. An agent that returns a whole file moves the flood one layer out and then straight back in.
 
 - **Locations, not contents.** Scouts return paths and line references. Researchers return findings with source tags. Builders return a short report and a deviation list, not the diff body.

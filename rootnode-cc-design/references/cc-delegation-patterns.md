@@ -24,7 +24,7 @@ Delegation is a context-isolation primitive with a cost dial attached. This refe
 
 Every subagent resolves a model, an effort level, a tool set, and an isolation mode. Leaving these unset resolves them to the main conversation's model, which is the expensive default. **[Anthropic docs]**
 
-Model resolution order, highest first: the per-invocation `model` parameter, the subagent definition's `model` frontmatter (`inherit` selects the main model), the `CLAUDE_CODE_SUBAGENT_MODEL` environment variable, then the main conversation's model. Setting `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` overrides all of them, including the built-ins. **[Anthropic docs]** Both variables are product facts; a design that names them carries the §5 emission marker.
+Model resolution order, highest first (as of v2.1.251+): the per-invocation `model` parameter, the subagent definition's `model` frontmatter (`inherit` selects the main model), the `CLAUDE_CODE_SUBAGENT_MODEL` environment variable, then the main conversation's model. Before v2.1.251, `CLAUDE_CODE_SUBAGENT_MODEL` sat at the top of the order and overrode all other sources. Setting `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) overrides all of them, including the built-ins. **[Anthropic docs]** Both variables are product facts; a design that names them carries the §5 emission marker.
 
 The reference role table. The structure is `[generalizable]`; the **Model** column is a landscape fact, dated below and refreshed rather than re-derived (AEA §4.15).
 
@@ -116,13 +116,14 @@ A setting emitted without the marker is a grounding defect even when the name is
 
 | Guarantee | Mechanism |
 |---|---|
-| Nesting depth | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3; `1` disables nesting) — product fact, emit with marker |
-| Concurrency | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20; ultracode sessions are exempt) — product fact, emit with marker |
+| Nesting depth | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3, v2.1.219+; `1` disables nesting) — product fact, emit with marker |
+| Concurrency | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20, v2.1.217+; ultracode sessions are exempt) — product fact, emit with marker |
+| Per-session cumulative subagent budget | `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION` (default 200, v2.1.212+; `/clear` resets) — product fact, emit with marker |
 | Which types may be spawned | `tools: Agent(builder, refuter, scout)` on an `--agent` main thread; `permissions.deny: ["Agent(name)"]` elsewhere |
 | A specific agent may not delegate | omit `Agent` from that agent's `tools`, or add it to `disallowedTools` |
 | Per-agent runaway | `maxTurns` in frontmatter |
 | Automatic workflow orchestration | `CLAUDE_CODE_DISABLE_WORKFLOWS=1`, the `/config` toggle, or `disableWorkflows` in managed settings — product fact, emit with marker |
-| One model for every subagent | `CLAUDE_CODE_SUBAGENT_MODEL` plus `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` — product fact, emit with marker |
+| One model for every subagent | `CLAUDE_CODE_SUBAGENT_MODEL` plus `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) — product fact, emit with marker |
 | Tool reach per role | `tools` allowlist or `disallowedTools` denylist; read-only for review roles |
 
 Tool restriction remains the cheapest reliability gain available. A Refuter with no write tools cannot quietly fix what it was asked to judge.

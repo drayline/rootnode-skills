@@ -7,20 +7,15 @@ description: >-
   remediation plans. Five modes: DESIGN (new CC deployments), EVOLVE (updates
   from friction), RESEARCH (evaluate a CC tool/pattern), TEMPLATE (reusable
   artifacts), REMEDIATE (consume hygiene findings → produce + execute plan).
-  Use when user says "design CC for X", "build CC environment", "design
-  CLAUDE.md", "build a CC prompt", "design a CC prompt for X", "write a
-  session prompt", "we hit X friction in CC", "should we adopt Y for CC",
-  "give me a CLAUDE.md skeleton", "remediate the hygiene findings". Do NOT
-  use REMEDIATE for direct cleanup (Cat 1–10 — use rootnode-repo-hygiene
-  Phase 2; REMEDIATE handles Cat 11–14 + 7-layer leaks). Do NOT use for
-  hygiene scanning (use rootnode-repo-hygiene). Do NOT use for chat prompts
-  (rootnode-prompt-validation) or chat Projects (rootnode-project-audit).
+  Do NOT use REMEDIATE for direct cleanup (Cat 1–10 — use rootnode-repo-hygiene
+  Phase 2). Do NOT use for hygiene scanning (rootnode-repo-hygiene), chat
+  prompts (rootnode-prompt-validation), or chat Projects (rootnode-project-audit).
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.1.0"
+  version: "4.2.0"
   predecessor: "rootnode-cc-design v4.0"
-  original-source: "root.node seed Project KFs (post-Phase 27/28 methodology absorption: root_AGENT_ENVIRONMENT_ARCHITECTURE.md, root_CC_ENVIRONMENT_GUIDE.md, root_AGENT_ANTI_PATTERNS.md) + accumulated CC deployment research (2026-05-04). v2 evolved REMEDIATE acceptance flow (three approval forms, step-level risk tags) and critic-gate composition (required/optional) to align with rootnode-repo-hygiene v1's contracts. Substantive rebuild of cc-anti-patterns.md to canonical numbering. Brand-surface clean (cchq references stripped or restructured; hyge contamination anonymized to \"production CC deployment 2026-05-04\"). v4.1 adds the end-state assertion rule to Step 4 output standards (observed 2026-09-07: a file-replacement prompt asserted a pre-state line count that had gone stale between authoring and execution, halting the run), and absorbs the orchestrator/worker delegation architecture — role-tiered subagents, the delegation-brief contract, the Builder-to-Refuter loop, and mechanism-enforced delegation caps — grounded in Anthropic subagent documentation verified 2026-09-09 and in community practitioner reports graded Tier 5 (signal-only)."
+  original-source: "root.node seed KFs (AEA, CCEG, AAP) + CC deployment research; v4.x evolves delegation architecture and REMEDIATE mode from v3 base"
   discipline_post: phase-30
 ---
 
@@ -34,21 +29,25 @@ This Skill operates in both chat-based design conversations (CP) and Claude Code
 
 The Skill produces design artifacts in all modes. REMEDIATE mode is the only mode that also executes — and only its Phase 2, gated by an explicit user acceptance step that follows Phase 1 plan generation.
 
-## v4.0 update — Opus 5 CC deployments
+## Activation
 
-**Subagent-delegation caps.** Opus 5 delegates to subagents more readily than prior Opus models. CLAUDE.md drafts and design specs authored by this Skill for Opus-5-based CC deployments include an explicit delegation cap. The prose cap explains the intent; the cap itself is placed in `settings.json` or agent frontmatter, because a cap that only exists as CLAUDE.md prose is enforcement-as-preference (`cc-anti-patterns.md` §4.4). See the cap mechanism table in `references/cc-delegation-patterns.md` and the countermeasure template in `root_OPTIMIZATION_REFERENCE.md` (subagent over-delegation tendency). Every Claude Code setting a draft names — a `CLAUDE_CODE_*` variable, its default, a managed-settings key — carries the dated product-fact marker on every line that names it — in JSON, on the line after the block — per the emission rule above that table; the settings drift with releases, and an unmarked setting reads as verified.
+Auto-invoke on these trigger phrases. Column two names the mode the phrase routes to; confirm mode in one line at the start of the response.
 
-**Verification topology (D4).** Independent review of a *different* agent's work — the Critic role, code reviewer subagent, test writer subagent, docs proofreader subagent — remains a valid subagent pattern under Opus 5. What does NOT remain valid: "spawn a subagent to verify your own output." Opus 5 already self-verifies; a subagent doing the same thing is duplicate cost. When designing CC verification topology, distinguish the two: independent-review-of-different-agent survives; self-directed re-checking (whether via subagent or via prompt instruction) is removed. See `root_AGENT_ENVIRONMENT_ARCHITECTURE.md` §4.14 and `root_CC_ENVIRONMENT_GUIDE.md` §1.4 for the discipline.
+| Trigger phrase | Mode |
+|---|---|
+| "design CC for X" | DESIGN |
+| "build CC environment" | DESIGN |
+| "design CLAUDE.md" | DESIGN |
+| "build a CC prompt" / "design a CC prompt for X" | DESIGN |
+| "write a session prompt" | DESIGN |
+| "give me a CLAUDE.md skeleton" | TEMPLATE |
+| "we hit X friction in CC" / "the agent keeps doing Y" | EVOLVE |
+| "should we adopt Y for CC" / "is Z worth using" | RESEARCH |
+| "remediate the hygiene findings" / "close the loop on the report" | REMEDIATE |
 
-**CC defaults.** On Claude Code, `effort` defaults to `high` for both Opus 5 and Sonnet 5 (per Anthropic's models overview and Opus 5 whats-new page). The Claude Code default *model* moves with Claude Code product releases and is not restated here — consult Anthropic's Claude Code documentation at update time rather than hardcoding a value that will drift.
+## Delegation architecture
 
-**Fable / Opus 5 / Sonnet 5 CC selection tradeoff.** For most CC workloads, Opus 5 at `high` is the recommended default (near-Fable capability at half the cost). Fable 5 is integrated-aware — reserve for long-horizon autonomous agent workloads and 1M-context long-context work where its edge is worth the $10/$50 pricing. Sonnet 5 at `high` is the cost-optimal target for lighter agentic workloads where Opus-5 depth is not required.
-
-## v4.1 update — delegation architecture
-
-Role tiering is a design decision, not a default: every subagent resolves a model, an effort level, a tool set, an isolation mode, and a return contract, and leaving them unset bills mechanical work at orchestrator rates. The role table is a menu, not a roster: add a role only for work the orchestrator cannot do from what it already holds. Integrating what the agents returned — composing the report, merging the result — is the orchestrator's own row, not a new role. The landscape-independent rule is that reviewer capability is greater than or equal to builder capability. **Explore no longer defaults to Haiku** — as of Claude Code v2.1.198 it inherits the main conversation's model, capped at Opus on the Claude API, so a cheap scout requires a project `Explore` defined with `model: haiku`. **[Anthropic docs, verified 2026-09-09]** Recommend the Builder-to-Refuter loop as the default coding topology and escalate to the four-agent verification topology only when the agent-warranted test shows verification perspectives that conflict by design. Every delegation carries a brief and a numeric return cap; unbounded delegation is the mechanism behind both subagent over-delegation and orchestrator context bloat.
-
-Role table, brief fields, loop mechanics, cap mechanisms, and the reasoning behind each are in `references/cc-delegation-patterns.md`.
+See `references/cc-delegation-patterns.md` for the role table, delegation briefs, Builder-to-Refuter loop, cap mechanisms, and the orchestrator/worker model. See `references/cc-methodology-patterns.md` for the verification topology and the agent-warranted test.
 
 ## Important
 
@@ -94,8 +93,8 @@ The Skill operates from a structured **design brief** for the delivery project. 
 
 Read the relevant references before producing output. Each mode draws from a specific subset:
 
-- **DESIGN MODE** consults: cc-methodology-patterns, cc-environment-design-patterns, cc-skills-and-hooks-composition, chat-to-code-handoff-patterns. Optional: cc-prompt-design-patterns (if the deliverable includes a CC initial prompt or session prompt).
-- **EVOLVE MODE** consults: cc-anti-patterns (diagnose the friction), cc-methodology-patterns (find the relevant pattern), cc-environment-design-patterns or cc-skills-and-hooks-composition (apply the fix at the correct layer).
+- **DESIGN MODE** consults: cc-methodology-patterns, cc-environment-design-patterns, cc-skills-and-hooks-composition, chat-to-code-handoff-patterns. Optional: cc-prompt-design-patterns (if the deliverable includes a CC initial prompt or session prompt); cc-delegation-patterns (if the deployment plan involves subagents, model tiering, parallel work, or delegation caps).
+- **EVOLVE MODE** consults: cc-anti-patterns (diagnose the friction), cc-methodology-patterns (find the relevant pattern), cc-environment-design-patterns or cc-skills-and-hooks-composition (apply the fix at the correct layer); cc-delegation-patterns (when friction involves delegation, context bloat, or subagent behavior).
 - **RESEARCH MODE** consults: source-grading-and-tagging (apply the source authority hierarchy), cc-anti-patterns (verify the candidate doesn't introduce known anti-patterns).
 - **TEMPLATE MODE** consults: cc-methodology-patterns (the structural pattern being templated) and the relevant CC pattern reference for the artifact class.
 - **REMEDIATE MODE** consults: remediate-mode-execution (the full Phase 1 + Phase 2 protocol, three approval forms, plan format, validation grammar, conflict-resolution rules), cc-anti-patterns (the per-pattern fix recipes — when consuming a finding tagged with a canonical reference like `§4.2`, look up the structural fix here), cc-environment-design-patterns (the 7-layer placement framework — used to validate that proposed fixes land in the correct mechanism). Schema: `schema/execution-plan.schema.json` defines the EXECUTION_PLAN.md structure.
@@ -104,11 +103,12 @@ Read the relevant references before producing output. Each mode draws from a spe
 
 - **File naming.** CLAUDE.md drafts for delivery projects use `{delivery_project_code}_CLAUDE.md` (the destination project's prefix). Agent role specs use `{delivery_project_code}_agent_{name}.md`. Design briefs use `{project_code}_design_brief.md` and live in the delivery project's KFs. Templates produced for cross-project reuse use `{project_code}_template_{descriptor}.md` or `shared_template_{descriptor}.md`.
 - **Markdown for CLAUDE.md drafts.** CLAUDE.md is consumed by Claude Code, which expects Markdown. Use `##` and `###` headers, fenced code blocks, tables for matrices. Do not use XML tags inside CLAUDE.md drafts — those are for system prompts, which CLAUDE.md is not.
-- **Halt triggers, scope authorization and the ultracode default.** Every DESIGN MODE plan and every EVOLVE MODE update explicitly includes all three — ultracode stays off and is opted into per task, stated in the plan's prose even when the plan proposes no topology or disables workflows by setting, so the operator sees the per-task opt-in path. Non-negotiable.
-- **Assert the END state, never the PRE state.** A prompt that states what a file currently contains goes stale the moment anything touches the working tree between authoring and execution, and nothing detects that staleness until CC halts mid-run. Write the starting condition as report-only ("report `wc -l` and `sha256sum`") and bind the halt to a post-action digest ("HALT if the resulting hash ≠ `<sha256>`"). Never write "expect N lines" as a precondition. **Corollary:** every prompt that replaces a file carries that file's digest, computed in the same turn the file is produced so the digest and the bytes cannot drift apart. The gate is for files whose bytes the prompt author holds. When the agent generates the change — a migration, a refactor — no digest exists at authoring time: assert the end state with the check that defines done, such as the suite or the type-check, not a digest over generated files. Bind the digest to LF-normalized content, never to raw bytes: on a Windows checkout with `core.autocrlf=true` git stores the LF blob, so a raw-bytes gate on a text file cannot be satisfied by any commit. State the normalization in the prompt; do not assert the target repo's git config unless the brief establishes it. Rationale and the observed instance are in `references/cc-prompt-design-patterns.md`. `[generalizable]`
+- **Halt triggers and scope authorization.** Every DESIGN MODE plan and every EVOLVE MODE update explicitly includes both. Ultracode stays off by default and is opted into per task (see `references/cc-delegation-patterns.md` §6 for the rationale). Non-negotiable.
+- **Assert the END state, never the PRE state.** Non-negotiable. See `references/cc-prompt-design-patterns.md` § Assert the END state for the rule, the LF-normalize corollary, and the observed instances. `[generalizable]`
 - **Delegation briefs are complete or absent.** Any role the plan names carries a model, an effort level, a tool set, an isolation mode, and a return contract including a numeric length cap. Verification clauses name external artifacts; never instruct an agent to re-check its own output.
 - **Token budgets.** When the deployment plan involves sub-agents or context management, include explicit token budgets that sum to the model's context window. A context plan without numbers is not a context plan.
 - **Source-tagged claims.** Every substantive technical claim carries an inline source tag.
+- **Output length.** When the deliverable is a design document, CLAUDE.md draft, or session prompt, target ≤200 lines per artifact. Multi-file designs may exceed this per-file if each file is self-contained.
 - **CC-prompt-specific output discipline.** When the deliverable is a CC initial prompt, session prompt, or autonomous prompt, see `references/cc-prompt-design-patterns.md` § Output discipline for CC prompts for additional output standards (shell-agnostic syntax, pre-flight Skill enumeration, continuation-phrase ambiguity gate, forward-state-aware authoring, competing hypotheses and instrument fit for diagnostic prompts).
 
 ### Step 5 — Surface the chat→Code handoff explicitly
@@ -119,7 +119,9 @@ See `references/chat-to-code-handoff-patterns.md` for the readiness signals, art
 
 ### Step 6 — Recommend runtime tooling only if it fills a specific gap
 
-The rootnode runtime Skills (handoff-trigger-check, critic-gate, mode-router, profile-builder) are external tooling. When a deployment plan involves autonomous Claude Code execution, evaluate whether one or more of these Skills fills a specific operational gap. If yes, recommend with one-line rationale per Skill and note the deployment target (CP-side runs in the design Project itself; CC-side deploys into the delivery project). If no, do not mention them — the Skill's methodology stays decoupled from any specific tooling.
+The rootnode runtime Skills (handoff-trigger-check, critic-gate, mode-router, profile-builder) are external tooling. Runtime Skills are thin governance over thick workflow systems — they compose with existing deployment tooling rather than replacing it. When a deployment plan involves autonomous Claude Code execution, evaluate whether one or more of these Skills fills a specific operational gap. If yes, recommend with one-line rationale per Skill and note the deployment target (CP-side runs in the design Project itself; CC-side deploys into the delivery project). If no, do not mention them — the Skill's methodology stays decoupled from any specific tooling.
+
+For scheduled and automated CC deployments, consult the Routines section in `references/cc-methodology-patterns.md`.
 
 ---
 
@@ -134,7 +136,7 @@ Read the relevant files based on the mode (Step 3 above). Each file is standalon
 | `references/cc-delegation-patterns.md` | When the deployment plan involves subagents, model tiering, parallel work, or delegation caps. Role table (model / effort / tools / isolation / return), the eight-field delegation brief, the Builder-to-Refuter loop, orchestrator context hygiene, and the cap mechanism table. |
 | `references/cc-environment-design-patterns.md` | Always for DESIGN mode. Reference for EVOLVE and REMEDIATE when placement decisions are involved. Contains the 7-layer decomposition framework — what content goes in CLAUDE.md vs `.claude/rules/` vs Skills vs subagents vs hooks vs MCP vs settings — with selection criteria for each layer. |
 | `references/cc-skills-and-hooks-composition.md` | When the deployment plan involves Skills, hooks, or both. Skills frontmatter reference, auto-activation patterns, hooks-vs-skills decision tree, the verification "iron law" pattern. |
-| `references/cc-anti-patterns.md` | Always for REMEDIATE mode (per-pattern fix recipes). Reference for EVOLVE when diagnosing friction. Reference for DESIGN as a "things to avoid creating" checklist. The 15-pattern catalog using canonical numbering from `root_AGENT_ANTI_PATTERNS.md`, with structural signature, cause, and fix per pattern. **Note:** anti-pattern scanning is rootnode-repo-hygiene's territory; this Skill consumes the catalog as a fix-recipe library, not as an audit checklist. |
+| `references/cc-anti-patterns.md` | Always for REMEDIATE mode (per-pattern fix recipes). Reference for EVOLVE when diagnosing friction. Reference for DESIGN as a "things to avoid creating" checklist. The 17-pattern catalog using canonical numbering from `root_AGENT_ANTI_PATTERNS.md` and `root_CC_ENVIRONMENT_GUIDE.md §10`, with structural signature, cause, and fix per pattern. **Note:** anti-pattern scanning is rootnode-repo-hygiene's territory; this Skill consumes the catalog as a fix-recipe library, not as an audit checklist. |
 | `references/chat-to-code-handoff-patterns.md` | Always for DESIGN mode. When designing how chat work transitions to CC execution. Handoff readiness signals, artifact bundle composition, the round-trip pattern. |
 | `references/source-grading-and-tagging.md` | Always for RESEARCH mode. Reference whenever a claim needs source backing. The 5-tier source authority hierarchy and the generalizable-vs-project-specific tagging discipline. |
 | `references/remediate-mode-execution.md` | Always for REMEDIATE mode. Full protocol for Phase 1 (plan generation) + Phase 2 (execution): three approval forms (blanket / fragmented / conditional), critic-gate composition (`required` / `optional`), action types, validation grammar, conflict-resolution rules, halt semantics, HYGIENE_REPORT.md input format expectations, EXECUTION_PLAN.md output format. |

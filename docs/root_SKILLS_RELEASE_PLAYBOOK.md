@@ -56,6 +56,19 @@ Historical v3.1 cycle tooling — `audit/v3_1-release/generate_release_notes.py`
 - **Catalog umbrella:** `catalog-vN` (not `vN` — distinct from per-Skill tags).
 - **Bundle asset name:** `rootnode-catalog-vN.zip` — distinct from the umbrella *tag* `catalog-vN`. The asset is what users download; the tag is what the release is keyed on.
 
+### 1.5 Alternate release shape — the single-Skill cut
+
+A **single-Skill cut** is a supported release shape distinct from the full catalog release. Use it when exactly one Skill needs a minor release and the catalog does not.
+
+- **What it produces.** One per-Skill release only, tag `rootnode-<skill>/vN.N` (or `vN.N.N` for a patch), carrying that Skill's surface zip(s) — cp-only, cc-only, or dual per the surface map.
+- **What it does NOT produce.** No new `catalog-vN` umbrella, no new bundle, no new catalog-index notes, no regenerated repo catalog. The prior `catalog-vN` umbrella retains `--latest`; the README `/releases/latest` link continues to resolve to it.
+- **Conditions for using this shape.** All must hold:
+  1. Only one Skill has changed (one Skill's minor or patch release, no cross-Skill co-release).
+  2. The change has no cross-Skill dependencies — no shared reference file bumps, no changes another Skill relies on.
+  3. The release does not introduce or break a link the README `/releases/latest` path (or the umbrella body) depends on.
+- **When to promote to a full catalog release instead.** As soon as any of the above fails — a second Skill needs to ship alongside, a shared/cross-Skill file changed, or the umbrella index needs re-linking — cut a full catalog release (per Phase A/B) so the umbrella and per-Skill releases move in lockstep.
+- **Anti-churn.** The `catalog-vN` Latest tag stays put. A single-Skill cut that marks itself `--latest` breaks the README install path (per §3, "README → `/releases/latest`, not a pinned tag" depends on the umbrella keeping `--latest`).
+
 ---
 
 ## 2. Release process — two-phase, branch-protection-aware

@@ -16,6 +16,7 @@ Delegation is a context-isolation primitive with a cost dial attached. This refe
 6. Ultracode and dynamic workflows
 7. Anti-patterns specific to delegation
 8. Source grading of the community delegation reports
+9. Orchestration primitives
 
 ---
 
@@ -23,7 +24,7 @@ Delegation is a context-isolation primitive with a cost dial attached. This refe
 
 Every subagent resolves a model, an effort level, a tool set, and an isolation mode. Leaving these unset resolves them to the main conversation's model, which is the expensive default. **[Anthropic docs]**
 
-Model resolution order, highest first: the per-invocation `model` parameter, the subagent definition's `model` frontmatter (`inherit` selects the main model), the `CLAUDE_CODE_SUBAGENT_MODEL` environment variable, then the main conversation's model. Setting `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` overrides all of them, including the built-ins. **[Anthropic docs]** Both variables are product facts; a design that names them carries the §5 emission marker.
+Model resolution order, highest first (as of v2.1.251+): the per-invocation `model` parameter, the subagent definition's `model` frontmatter (`inherit` selects the main model), the `CLAUDE_CODE_SUBAGENT_MODEL` environment variable, then the main conversation's model. Before v2.1.251, `CLAUDE_CODE_SUBAGENT_MODEL` sat at the top of the order and overrode all other sources. Setting `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) overrides all of them, including the built-ins. **[Anthropic docs]** Both variables are product facts; a design that names them carries the §5 emission marker.
 
 The reference role table. The structure is `[generalizable]`; the **Model** column is a landscape fact, dated below and refreshed rather than re-derived (AEA §4.15).
 
@@ -32,15 +33,19 @@ The reference role table. The structure is `[generalizable]`; the **Model** colu
 | Orchestrator (main thread) | Plans, writes specs, delegates, reads reports, integrates, makes judgment calls | Fable or Opus tier | high | full | — | — |
 | Scout | Finds files, symbols, call sites, references | Haiku tier via a project `Explore` override | low | Read, Grep, Glob | — | paths and line refs, capped |
 | Researcher | Reads docs and source, reports facts | Sonnet tier | medium | Read, Grep, Glob, WebFetch | — | facts, with unverifiable items marked unverified |
-| Builder | Implements from a written spec, runs the suite | Sonnet tier; Opus tier when the spec is hard | high | full minus `Agent` | `worktree` | short report plus flagged deviations |
+| Builder | Implements from a written spec, runs the suite | Sonnet baseline; Opus for hard specs — set via mechanism (see below) | high | full minus `Agent` | `worktree` | short report plus flagged deviations |
 | Refuter | Re-derives a *different* agent's change against the spec | Opus tier or above | high | Read, Grep, Glob, Bash | non-fork, fresh context | ACCEPT or REWORK plus must-fixes |
 | Debugger | Root-cause work the Builder could not resolve | Opus tier | xhigh | full | `worktree` | competing hypotheses with predicted observations (CC_EG §5.8) |
 
 **The landscape-independent rule the table encodes:** reviewer capability is greater than or equal to builder capability. The Refuter is the last external-artifact verification before a change lands; an under-powered reviewer converts the loop into rubber-stamping. When a deployment must economize, economize on the Scout and the Researcher, not on the Refuter.
 
+**Model tier selection for CC workloads.** *(Dated landscape content — refresh per AEA §4.15.)* For most CC workloads, Opus 5 at `high` is the recommended default: near-Fable capability at roughly half the price. Fable 5 is integrated-aware — reserve for long-horizon autonomous agent workloads and 1M-context long-context work where its edge is worth the $10/$50 pricing. Sonnet 5 at `high` is the cost-optimal target for lighter agentic workloads where Opus 5 depth is not required. The Claude Code default *model* moves with Claude Code product releases and is not restated here — consult Anthropic's Claude Code documentation at update time rather than hardcoding a value that will drift. **[Anthropic docs]**
+
+**Builder tier-switch mechanism.** The Builder row above notes a Sonnet baseline with Opus for hard specs. That switch is configured, not ad-hoc: set the model via the subagent definition's `model` frontmatter field, or the per-invocation `model` parameter (v2.1.251+), or the `CLAUDE_CODE_SUBAGENT_MODEL` environment variable. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) overrides all three sources for every subagent in the session, teammates and workflow agents included. A deployment that wants "Sonnet Builder unless the spec is hard" encodes it: default the subagent frontmatter to Sonnet and pass `model: opus` in the per-invocation parameter for hard specs. Do not rely on the orchestrator to "notice" and switch. **[Anthropic docs]**
+
 **Built-in behavior that changed.** As of Claude Code v2.1.198, the built-in Explore subagent inherits the main conversation's model rather than always running on Haiku; on the Claude API that inherited model is capped at Opus. A project or user subagent named `Explore` overrides the built-in and keeps its own `model` field, which is how a deployment gets a genuinely cheap scout. Explore and Plan also skip CLAUDE.md and git status, so any rule they must obey is restated in the delegation prompt rather than assumed. Explore and Plan are one-shot and cannot be resumed. **[Anthropic docs]**
 
-**Effort per role.** `effort` is a supported frontmatter field and overrides the session effort for that subagent; available levels depend on the model. Cheap mechanical stages take the low tiers, judgment and verification stages take the high tiers. **[Anthropic docs]**
+**Effort per role.** `effort` is a supported frontmatter field and overrides the session effort for that subagent; available levels depend on the model. Cheap mechanical stages take the low tiers, judgment and verification stages take the high tiers. **[Anthropic docs]** `thinking: disabled` at `xhigh` or `max` effort returns HTTP 400 on Opus 5 (v2.1.198+ behavior) — pair those effort levels with the model's own thinking budget rather than suppressing it. **[Anthropic docs]**
 
 **Do not tier for its own sake.** The agent-warranted test (`cc-methodology-patterns.md` §1) governs whether a role should exist at all. A one-line fix or a single grep is done by the orchestrator; delegation overhead exceeds the benefit below a task floor that each deployment finds for itself.
 
@@ -68,6 +73,8 @@ Two clauses that are not optional. First, verification clauses name external art
 ---
 
 ## 3. Return contracts and orchestrator context hygiene
+
+**No fixed threshold.** There is no single numeric limit that bounds when the orchestrator context is "too full." The practice is qualitative: return locations rather than contents, use scratch-file handoff for oversized results, and specify a numeric return cap in every delegation brief. The 15,000-token subagent-description warning below is a separate startup guard, not a runtime context threshold.
 
 Delegation isolates the subagent's working set, not its report. An agent that returns a whole file moves the flood one layer out and then straight back in.
 
@@ -109,13 +116,14 @@ A setting emitted without the marker is a grounding defect even when the name is
 
 | Guarantee | Mechanism |
 |---|---|
-| Nesting depth | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3; `1` disables nesting) — product fact, emit with marker |
-| Concurrency | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20; ultracode sessions are exempt) — product fact, emit with marker |
+| Nesting depth | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3, v2.1.219+; `1` disables nesting) — product fact, emit with marker |
+| Concurrency | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20, v2.1.217+; ultracode sessions are exempt) — product fact, emit with marker |
+| Per-session cumulative subagent budget | `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION` (default 200, v2.1.212+; `/clear` resets) — product fact, emit with marker |
 | Which types may be spawned | `tools: Agent(builder, refuter, scout)` on an `--agent` main thread; `permissions.deny: ["Agent(name)"]` elsewhere |
 | A specific agent may not delegate | omit `Agent` from that agent's `tools`, or add it to `disallowedTools` |
 | Per-agent runaway | `maxTurns` in frontmatter |
 | Automatic workflow orchestration | `CLAUDE_CODE_DISABLE_WORKFLOWS=1`, the `/config` toggle, or `disableWorkflows` in managed settings — product fact, emit with marker |
-| One model for every subagent | `CLAUDE_CODE_SUBAGENT_MODEL` plus `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` — product fact, emit with marker |
+| One model for every subagent | `CLAUDE_CODE_SUBAGENT_MODEL` plus `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) — product fact, emit with marker |
 | Tool reach per role | `tools` allowlist or `disallowedTools` denylist; read-only for review roles |
 
 Tool restriction remains the cheapest reliability gain available. A Refuter with no write tools cannot quietly fix what it was asked to judge.
@@ -149,6 +157,24 @@ These extend `cc-anti-patterns.md` §4.5 (subagent overuse) and §4.6 (underuse)
 The role-tiering strategy in this reference was prompted by two community practitioner reports (2026-09) describing an orchestrator/worker split with model tiering, strict per-agent marching orders, a Builder-to-Refuter loop, and a ticket-and-worktree review cycle. Those reports are **Tier 5 — signal-only, unverified authorship, unverified usage claims** (`source-grading-and-tagging.md`). None of their throughput or usage-limit claims are reproduced here.
 
 What was adopted was adopted because an Anthropic-documented mechanism backs it: per-subagent `model`, `effort`, `tools`, `maxTurns`, `isolation: worktree`, resume-by-ID, the spawn-depth and concurrency variables, the `Agent(...)` allowlist, and the workflow toggles. What was not adopted: the ticket-queue, seat-minting, and automatic branch-lifecycle machinery in the second report, which is custom tooling the author built around Claude Code rather than a Claude Code feature. Deployments wanting that shape should reach for agent teams, background sessions, or their own CI — `[verify the native surface against Anthropic's agent-teams and worktrees documentation before designing against it]`.
+
+---
+
+## 9. Orchestration primitives
+
+*(Dated landscape content — refresh per AEA §4.15. Facts below dated 2026-09-11.)*
+
+Claude Code exposes three orchestration primitives that sit at different scopes and follow different limit regimes. The subagent-centric patterns in §1–§8 apply mainly to the first row; a deployment that reaches for the second or third is choosing a different governance model, not extending the subagent one.
+
+| Primitive | Scope | Isolation model | Limit governance |
+|---|---|---|---|
+| Subagents | Single session, in-process delegation | Own context window; optional `worktree` isolation per subagent | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20, v2.1.217+), `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3, v2.1.219+), `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION` (default 200, v2.1.212+) |
+| Agent Teams | Multiple sessions, team-lead session breaks down work and spawns teammates | Split-pane teammates run as separate CC processes with their own model; in-process teammates share the parent | Teammate and workflow-agent limits are separate from the subagent concurrency cap |
+| Dynamic Workflows | JavaScript-orchestrated script fans work across many subagents with deterministic control flow | Script holds the loop; the workflow agents it spawns do the work | Workflow-agent limits are separate; the `Workflow` tool is removed from subagent tool pools |
+
+**When each fits.** Subagents are the default for context isolation and per-role scoping inside one session. Agent Teams fit when work needs multiple full CC processes coordinated by a lead — larger blast radius, more governance surface, own limits. Dynamic Workflows fit when the orchestration itself is deterministic — fan-out over hundreds of units, adversarial checking patterns, intermediate-result composition that cannot be expressed as a single subagent tree. **[Anthropic docs]**
+
+**Governance consequence.** A design that only reasons about subagent caps but reaches for teams or workflows has un-modeled fan-out. Name the primitive in the deployment plan and pair it with the matching limit regime.
 
 ---
 

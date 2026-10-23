@@ -317,3 +317,33 @@ No fetch failed. Text 6 was a sixth pointer Builder-D listed; it was quoted on t
 ## KF deltas
 
 `audit/v5_0-alignment/kf-update-blocks.md` — 30 surfaced blocks across 9 target KFs (+1 NOT APPLICABLE row). Nothing was written to `audit/canonical-kfs/`.
+
+---
+
+## Addendum — after PR #25 opened (append-only)
+
+### Operator decision (verbatim)
+
+> 1. Authorized: one-line commit on this PR setting CATALOG_VERSION = "v5.0" in build_release_artifacts.py:59. Commit message `release: bump packager CATALOG_VERSION to v5.0`. Record it in the report as a prompt gap (the packager authorization clause was too narrow).
+> 2. Track the four v5 specs: commit design/root_MODEL_LANDSCAPE_2026-10.md, design/root_DESIGN_catalog_v5_model_alignment.md, design/root_DESIGN_cc-design_v5.md, design/root_DESIGN_behavioral-tuning_v5.md as one commit on this PR (`docs: track v5.0 design specs`), bytes unchanged — the pre-flight digests must still hold after commit; verify and report.
+> 3. Confirmed: the 7 Haiku 4.5 Skill lines are legacy clauses required by their spec rows, not defects. The T1 pass wording was overstrict relative to revised D6; note that in the manifest.
+>
+> Push, then report the new head SHA verbatim and stop. I'll merge.
+
+— answered the Phase 3 step 4 halt (open items F3, F4, F5).
+
+### Commits added to PR #25
+
+| Commit | Subject |
+|---|---|
+| `07f9542c569bba694b6d850c12c71cd1b8e77109` | release: bump packager CATALOG_VERSION to v5.0 |
+| `32d4650f05567bd48a843b659d4b27da4e65cb6d` | docs: track v5.0 design specs |
+| (this commit) | docs: v5.0 audit — operator rulings appended |
+
+### Finding status updates (the table above is left as written)
+
+- **F3 → resolved.** `build_release_artifacts.py:59` is now `CATALOG_VERSION = "v5.0"`. **Prompt gap:** `root_CC_PROMPT_v5_0_build.md` authorized packager edits only "if the self-assert needs a surface-map change". A catalog cut always needs the `CATALOG_VERSION` bump (the v4.0 cycle hit the same gap, recorded in `audit/v4_0-alignment/5GEN_VERIFICATION_LOG.md`). Future catalog-cut prompts should authorize the bump explicitly.
+- **F4 → resolved.** The four v5 specs are tracked. The LF sha256 of each committed blob (`git show HEAD:<f> | tr -d '' | sha256sum`) equals the pre-flight value, and the LF byte counts are unchanged: landscape `45515513…8e70` / 20635; catalog `1ccfb1a8…706d` / 23265; cc-design `0e641480…431e` / 30275; behavioral-tuning `fdb60955…35cfb` / 17448. The working-tree files were already LF, so their raw bytes are unchanged too.
+- **F5 → resolved.** The operator confirmed the legacy clauses; ruling appended to `5_5GEN_SWEEP_MANIFEST.md`.
+- Open after this addendum: 14 (F2, F11–F22, F24); resolved 8 (F1, F3, F4, F5, F6, F7, F23, F25); accepted 3 (F8, F9, F10). 14 + 8 + 3 = 25.
+- `design/audit-artifacts/v4.2/` stays untracked; it was not in scope.

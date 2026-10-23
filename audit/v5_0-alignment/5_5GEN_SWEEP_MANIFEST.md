@@ -269,3 +269,7 @@ What was fixed:
 - Reference TOC lines 15 and 23–26, and section titles and bodies at 441–623 ("(Opus 5)", "Opus 5 verifies / expands / delegates / narrates…"): made model-neutral. Each section notes "added in the v4.0 cycle" as history.
 - Reference lines 302 and 424–425 ("`high` (the Opus 5 / Sonnet 5 default)", "Opus 5 and Sonnet 5 default to `high` on the Claude API"): rewritten to the `medium` default with the apply-on-observation note and the three API defaults.
 - Reference lines 645, 649, and 659 (thinking-disabled on Opus 5, the 400 at `xhigh`/`max`): narrowed to Haiku 5.5 only, plus Sonnet 5.5 `between_tools`, per spec §3 and §4 and landscape §4.1.
+
+## Operator ruling — appended after PR open (2026-10-22)
+
+The 7 Haiku 4.5 lines inside `rootnode-*/` (see "Haiku 4.5 mentions vs the gate's pass wording" above) are **confirmed as legacy clauses required by their catalog-spec §4 rows, not defects**. The session prompt's T1 pass wording ("the README `haiku`-alias pin line is the only Haiku 4.5 mention outside historical text") was stricter than revised D6, which drops Haiku 4.5 from the calibration templates and the README scope but does not forbid row-mandated legacy notes. T1 stands as PASS. Future landscape-gate wording should exempt row-mandated legacy clauses explicitly.

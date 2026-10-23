@@ -491,3 +491,11 @@ During generation, the first run's `rootnode-*/` new-file listing came out empty
 - D9a validation of cc-design 5.0 — separate prompt `root_CC_PROMPT_v5_0_cc-design_d9a.md`.
 - KF mirror sync PR after the seed KFs absorb `kf-update-blocks.md` (30 blocks).
 - 16 open low-severity findings (F2, F13–F22, F24, F27–F29, F31) for the next patch.
+
+### Rendered page — operator check (append-only, 2026-10-23T01:38:20Z)
+
+> operator-verified
+
+— the operator's reply to the rendered-page check requested at the Phase B halt.
+
+**Rendered page: operator-verified.** The `catalog-v5.0` umbrella page (https://github.com/drayline/rootnode-skills/releases/tag/catalog-v5.0) renders its per-Skill links as clickable links. This supersedes the "not verified" entries for the rendered page and its per-Skill link clicks in Addendum 3; those entries are left as written. Remaining Phase B not-verified item: asset download integrity beyond size equality.

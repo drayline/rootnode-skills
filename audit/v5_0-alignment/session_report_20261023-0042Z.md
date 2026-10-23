@@ -343,7 +343,7 @@ No fetch failed. Text 6 was a sixth pointer Builder-D listed; it was quoted on t
 ### Finding status updates (the table above is left as written)
 
 - **F3 → resolved.** `build_release_artifacts.py:59` is now `CATALOG_VERSION = "v5.0"`. **Prompt gap:** `root_CC_PROMPT_v5_0_build.md` authorized packager edits only "if the self-assert needs a surface-map change". A catalog cut always needs the `CATALOG_VERSION` bump (the v4.0 cycle hit the same gap, recorded in `audit/v4_0-alignment/5GEN_VERIFICATION_LOG.md`). Future catalog-cut prompts should authorize the bump explicitly.
-- **F4 → resolved.** The four v5 specs are tracked. The LF sha256 of each committed blob (`git show HEAD:<f> | tr -d '' | sha256sum`) equals the pre-flight value, and the LF byte counts are unchanged: landscape `45515513…8e70` / 20635; catalog `1ccfb1a8…706d` / 23265; cc-design `0e641480…431e` / 30275; behavioral-tuning `fdb60955…35cfb` / 17448. The working-tree files were already LF, so their raw bytes are unchanged too.
+- **F4 → resolved.** The four v5 specs are tracked. The LF sha256 of each committed blob (`git show HEAD:<f> | tr -d '\r' | sha256sum`) equals the pre-flight value, and the LF byte counts are unchanged: landscape `45515513…8e70` / 20635; catalog `1ccfb1a8…706d` / 23265; cc-design `0e641480…431e` / 30275; behavioral-tuning `fdb60955…35cfb` / 17448. The working-tree files were already LF, so their raw bytes are unchanged too.
 - **F5 → resolved.** The operator confirmed the legacy clauses; ruling appended to `5_5GEN_SWEEP_MANIFEST.md`.
 - Open after this addendum: 14 (F2, F11–F22, F24); resolved 8 (F1, F3, F4, F5, F6, F7, F23, F25); accepted 3 (F8, F9, F10). 14 + 8 + 3 = 25.
 - `design/audit-artifacts/v4.2/` stays untracked; it was not in scope.

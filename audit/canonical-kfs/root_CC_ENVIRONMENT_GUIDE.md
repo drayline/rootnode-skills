@@ -86,11 +86,11 @@ Subagents are focused specialists with their own context window. The parent conv
 
 **Do not use subagents for:** "coverage" — using more agents because more is better is anti-pattern; sequential work where each step depends on the previous (subagents block on each other); same-file edits (two subagents editing the same file in parallel produces conflicts); single-perspective tasks where one thorough audit beats four shallow ones; small tasks where delegation overhead exceeds the benefit.
 
-**Delegation caps on Opus 5.** Opus 5 delegates to subagents more readily than prior Opus models. On CC deployments running Opus 5, cap delegation explicitly in CLAUDE.md or Skill instructions — for example: "Delegate to a subagent only for large tasks that are genuinely independent and parallelizable. Do not delegate work you can finish in a handful of tool calls. If one subagent can complete the task, use one rather than several, and keep spawn counts low." Anthropic's Opus 5 prompting guide names this as required prompting discipline for Opus-5-based deployments. A cap stated only in prose is enforcement-as-preference — put the mechanism behind it (§6 carries the cap mechanism table).
+**Delegation caps.** Opus 5 delegated to subagents more readily than prior Opus models, and on the 5.5 generation Sonnet 5.5 at `xhigh`/`max` launches reviewer subagents on its own (tendency #13 — its first-line countermeasure is the one-paragraph Anthropic block in `root_OPTIMIZATION_REFERENCE.md`). Cap delegation explicitly in CLAUDE.md or Skill instructions — for example: "Delegate to a subagent only for large tasks that are genuinely independent and parallelizable. Do not delegate work you can finish in a handful of tool calls. If one subagent can complete the task, use one rather than several, and keep spawn counts low." Anthropic's Opus 5 prompting guide names this as required prompting discipline for Opus-5-based deployments. A cap stated only in prose is enforcement-as-preference — put the mechanism behind it (§6 carries the cap mechanism table).
 
 **Built-in subagents first.** Claude Code ships three built-in subagents — Explore (read-only, codebase search), Plan (read-only, used in plan mode), general-purpose (full tools, complex multi-step work). Default to built-ins where they fit; create custom subagents only when a recurring specialist role emerges with clear warrant.
 
-**Explore does not default to a cheap model.** As of Claude Code v2.1.198, the built-in Explore subagent inherits the main conversation's model rather than defaulting to Haiku, capped at Opus. A session running Opus therefore pays Opus rates for every Explore call — the opposite of the cost profile the role's name implies. To make Explore cheap, define a project-level `Explore` subagent with `model: haiku`; the project definition overrides the built-in. Two further properties matter when designing around Explore and Plan: neither loads CLAUDE.md or git status, so neither inherits the standing context the main session has, and neither can be resumed, so a partial result is lost rather than continued. `[product fact under AEA §4.15 — verify against the running version with claude --version before relying on it]`
+**Explore does not default to a cheap model.** As of Claude Code v2.1.198, the built-in Explore subagent inherits the main conversation's model rather than defaulting to Haiku; when the main session runs a Fable model, Explore runs on the `opus` alias (Anthropic-hosted only), and on third-party providers it stays on the main model. A session running Opus therefore pays Opus rates for every Explore call — the opposite of the cost profile the role's name implies. To make Explore cheap, define a project-level `Explore` subagent with `model: haiku`; the project definition overrides the built-in. On the Anthropic API the `haiku` alias resolves to Haiku 5.5 (1M context, effort-capable); on Bedrock and Agent Platform it may still resolve to Haiku 4.5, so pin `claude-haiku-5-5` there. Two further properties matter when designing around Explore and Plan: neither loads CLAUDE.md or git status, so neither inherits the standing context the main session has, and neither can be resumed, so a partial result is lost rather than continued. `[product fact under AEA §4.15 — verify against the running version with claude --version before relying on it]`
 
 **Custom subagent reliability requirements:**
 - *Specific `description:` field.* Claude uses this to decide auto-delegation. "Reviews code for security issues before commits" routes better than "security expert."
@@ -117,7 +117,7 @@ Hooks run deterministically on lifecycle events. They are the enforcement layer 
 
 **The enforcement-as-preference anti-pattern.** A common failure mode in CC deployments: writing rules in CLAUDE.md like "always run tests before committing" or "never modify the migrations folder" without backing them with hooks. CLAUDE.md is advice, not enforcement. The model may comply 95% of the time; the 5% it doesn't is when the failure surfaces. If a guarantee must hold, the rule must be a hook, not a CLAUDE.md sentence.
 
-Hook events include PreToolUse (block before action), PostToolUse (verify after action), Stop (gate completion), and others per Anthropic primary documentation. Choose the event by the timing of the guarantee.
+Hook events include PreToolUse (block before action), PostToolUse (verify after action), Stop (gate completion), and others per Anthropic primary documentation. Choose the event by the timing of the guarantee. A hook blocks only when it exits 2 — `exit 1` is a non-blocking error (§6, exit-code contract).
 
 ### 1.6 MCP servers (`.mcp.json`)
 
@@ -239,7 +239,7 @@ The Critic role is available as a standalone Skill (`rootnode-critic-gate`) with
 
 Every agent prompt has concrete, verifiable tasks. Never "brainstorm creatively" or "consider all angles." Each agent has a checklist of verifiable assertions, not open-ended exploration. Subagent prompts should also specify the return format (summary, finding list with priority, diff with rationale) so the parent conversation can integrate results without re-injecting raw file content.
 
-**The eight-field delegation brief.** A delegation is a contract, and an underspecified contract is where delegated work drifts. Every brief carries eight fields:
+**The ten-field delegation brief.** A delegation is a contract, and an underspecified contract is where delegated work drifts. Every brief carries the first eight fields; Builder and Refuter briefs — the roles whose output is accepted or rejected against a spec — also carry fields 9 and 10:
 
 | # | Field | What it fixes |
 |---|---|---|
@@ -251,45 +251,55 @@ Every agent prompt has concrete, verifiable tasks. Never "brainstorm creatively"
 | 6 | Output format | The shape the orchestrator will integrate |
 | 7 | Return length cap | A number, in lines or words |
 | 8 | Known facts | What is already established, so the agent does not re-derive it |
+| 9 | Bound spec digest | The LF-sha256 of the spec or diff the worker builds or reviews against; the worker halts on mismatch, so authority binds to content rather than to who issued the brief or when |
+| 10 | No verdict dictation | A Refuter brief never names a verdict to write or prefer and never passes the Builder's reasoning; the return opens with `Verdict Dictated: yes` or `no`, so a contaminated brief is visible in the record |
 
-Two of the eight are non-optional, and they are the two most often written wrong.
+Two fields are non-optional in every brief, and they are the two most often written wrong.
 
 *Field 4 names external artifacts only.* "Verify your work" and "double-check your output" are self-directed re-checking and are removed rather than softened (AEA §4.14). "Run the auth test suite and report the failing test names" is external-artifact verification and stays imperative.
 
 *Field 7 is a number, not an adjective.* "Be concise" and "keep it short" are not caps — they are preferences the agent calibrates against its own sense of the task, and an agent deep in a long run calibrates upward. "Return no more than 20 lines" is a cap.
 
-### 3.4 Claude Code defaults on Opus 5 and Sonnet 5
+`[fields 9–10 added in the v5.0 cycle, 2026-10-22; practitioner: awslabs/aidlc-workflows — authority binds to content; reviewer brief contamination check]`
 
-**Effort default:** on Claude Code, `effort` defaults to `high` for both Opus 5 and Sonnet 5. This is the Anthropic-recommended starting point (per the models overview and the Opus 5 whats-new page). Do not carry over `xhigh` defaults from Opus 4.7/4.8 prompts without re-running an effort sweep on the deployment's own evals — the inverted rule (`high` is the start; `xhigh` steps up for demanding work; `low`/`medium` are legitimate primary cost controls) applies on CC as it applies everywhere else.
+### 3.4 Claude Code defaults on the 5.5 generation
 
-**Model default:** the Claude Code default model moves with Claude Code product releases and is not restated here (consult Anthropic's Claude Code documentation at update time rather than hardcoding a value that will drift). Design deployments to work under the model the user is running, not under a specific model version assumed at design time.
+Model, effort, and thinking facts in this section are dated product facts from the landscape block in `root_CLAUDE_OPTIMIZATION_NOTES.md` §3 (verified 2026-10-22). Verify them against the running Claude Code version before relying on them.
 
-**Breaking-change reminder:** on Opus 5, `thinking: {"type": "disabled"}` at `xhigh` or `max` returns 400. For CC deployments that need thinking disabled, drop effort to `high` or below.
+**Effort default:** Claude Code defaults to `medium` on Opus 5.5, Sonnet 5.5, and Haiku 5.5, and to `high` on Fable 5.1 and earlier effort-capable models. Anthropic reports Opus 5.5 at `medium` matches or exceeds Opus 5 at `high` on coding and knowledge-work evaluations, and recommends starting there when moving from Opus 5. The rule from the Opus 5 cycle carries over: start at the default, re-run an effort sweep on the deployment's own evals rather than carrying a setting over, treat `low`/`medium` as legitimate cost controls where quality holds, and step to `xhigh`/`max` only on a measured gain. Two effort-conditioned behaviors bear on design: at `low`/`medium` early turn termination rises (tendency #15 — raise effort before adding the countermeasure block), and at `xhigh`/`max` Sonnet 5.5 self-starts review rounds and reviewer subagents (tendencies #11 and #13). Set effort per model in `modelSettings` rather than a top-level `effortLevel`, which the documentation says Opus 5.5 ignores `[verify on the running version]`; set a subagent's effort with the Agent tool's `effort` parameter `[v2.1.292+]` or frontmatter `effort`.
 
-**Ultracode:** a session setting, not a model effort level. It sends `xhigh` to the model and has Claude orchestrate dynamic workflows (orchestration scripts that fan work across many subagents) for substantive tasks. Ultracode sessions are exempt from the subagent concurrency limit, so a session-wide opt-in removes the one numeric cap on fan-out. Default it off and opt in per task; it fits codebase-wide audits, large migrations and cross-checked research, not routine editing. Disable it by mechanism with `CLAUDE_CODE_DISABLE_WORKFLOWS=1` or `disableWorkflows` in managed settings (§6 cap mechanism table), and state the default and the opt-in path in the design's prose. `[product fact 2026-09-09 — verify against the running Claude Code version]`
+**Model default:** the Claude Code default model moves with product releases and is not restated here — it moved from Opus 5 to Opus 5.5 in one release. Consult the landscape block or Anthropic's Claude Code documentation at design time, and design deployments to work under the model the user is running rather than a version assumed at design time.
+
+**Thinking:** thinking cannot be turned off in Claude Code on Opus 5.5, Sonnet 5.5, Haiku 5.5, or the Fable models, and `MAX_THINKING_TOKENS=0` no longer applies to them. On the API, `thinking: {"type": "disabled"}` returns 400 on Opus 5.5, Sonnet 5.5, and Fable 5.1 at any effort; Sonnet 5.5's floor is `between_tools` at `high` or below; Haiku 5.5 accepts `disabled` at `high` or below. The Opus 5 rule — disabled accepted only at `high` or below — now applies only to Opus 5 and earlier. Designs carried from the Opus 5 era drop their thinking-disabled mitigations.
+
+**Ultracode:** a session setting, not a model effort level. It sends `xhigh` to the model and has Claude orchestrate dynamic workflows (orchestration scripts that fan work across many subagents) for substantive tasks. Ultracode sessions are exempt from the subagent concurrency limit, so a session-wide opt-in removes the one numeric cap on fan-out. Default it off and opt in per task; it fits codebase-wide audits, large migrations and cross-checked research, not routine editing. Turn it off for a session with `/effort ultracode off` `[v2.1.284+]`; it is unavailable when workflows are off or the model lacks `xhigh`. Disable it by mechanism with `CLAUDE_CODE_DISABLE_WORKFLOWS=1` `[name not on the 2026-10-22 fetched pages — verify on 2.1.30x]` or `disableWorkflows` in managed settings (§6 cap mechanism table), and state the default and the opt-in path in the design's prose. `[product fact 2026-10-22 — verify against the running Claude Code version]`
 
 ### 3.5 Role tiering and the Builder-to-Refuter loop
 
 **Role tiering.** In a multi-agent topology, every role does not need the same capability — and by default every subagent inherits the session's model, so an untiered deployment pays the orchestrator's rate for the scout. The structure below is `[generalizable]`. The model column is a landscape fact, dated per AEA §4.15, and is refreshed against the dated landscape block in `root_CLAUDE_OPTIMIZATION_NOTES.md` rather than treated as durable.
 
-| Role | Does | Capability needed | Tier as of 2026-09-09 |
+| Role | Does | Capability needed | Model as of 2026-10-22 |
 |---|---|---|---|
-| Orchestrator | Plans, decomposes, spawns, reads reports, integrates | Highest — it holds the whole picture | Top tier available |
-| Scout | Locates files, symbols, call sites; returns locations | Low — retrieval, not judgment | Haiku tier |
-| Researcher | Establishes facts; marks unverified ones as unverified | Middle | Sonnet tier |
-| Builder | Implements against a spec; runs the tests | Middle | Sonnet tier |
-| Refuter | Re-derives the builder's diff, re-runs the tests, refuses to trust "done" | At or above the builder | Opus tier or above |
-| Debugger | Root-causes failures the builder could not | Highest — spawned only for hard cases | Top tier available |
+| Orchestrator | Plans, decomposes, spawns, reads reports, integrates | Highest — it holds the whole picture | Opus 5.5 (CC default); Fable 5.1 for multi-sitting runs |
+| Scout | Locates files, symbols, call sites; returns locations | Low — retrieval, not judgment | Haiku 5.5 via a project `Explore` override, `low` effort |
+| Researcher | Establishes facts; marks unverified ones as unverified | Middle | Haiku 5.5 at `medium`–`high`, or Sonnet 5.5 for judgment-heavy reads |
+| Builder | Implements against a spec; runs the tests | Middle | Sonnet 5.5 baseline; Opus 5.5 for hard specs |
+| Refuter | Re-derives the builder's diff, re-runs the tests, refuses to trust "done" | At or above the builder | Opus 5.5 or above |
+| Debugger | Root-causes failures the builder could not | Highest — spawned only for hard cases | Opus 5.5 at `high`; `xhigh` only on measured gain |
 
 The landscape-independent rule is the one to carry forward: **reviewer capability is greater than or equal to builder capability.** A reviewer weaker than the agent it reviews rubber-stamps. Every other cell in the model column expires.
 
 **The Builder-to-Refuter loop.** The default coding topology is a loop, not a panel: an Orchestrator that specs and integrates, a Builder that implements, and a Refuter that re-derives the result. The loop runs Orchestrator → Builder → Refuter → Orchestrator, and a rejection returns to the *same* Builder so it keeps its context rather than restarting cold.
 
-The Refuter spawns **non-fork**. A reviewer forked from the builder's conversation inherits the builder's reasoning and re-derives nothing — it agrees with itself and reports the agreement as verification. Non-fork isolation is the property that makes the Refuter a Critic under §3.2 rather than self-verification under AEA §4.14.
+The Refuter spawns **non-fork**. A reviewer forked from the builder's conversation inherits the builder's reasoning and re-derives nothing — it agrees with itself and reports the agreement as verification. Non-fork isolation is the property that makes the Refuter a Critic under §3.2 rather than self-verification under AEA §4.14. Fork mode is on by default, so a non-fork Refuter needs `CLAUDE_CODE_FORK_SUBAGENT=0` or an explicit non-fork spawn `[verify on the running version]`.
+
+**Bounded loop.** Builder-to-Refuter cycles default to **2**. After the cap the work goes to the operator gate with its open findings listed, rather than into a third cycle. A Refuter return with no verdict is re-dispatched once; a second incomplete return is recorded as `NOT-READY`, so a silent cutoff becomes a visible finding. At the operator gate, after three REWORK cycles in total, offer "accept as-is with open findings" as an explicit option.
+
+**`blocked` ≠ empty.** A reviewer's return contract has three outcomes: findings, no findings, or `status: blocked` — it could not inspect, because a file was missing, a tool failed, or the turn cap hit before inspection. An empty findings list is never the encoding of "could not look"; a criterion that silence can satisfy measures nothing (`root_build_context.md` Observation 26).
 
 §3.2's gating conditions govern the full Orchestrator + Critic + Scribe expansion, not this loop. Builder-to-Refuter is lighter than both that expansion and the four-agent verification topology in §3.1, and it is the right default for ordinary coding work. Escalate to §3.1 only when verification needs perspectives that conflict by design, and to §3.2 only when its three conditions are met.
 
-`[generalizable structure; model column dated 2026-09-09; loop grounded in the rootnode-cc-design v4.1 cycle, 2026-09-09]`
+`[generalizable structure; model column dated 2026-10-22 per the landscape block; loop grounded in the rootnode-cc-design v4.1 cycle, 2026-09-09; cycle cap and blocked-status contract from the v5.0 cycle, 2026-10-22 — practitioner: awslabs/aidlc-workflows reviewer_max_iterations and lens contract]`
 
 ---
 
@@ -389,6 +399,8 @@ Every prompt that replaces a file carries that file's digest, and the digest is 
 
 **Normalize before hashing.** A digest gate on a text file binds to LF-normalized content, never to raw bytes. On a Windows checkout with `core.autocrlf=true`, git stores the LF blob regardless of what the working copy contains, so a raw-bytes gate on a CRLF or mixed-ending file is unsatisfiable by any commit — the gate can never pass, and the failure presents as a content error rather than an encoding one. Compute the digest over content with carriage returns stripped, and say so in the prompt so the agent normalizes the same way before comparing.
 
+**Receipt freeze — the end-state rule applied to review.** A Refuter's ACCEPT binds to the digest of the diff it reviewed. Any later write to a reviewed file invalidates the ACCEPT, and the loop re-enters at the Refuter rather than at "done" — an approval of bytes that no longer exist approves nothing. Where the guarantee must hold, a PreToolUse hook that exits 2 on writes to frozen files is the mechanism (§6); prose is the fallback. `[v5.0 cycle, 2026-10-22; practitioner: awslabs/aidlc-workflows review-freeze hook]`
+
 `[generalizable; forward-reference discipline grounded in Phase 31d merge session 2026-05-07 — author agent correctly anticipated the audit-artifact commit would change main..HEAD count from 10 → 11 and updated PR description proactively. End-state assertion rule grounded in an observed 2026-09-07 halt where a prompt's pre-state line count went stale because the replacement was already staged, and in the 2026-09-09 v4.1 cycle where a raw-bytes digest gate proved unsatisfiable by construction]`
 
 ### 5.8 Competing hypotheses in diagnostic prompts
@@ -404,6 +416,8 @@ Before naming an instrument, run the instrument-fit test from AEA §4.14. An ins
 ### 5.9 Turn-economy rule
 
 A multi-phase CC prompt runs end to end and halts only at genuine operator gates — a merge decision, an accept/reject decision on a design. A halt whose only purpose is letting chat read a report and hand back the next paste is a design defect in the prompt, not a legitimate review gate. This applies to session prompts authored in design conversations; it does not apply to CLAUDE.md standing context, which governs every session rather than one prompt.
+
+Within a single turn the same discipline is tendency #15, early turn termination: an agent that ends its turn with a summary and an announced next step, an offer to continue, or a decision list that blocks nothing has stopped work the prompt asked for. Multi-phase and unattended prompts carry the early-stop countermeasure — the default "Keep working until…" block, both paragraphs, or for fully unattended runs the Opus 5.5 variant — and name the stops the prompt does want: genuine operator gates and risky or destructive actions. Templates and placement: `root_OPTIMIZATION_REFERENCE.md` #15.
 
 ---
 
@@ -423,19 +437,39 @@ Decision rule: if a guarantee absolutely must hold, use a hook. If a preference 
 - "Always update change_log.md after changes" → PostToolUse hook verifying or appending.
 - "Verify type-check passes before commit" → PreToolUse hook on Bash(git commit) running type-check.
 
+**The exit-code contract** `[Anthropic docs — hooks, verified 2026-10-22; re-verify on the running version]`. A command hook enforces only if it exits 2. `exit 0` is success, and its JSON output fields are applied. `exit 2` is a blocking error on events that can block: PreToolUse blocks the call, Stop prevents stopping, UserPromptSubmit blocks the prompt, and PostToolUse only shows stderr, because the tool already ran. Any other non-zero exit — `exit 1` included — is a non-blocking error, and the action goes ahead. A hook written to "enforce" with `exit 1` is enforcement-as-preference inside the hook layer: it reads as a guarantee and behaves as advice (`root_build_context.md` Observation 28). The JSON route blocks with `{"decision": "block", "reason": "…"}`, or on PreToolUse with `hookSpecificOutput.permissionDecision: "deny"`. A timed-out command hook does not block on PreToolUse unless `onFailure: "block"` is set. The configuration shape:
+
+```json
+"hooks": {
+  "PreToolUse": [
+    { "matcher": "Edit|Write", "hooks": [ { "type": "command", "command": "<script>", "timeout": 30 } ] }
+  ]
+}
+```
+
+`matcher` is a string — an exact tool name, `a|b`, or a regex — not a `"matchers"` array, and `timeout` is in seconds.
+
+**Bounded Stop hooks.** A Stop hook that blocks can trap a session. Any Stop hook that enforces an iron law carries two bounds. It honors the `stop_hook_active` input field — it does not re-block when Claude is already continuing from a stop hook `[verify the field name on the running version]`. And it keeps a no-progress counter in a state file that releases the session after N blocks on unchanged evidence (the AI-DLC working values are 2 interactive and 8 unattended, reset when the evidence changes). The block reason names the missing evidence as an on-task continuation, never as an override-shaped instruction. `[practitioner: awslabs/aidlc-workflows]`
+
+**Three-tier enforcement.** Between the prompt and the blocking hook sits a middle tier. A *prompt* rule is advisory and guarantees nothing. An *advisory check* is deterministic — it runs on write and surfaces a finding — but never blocks; a check whose tool was unavailable evaluated nothing and does not clear an earlier failure. A *blocking hook* exits 2 at a gate. Promote a rule up a tier on observed evidence that the lower tier lost, not in advance; overriding a blocking check is a logged operator decision and is forbidden in unattended runs. Give each invariant one owner and one shared check, which may run at more than one boundary — a second, independently written version of the same rule drifts (`root_AGENT_ANTI_PATTERNS.md` §6, structural candidates). `[practitioner: awslabs/aidlc-workflows]`
+
 **Worked example: the subagent delegation cap.** A delegation cap that exists only as CLAUDE.md prose is enforcement-as-preference — the model reads it, complies most of the time, and drifts under load, which is exactly when the cap matters. Most of the cap has a mechanism available:
 
 | Guarantee | Prose-only form | Mechanism |
 |---|---|---|
 | Subagents cannot spawn subagents | "Do not nest delegation" | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3; `1` disables nesting) |
-| Bound concurrent fan-out | "Keep spawn counts low" | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20) |
+| Bound concurrent fan-out | "Keep spawn counts low" | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20; ultracode sessions exempt) `[v2.1.217+]` |
+| Subagents run a chosen model | "Use the cheap model for scouts" | per-invocation `model` → frontmatter `model` → `CLAUDE_CODE_SUBAGENT_MODEL`; `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` overrides all `[v2.1.257+]` |
+| Every workflow agent runs one model | "Workflows run on Sonnet" | `CLAUDE_CODE_WORKFLOW_SUBAGENT_MODEL` `[v2.1.296+]` |
+| A subagent runs at a set effort | "Scouts think less" | Agent tool `effort` parameter per invocation `[v2.1.292+]`; frontmatter `effort` |
+| A reviewer does not inherit the builder's conversation | "Spawn the Refuter fresh" | `CLAUDE_CODE_FORK_SUBAGENT=0` (fork mode is on by default) or an explicit non-fork spawn |
 | A role may only call certain agents | "Delegate only to the builder" | `tools: Agent(type, …)` allowlist in agent frontmatter |
 | A named agent is unavailable | "Do not use agent X" | `permissions.deny: ["Agent(name)"]` |
 | A role cannot delegate at all | "This role does its own work" | Omit `Agent` from that role's `tools` |
 | A run cannot wander | "Stop when the task is done" | `maxTurns` |
-| Workflows are off | "Do not use workflows" | `CLAUDE_CODE_DISABLE_WORKFLOWS=1` |
+| Workflows are off | "Do not use workflows" | `CLAUDE_CODE_DISABLE_WORKFLOWS=1` `[name not on the 2026-10-22 fetched pages — verify on 2.1.30x]` |
 
-Keep the prose as well — it carries the reasoning, which a settings key cannot. The rule is that the guarantee lives in the mechanism and the why lives in the prose, not that the prose is redundant. `[verify variable names and defaults against the running Claude Code version before deploying — product facts under AEA §4.15]`
+Keep the prose as well — it carries the reasoning, which a settings key cannot. The rule is that the guarantee lives in the mechanism and the why lives in the prose, not that the prose is redundant. `[verify variable names, defaults, and minimum versions against the running Claude Code version before deploying — product facts under AEA §4.15, landscape block 2026-10-22]`
 
 ---
 

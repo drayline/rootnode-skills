@@ -1,8 +1,8 @@
 # Optimization Reference
 
-Claude-specific structural principles, behavioral patterns, and fix patterns for Project optimization. Calibrated for Claude Opus 5 and Sonnet 5 (dual-primary), with Fable 5 integrated-aware for long-horizon agent workloads, Opus 4.8 fallback-graceful (users are silently served it on classifier-flagged requests), Sonnet 4.6 legacy-graceful, and Haiku 4.5 graceful-with-extended-thinking. Consult this when diagnosing structural issues, checking behavioral countermeasures, and reconstructing system prompts or knowledge file architectures. Model-fact statements defer to `root_CLAUDE_OPTIMIZATION_NOTES.md` Section 3 (5-Generation Model Landscape); this document assumes that reference.
+Claude-specific structural principles, behavioral patterns, and fix patterns for Project optimization. Calibrated for the 5.5 generation: Claude Opus 5.5 and Sonnet 5.5 (dual-primary), Fable 5.1 integrated-aware for long-horizon agent workloads, Haiku 5.5 subagent-aware, Opus 5 and Sonnet 5 fallback-graceful (the models users are silently served on classifier-flagged requests), and Sonnet 4.6 legacy-graceful. Consult this when diagnosing structural issues, checking behavioral countermeasures, and reconstructing system prompts or knowledge file architectures. Model-fact statements defer to `root_CLAUDE_OPTIMIZATION_NOTES.md` Section 3 (the dated model-landscape block, verified 2026-10-22); this document assumes that reference.
 
-**Calibration scope:** Opus 5 + Sonnet 5 **dual-primary**; Fable 5 **integrated-aware**; Opus 4.8 **fallback-graceful**; Sonnet 4.6 **legacy-graceful**; Haiku 4.5 **graceful-with-extended-thinking**. Haiku 4.5 without extended thinking and Haiku 3.5 are out of scope. Mythos 5 / Mythos Preview out of scope. See `root_CALIBRATION_SCOPE_DECISION.md` for the full scope authority and operational definitions. Where Opus 5 and Sonnet 5 diverge, both are documented; where Sonnet 5 behavior is not documented by Anthropic, the column reads "no delta documented" rather than inheriting from Sonnet 4.6. See `root_SKILL_PORTABILITY_TIER_ASSIGNMENTS.md` for per-Skill tier assignments and Claude Code applicability classifications.
+**Calibration scope:** Opus 5.5 + Sonnet 5.5 **dual-primary**; Fable 5.1 **integrated-aware**; Haiku 5.5 **subagent-aware**; Opus 5 / Sonnet 5 **fallback-graceful**; Sonnet 4.6 **legacy-graceful** until retirement. Haiku 4.5 (retirement not sooner than 2026-10-15) and Mythos 5.1 are out of scope. Scope authority is the dated landscape block in `root_CLAUDE_OPTIMIZATION_NOTES.md` §3 and the catalog README's Model Compatibility section; `root_CALIBRATION_SCOPE_DECISION.md` and `root_SKILL_PORTABILITY_TIER_ASSIGNMENTS.md` are retired historical records (2026-07-28). Where Opus 5.5 and Sonnet 5.5 diverge, both are documented; where Anthropic documents no behavior for a model, the entry says so rather than inheriting a value from an earlier model.
 
 **Surface scope.** This document is primarily CP-side (Claude Project) optimization methodology. The Nine-Layer Architecture Model, system prompt architecture, Memory layer design, User Preference optimization, evolutionary optimization pathways, knowledge file design, context budget principles, RAG quality optimization, and most common structural fixes apply to chat-side Projects. The Behavioral Tendencies and Countermeasures section is surface-aware: tendencies and their deployment calibrations span CP, CC, and API contexts. The CC-side counterpart for environment design is `root_CC_ENVIRONMENT_GUIDE.md`. The surface-invariant principle layer is `root_AGENT_ENVIRONMENT_ARCHITECTURE.md`.
 
@@ -120,7 +120,7 @@ BOTTOM (high attention, closest to generation):
 
 **Layer 2 — Core Rules.** Should contain 3-7 non-negotiable behavioral rules. Each rule should address a specific need — not restate generic best practices. Write as directives, not suggestions. Use the principle/default distinction: hard rules are stated as rules ("Never fabricate statistics"), preferences are stated as defaults ("Default to prose; use lists only for genuinely parallel items"). Fewer rules followed consistently beats many rules followed sporadically.
 
-**Note on instruction weight for current models (Opus 5 and Sonnet 5):** Opus 5 and Sonnet 5 follow instructions precisely — over-specified prompts produce rigid outputs rather than smoothed-over ones. Instructions that needed emphasis in pre-4.6 models (capitalization, repetition, "CRITICAL" prefixes) should be written in normal-weight language. Emphatic legacy language now causes over-compliance. Replace `MUST`, `ALWAYS`, `CRITICAL`, `NEVER` with calibrated guidance. **Exception on chat-interface deployments:** where you are specifically countering tendency 1b (persistent-preference dilution) or 7b (tool under-triggering), explicit enforcement language remains appropriate. See the Behavioral Tendencies section for details.
+**Note on instruction weight for current models (Opus 5.5 and Sonnet 5.5):** Current models follow instructions precisely — over-specified prompts produce rigid outputs rather than smoothed-over ones. Instructions that needed emphasis in pre-4.6 models (capitalization, repetition, "CRITICAL" prefixes) should be written in normal-weight language. Emphatic legacy language now causes over-compliance. Replace `MUST`, `ALWAYS`, `CRITICAL`, `NEVER` with calibrated guidance. **Exception on chat-interface deployments:** where you are specifically countering tendency 1b (persistent-preference dilution) or 7b (tool under-triggering), explicit enforcement language remains appropriate. See the Behavioral Tendencies section for details.
 
 **Layer 3 — Knowledge File Guide.** Each file gets a name, a one-sentence purpose description, and a routing signal: "Consult this when [specific trigger condition]." Routing descriptions should be functional, not decorative — they tell Claude when a file is relevant, not just what it contains. Every file in the Project must appear here.
 
@@ -145,9 +145,11 @@ Within modes, nest subsections with descriptive names rather than generic tags. 
 
 ## Behavioral Tendencies and Countermeasures
 
-The tendency taxonomy expanded for Opus 5. Verbosity refactored into a three-surface family (#3a/#3b/#3c) with distinct triggers and countermeasures. Four new tendencies added for Opus 5 (#11–#14). Two prompt/environment-conditional defects are treated separately at the end of this section rather than as model tendencies. Total: 14 model tendencies + 2 non-tendency defects.
+The taxonomy expanded for Opus 5 (v4.0 cycle) and again for the 5.5 generation (v5.0 cycle). Verbosity refactored into a three-surface family (#3a/#3b/#3c) with distinct triggers and countermeasures. Four tendencies were added for Opus 5 (#11–#14) and one for the 5.5 generation (#15 early turn termination). Four prompt/environment-conditional defects are treated separately at the end of this section rather than as model tendencies. Total: 15 model tendencies + 4 non-tendency defects.
 
-During audits, check whether the Project's domain and deployment context is likely to trigger each tendency, and whether an appropriate countermeasure is present. Countermeasure calibration varies by deployment — a countermeasure essential on the chat interface may be wasted tokens on Claude Code, and Opus 5's new tendencies (#11–#14) surface strongly on Claude Code specifically because that is where agentic workloads run.
+**5.5-generation provenance.** Facets added in the v5.0 cycle cite the Anthropic prompting guide they derive from (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1 — fetched 2026-10-22; URLs in `root_CLAUDE_OPTIMIZATION_NOTES.md` §3). Verbatim Anthropic blocks are carried in full, tagged `[Anthropic docs — <guide>, fetched 2026-10-22]`, rather than as pointers, because a pointer is a hidden dependency on a URL that will move. Deployment-conditioning values for the `medium`-default generation are D9c-analytical from the guides, not measured; Calibration Lab re-baselining remains open.
+
+During audits, check whether the Project's domain and deployment context is likely to trigger each tendency, and whether an appropriate countermeasure is present. Countermeasure calibration varies by deployment — a countermeasure essential on the chat interface may be wasted tokens on Claude Code, and the agentic tendencies (#11–#13, #15) surface strongly on Claude Code specifically because that is where agentic workloads run.
 
 ### The Deployment Context Model
 
@@ -157,14 +159,16 @@ Countermeasure relevance varies by deployment surface. Four contexts matter:
 |---|---|---|
 | Chat interface (claude.ai web/mobile) | Adaptive | HIGH for #1b, #7b, #9, #10; MEDIUM for #1a, #3a, #14 |
 | Claude Projects | Adaptive (CI anchors) | MEDIUM for #1b, #9, #14; LOW for most others |
-| Claude Code | `high` default (Opus 5 / Sonnet 5) | HIGH for #11, #12, #13; LOW for chat-interface-specific tendencies |
+| Claude Code | `medium` default (Opus 5.5 / Sonnet 5.5 / Haiku 5.5); `high` on Fable 5.1 | HIGH for #11, #12, #13; MEDIUM for #15 at `medium`, HIGH at `low`; LOW for chat-interface-specific tendencies |
 | API | Developer-controlled effort; developer-selected model | Depends on effort level and model |
 
 Each tendency below includes a deployment calibration line indicating where it most strongly applies. Before applying a countermeasure, identify the Project's deployment context.
 
+**The `medium`-default generation.** Claude Code defaults to `medium` effort on Opus 5.5, Sonnet 5.5, and Haiku 5.5; API defaults differ (Opus 5.5 `medium`, Sonnet 5.5 `high`, Fable 5.1 `high`). Where a v4.0 Claude Code value of LOW rested on `high`-effort mitigation (tendencies #5, #6, #7a, #9), that mitigation is weaker at `medium` — apply the countermeasure on observation rather than excluding it by default. No likelihood value below was raised or lowered without a cited guide sentence; absent one, the v4.0 value stands with this note.
+
 **Note on Claude Code applicability (per-Skill, not universal).** The Claude Code column in each tendency's deployment calibration below applies at the Project / prompt design level. For Skill design decisions (description optimization, 250-char listing cap, trigger language), Claude Code applicability is per-Skill — some Skills are first-class Claude Code targets, others are Claude.ai Projects-native and out-of-domain for Claude Code users. See `root_SKILL_PORTABILITY_TIER_ASSIGNMENTS.md` for HIGH / MEDIUM / LOW / NONE classifications.
 
-**Note on countermeasure language design.** Countermeasure effectiveness depends not just on *what* the countermeasure says but *how* it says it. LLMs respond to the same persuasion principles as humans: authority framing ("YOU MUST," "No exceptions"), commitment mechanisms (requiring announcement before action, creating TodoWrite checklists), scarcity framing ("BEFORE proceeding"), and social proof. Research (Meincke et al. 2025, N=28,000 AI conversations) found that persuasion techniques more than doubled LLM compliance rates (33% → 72%, p < .001). The countermeasure templates below implicitly use authority and commitment framing — the note here makes the mechanism explicit so that users writing custom countermeasures can apply the same principles deliberately. Strong imperative language is appropriate for discipline-enforcing countermeasures (#1, #5, #7b, #10, #12); calibrated language is appropriate for tendency reduction where overcorrection is the risk (#3a verbosity, #6 over-exploration). **For over-verification (#11), the countermeasure is REMOVAL of instructions — a new countermeasure shape.**
+**Note on countermeasure language design.** Countermeasure effectiveness depends not just on *what* the countermeasure says but *how* it says it. LLMs respond to the same persuasion principles as humans: authority framing ("YOU MUST," "No exceptions"), commitment mechanisms (requiring announcement before action, creating TodoWrite checklists), scarcity framing ("BEFORE proceeding"), and social proof. Research (Meincke et al. 2025, N=28,000 AI conversations) found that persuasion techniques more than doubled LLM compliance rates (33% → 72%, p < .001). The countermeasure templates below implicitly use authority and commitment framing — the note here makes the mechanism explicit so that users writing custom countermeasures can apply the same principles deliberately. Strong imperative language is appropriate for discipline-enforcing countermeasures (#1, #5, #7b, #10, #12); calibrated language is appropriate for tendency reduction where overcorrection is the risk (#3a verbosity, #6 over-exploration). **For over-verification (#11), the countermeasure is REMOVAL of instructions — a new countermeasure shape.** **For early turn termination (#15), use Anthropic's block as written** — do not intensify it; raise effort first.
 
 ### 1. Agreeableness Bias
 
@@ -289,6 +293,15 @@ boilerplate.
 - Claude Code: HIGH (any Skill that writes .md files)
 - API: HIGH (document-generation workloads)
 
+**Facet — whole-file rewrites for small edits (Fable 5.1; token cost, not quality).** Fable 5.1 tends to rewrite an entire file for a small change. Add the Fable 5.1 guide's instruction to "surgically edit a file rather than rewrite the entire thing" `[Anthropic docs — Prompting Claude Fable 5.1, fetched 2026-10-22]` to the coding or file-editing section of the prompt. Claude Code–relevant.
+
+**Facet — drafting twice at `xhigh`/`max` (Fable 5.1; effort-conditioned).** At `xhigh`/`max`, Fable 5.1 may draft the deliverable in thinking and then write it again in the reply. First lever: prefer `high`. For prose that still reads padded, "remove all mannered prose" `[Anthropic docs]` targets density, not length; do not stack a v4.0-era anti-formatting rule on top (see #4). Where `xhigh`/`max` is needed, add the max_tokens-aware block (replace `[max_tokens]` with the deployment's limit) `[Anthropic docs — Prompting Claude Fable 5.1, fetched 2026-10-22]`:
+```text
+Everything produced in one reply, including any reasoning or drafting done before the reply, counts toward a single limit of about [max_tokens] tokens. If that limit is reached before the reply is finished, the person receives a cut-off response and has to start over. Composing an entire output or deliverable in full as reasoning and then again as a reply would double the length of the turn without improving the result, so don't do that.
+
+Instead, when the person has asked for a long or effort-intensive deliverable such as a multi-section document, a large table or dataset, or a complete code file, spend extra effort on understanding the request, checking the inputs the answer depends on, settling the structure and other difficult decisions, and otherwise using the reasoning space to reason and the output space to write an output. Usually it is not needed to draft an output multiple times.
+```
+
 ### 4. List and Bullet Overuse
 
 **What it looks like:** Claude converts narrative explanations into bullet points. Analytical prose becomes lists of points. Every response defaults to structured formats even when prose would be more appropriate and readable. Persists across Opus 4.6 → 4.7 → 4.8 → 5.
@@ -309,6 +322,8 @@ explanations, analytical reasoning, or recommendations into bullet points.
 - Claude Projects: MEDIUM
 - Claude Code: LOW (code output is structurally formatted regardless)
 - API (effort ≥ high): MEDIUM
+
+**Over-correction warning (Fable 5.1).** Fable 5.1 formats less (less bold, fewer headers and lists) and writes denser prose by default. The template above — and any v4.0-era anti-formatting rule in an existing prompt — can now suppress structure the content needs. On Fable 5.1, remove blanket anti-list rules and use the conditional formulation instead: "use lists… when the content is multifaceted enough that they help; plain prose in conversational exchanges" `[Anthropic docs — Prompting Claude Fable 5.1, fetched 2026-10-22]`. Apply the template above only where list overuse is actually observed on the model in use.
 
 ### 5. Fabricated Precision (External-Fact)
 
@@ -333,11 +348,32 @@ percentage, or quantitative claim to fill a gap in the available information.
 - Claude Code: LOW
 - API (effort ≥ high): LOW
 
+**Facet — unmarked quotations (Fable 5.1).** Fable 5.1 summaries can reproduce source passages without quotation marks, so source wording reads as the model's own. The fix the Fable 5.1 guide documents is one complete worked example in the system prompt plus a marked-quotation rule in the Output layer `[Anthropic docs — Prompting Claude Fable 5.1, fetched 2026-10-22]`. The shapes below are rootnode-authored; fill the brackets from the deployment's own sources.
+
+**Output-layer rule:**
+```
+When your response reuses wording from a source, put the reused words in
+quotation marks and name the source. Paraphrase everything else in your
+own words.
+```
+
+**Worked-example shape** (one complete example in the system prompt — request, correct response, rationale):
+```
+<example>
+Request: Summarize [source document] for [audience].
+Correct response: [Summary in the model's own words, with any reused
+source phrase in quotation marks and attributed, e.g., The report calls
+the change "[exact phrase from source]" ([source name]).]
+Why this is correct: reused wording is marked and attributed; everything
+unmarked is paraphrase.
+</example>
+```
+
 ### 6. Over-Exploration (search breadth)
 
 **What it looks like:** Claude pursues too many lines of investigation before producing output. It reads many files, runs multiple searches, explores tangential angles.
 
-**Distinct from #12 (scope expansion):** #6 is search *breadth* within a defined task. #12 is delivering *beyond* the task. A prompt with both tendencies looks the same on the surface — "the model did too much" — but they have different fixes.
+**Distinct from #12 (scope expansion):** #6 is search *breadth* within a defined task. #12 is delivering *beyond* the task. Adding features, tests, or files beyond the request is a #12 symptom, not a #6 symptom — route it there (the template below is unchanged). A prompt with both tendencies looks the same on the surface — "the model did too much" — but they have different fixes.
 
 **Domains most affected:** Agentic projects, research projects, software engineering projects (where Claude may explore beyond the request), any project where Claude has access to tools and files.
 
@@ -353,8 +389,13 @@ or make improvements beyond what was asked.
 **Deployment calibration:**
 - Chat interface (Adaptive): LOW
 - Claude Projects: LOW
-- Claude Code (`high` default): MEDIUM (higher-effort settings amplify exploration on complex tasks)
+- Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5): MEDIUM (`xhigh` and `max` amplify exploration on complex tasks; the v4.0 value rested on `high`-effort behavior — apply on observation)
 - API (effort = xhigh): MEDIUM
+
+**Inverse note — Opus 5.5 multi-app workflows.** The Opus 5.5 guide documents the opposite failure: in multi-app workflows Opus 5.5 "tends to get to work quickly" `[Anthropic docs]` — it under-explores. Keep the #6 template for `xhigh`/`max` runs where excess breadth is observed, and never apply both directions to one deployment. On multi-app tasks the countermeasure runs the other way — because it tells the model to act on what it finds, keep untrusted content out of the records it searches `[Anthropic docs — Prompting Claude Opus 5.5, fetched 2026-10-22]`:
+```text
+Before taking any action, explore broadly with tool calls: list and open the emails, documents, spreadsheet tabs and records across the available apps that could be relevant to this task, including ones the task does not explicitly mention, and use what you find.
+```
 
 ### 7. Tool Trigger Miscalibration — two facets
 
@@ -379,13 +420,31 @@ changed since your training. For well-established facts and concepts,
 answer directly.
 ```
 
+**5.5-generation caution.** Tool-discouraging language is now the more common defect: the Sonnet 5.5, Haiku 5.5, and Fable 5.1 guides document that it causes under-search (7b). Apply the 7a revision only on observed over-triggering, scoped to the tool that over-fires. Claude Code likelihood for 7a: LOW.
+
 **Facet 7b — Tool under-triggering**.
 
 On the chat interface at Adaptive effort, Skills can fail to fire on legitimate triggers because the model weights persistent context (Skill descriptions loaded via progressive disclosure) less heavily than immediate prompts. The user asks a question that should route to a specific Skill; the model answers from general reasoning without invoking the Skill.
 
 This is the structural inverse of 7a — emphatic enforcement language is appropriate here, not in 7a.
 
-**Domains most affected:** Any project on the chat interface that depends on Skill activation or User-Preference-specified tool use.
+**Second driver — the fix direction flipped on the 5.5 generation.** On Sonnet 5.5, Haiku 5.5, and Fable 5.1, tool-suppressing language carried over from older prompts ("only use tools when strictly necessary") causes under-search, and at `low` effort the model answers from memory. The v4.0-era fix direction ("stop over-calling") is now usually the wrong one.
+
+**Step 1 — remove suppression.** "First, check your prompt for language that discourages tool use, such as "only use tools when strictly necessary" or "minimize tool calls," and remove it." `[Anthropic docs]`
+
+**Step 2 — search nudge** `[Anthropic docs — Sonnet 5.5 guide, fetched 2026-10-22]`:
+```text
+Use the search tool to check specifics that may have changed since your training, such as what is allowed, required or charged, even when you feel confident. For researched work such as a report or a comparison, gather current sources rather than writing from your training knowledge.
+```
+
+**Step 3 — model-specific additions.** Haiku 5.5: give the current date in the system prompt. Do not add blanket "always search" instructions — per the Haiku 5.5 guide, a blanket instruction made the model search on about half of the prompts that needed no search, with no accuracy gain. Fable 5.1 at `low`: raise effort for the affected turns, or add the name-verification nudge `[Anthropic docs — Prompting Claude Fable 5.1, fetched 2026-10-22]`:
+```text
+When a query centers on a name you do not confidently recognize, or recognize from a fast-moving area like AI models and developer tools where the landscape shifts within months, the name itself is the thing to verify: search before answering, and include the name as the user wrote it in at least one query alongside any reformulations. This holds even when you have some background on it — partial background is exactly what makes an out-of-date answer sound authoritative, so familiarity is not a reason to skip the search.
+```
+
+**Step 4 — explicit enforcement** applies to the first driver (chat Preferences or CI that name a required tool) and is the clause below.
+
+**Domains most affected:** Any project on the chat interface that depends on Skill activation or User-Preference-specified tool use; on the 5.5 generation, any prompt carried over with tool-suppressing language.
 
 **Countermeasure for 7b — explicit tool-use enforcement clause:**
 ```
@@ -399,10 +458,12 @@ unavailable in the current environment.
 **Deployment calibration:**
 - Chat interface (Adaptive): 7b is HIGH; 7a is LOW (legacy language should be removed)
 - Claude Projects: 7b is MEDIUM (CI partially anchors)
-- Claude Code: 7b is LOW
+- Claude Code: 7b is LOW at `medium`; **MEDIUM at `low` or when tool-suppressing language is present**
 - API (effort ≥ high): 7b is LOW
 
 **General principle:** Replace emphatic language (MUST, ALWAYS, CRITICAL, NEVER) with calibrated guidance for general tool use. Reserve emphatic language for the specific case where you need to override 7b on chat-interface deployments.
+
+**Facet — parallel tool calling more variable (Fable 5.1; API surface).** Fable 5.1 sometimes makes one tool call per turn where Fable 5 batched independent calls. The Fable 5.1 guide's countermeasure is a batching nudge delivered as a turn-scoped system message after each tool-result turn, not a standing system-prompt rule `[Anthropic docs — Prompting Claude Fable 5.1, fetched 2026-10-22]`. API-surface only: the Claude Code harness already batches.
 
 ### 8. LaTeX Defaulting
 
@@ -508,6 +569,8 @@ For the full countermeasure template with CI-level and User-Preferences-level va
 
 This is a new countermeasure shape for the taxonomy: the fix is *removal of instructions*, not addition. Prompts that grew over multiple model generations often carry accumulated verification instructions layered on top of each other. On Opus 5, these compound rather than adding value.
 
+**5.5-generation extension — thinking instructions.** On Opus 5.5, "think carefully before answering" and "re-verify earlier answers" lines in chat system prompts are removal targets too; effort is the control (Opus 5.5 guide). Prompt-level think-less instructions fail in the other direction: "Asking it in the system prompt to think less doesn't reliably reduce its thinking." `[Anthropic docs — Sonnet 5.5 guide]` — lower effort instead.
+
 **The critical distinction — self-directed re-checking vs external-artifact verification:**
 
 - **Self-directed re-checking** (REMOVE) asks the model to re-examine its own reasoning or output with no new information. Opus 5 already does this. Instructing it compounds the behavior.
@@ -520,6 +583,9 @@ re-verify before responding
 include a final verification step
 use a subagent to verify your work
 before presenting your final answer, verify your reasoning
+think carefully before answering
+think step by step before answering
+re-verify earlier answers
 ```
 
 **Keep and keep imperative (external-artifact verification):**
@@ -532,19 +598,50 @@ run the tests and verify they pass
 grep for the symbol to confirm it exists before recommending it
 ```
 
+**Canonical external-verification template for code tasks** `[Anthropic docs — Sonnet 5.5 guide, fetched 2026-10-22]`. External-artifact verification (AEA §4.14 keep class), not self-verification; a D7 self-verification scan must not flag it. It counters the opposite failure — Sonnet 5.5 at `low` and Haiku 5.5 at `low`/`medium` report a change done without running a real check:
+```text
+When you change code that can be run, built, or type-checked, run a real check that exercises the change before reporting it done: the project's tests, type-checker, or build, or the changed command itself. A syntax-only check, or a check command that failed to start, does not count; if all that is missing is the project's declared dependencies, install them with its own package manager and lockfile (e.g. npm install, pip install -r requirements.txt), never via sudo or the system package manager, unless told not to. Only if no real check can run here, say which one you did not run and why instead of reporting the change as done.
+```
+
+**Optional chat-only line** `[Anthropic docs — Prompting Claude Opus 5.5, fetched 2026-10-22]` — chat only; leave it out of long analyses and agentic tasks, where a later step can reveal an earlier mistake. It may make the model less likely to volunteer a mistake in an earlier answer, so test before adopting:
+```text
+Once you have answered something, treat that answer as done. On later turns, focus your thinking on what the user is asking now, and don't go back over an earlier answer unless the user asks about it or points out a problem with it.
+```
+
+**Effort-conditioned facet (Sonnet 5.5).** At `xhigh`/`max`, Sonnet 5.5 starts its own review and hardening rounds. The countermeasure is the review-round block under #13, which covers both review rounds and reviewer-subagent launches.
+
 **Deployment calibration:**
 - Chat interface: MEDIUM (chat workloads are less verification-heavy)
 - Claude Projects: MEDIUM
 - Claude Code: HIGH (agentic workloads with verification scaffolding accumulated over prior model generations)
 - API (agent workloads at effort ≥ high): HIGH
 
-**Audit note:** the pattern set that identifies this tendency in existing prompts is `double-check`, `re-verify`, `verify your (own )?work`, `verification step`, `subagent to verify`, `check your answer`. Not every hit is a removal target — some phrasings are ambiguous (see external-artifact examples above). Classify item-by-item, do not batch-apply.
+**Audit note:** the pattern set that identifies this tendency in existing prompts is `double-check`, `re-verify`, `verify your (own )?work`, `verification step`, `subagent to verify`, `check your answer`, and on the 5.5 generation `think (carefully|step by step) before`. Not every hit is a removal target — some phrasings are ambiguous (see external-artifact examples above). Classify item-by-item, do not batch-apply.
 
 ### 12. Scope Expansion (NEW in Opus 5)
 
 **What it looks like:** Opus 5 expands the scope of a task, adding steps that weren't requested or applying its own judgment about what the task should be. This is deliverable-boundary drift.
 
 **Distinct from #6 (over-exploration):** #6 is search breadth within a task; #12 is delivering beyond the task. A prompt with both tendencies produces work that is both wandering AND expanded. The fixes address different mechanisms.
+
+**Opposite of #15.** #12 is too much; #15 early turn termination is too little. Their default countermeasures ship together — a prompt that only says "keep working" invites scope expansion, and a prompt that only says "don't add" invites early stops.
+
+**Facet — unrequested additions (Sonnet 5.5, Haiku 5.5, Fable 5.1).** Tests, docs, refactors, and small supporting files that fit the repo's conventions, at every effort level and more at higher effort. Open-ended "show me what you can do" requests get built rather than answered.
+
+**Default template** `[Anthropic docs — Sonnet 5.5 guide, fetched 2026-10-22]` — the second paragraph of the #15 default block. Turn-boundary instruction, not self-verification (AEA §4.14 keep class):
+```text
+When the work the user asked for is done and checked, stop and report. Don't add features, tests, files, docs or refactors that weren't asked for. If you think one would help, mention it at the end instead of doing it.
+```
+
+**Open-ended requests** `[Anthropic docs — Sonnet 5.5 guide, fetched 2026-10-22]`:
+```text
+When the user asks for ideas, options or a plan, give them that and stop. Don't start building or changing anything until they say to go ahead.
+```
+
+**Coding — pre-existing bugs and extras (Fable 5.1)** `[Anthropic docs — Prompting Claude Fable 5.1, fetched 2026-10-22]` — report a pre-existing bug as a follow-up rather than fixing it in the current change:
+```text
+If, while working or testing, you find a pre-existing bug, a performance concern, or behavior the task doesn't mention, don't fix, optimize or extend it in this change unless the requested behavior cannot work without it; report it as a follow-up in your summary. Where the task is ambiguous, implement the reading its wording and the surrounding code most directly support, state that assumption in your summary, and don't build for the other readings as well. Verify your work however you like; scratch scripts and quick checks need not be kept. Commit tests only where the task asks for them or this repository already keeps tests for this kind of change, sized like the neighboring test files — roughly one focused test per stated behavior — and don't turn scratch checks into additional permanent test files. This is about extras only: implement every behavior the task asks for, completely.
+```
 
 **Countermeasure — constrain scope explicitly:**
 ```
@@ -566,7 +663,12 @@ whole task, and stop short of actions that are clearly beyond what was asked.
 
 ### 13. Subagent Over-Delegation (NEW in Opus 5)
 
-**What it looks like:** Opus 5 delegates to subagents more readily than prior models. Delegation pays off on genuinely independent, sizeable tracks of work but multiplies cost and time when applied to small tasks. Also — and this is a load-bearing correction — Opus 5 will use a subagent to "verify" its own work, which is a specific form of over-verification (see #11) that costs a full subagent invocation for no quality gain. A second symptom is quieter and costs more over a session: every subagent inherits the session's model unless its role definition sets one, so a topology run on a top-tier model pays that rate for its scouts and its formatters as well as for its reasoning roles. The fix for that symptom is **role tiering, not a lower spawn count** — cutting agents to control cost when the real problem is uniform model assignment removes parallelism that was earning its keep and leaves the per-agent rate untouched.
+**What it looks like:** Opus 5 delegates to subagents more readily than prior models. Delegation pays off on genuinely independent, sizeable tracks of work but multiplies cost and time when applied to small tasks. Also — and this is a load-bearing correction — Opus 5 will use a subagent to "verify" its own work, which is a specific form of over-verification (see #11) that costs a full subagent invocation for no quality gain. A second symptom is quieter and costs more over a session: every subagent inherits the session's model unless its role definition sets one, so a topology run on a top-tier model pays that rate for its scouts and its formatters as well as for its reasoning roles. The fix for that symptom is **role tiering, not a lower spawn count** — cutting agents to control cost when the real problem is uniform model assignment removes parallelism that was earning its keep and leaves the per-agent rate untouched. Haiku 5.5 — 1M context, effort-capable — is positioned for subagent tasks; route small tracks to it rather than letting every subagent inherit the main model.
+
+**Effort-conditioned facet (Sonnet 5.5).** At `xhigh`/`max`, Sonnet 5.5 launches reviewer subagents and starts review rounds on its own. The guide reports that the paragraph below "stopped reviewer subagent launches and cut session cost by about a third, with no change in quality" `[Anthropic docs]`. **First-line countermeasure** `[Anthropic docs — Sonnet 5.5 guide, fetched 2026-10-22]` — apply before any cap mechanism:
+```text
+When the work the user asked for is done and its checks pass, stop and report. Don't start extra rounds of review or hardening on your own, and don't launch reviewer sub-agents unless the user asked for a review. If you think a deeper review is worth doing, say so at the end.
+```
 
 **Countermeasure — cap delegation:**
 ```
@@ -582,16 +684,20 @@ complete the task, use one rather than several, and keep spawn counts low.
 | Guarantee | Mechanism |
 |---|---|
 | Subagents cannot spawn subagents | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3; `1` disables nesting) |
-| Bound concurrent fan-out | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20; ultracode runs exempt) |
+| Bound concurrent fan-out | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20; ultracode runs exempt) `[v2.1.217+]` |
+| Subagents run a chosen model, not the session's | per-invocation `model` → definition `model` → `CLAUDE_CODE_SUBAGENT_MODEL`; `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` overrides all `[v2.1.257+]` |
+| Every workflow agent runs one model | `CLAUDE_CODE_WORKFLOW_SUBAGENT_MODEL` `[v2.1.296+]` |
+| A subagent runs at a set effort | Agent tool `effort` parameter per invocation `[v2.1.292+]`; frontmatter `effort` |
+| A reviewer does not inherit the builder's conversation | `CLAUDE_CODE_FORK_SUBAGENT=0` — fork mode is on by default — or an explicit non-fork spawn |
 | A role may delegate only to named agents | `tools: Agent(type, …)` allowlist in the agent's frontmatter |
 | A named agent is unavailable | `permissions.deny: ["Agent(name)"]` in `settings.json` |
 | A role cannot delegate at all | omit `Agent` from that role's `tools` |
 | A run cannot wander | `maxTurns` on the delegation |
-| Workflows are off | `CLAUDE_CODE_DISABLE_WORKFLOWS=1` |
+| Workflows are off | `CLAUDE_CODE_DISABLE_WORKFLOWS=1` `[name not on the 2026-10-22 fetched pages — verify on 2.1.30x]` |
 
 Keep the prose countermeasure alongside the mechanism. The prose carries the reasoning, which a settings key cannot express, and the model needs that reasoning at the edges the settings do not cover. Prose with no mechanism behind it is the prose-only-delegation-cap anti-pattern; a mechanism with no prose produces compliance the model cannot extend to an unanticipated case.
 
-`[verify variable names and defaults against the running Claude Code version before deploying — these are product facts and drift with releases. CC-side application detail is in root_CC_ENVIRONMENT_GUIDE.md §6 (cap mechanism table) and §3.5 (role tiering)]`
+`[verify variable names, defaults, and minimum versions against the running Claude Code version before deploying — these are product facts (landscape block 2026-10-22) and drift with releases. CC-side application detail is in root_CC_ENVIRONMENT_GUIDE.md §6 (cap mechanism table) and §3.5 (role tiering)]`
 
 **Deployment calibration:**
 - Chat interface: N/A (no subagent surface)
@@ -617,36 +723,83 @@ and move on without noting it.
 - Claude Code: LOW (agentic sessions are largely action-driven; correction narration is a smaller share)
 - API: LOW
 
+### 15. Early Turn Termination (NEW in the 5.5 generation)
+
+**What it looks like:** The model ends its turn while work it was asked for is still owed: a summary that closes by announcing the next step, with no tool call; an offer to continue "unless you'd prefer otherwise"; a list of decisions for the user when none of them blocks the remaining work; a report because the turn has been long or a milestone is done; at low effort, pausing to confirm a plan or asking a question it could answer itself; in long agent prompts, handing the task back. Distinct from #12 scope expansion (the model does too much) and #6 over-exploration (search breadth within a task). #15 is too little, and its countermeasure runs in the opposite direction from #12's — which is why it is a separate tendency, not a #12 facet.
+
+**Warrant (SBD §7.3 — named-primary-source documentation).** Documented with a prompt-level countermeasure in all four current Anthropic prompting guides: Opus 5.5 ("Unattended agentic runs"), Sonnet 5.5 ("Carrying work through" at `low`/`medium`), Haiku 5.5 ("Early stopping" — raising `low` → `medium` "roughly halved early stopping" `[Anthropic docs]`), and Fable 5.1 ("Finishing the whole task").
+
+**Deployment calibration** (D9c analytical from the guides; not measured):
+- Chat interface (default effort): LOW — a chat turn is supposed to end
+- Claude Projects: LOW
+- Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5): MEDIUM at `medium`, HIGH at `low`; LOW at `high` and above; long system prompts raise it (Haiku 5.5 guide)
+- API agentic (developer-controlled effort): as Claude Code by effort level; HIGH for fully unattended loops with no harness continuation
+- Cowork / scheduled runs: HIGH — no operator present to send the continuation
+
+**Label for scanners.** Every template in this section is a turn-boundary instruction, not a self-verification instruction (AEA §4.14 keep class). It governs when a turn ends, not whether the model re-checks its work. A D7 self-verification scan must not flag it.
+
+**Lever 1 — effort.** At `low`/`medium`, try raising effort before adding a block. The Sonnet 5.5 guide notes the block lengthens output and costs more at low effort. Raising Haiku 5.5 from `low` to `medium` "roughly halved early stopping" `[Anthropic docs]`.
+
+**Lever 2 — default block (Sonnet 5.5 / Haiku 5.5 guides).** `[Anthropic docs — Sonnet 5.5 guide]` — place in core rules. The second paragraph is the #12 countermeasure; the two ship together because a prompt that only says "keep working" invites scope expansion.
+```text
+Keep working until everything the user asked for is done, and only stop to ask when you can't go on without the user or before a risky step.
+
+When the work the user asked for is done and checked, stop and report. Don't add features, tests, files, docs or refactors that weren't asked for. If you think one would help, mention it at the end instead of doing it.
+```
+
+**Lever 3 — fully-unattended variant (Opus 5.5 guide).** For loops with no human in the turn `[Anthropic docs — Prompting Claude Opus 5.5, fetched 2026-10-22]`. Turn-boundary instruction (AEA §4.14 keep class). Place at the end of the system prompt from the first request (adding it mid-session changes `system`); not for human-in-the-loop applications; keep your own confirmation step for risky actions; set `thinking.display: "updates"` to receive the status notes:
+```text
+A standing instruction from the user, the person you are working for. It is about how your turns end. A message with no tool call in it ends your turn, and the work stops there until you are asked to continue. The user has seen you end turns in four ways while work they asked for was still owed, and does not want any of them. One: a long summary of what was done that closes by announcing the next step and has no tool call, so the next thing never starts. Two: an offer to carry on with something unless the user would prefer otherwise, which stops to wait for an answer the user was not going to give. Three: a list of decisions for the user when, by your own account, none of them blocks the rest of the work. Four: deciding that this is a good place to report, because the turn has been long or a milestone is done. Status notes are welcome, and so are your recommendations on open decisions, but put them in the same message as your next tool call and carry on with whatever does not depend on the user's answer. If you notice yourself inviting the user to redirect you or offering to wait, delete it and do the next thing. The stops the user does want are the ones where nothing can move without them, or where the thing blocking you is deliberately protected from you. This does not override the need for confirmation on risky or destructive actions.
+```
+
+**Lever 4 — harness complement.** The harness, not the prompt, decides whether a turn that ended is actually finished:
+- Treat a text-only end of turn "as a report rather than as proof the task is done" `[Anthropic docs — Opus 5.5 guide]`.
+- When open items remain, send a continuation message naming them. Cap continuations at two or three per task.
+- If something the model started is still running (a background command, a subagent), the task is not done — wait, and return its output as the next user message.
+
+**Placement:** Core rules for the default block (both paragraphs, in agentic deployments); end of the system prompt for the fully-unattended variant only. Cross-reference: `root_CC_ENVIRONMENT_GUIDE.md` §5.9 (turn economy) applies the same discipline to multi-phase CC prompts.
+
 ### Prompt/environment-conditional defects (not model tendencies)
 
-Two failure modes track cleanly to the prompt or the runtime configuration rather than the model. They are handled by writing prompts differently or configuring the API differently, not by adding counter-tendency instructions.
+Four failure modes track cleanly to the prompt, the harness, or the runtime configuration rather than the model. They are handled by writing prompts differently or configuring the API or harness differently, not by adding counter-tendency instructions.
 
 #### Conservative-instruction literalism
 
-Opus 5 follows "only report high-severity issues" or "be conservative" literally, which causes under-reporting. This is a **prompt defect** exposed by the model, not a model tendency.
+Carried from the Opus 5 generation; not re-documented for 5.5. Opus 5 follows "only report high-severity issues" or "be conservative" literally, which causes under-reporting. This is a **prompt defect** exposed by the model, not a model tendency.
 
 **Fix — ask for everything, filter in a separate pass.** Rewrite review prompts to two stages: (1) report every issue found; (2) filter to the severity level or subset the user wants. Do not compress "report everything" and "filter to high severity" into one instruction. This applies to audit Skills (project-audit, full-stack-audit, prompt-validation, global-audit, repo-hygiene, critic-gate) in particular.
 
 Sweep pattern for prompts that carry this defect: `only report`, `only flag`, `be conservative`, `high-severity` (as an instruction, not as an output label). Replace with report-everything-then-filter form.
 
-#### Thinking-disabled output artifacts
+#### Thinking-disabled output artifacts (narrowed for the 5.5 generation)
 
-With `thinking: {"type": "disabled"}` on Opus 5, two artifacts can occasionally appear in the model's visible output:
+Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1. The artifacts — reasoning leaking into visible text, tool calls written as text instead of a structured `tool_use` block, internal XML tags in the response — are now documented only on Haiku 5.5 at `low` effort or with thinking off, and on Sonnet 5.5 at `between_tools` when a "don't think" instruction is left in the prompt. **Fix:** use adaptive thinking at `medium` and control cost through effort. Remove any "do not think" line.
 
-- **Tool calls as text.** The model writes a tool call into user-facing text instead of emitting a structured `tool_use` block. The call never runs; in agentic loops the leaked text stays in the conversation history and affects later turns. Most common on tool-heavy workloads such as search.
-- **Internal XML tags in visible response.** `<thinking>` tags or other internal tags leak into the visible response.
-
-Both are **API-configuration failure modes** — the fix is not to prompt around them but to keep thinking on and control cost via effort. For most tasks, thinking-on at `low` effort outperforms thinking-off at similar cost.
-
-**Sub-finding — a system-prompt rule against thinking increases tag leakage.** Do NOT add instructions like "do not think" or "do not reason" to a system prompt while thinking is disabled — that instruction increases tag leakage rather than suppressing it. If a mitigation instruction is required (for integrations that must keep thinking disabled), use the general form rather than naming the tags:
+**Sub-finding (stands from v4.0) — do NOT add "do not think" instructions.** A system-prompt rule telling the model not to think or not to reason INCREASES `<thinking>` tag leakage rather than suppressing it. If an integration must keep Haiku 5.5 thinking disabled and needs a mitigation instruction, use the general form:
 
 ```
+<output_hygiene>
 When you use a tool, you may say a brief sentence first. If no tool can
 express what the user asked for, say so instead of guessing. Do not include
 internal or system XML tags in your response.
+</output_hygiene>
 ```
 
-**Reminder — thinking-disabled breaking change on Opus 5:** `thinking: {"type": "disabled"}` is accepted only at effort `high` or below. Setting it at `xhigh` or `max` returns a 400 error. This is a breaking change vs Opus 4.8.
+**API rule.** `thinking: {"type": "disabled"}` is accepted only on Haiku 5.5, at effort `high` or below. On Opus 5.5, Sonnet 5.5, and Fable 5.1 it returns 400; Sonnet 5.5's floor is `between_tools` (at `high` or below).
+
+#### Mid-turn user text misread as injection (NEW in the 5.5 generation)
+
+Sonnet 5.5 and Haiku 5.5 treat user text placed inside `tool_result` blocks, per-step harness notices, and token countdowns as possible prompt injection, and may ignore them. Symptom: "Claude ignores messages I send while it's working." A harness-design rule rather than a prompt rule; the `rootnode-domain-agentic-context` Skill carries the harness design and `rootnode-behavioral-tuning` the symptom row.
+
+**Fix — harness, not prompt** `[Anthropic docs — Sonnet 5.5 guide]`:
+- Never put user text inside a `tool_result` block. The model misreads that placement most often.
+- Deliver mid-turn user input as a user turn. Append the user's words as a text block in the user message that carries the `tool_result` blocks, after the last `tool_result`.
+- Keep harness notices, such as reminders, in a separate mid-conversation system message after the user's words. Never put a notice and the user's words in the same block.
+- In interactive sessions where users can type mid-turn, don't add your own token or budget countdown after tool results.
+
+#### Reasoning-extraction refusal (NEW in the 5.5 generation)
+
+On all four current models, prompts that ask the model to reproduce its internal reasoning in the response can be declined with `stop_reason: "refusal"`, category `reasoning_extraction`. Symptom: "Claude refuses when I ask it to show its reasoning." **Fix** `[Anthropic docs — Sonnet 5.5 guide]`: "If your prompts ask the model to include its reasoning in the response, remove those instructions, because they invite `reasoning_extraction` declines. With adaptive thinking, read the reasoning from summarized thinking blocks instead (`display: "summarized"`). You can still ask for a short explanation of the answer or a summary of the actions taken".
 
 ---
 
@@ -844,7 +997,7 @@ The optimization objective is to maximize the quality of Claude's content access
 
 Under the 200K-window era, the RAG threshold was numerically entangled with the window (empirically ~66,500 tokens on 200K plans, roughly a third of the window). That made the fixed number look like a stable rule of thumb, and it conflated two concepts that are conceptually distinct:
 
-- **Context window** — the model's maximum input capacity (measured in tokens per model; 1M for current top-tier models, 200K for Haiku 4.5).
+- **Context window** — the model's maximum input capacity (measured in tokens per model; 1M on all four current models — Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5 — and 200K on legacy Haiku 4.5).
 - **RAG threshold** — the platform-side decision point where Projects switch from full-context loading to retrieval mode. Now tracks the window (automatic per current article), rather than being a fraction of it.
 
 Under 1M-window models, the RAG threshold has moved with the window. State the two separately in prompt/Project design; do not carry the ~66,500 figure forward as a live threshold. See "Historical context" below for the measurement that produced that figure and why it is preserved as history but not as current-state guidance.
@@ -861,7 +1014,7 @@ Under 1M-window models, the RAG threshold has moved with the window. State the t
 
 **Trigger:** Knowledge base approaches or exceeds the underlying model's context window.
 
-The threshold is window-relative — a Project that loads full-context under Opus 5's 1M window may switch to retrieval under Haiku 4.5's 200K window. Neither the article nor the current models overview publishes per-model threshold numbers. If a specific number matters for architectural decisions on a specific project, measure empirically (see "Empirical Threshold Measurement" below).
+The threshold is window-relative — a Project that loads full-context under a 1M-window model may switch to retrieval under a 200K-window model (legacy Haiku 4.5). Neither the article nor the current models overview publishes per-model threshold numbers. If a specific number matters for architectural decisions on a specific project, measure empirically (see "Empirical Threshold Measurement" below).
 
 **Threshold-exempt overhead.** Skills, MCP integrations, Custom Instructions, Memory, and User Preferences consume conversation budget but are not part of the knowledge-file total that triggers RAG activation. Adding or removing them cannot switch a Project between modes. This distinction was true under the 200K-era platform (empirically confirmed) and remains true under current platform behavior; the split between "knowledge budget" (triggers RAG) and "conversation budget" (does not) survives the platform change.
 
@@ -881,9 +1034,10 @@ Where prior documentation states the 66,500 figure as a historical measurement i
 Claude cannot count tokens precisely but can estimate with sufficient accuracy for architectural decisions. Rough conversion for English prose: approximately 4 characters per token; structured content (XML, code, tables) at approximately 3.25 characters per token; mixed markdown at approximately 3.75 characters per token. One page of prose is roughly 500 words, 3,000 characters, or 750 tokens.
 
 **Tokenizer notes for current models:**
-- **Fable 5** uses the tokenizer introduced with Opus 4.7 — compared to models before Opus 4.7, the same text produces roughly 30% more tokens (Anthropic's models overview page).
-- **Sonnet 5** produces approximately 30% more tokens per unit of content than Sonnet 4.6 (Anthropic's whats-new page: "approximately 30% more tokens than on Claude Sonnet 4.6").
-- **Opus 5** tokenizer specifics were not fully re-baselined in the v4.0 alignment cycle. Treat measurements with explicit tolerance until re-baselined via `count_tokens`.
+- **Fable 5.1** uses the same tokenizer as Fable 5 — the one introduced with Opus 4.7; compared to models before Opus 4.7, the same text produces roughly 30% more tokens.
+- **Sonnet 5.5** uses the Sonnet 5 tokenizer, which produces approximately 30% more tokens than Sonnet 4.6.
+- **Haiku 5.5** uses the Opus 4.7-era tokenizer — roughly 30% more tokens than Haiku 4.5 — and bills a higher price band above 100K prompt tokens.
+- **Opus 5.5** tokenizer is not stated on any fetched Anthropic page (landscape block, open items). Treat measurements with explicit tolerance until confirmed via `count_tokens`.
 
 Estimates are approximate. For architectural decisions where precise numbers matter (borderline threshold cases, empirical measurement), use `count_tokens` against the target model rather than character-based heuristics.
 
@@ -908,8 +1062,8 @@ Overhead affects context quality on every turn: as total context grows, the mode
 |---|---|---|
 | Pro / Max | 200K–1M tokens (plan-dependent; consult current Anthropic plan documentation) | RAG threshold is automatic per window |
 | Team / Enterprise | Plan-dependent | RAG threshold is automatic per window |
-| API (Opus 5, Sonnet 5, Fable 5) | 1M tokens (default AND max; no smaller variant on Opus 5) | User-controlled context; no platform RAG |
-| API (Haiku 4.5) | 200K tokens | User-controlled context; no platform RAG |
+| API (Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5) | 1M tokens; 128K max output | User-controlled context; no platform RAG |
+| API (Haiku 4.5, legacy) | 200K tokens | User-controlled context; no platform RAG |
 
 The context window is plan-dependent. The Projects RAG threshold now tracks the window (per the support article), rather than being a fixed number. Consult Anthropic's plan documentation for current per-plan windows; the numbers move with product changes.
 
@@ -924,7 +1078,7 @@ These are two distinct mechanisms that operate independently:
 
 Context pressure affects conversation quality — earlier context is lost as the conversation grows. RAG switching affects knowledge access quality — retrieval returns fragments instead of complete files. A project can experience both simultaneously (large knowledge base in RAG mode with a long conversation causing compaction) or either independently.
 
-Under 200K-window models (Haiku 4.5) both mechanisms sit closer together numerically. Under 1M-window models (Fable 5, Opus 5, Sonnet 5), the two mechanisms sit further apart in absolute terms — a Project can be well under the RAG threshold while a long agentic conversation still triggers compaction.
+Under 200K-window models (legacy Haiku 4.5) both mechanisms sit closer together numerically. Under 1M-window models (all four current models), the two mechanisms sit further apart in absolute terms — a Project can be well under the RAG threshold while a long agentic conversation still triggers compaction.
 
 ### When Retrieval Mode Is the Right Architecture
 
@@ -932,11 +1086,11 @@ Retrieval mode is the appropriate architecture for projects that primarily query
 
 The quality concern is specific to projects that depend on cross-file reasoning, where Claude needs simultaneous awareness of multiple files to produce correct output. For these projects, full-context loading is worth pursuing if achievable. When it is not achievable, the mitigation is architectural: consolidate cross-dependent content into fewer files to eliminate cross-file dependencies, move independent content to Skills, and ensure the remaining knowledge files are self-contained.
 
-Under 1M-window primary models, more Projects can operate in full-context mode than under the 200K era. Recheck a Project's current mode by looking for `project_knowledge_search` — a Project that was in retrieval mode under the 200K era may have moved to full-context under Opus 5 / Sonnet 5 without any content changes.
+Under 1M-window primary models, more Projects can operate in full-context mode than under the 200K era. Recheck a Project's current mode by looking for `project_knowledge_search` — a Project that was in retrieval mode under the 200K era may have moved to full-context under the 1M-window generation without any content changes.
 
 ### API Deployment as Alternative Architecture
 
-For knowledge bases and workloads where Anthropic Projects' automatic RAG behavior doesn't fit the use case (very large content volumes with cross-document synthesis requirements, or explicit control over retrieval), an API-based deployment provides a different architecture: 1M-token windows on Opus 5, Sonnet 5, Fable 5; developer control over what enters context; no platform-imposed RAG.
+For knowledge bases and workloads where Anthropic Projects' automatic RAG behavior doesn't fit the use case (very large content volumes with cross-document synthesis requirements, or explicit control over retrieval), an API-based deployment provides a different architecture: 1M-token windows on every current model; developer control over what enters context; no platform-imposed RAG.
 
 Tradeoffs are significant. Cost is substantially higher (per-token billing on massive inputs every turn). Latency increases with context size (30–60+ seconds at high token counts). Accuracy and recall degrade as total context grows toward 1M (context rot). The lost-in-the-middle effect reduces recall of content positioned in the middle of very large contexts. The user owns the full stack — conversation management, retrieval logic, memory persistence, and all platform features must be built and maintained.
 
@@ -1130,18 +1284,18 @@ Addresses the **Monolithic standing context** pattern (`root_AGENT_ANTI_PATTERNS
 ### Fix: Missing Countermeasures → Domain- and Deployment-Targeted Selection
 
 1. Identify the Project's domain, primary task types, and deployment context (chat / Projects / Claude Code / API).
-2. Check each of the 14 numbered behavioral tendencies (#1–#14, with facets 1a/1b under #1, 3a/3b/3c under #3, 7a/7b under #7) against the domain and deployment combination. Use the deployment calibration tables in the Behavioral Tendencies section to filter — a tendency at LOW for the deployment context generally does not need a countermeasure regardless of domain match.
+2. Check each of the 15 numbered behavioral tendencies (#1–#15, with facets 1a/1b under #1, 3a/3b/3c under #3, 7a/7b under #7) against the domain and deployment combination. Use the deployment calibration tables in the Behavioral Tendencies section to filter — a tendency at LOW for the deployment context generally does not need a countermeasure regardless of domain match.
 3. For each relevant tendency, add the countermeasure template (customized to the domain's language). For Tool Trigger Miscalibration (#7), apply the specific facet (7a or 7b). For Verbosity (#3), apply the specific surface (3a conversational, 3b agentic narration, 3c written deliverables).
 4. Place at the appropriate attention position (identity or core rules for critical countermeasures, output standards for format-level countermeasures).
 5. Do not add countermeasures for tendencies this domain or deployment does not trigger — they are noise that diminishes current models' strong instruction following.
 6. For Projects deployed on the chat interface specifically: prioritize countermeasures for #1b (persistent-preference dilution), #7b (tool under-triggering), #9 (editorial drift), and #10 (self-referential fabrication).
-7. For Projects deployed on Claude Code specifically (or agent workloads on the API): prioritize countermeasures for #3b (agentic narration), #11 (over-verification — REMOVE self-directed re-check instructions), #12 (scope expansion), #13 (subagent over-delegation). These are the tendencies Opus 5 introduces or amplifies on agentic surfaces.
-8. For Projects upgrading from a 4.6-era or 4.8-era system prompt: audit for now-redundant countermeasures targeting tendencies #1a, #2 (factual claims), #3a (verbosity), #5 (external-fact), #6 (over-exploration), and #7a — these are partially or fully reduced at the model level. Where the failure mode is no longer observed, remove the countermeasure to free token budget for the new tendencies.
+7. For Projects deployed on Claude Code specifically (or agent workloads on the API): prioritize countermeasures for #3b (agentic narration), #11 (over-verification — REMOVE self-directed re-check instructions), #12 (scope expansion), #13 (subagent over-delegation), #15 (early turn termination — ship the default block's two paragraphs together, and raise effort first at `low`/`medium`). These are the tendencies the Opus 5 and 5.5 generations introduce or amplify on agentic surfaces.
+8. For Projects upgrading from a 5-era (Opus 5 / Sonnet 5) system prompt: remove thinking-disabled mitigations (thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1), tool-suppressing language (#7b — it now causes under-search), and think-harder / re-verify lines (#11). For Projects upgrading from a 4.6-era or 4.8-era system prompt: audit for now-redundant countermeasures targeting tendencies #1a, #2 (factual claims), #3a (verbosity), #5 (external-fact), #6 (over-exploration), and #7a — these are partially or fully reduced at the model level. Where the failure mode is no longer observed, remove the countermeasure to free token budget for the new tendencies.
 9. For audit Skills specifically: apply the conservative-instruction literalism fix. Replace "only report high-severity issues" / "be conservative" language with report-everything-then-filter form.
 
 ### Fix: Pre-4.6 System Prompt → Recalibrate for Current Models
 
-When a Project's system prompt was written for earlier Claude models (pre-4.6, or pre-Opus-5):
+When a Project's system prompt was written for earlier Claude models (pre-4.6, pre-Opus-5, or pre-5.5):
 1. Audit for emphatic language (MUST, ALWAYS, CRITICAL, NEVER, "If in doubt, always...") and replace with calibrated guidance. Exception: where you are specifically countering tendency 7b on chat-interface deployments, explicit enforcement language remains appropriate.
 2. Audit for aggressive tool-use triggers and dial back to conditional language for general tool use.
 3. Audit for verbosity countermeasures that may now over-correct — remove or soften preemptive anti-verbosity instructions. Check for the specific surface (3a conversational, 3b agentic, 3c written) rather than applying a single generic verbosity countermeasure.
@@ -1150,7 +1304,8 @@ When a Project's system prompt was written for earlier Claude models (pre-4.6, o
 6. For chat-interface deployments: add countermeasures for #1b, #7b, #9, and #10 if not already present.
 7. For agentic deployments (Claude Code, API agent workloads): audit for accumulated verification instructions (double-check, re-verify, verification step, subagent to verify). Distinguish self-directed re-checking (REMOVE per tendency #11) from external-artifact verification (KEEP). This is the highest-value single audit on prompts that migrated from 4.7/4.8 into Opus 5.
 8. For audit-Skills and review prompts: apply the conservative-instruction literalism fix (see Fix: Missing Countermeasures step 9).
-9. Audit effort settings: on Opus 5, the default is `high` and the recommendation is to re-run an effort sweep rather than carry over from prior models. Prompts hardcoded to `xhigh` from the 4.7/4.8 era should be re-evaluated — `xhigh` is now the *step-up* for demanding work, not the *default*.
+9. Audit effort settings: on Claude Code the 5.5 trio (Opus 5.5, Sonnet 5.5, Haiku 5.5) defaults to `medium` — Anthropic reports Opus 5.5 at `medium` matches or exceeds Opus 5 at `high` — while Sonnet 5.5 and Fable 5.1 default to `high` on the API. Re-run an effort sweep rather than carrying settings over; step to `xhigh`/`max` only on a measured gain. Sonnet 5.5 at `xhigh`/`max` self-starts review rounds and reviewer subagents (#11, #13).
+10. Remove forced tool use — `tool_choice: {"type": "any"}` or `{"type": "tool"}` returns 400 on all four current models; state in the prompt when the tool applies, or use `auto` with `strict: true`. Remove instructions that ask the model to reproduce its reasoning in the response (reasoning-extraction refusal).
 
 ### Fix: Misaligned Context Layers → Rebalance Memory and Knowledge Files
 

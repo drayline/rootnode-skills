@@ -273,3 +273,7 @@ What was fixed:
 ## Operator ruling — appended after PR open (2026-10-22)
 
 The 7 Haiku 4.5 lines inside `rootnode-*/` (see "Haiku 4.5 mentions vs the gate's pass wording" above) are **confirmed as legacy clauses required by their catalog-spec §4 rows, not defects**. The session prompt's T1 pass wording ("the README `haiku`-alias pin line is the only Haiku 4.5 mention outside historical text") was stricter than revised D6, which drops Haiku 4.5 from the calibration templates and the README scope but does not forbid row-mandated legacy notes. T1 stands as PASS. Future landscape-gate wording should exempt row-mandated legacy clauses explicitly.
+
+## Round 4 re-check — appended (2026-10-22)
+
+After the operator-granted cc-design round 4 (spec items D8, A6, E3 + guard notes), T1 was re-run: **190** literal / **46** exact-form lines, unchanged. The cc-design exact-form lines are still `references/cc-delegation-patterns.md:42` and `references/cc-environment-design-patterns.md:189`, classified above. No new hits; defects remaining 0.

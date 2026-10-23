@@ -347,3 +347,69 @@ No fetch failed. Text 6 was a sixth pointer Builder-D listed; it was quoted on t
 - **F5 → resolved.** The operator confirmed the legacy clauses; ruling appended to `5_5GEN_SWEEP_MANIFEST.md`.
 - Open after this addendum: 14 (F2, F11–F22, F24); resolved 8 (F1, F3, F4, F5, F6, F7, F23, F25); accepted 3 (F8, F9, F10). 14 + 8 + 3 = 25.
 - `design/audit-artifacts/v4.2/` stays untracked; it was not in scope.
+
+---
+
+## Addendum 2 — round 4: cc-design spec items D8, A6, E3 and the guard notes (append-only)
+
+### Operator decisions (verbatim)
+
+> Before I merge: one more scoped cycle on cc-design to close the five open items. Builder-C applies, fresh non-fork Refuter checks only these edits, then re-run T4–T6 and T9 for cc-design, update the session report and manifest, commit as `feat: rootnode-cc-design 5.0.0 — close spec items D8, A6, E3 + guard notes`, push, report the head SHA verbatim, stop.
+>
+> 1. Kill-first refuting (spec root_DESIGN_cc-design_v5.md §4 item 8) — cc-delegation-patterns.md §4: the Refuter's first move on each Builder claim is to try to disprove it (upstream guard, unreachable path, a test it can run), then re-derive survivors from spec + diff; a REWORK-severity finding carries path:line and the spec clause, and at top severity a one-step repro and a concrete loss — a finding that cannot state both is re-rated. Tag [practitioner: awslabs/aidlc-workflows ai-pr-review-judge.md / ai-pr-review-common.md]. Also one sentence in SKILL.md Step 6 recommending this shape when composing rootnode-critic-gate.
+>
+> 2. Fail direction (spec §2 item 6) — cc-skills-and-hooks-composition.md §1 decision tree gains a "fail direction" column: observers fail open (exit 0); a guard that loses its own bookkeeping fails toward the last recorded instruction with a one-line note, never into a re-ask loop; evidence that binds a human decision never falls back to a guess. Plus the stderr contract: a blocking hook's stderr names the exact next step; promote prose to a hook only on observed evidence that prose lost; each such hook gets its own off-switch env var and an audit row per block. Tag [practitioner: aidlc AGENTS.md §Guards]. Byte guidance for this file may go to 22,000; record the overage.
+>
+> 3. Include-and-exclude justification (spec §6 item 3) — cc-prompt-design-patterns.md §10: every gate, halt, and plan step the prompt carries names what it protects; every omitted step names what already covers it; overlapping "just in case" ceremony is the more common failure. Tag [practitioner: aidlc aidlc-composer-agent.md Adversarial Framing].
+>
+> 4. Migration guard: handle Windows-style paths (backslashes, drive letters) and Bash `rm`/`mv` targets under migrations/ in the example script; keep it under the same test the Refuter ran.
+>
+> 5. verify-tests.sh: when `jq` is absent, print "jq not found — evidence not evaluated; cap still applies" and exit 2, not a misleading pass message.
+>
+> No other files. Cycle cap for this round: 2.
+
+— opened round 4 (answered the PR-open halt).
+
+> Granted: scoped cycle 3, item 4 only. After parsing input, if the tool name is empty, print "guard: no tool name in hook input — refusing (fail-closed); check the hook's stdin wiring" to stderr and exit 2. Fresh non-fork Refuter re-runs the full item-4 case list plus empty stdin, {}, and null. On ACCEPT: re-run T4–T6 and T9 for cc-design, append to the report and manifest (the jq-stand-in note is a finding — record it as "test instrument did not model real jq on empty input"), commit as specified, push, report the head SHA verbatim, stop.
+
+— answered halt #3 (round 4 cycle-cap reached: second REWORK).
+
+### Round 4 cycle record
+
+| Cycle | Builder change | Refuter | Verdict |
+|---|---|---|---|
+| 1 | Items 1, 2, 4, 5 applied; item 3 already present (§10 text and tag verified) | Refuter-C4, diff `c500617e96694808d754c40e1cf0f15a8eea66ee7a06f6bdd798e5f1a4dde378` | REWORK — `rm -rf ./migrations` exited 0 (the regex needed a trailing `/`) |
+| 2 | Bash branch matches `migrations` followed by `/`, whitespace, `;&\|` or end of line, and strips quotes | Refuter-C5, diff `947d754117393af0b22fbb4c91a84f4cfbb5aa89133dac5998c43c41c0083a77` | REWORK — empty stdin / `{}` / `null` exited 0 under real-jq semantics (halt #3) |
+| 3 (operator-granted, scoped, item 4) | Empty tool name → exact stderr line, exit 2 | Refuter-C6, hooks diff `066468c4d1e70dc03bd3105d086f5e14c051b57710f36f446903e1f4d1870ebd`, round diff `6af67694ad78befaa159ece87c11984eea8f0e675258657b84fb0849588176fd` | ACCEPT — 24/24 cases correct; stderr byte-exact; off-switch `MIGRATIONS_GUARD_OFF=1` bypasses |
+
+SKILL.md (`02ac690c1275953b9314927121e17c4768fc1c49b69f7ab181a5188fe2011345`) and `cc-delegation-patterns.md` (`54636293be981c45175f88f2fe3c93fb0e66f4082ac0d051cf8fd8d2745a9e2a`) are byte-identical to their cycle-1 digests, so cycles 2 and 3 changed only `cc-skills-and-hooks-composition.md` (final `92984dca1e221ac44490a908b36daa68ac6ba2116c311b73fcc47300cdfeb615`). `cc-prompt-design-patterns.md` is unchanged in round 4 (`656a17df462ec9d6c14500c7e8272bf673a2d6cbbd15423d3618dfccc05c3078`).
+
+Item-4 final exit codes (Refuter-C6, real-jq-modelled stand-in):
+- **Expect 2, all 2:** Edit `migrations/x.sql`, Write `/repo/migrations/x.sql`, Edit `C:\repo\migrations\001.sql`, Edit `d:\migrations\x.sql`, `rm migrations/x.sql`, `mv migrations/a.sql b.sql`, `rm -rf ./migrations`, `rm -rf migrations`, `rm -rf migrations;`, `rm -rf migrations && echo ok`, `rm "migrations/a b.sql"`, `rm 'migrations/x.sql'`, `rm C:\repo\migrations\x.sql`, malformed JSON, empty stdin, `{}`, `null`, `{"tool_name":""}`, `{"tool_name":null}`.
+- **Expect 0, all 0:** Edit `src/app.py`, `rm other/x`, `ls migrations/`, `rm migrations_backup/x`, `cat migrations/x.sql`.
+
+Item-5 sequence, jq absent, default cap 2: stop exit codes 2, 2, 0 (released), 0, with byte-exact stderr `jq not found — evidence not evaluated; cap still applies`.
+
+### Gates re-run for cc-design (after cycle 3)
+
+| ID | Result | Evidence |
+|---|---|---|
+| T4 | PASS | description 694 ≤ 700, unchanged |
+| T5 | PASS | SKILL.md 274 lines, 34,302 bytes on disk (≤ 290 / ≤ 34,500); catalog max 477 lines |
+| T6 | PASS | `exit 1\b` / `"matchers"` 0 hits; `exit 2` count 13; both ```json blocks parse |
+| T9 | PASS | fresh reviewer, skill-builder Review loaded: D1–D8 PASS with cited evidence; D9 `D9c (analytical) — D9a deferred to the validation prompt` |
+| T1 (re-checked) | unchanged | 190 literal / 46 exact-form lines; the cc-design exact lines are still `cc-delegation-patterns.md:42` and `cc-environment-design-patterns.md:189` |
+
+Size record (LF bytes vs `main`): `cc-skills-and-hooks-composition.md` 21,319 vs 14,638 (+45.6%), within the operator ceiling of 22,000 (spec guidance 20,500); `cc-delegation-patterns.md` 27,862 vs 21,384 (+30.3%; spec guidance +30%); `cc-prompt-design-patterns.md` 33,314 vs 26,373 (+26.3%; guidance +20%).
+
+### Finding status updates (earlier tables left as written)
+
+- **F11 → resolved.** The migration guard now covers Windows paths and Bash `rm`/`mv` targets, including the directory itself and quoted targets, and fails closed on empty input.
+- **F12 → resolved.** `verify-tests.sh` without jq prints the exact message, exits 2, and still counts toward the cap.
+- **F26 (medium, resolved). Test instrument did not model real jq on empty input.** Refuter-C4's jq stand-in exited nonzero on empty stdin, so the guard's fail-open on empty input, `{}` and `null` passed cycle 1. Refuter-C5 modelled real jq (empty input → no output, exit 0) and caught it. Fixed in cycle 3. Lesson: a stand-in for an absent tool must be shown to match the real tool on the edge cases under test before its results count. This round's later Refuters were briefed to verify that first.
+- **F27 (low, open — next patch).** Guard gaps: `find migrations -delete`, `cd migrations && rm x.sql`, and `rm -rf mig*` are not caught; `echo rm migrations` is falsely blocked (fails closed, operator-accepted).
+- **F28 (low, open — next patch).** The guard's settings matcher omits `MultiEdit` and `NotebookEdit`.
+- **F29 (low, open — next patch).** The audit-row append needs `.claude/` to exist; without it the log write fails, though the exit code stays correct.
+- **F30 (info).** With jq absent, `verify-tests.sh` cannot read `stop_hook_active`, so bound 1 is skipped; the cap (bound 2) still releases, as the item specifies.
+- **F31 (low, open — next patch).** `rootnode-cc-design/SKILL.md:168` says "handoff-gate"; the Skill is `rootnode-handoff-trigger-check` (pre-existing).
+- Totals after addendum 2: 31 findings (F1–F31). Open 16 (F2, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F24, F27, F28, F29, F31); resolved 11 (F1, F3, F4, F5, F6, F7, F11, F12, F23, F25, F26); accepted 3 (F8, F9, F10); info 1 (F30). 16 + 11 + 3 + 1 = 31.

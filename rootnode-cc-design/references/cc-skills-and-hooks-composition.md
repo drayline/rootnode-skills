@@ -40,18 +40,18 @@ The boundary between Skills (preference layer) and hooks (enforcement layer) has
 
 **Examples:**
 
-| Want | Failure mode if missed | Mechanism | Fails |
+| Want | Failure mode if missed | Mechanism | Fail direction |
 |---|---|---|---|
 | "Use 2-space indentation" | Code reviewer asks for re-indent | Skill or CLAUDE.md preference | — |
-| "Add tests for new functions" | Coverage drops; tech debt | Skill + advisory coverage check | open |
-| "Never delete `migrations/*.sql`" | Production data loss | PreToolUse hook, `exit 2` | closed |
-| "Format Markdown with prettier" | Inconsistent formatting | PostToolUse hook running prettier | open |
+| "Add tests for new functions" | Coverage drops; tech debt | Skill + advisory coverage check | open (observer) |
+| "Never delete `migrations/*.sql`" | Production data loss | PreToolUse hook, `exit 2` | closed (guard) |
+| "Format Markdown with prettier" | Inconsistent formatting | PostToolUse hook running prettier | open (observer) |
 | "Run tests before declaring done" | Bugs ship | Stop hook requiring test evidence, bounded (§5) | closed, bounded |
-| "Don't commit secrets" | Credential leak | PreToolUse hook + gitleaks, `exit 2` | closed |
+| "Don't commit secrets" | Credential leak | PreToolUse hook + gitleaks, `exit 2` | closed (guard) |
 
 **The decision rule applied:** if a missed instruction has compounding cost (corrupts production, leaks credentials, irreversible), it's a hook. If the cost is bounded and recoverable, a Skill is sufficient.
 
-**Fail direction and the stderr contract.** Every hook declares which way it fails. Observers fail open (`exit 0`). A guard that loses its own bookkeeping fails toward the last recorded instruction with a one-line note, never into a re-ask loop. Evidence binding a human decision never falls back to a guess. A blocking hook's stderr names the exact next step. Promote a prose rule to a hook only on observed evidence the prose lost; each such hook gets its own off-switch env var and an audit row per block. `[practitioner: aidlc AGENTS.md §Guards; aidlc-plan-approval-guard.ts header]`
+**Fail direction and the stderr contract.** Every hook declares its fail direction (column above). Observers fail open (`exit 0`). A guard that loses its own bookkeeping fails toward the last recorded instruction with a one-line note, never into a re-ask loop. Evidence that binds a human decision never falls back to a guess. A blocking hook's stderr names the exact next step. Promote prose to a hook only on observed evidence that prose lost; each such hook gets its own off-switch env var and an audit row per block. `[practitioner: aidlc AGENTS.md §Guards]`
 
 ---
 
@@ -215,7 +215,7 @@ The doc's own warning: "Exit code 1 without valid JSON output is a non-blocking 
 {
   "hooks": {
     "PreToolUse": [
-      { "matcher": "Edit|Write",
+      { "matcher": "Edit|Write|Bash",
         "hooks": [ { "type": "command", "command": ".claude/hooks/guard-migrations.sh", "timeout": 10 } ] }
     ],
     "PostToolUse": [
@@ -231,14 +231,24 @@ The doc's own warning: "Exit code 1 without valid JSON output is a non-blocking 
 
 ```bash
 #!/bin/bash
-# guard-migrations.sh — guard; fails closed.
+# guard-migrations.sh — Edit|Write|Bash guard; fails closed.
 [ "${MIGRATIONS_GUARD_OFF:-0}" = "1" ] && exit 0      # off-switch; audit its use
-FILE=$(jq -r '.tool_input.file_path // empty') || { echo "Input unreadable; rule holds. Next step: install jq." >&2; exit 2; }
-case "$FILE" in migrations/*|*/migrations/*)
-  echo "$(date -u +%FT%TZ) block $FILE" >> .claude/guard.log   # audit row
-  echo "migrations/ is protected. Next step: use the migration tool, then stop for review." >&2
-  exit 2 ;; esac
-exit 0
+IN=$(cat)
+TOOL=$(printf '%s' "$IN" | jq -r '.tool_name // ""') &&
+T=$(printf '%s' "$IN" | jq -r '.tool_input.file_path // .tool_input.command // ""') ||
+  { echo "Input unreadable; rule holds. Next step: check jq and the hook input." >&2; exit 2; }
+[ -n "$TOOL" ] || { echo "guard: no tool name in hook input — refusing (fail-closed); check the hook's stdin wiring" >&2; exit 2; }
+P=$(printf '%s' "$T" | tr '\\' '/')                  # C:\repo\migrations\x -> C:/repo/migrations/x
+HIT=""
+if [ "$TOOL" = "Bash" ]; then                        # rm/mv on migrations/ or its contents
+  printf '%s\n' "$P" | tr -d "\"'" | grep -Eq '(^|[;&|[:space:]])(rm|mv)[[:space:]]([^;&|]*[[:space:]])?([^[:space:]]*/)?migrations([/[:space:];&|]|$)' && HIT=1
+else
+  case "$P" in migrations/*|*/migrations/*) HIT=1 ;; esac
+fi
+[ -z "$HIT" ] && exit 0
+echo "$(date -u +%FT%TZ) block $TOOL $P" >> .claude/guard.log   # audit row
+echo "migrations/ is protected. Next step: use the migration tool, then stop for review." >&2
+exit 2
 ```
 
 ---
@@ -257,7 +267,6 @@ The verification-before-completion pattern (named in obra/superpowers, Marc Nuri
 [ "${VERIFY_GATE_OFF:-0}" = "1" ] && exit 0          # off-switch; audit its use
 EV=.claude/state/last-test-evidence.json; CT=.claude/state/verify-gate.count
 MAX="${VERIFY_GATE_MAX_BLOCKS:-2}"; mkdir -p .claude/state   # 2 interactive, 8 unattended
-[ "$(jq -r '.stop_hook_active // false')" = "true" ] && exit 0   # bound 1
 block() {  # $1 = on-task reason naming the next step
   KEY=$(sha256sum "$EV" 2>/dev/null | cut -c1-16); KEY=${KEY:-none}
   LAST=""; N=0; [ -f "$CT" ] && read -r LAST N < "$CT"
@@ -266,6 +275,8 @@ block() {  # $1 = on-task reason naming the next step
   [ "$N" -gt "$MAX" ] && exit 0                      # bound 2: release, logged
   echo "$1" >&2; exit 2
 }
+command -v jq >/dev/null || block "jq not found — evidence not evaluated; cap still applies"
+[ "$(jq -r '.stop_hook_active // false')" = "true" ] && exit 0   # bound 1
 [ -f "$EV" ] || block "Next step: run the test suite and record the result to $EV."
 AGE=$(($(date +%s) - $(stat -c %Y "$EV" 2>/dev/null || stat -f %m "$EV")))
 [ "$AGE" -le 300 ] || block "Next step: re-run the test suite; the evidence is over 5 minutes old."

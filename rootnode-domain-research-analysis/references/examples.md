@@ -181,6 +181,26 @@ Suggested responses should be direct and substantive — the kind of answer that
 
 ---
 
+## Example 4: Marked Quotations in the Output Layer (Fable 5.1)
+
+**Scenario:** A literature summary that quotes its sources. On Fable 5.1, summaries may reproduce source passages without quotation marks, so the prompt requires marked quotations in the Output layer and carries one worked example. This example is root.node-authored and its survey data are invented for illustration; the failure mode is documented in the Fable 5.1 prompting guide [Anthropic docs].
+
+```xml
+<output_format>
+Quote sources only inside quotation marks, each followed by a short source tag. Everything outside quotation marks is your own paraphrase — never reproduce a source's wording without marking it.
+
+<example>
+<request>Summarize what the 2024 county survey found about commute times.</request>
+<response>Median commute time rose from 24 to 27 minutes between 2019 and 2024 (Survey, p. 6). The authors call the increase "concentrated almost entirely in the two eastern districts" (Survey, p. 7), and attribute it mainly to the closure of the Route 9 bridge.</response>
+<why>The figure and the attribution are paraphrased and carry a source tag; the one phrase taken from the source is inside quotation marks with its own tag.</why>
+</example>
+</output_format>
+```
+
+**Why it works:** the rule sits in the Output layer where the deliverable is shaped, and the example shows the exact mark-up instead of describing it.
+
+---
+
 ## Assembly Notes
 
 **Pattern across all examples:**

@@ -13,18 +13,18 @@ description: >-
   foundation. Do NOT use for single-Project audits, Project Memory
   optimization, or full-stack audits (use rootnode-project-audit,
   rootnode-memory-optimization, or rootnode-full-stack-audit respectively, if
-  available). Run on Opus 5 or Sonnet 5 at `high` effort (both defaults); depth
+  available). Run on Opus 5.5 (`medium`+) or Sonnet 5.5 (`high`); depth
   reduces on legacy models.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   original-source: "PROJECT_OPTIMIZER.md, AUDIT_FRAMEWORK.md, OPTIMIZATION_REFERENCE.md"
 ---
 
 # Global Layer Auditor
 
-> **Calibration:** Tier 3 (High-effort recommended) - run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Reserve Fable 5.1 for long-horizon runs where Opus 5.5 at higher effort still fails your evals. See repository README for model compatibility.
 
 You audit the account-wide layers of a user's Claude environment — the configuration that affects every conversation, inside and outside Projects. You produce scored evaluations, cross-layer alignment findings, and evolutionary recommendations that strengthen the user's global foundation.
 
@@ -40,9 +40,9 @@ When producing any updated content — optimized User Preferences, Memory edit p
 
 ## Model requirements
 
-This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Global Layer Scorecard, detects eight cross-layer failure modes, and synthesizes evolutionary recommendations across four pathways. Run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code — the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Effort controls thinking depth, not visible output length — deep cross-layer synthesis benefits from `high` or higher.
+This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Global Layer Scorecard, detects eight cross-layer failure modes, and synthesizes evolutionary recommendations across four pathways. Run on Opus 5.5 (start at its `medium` default) or Sonnet 5.5 (`high`) — the recommended starting points. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — deep cross-layer synthesis benefits from `high` or higher.
 
-On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and Haiku 4.5 with extended thinking, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across the five global layers. Fallback-graceful on Opus 4.8. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them. Haiku 4.5 without extended thinking is out of scope.
+On the dual-primary tier (Opus 5.5 at its `medium` default or `high`; Sonnet 5.5 at `high`) the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and at `low` effort, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across the five global layers. Fallback-graceful on Opus 5 / Sonnet 5. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them.
 
 ## When to Use This Skill
 

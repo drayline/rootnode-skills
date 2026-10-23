@@ -385,7 +385,7 @@ Canonical source: `root_SKILL_BUILD_DISCIPLINE.md` §3.9 D9. The text below is r
 **Three pass conditions** (all must be met OR the skip condition must apply):
 
 1. **Pressure scenario documented.** At least one scenario is described where Claude, without the Skill loaded, would produce incorrect behavior that the Skill is designed to prevent. The scenario should target the Skill's core discipline — the failure mode it exists to stop.
-2. **Baseline failure confirmed or credibly expected.** The scenario has been run against a subagent without the Skill (RED), or the expected failure is credible based on documented Claude behavioral tendencies (cite the specific tendency from the 10-tendency taxonomy if applicable).
+2. **Baseline failure confirmed or credibly expected.** The scenario has been run against a subagent without the Skill (RED), or the expected failure is credible based on documented Claude behavioral tendencies (cite the specific tendency from the 15-tendency taxonomy if applicable).
 3. **Compliance with Skill confirmed or credibly expected.** The scenario has been re-run with the Skill loaded (GREEN), or compliance is credible based on the Skill's instruction specificity and the countermeasure's alignment with the identified tendency.
 
 **Skip condition.** The Skill is reference-only, data-carrying, or configuration-driven — it has no behavioral compliance to test. Examples: context carriers (drayline-ecosystem), profile schemas, block libraries used by other Skills. Mark as `D9: SKIPPED — no behavioral compliance surface` with one-sentence justification.

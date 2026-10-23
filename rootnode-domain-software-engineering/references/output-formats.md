@@ -1,6 +1,6 @@
 # Engineering Output Format Specifications
 
-Four specialized output format specifications for software engineering deliverables. Each includes the complete XML specification for use in Claude prompts, section-level length guidance, and calibration notes.
+Four specialized output format specifications for software engineering deliverables, plus one external-verification template for code tasks. Each format includes the complete XML specification for use in Claude prompts, section-level length guidance, and calibration notes.
 
 ## Table of Contents
 
@@ -8,6 +8,7 @@ Four specialized output format specifications for software engineering deliverab
 - [ADR (Architecture Decision Record)](#adr-architecture-decision-record)
 - [Runbook](#runbook)
 - [Code Review Feedback](#code-review-feedback)
+- [External-Verification Template (code tasks)](#external-verification-template-code-tasks)
 
 ---
 
@@ -140,3 +141,19 @@ Total length: Scale to the size and complexity of the code under review. A small
 Claude may produce code review feedback that is uniformly positive — praising the code without identifying substantive issues. This is Claude's agreeableness tendency applied to code review, and it undermines the format's purpose. If the output lacks critical or important findings on code that clearly has issues, add: "This review must identify at least the most significant improvement opportunity in the code. A review with no actionable findings is not useful — if the code is genuinely excellent, explain specifically what makes it so rather than offering generic praise."
 
 Watch for Claude inventing line numbers or file references when reviewing code it can see but cannot precisely locate within. If specific references are unreliable, add: "Reference findings by function name and description of the code section, not by line number, unless you can verify the line numbers exactly."
+
+---
+
+## External-Verification Template (code tasks)
+
+**Use when:** The prompt asks Claude to change code that can be run, built, or type-checked (implementation, bug fix, refactor, migration). Place the block in the Output layer, after the deliverable specification. (external-artifact verification — AEA §4.14 keep class)
+
+**Source:** [Anthropic docs — Sonnet 5.5 prompting guide, "Verification on coding tasks"; the catalog landscape (2026-10 §5) records the same block in the Haiku 5.5 guide]. Copied verbatim — do not paraphrase or shorten.
+
+```text
+When you change code that can be run, built, or type-checked, run a real check that exercises the change before reporting it done: the project's tests, type-checker, or build, or the changed command itself. A syntax-only check, or a check command that failed to start, does not count; if all that is missing is the project's declared dependencies, install them with its own package manager and lockfile (e.g. npm install, pip install -r requirements.txt), never via sudo or the system package manager, unless told not to. Only if no real check can run here, say which one you did not run and why instead of reporting the change as done.
+```
+
+**Calibration notes:**
+
+This is external-artifact verification: it points the model at a real check outside its own output (tests, type-checker, build, the changed command). It is not a "re-verify your answer" instruction, which adds cost without new evidence. The documented failure it counters is reporting a change done without running a real check — at `low` effort on Sonnet 5.5, and at `low`/`medium` on Haiku 5.5 [landscape 2026-10 §5].

@@ -16,7 +16,7 @@ Approach this comparison as follows:
 3. Identify where the options are functionally equivalent — do not manufacture differences where none exist.
 4. Identify where the options genuinely diverge and articulate why the difference matters for this specific situation.
 5. Assess the risks specific to each option — not just "which is best on the criteria" but "what could go wrong with each."
-6. Make a clear recommendation with explicit reasoning. If the top options are very close, say so and identify what additional information would break the tie.
+6. Make a clear recommendation and state a short rationale for it. If the top options are very close, say so and identify what additional information would break the tie.
 </reasoning>
 ```
 
@@ -47,7 +47,7 @@ Approach this selection as follows:
 3. Assess the total cost of ownership, not just the purchase price. Include implementation effort, training, migration cost, ongoing maintenance, and cost of switching away later.
 4. Evaluate the vendor / project trajectory: is this vendor growing and investing, stable, or declining? For open-source tools: is the community healthy and the project actively maintained?
 5. Identify integration and compatibility concerns specific to your existing stack. A tool that's excellent in isolation but creates integration headaches may cost more than a slightly weaker tool that fits cleanly.
-6. Recommend a selection with reasoning. If the decision depends on factors you don't have visibility into, name those factors explicitly.
+6. Recommend a selection and state a short rationale. If the decision depends on factors you don't have visibility into, name those factors explicitly.
 </reasoning>
 ```
 

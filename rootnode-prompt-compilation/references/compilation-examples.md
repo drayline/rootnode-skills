@@ -112,7 +112,7 @@ Approach this comparison as follows:
 2. Evaluate each provider against every criterion consistently — same dimensions, same depth.
 3. Identify where the providers are functionally equivalent — do not manufacture differences for commodity capabilities.
 4. Identify where they genuinely diverge and why it matters for a fintech migration specifically.
-5. Make a clear recommendation with explicit reasoning. State what the recommended provider sacrifices compared to alternatives.
+5. Make a clear recommendation and state a short rationale. State what the recommended provider sacrifices compared to alternatives.
 </reasoning>
 
 <output_format>

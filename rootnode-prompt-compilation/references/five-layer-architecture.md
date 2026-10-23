@@ -266,7 +266,7 @@ Approach this comparison as follows:
 2. Evaluate each option against every criterion consistently.
 3. Identify where the options are functionally equivalent — do not manufacture differences.
 4. Identify where the options genuinely diverge and why it matters.
-5. Make a clear recommendation with explicit reasoning, not a "they're all good in different ways" non-answer.
+5. Make a clear recommendation and state a short rationale for it, not a "they're all good in different ways" non-answer.
 </reasoning>
 ```
 
@@ -275,6 +275,23 @@ Approach this comparison as follows:
 When a task spans categories, combine elements. Keep total steps to 5-7. Lead with the dominant task type.
 
 Example: A strategic decision needing technical feasibility analysis → Strategic reasoning structure with technical evaluation folded into steps 3-4.
+
+### Reasoning-extraction check
+
+A Reasoning-layer instruction that asks the model to reproduce its internal reasoning in the response text can be declined: the response returns `stop_reason: "refusal"` with category `reasoning_extraction`. This applies on every current model (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1) [Anthropic docs, per-model what's-new and prompting guides, verified 2026-10-22].
+
+Anthropic's category text [Anthropic docs, Sonnet 5.5 prompting guide, "Safeguard refusals"]:
+
+- `reasoning_extraction`: the request asks the model to reproduce its internal reasoning in the response text.
+- "If your prompts ask the model to include its reasoning in the response, remove those instructions, because they invite `reasoning_extraction` declines. With adaptive thinking, read the reasoning from summarized thinking blocks instead (`display: "summarized"`). You can still ask for a short explanation of the answer or a summary of the actions taken"
+
+Apply it when validating a compiled prompt:
+
+- Task-specific analytical steps (the ready-to-use approaches above) are fine. They direct what the model analyzes; they do not ask it to transcribe its thinking.
+- Rewrite any instruction to show, write out, or narrate reasoning in the response as "state the conclusion and a short rationale."
+- A short explanation of the answer, or a summary of actions taken, is allowed.
+- Remove "think carefully before answering" lines. Thinking is always on for the primary tier and effort is the control [Anthropic, Opus 5.5 prompting guide, per landscape 2026-10 section 5].
+- To inspect the model's reasoning, read `display: "summarized"` thinking blocks rather than asking for it in the response text.
 
 ---
 

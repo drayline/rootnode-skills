@@ -10,7 +10,7 @@ The complete reference of documented prompt failure symptoms, their root causes,
 
 1. [Substance Problems](#substance-problems) — Generic output, shallow analysis, flawed premise agreement, contradictory recommendations, missed aspects, long preamble
 2. [Form Problems](#form-problems) — Too long, bullet overuse, format mismatch, wrong tone
-3. [Behavioral Problems](#behavioral-problems) — Excessive hedging, unrequested sections, conversation drift
+3. [Behavioral Problems](#behavioral-problems) — Excessive hedging, unrequested sections, conversation drift, `reasoning_extraction` refusals, think-less instructions that do not take effect
 
 ---
 
@@ -142,6 +142,26 @@ For research tasks specifically, add: "After presenting the evidence fairly, sta
 
 ---
 
+### Prompt returns `stop_reason: refusal` / category `reasoning_extraction`
+
+**Root cause:** The Reasoning layer asks the model to reproduce its internal reasoning in the response text. Anthropic's category text: "`reasoning_extraction`: the request asks the model to reproduce its internal reasoning in the response text." [Anthropic docs, Sonnet 5.5 prompting guide, "Safeguard refusals"]
+
+**Diagnostic test:** Read the refusal category on the response. Then search the Reasoning layer (and any quality-control or output text) for instructions to show, write out, narrate, or include reasoning or thinking in the response, including paraphrases such as "explain your reasoning step by step in your answer."
+
+**Fix:** Remove the reproduce-your-reasoning instructions; rewrite them as "state the conclusion and a short rationale." Task-specific analytical steps stay. Anthropic: "If your prompts ask the model to include its reasoning in the response, remove those instructions, because they invite `reasoning_extraction` declines. With adaptive thinking, read the reasoning from summarized thinking blocks instead (`display: "summarized"`). You can still ask for a short explanation of the answer or a summary of the actions taken" [Anthropic docs, Sonnet 5.5 prompting guide]. To inspect the reasoning, read the `display: "summarized"` thinking blocks.
+
+---
+
+### Prompt tells the model to think less or answer directly, and it still thinks
+
+**Root cause:** Not a prompt defect. On the current models the thinking depth is set by the effort level, not by prompt text. Anthropic: "To get less thinking, lower the effort level. ... Asking it in the system prompt to think less doesn't reliably reduce its thinking." [Anthropic docs, Sonnet 5.5 prompting guide, "Calibrate effort"; the Haiku 5.5 guide gives the same direction]
+
+**Diagnostic test:** Check the effort level in use and whether the prompt carries think-less or answer-directly instructions ("don't overthink," "answer immediately without thinking").
+
+**Fix:** Lower the effort level. Remove the think-less instruction from the prompt; it adds tokens without changing the behavior.
+
+---
+
 ## Quick Reference Table
 
 | Problem | Most Likely Layer | First Fix to Try |
@@ -159,3 +179,5 @@ For research tasks specifically, add: "After presenting the evidence fairly, sta
 | Misses key aspects | Objective + Reasoning | Specify dimensions in objective; add as reasoning steps |
 | Long preamble | Output specification | Specify the opening section; remove conversational framing |
 | Drifts over conversation | Context management | Restate constraints; summarize prior decisions |
+| Prompt returns `stop_reason: refusal` / category `reasoning_extraction` | Reasoning | Remove reproduce-your-reasoning instructions; ask for the conclusion and a short rationale; read `display: "summarized"` thinking blocks |
+| Prompt tells the model to think less / answer directly and it still thinks | Not a prompt defect (effort) | Lower the effort level; prompt-level think-less instructions do not reliably reduce thinking |

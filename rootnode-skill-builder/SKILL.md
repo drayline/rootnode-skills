@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   predecessor: "rootnode-skill-builder v2.1"
   original-source: "root.node seed Project KFs (post-Phase 32a methodology updates) + rootnode-skill-builder v2.1 source"
   discipline_post: phase-30
@@ -26,7 +26,7 @@ metadata:
 
 # Skill Builder
 
-> **Calibration:** Tier 2 (Sonnet-graceful) — designed and tested against Opus 5 + Sonnet 5 dual-primary. Runs correctly on Sonnet 4.6 (legacy-graceful) with slightly less depth on multi-dimensional analysis; on Haiku 4.5 with extended thinking; fallback-graceful on Opus 4.8. Effort default is `high` on Opus 5 and Sonnet 5; step down to `medium` for cost-sensitive runs where evals show quality holds. D9a graders run on Opus 5 or Sonnet 5. See repository README for model compatibility.
+> **Calibration:** Tier 2 (Sonnet-graceful) — designed against Opus 5.5 + Sonnet 5.5 dual-primary. Runs on Haiku 5.5 at `high` effort with less depth on multi-dimensional analysis; fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. Start at the model's default effort (`medium` on Opus 5.5 and Sonnet 5.5 in Claude Code; `high` for Sonnet 5.5 on the Claude API) and re-run an effort sweep on your own evals rather than carrying a setting over. See repository README for model compatibility. D9a graders run on Opus 5.5 or Sonnet 5.5 (Opus 5 / Sonnet 5 valid fallback).
 
 > **Version 3.0:** Methodology + tooling release. D9 expanded into D9a/D9b/D9c sub-levels (empirical Tier A / empirical Tier B / analytical floor). Adds Description Refinement Loop methodology (manual or automated via `scripts/description_optimizer.py`). Adds Tier A/B/C environment-adaptive degradation. Adds executable layer (`scripts/`, `agents/`, `eval-viewer/`) ported from upstream Anthropic skill-creator with content-class-policy adaptation. v2.1 build methodology preserved verbatim where unchanged.
 
@@ -118,7 +118,7 @@ When the three pre-build gates have passed and a design specification is present
 6. **Auto-activation enforcement:** verb-based triggers; `disable-model-invocation` either absent or with `metadata.notes` justification.
 7. **Anti-pattern catalog scan:** scan against `references/anti-pattern-catalog.md` Skill-relevant subset; surface catches with section reference; advisory unless severe (HALT disposition).
 8. **7-layer leak-check:** scan for content belonging in CLAUDE.md, `.claude/rules/`, hooks, or MCP rather than in the Skill.
-9. **Behavioral validation (RECOMMENDED, sub-level applies):** D9a (Tier A — empirical with-Skill vs. without-Skill comparison via subagent grader); D9b (Tier B — empirical execution under realistic test prompts; qualitative review; no baseline); D9c (Tier C — analytical reasoning grounded in the 10-tendency taxonomy). Capture the applied sub-level in the build summary. The sub-level architecture and per-tier procedure live in `references/behavioral-validation.md`. Tier applicability per `references/multi-environment-adaptation.md`.
+9. **Behavioral validation (RECOMMENDED, sub-level applies):** D9a (Tier A — empirical with-Skill vs. without-Skill comparison via subagent grader); D9b (Tier B — empirical execution under realistic test prompts; qualitative review; no baseline); D9c (Tier C — analytical reasoning grounded in the 15-tendency taxonomy). Capture the applied sub-level in the build summary. The sub-level architecture and per-tier procedure live in `references/behavioral-validation.md`. Tier applicability per `references/multi-environment-adaptation.md`.
 
 **Step 6 — Package the deployable Skill and deliver alongside separated audit artifacts.** The deliverable is two distinct things: (1) `{skill-name}.zip` containing the Skill folder (`{skill-name}/SKILL.md` + `{skill-name}/references/*.md` + `{skill-name}/scripts/*` + `{skill-name}/agents/*.md` + `{skill-name}/eval-viewer/*` if present); (2) audit artifacts as separate files outside the zip. The zip is the primary deliverable; audit artifacts are secondary. Use `scripts/package_zip.py` to build the zip and verify contents before delivery.
 

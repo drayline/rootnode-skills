@@ -15,13 +15,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   original-source: "DOMAIN_PACK_SOFTWARE_ENGINEERING.md"
 ---
 
 # Software Engineering Prompt Methodology
 
-> **Calibration:** Tier 1 (Model-compatible) - runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured retrieval, rule evaluation, or template lookup - output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Specialized approaches for building Claude prompts that handle software engineering tasks — reliability engineering, security analysis, code review, API design, performance analysis, threat modeling, and engineering document formats (RFCs, ADRs, runbooks, code review feedback).
 
@@ -33,23 +33,23 @@ Specialized approaches for building Claude prompts that handle software engineer
 - 4 output format specifications (RFC, ADR, Runbook, Code Review Feedback) — see `references/output-formats.md`
 - Behavioral countermeasures for engineering-specific Claude failure modes
 
-## v4.0 update — Opus 5 cyber classifier posture
+## Cyber classifier posture (5.5 generation)
 
-Opus 5's cybersecurity classifiers are proportionally less restrictive than Fable 5's — expected to intervene approximately 85% less often (per Anthropic's Opus 5 announcement). For defensive-security software-engineering workflows, Opus 5 is the friction-optimal target.
+Opus 5.5 ships under the same bio + cyber safeguards as Fable. Sonnet 5.5 is the first Sonnet with frontier-model cyber safeguards. Fable 5.1 triggers about 60% fewer cyber interventions per Claude Code session than Fable 5 [Tier 2 source: Anthropic's figure as reported by VentureBeat, 2026-09-01 — secondary, not an Anthropic primary page]. The line Anthropic draws: "Finding vulnerabilities in source code is allowed. High-risk dual-use cybersecurity work isn't allowed." [Anthropic docs — Sonnet 5.5 prompting guide; the catalog design spec records the same line in all four 5.5-generation guides]
 
-**Permitted on Opus 5:**
+**Stays inside the allowed line:**
 - Source-code vulnerability finding and review.
 - Defensive analysis of application code, configurations, and infrastructure-as-code.
 - Threat modeling against source-available systems.
 
-**Blocked on Opus 5 (routes to fallback):**
-- Binary-based vulnerability scanning (opaque binaries analyzed for exploits).
-- Penetration testing (active exploitation against systems).
-- Exploit generation and weaponization.
+**Outside it (declined):** high-risk dual-use work, such as the malware and exploit development named in the `cyber` refusal category [Anthropic docs — Sonnet 5.5 prompting guide].
 
-The 85%-less-often intervention estimate is Fable-5-relative, not absolute — Opus 5 classifiers still trigger on the blocked categories above.
+**False-positive reducers** (sourced paraphrase of the Fable 5.1 prompting guide via the catalog design spec; the guide's verbatim text was not available at build time):
+- Ask "are there bugs" rather than "does this compile".
+- Supply documentation for lesser-known languages.
+- Strip base64 from tool output.
 
-**Fallback destination.** On Claude.ai, Claude Code, and Claude Cowork, Opus 5 refusals fall back to Opus 4.8 by default. Skills designed for defensive-security workflows should produce correct-shape output on Opus 4.8 (fallback-graceful) as well as on Opus 5 (primary).
+**Fallback destination.** Server-side fallback differs per model — Haiku 5.5 has none, and Sonnet 5.5 falls back only for `cyber` and `frontier_llm`. See the per-model table in `rootnode-domain-agentic-context`, section "Refusal & fallback semantics (5.5 generation)". Skills designed for defensive-security workflows should produce correct-shape output on the fallback target as well as on the primary model.
 
 **Conservative-review-instruction fix.** For code-review prompts, do NOT use `only report high-severity issues` or `be conservative` — Opus 5 follows literally and under-reports. Rewrite to report-everything-then-filter form: "Report every issue you find, categorized by severity. In a separate pass at the end, filter to [severity threshold] and list only those in the final report. Include the full list in an appendix." See `root_OPTIMIZATION_REFERENCE.md` "Prompt/environment-conditional defects" for details.
 
@@ -144,6 +144,8 @@ Add these engineering-specific quality checks to any prompt built with this Skil
 - **Proportionality:** Recommendations match the system's actual scale, team size, and reliability requirements. Enterprise-grade solutions for startup-scale problems, or vice versa, indicate miscalibrated analysis.
 - **Specificity of commands and actions:** Runbooks, review feedback, and operational recommendations include exact commands, specific file paths, and concrete thresholds — not "check the logs" or "monitor the system."
 - **Security as a dimension:** Any design or review that handles user input, authentication, authorization, or sensitive data addresses the security implications explicitly — even if security is not the primary focus.
+- **External verification (code tasks):** When the prompt's task changes code that can be run, built, or type-checked, place the "run a real check that exercises the change" block in the prompt's Output layer. Verbatim template in `references/output-formats.md` ("External-Verification Template") [Anthropic docs]. This is external-artifact verification, not self-verification (AEA §4.14 keep class).
+- **Surgical edits (token-cost rule):** For file changes, instruct the model to "surgically edit a file rather than rewrite the entire thing" — Fable 5.1 may rewrite whole files for small edits. This is a token-cost rule, not a quality rule. [Anthropic docs — Fable 5.1 prompting guide, as recorded in the catalog behavioral-tuning design spec §3]
 
 ## Critical: Engineering-Specific Behavioral Countermeasures
 

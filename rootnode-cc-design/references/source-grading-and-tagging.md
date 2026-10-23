@@ -138,6 +138,8 @@ Speculation isn't banned — it's labeled. There are legitimate uses:
 
 **The discipline:** speculate when needed, but mark it. The reader should know which claims are evidence-grounded and which are inference.
 
+**Assumption status survives.** A `[speculation]` or `[assumption]` tag in the design brief travels with the fact — into CLAUDE.md, the CC prompt, the handoff bundle, and the session report — until the operator confirms it. It is never silently promoted to fact by being restated without the tag. `[practitioner: awslabs/aidlc-workflows stage-protocol.md §3]`
+
 **Anti-pattern:** speculative claims dressed as authoritative. Examples to avoid:
 - "Best practice is to..." without naming the practice's source
 - "It's well-known that..." (well-known to whom? cite the source)

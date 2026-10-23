@@ -64,6 +64,10 @@ For every piece of content you'd put in a CC environment, walk this procedure:
 
 **The placement test:** ask "what mechanism enforces this guarantee?" before "what should I write?" If the answer is "CLAUDE.md plus Claude reading and following it," consider whether a more deterministic mechanism is the better home. CLAUDE.md is for context that genuinely needs to be in every session.
 
+**Three enforcement tiers, not two.** Prompt (advisory, no guarantee) → **advisory check** (deterministic, runs on write, surfaces a finding, never blocks; a check whose tool was unavailable evaluated nothing and does not clear an earlier failure) → blocking hook (`exit 2`, at a gate). Overriding a blocking check is a logged operator decision and is forbidden in unattended runs. Decision tree and fail-direction rules: `cc-skills-and-hooks-composition.md` §1. `[practitioner: awslabs/aidlc-workflows 06-sensors.md]`
+
+**One owner per rule.** Every invariant has one owner and one shared check. Enforcing it at two boundaries (a hook and a CLI floor) is fine; a second, independently written version of the same check is a defect, because the two drift. `[practitioner: aidlc AGENTS.md]`
+
 **Common misplacements (the placement-validation checklist used by REMEDIATE for fix proposals and by rootnode-repo-hygiene for scan findings):**
 
 | You see this in CLAUDE.md | It probably belongs in |
@@ -178,11 +182,11 @@ Subagents are spawned with their own context window. They isolate context that w
 
 | Subagent | Model | Tools | Use for |
 |---|---|---|---|
-| **Explore** | inherits main conversation (capped at Opus on the Claude API) | Read-only | Codebase search, "find me where X is implemented", cheap context-gathering |
+| **Explore** | inherits (Fable → `opus` alias) | Read-only | Codebase search, "find me where X is implemented", cheap context-gathering |
 | **Plan** | (planning-mode) | Read-only | Used in plan mode for research before plan production |
 | **general-purpose** | (default) | Full tools | Complex multi-step work that requires context isolation |
 
-**Explore's default changed in v2.1.198.** The built-in Explore no longer defaults to Haiku — it inherits the main conversation's model. A deployment that wants a genuinely cheap scout must define a project subagent named `Explore` with `model: haiku` (the project definition overrides the built-in and keeps its own `model` field). Explore and Plan also skip CLAUDE.md and git status, so any rule they must obey is restated in the delegation prompt rather than assumed; both are one-shot and cannot be resumed. See `cc-delegation-patterns.md` §1. **[Anthropic docs]**
+**Explore's default changed in v2.1.198.** The built-in Explore no longer defaults to Haiku — it inherits the main conversation's model; when the main conversation runs Fable, Explore runs on the `opus` alias (Anthropic-hosted only); on third-party providers it stays on the main model. A deployment that wants a genuinely cheap scout must define a project subagent named `Explore` with `model: haiku` — Haiku 5.5 on the Anthropic API (the project definition overrides the built-in and keeps its own `model` field). On third-party providers the `haiku` alias may still resolve to Haiku 4.5; pin `claude-haiku-5-5` via `ANTHROPIC_DEFAULT_HAIKU_MODEL`. Explore and Plan also skip CLAUDE.md and git status, so any rule they must obey is restated in the delegation prompt rather than assumed; both are one-shot and cannot be resumed. See `cc-delegation-patterns.md` §1. **[Anthropic docs]**
 
 **When to add a custom subagent:** when the same kind of subagent keeps getting requested (a security reviewer, a test writer, a docs proofreader), define it once. **[Anthropic docs framing]**
 
@@ -214,7 +218,9 @@ Hooks run deterministically on CC lifecycle events. They are the enforcement lay
 | `UserPromptSubmit` | Before CC processes the user's prompt | Auto-inject Skill instructions, log prompts, validate prompt format |
 | `PreToolUse` | Before a tool call executes | Block dangerous operations, require confirmation, modify tool inputs |
 | `PostToolUse` | After a tool call completes | Auto-format edited files, run linters, log changes |
-| `Stop` | Before CC declares work complete | Verify-before-completion gates (run tests, check evidence) |
+| `Stop` | Before CC declares work complete | Verify-before-completion gates (run tests, check evidence) — bounded |
+
+Four documented events. A hook blocks with exit code 2, or exit 0 with JSON `{"decision":"block"}` `[Anthropic docs — hooks, fetched 2026-10-22]`; config is a `matcher` string plus a nested `hooks` array. Full set and contracts: `cc-skills-and-hooks-composition.md` §4. **[Anthropic docs — hooks, verified 2026-10-22]**
 
 **Hook authoring is covered in detail in `cc-skills-and-hooks-composition.md`.** This section is the placement-rule pointer: enforcement guarantees go in hooks; preferences go in CLAUDE.md.
 
@@ -241,7 +247,7 @@ MCP servers expose external data and APIs to CC. Each server's tool schemas cons
 - **Output summarization** — prefer servers that return summarized output, not raw JSON dumps
 - **State-awareness** — prefer indexed/queryable interfaces over those that return large payloads on every call
 
-**Per-subagent MCP scoping:** specify `mcpServers:` in a subagent's frontmatter to keep tool definitions out of the main conversation when only the specialist needs them. Reduces main-session context pressure.
+**Per-subagent MCP scoping:** specify `mcpServers:` in a subagent's frontmatter to keep tool definitions out of the main conversation when only the specialist needs them. Reduces main-session context pressure. Re-verify tool inheritance on the running version: a `tools:` allowlist may drop inherited MCP tools unless fully-qualified names are listed; a bare `mcp__<server>` entry may not be honored. `[practitioner: awslabs/aidlc-workflows 14-claude-features.md, 2.1.159-era spike — verify on running version]`
 
 **Audit trigger:** if a project's `.mcp.json` has 5+ servers and sessions are showing context pressure symptoms (Claude forgetting earlier instructions, generic responses, hitting context limits), audit MCP usage. See `cc-anti-patterns.md` §4.2.
 
@@ -291,6 +297,8 @@ Settings have a layered authority hierarchy. Higher-tier settings override lower
 - **Local settings.json** → experimental overrides for this work tree (transient)
 
 **For regulated industries or enterprise contexts:** managed policy is required for any rule that must hold organization-wide. See `cc-anti-patterns.md` §4.8 for the missing-managed-policy pattern.
+
+**Prior-judgement locks.** A setting the team explicitly locked — a strict mode in a settings file, a rule CLAUDE.md marks as locked — outranks a single chat request; the refusal names the file that holds the lock. Defaults are not locks: an unset or default value yields to the request. `[practitioner: awslabs/aidlc-workflows AGENTS.md Prior judgement]`
 
 ---
 

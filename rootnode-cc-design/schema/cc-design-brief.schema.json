@@ -169,6 +169,13 @@
       "description": "Optional: semantic version of the brief itself (e.g., '1.0', '1.1'). Useful when briefs are versioned alongside the project.",
       "pattern": "^\\d+\\.\\d+(\\.\\d+)?$"
     },
+    "report_dir": {
+      "type": "string",
+      "description": "Optional: directory, relative to the delivery repo root, where CC prompts write session reports — the repo's own audit convention (e.g. 'reports/', 'audit/phase-XX/'). Reports are named <descriptive_name>_{YYYYMMDD-HHMM}Z.md. See references/cc-session-reports.md.",
+      "default": "reports/",
+      "minLength": 1,
+      "maxLength": 200
+    },
     "ecosystem_position": {
       "type": "object",
       "description": "Optional: cross-project context. Used when the project depends on or is depended on by other projects in the Drayline ecosystem.",

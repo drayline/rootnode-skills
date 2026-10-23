@@ -75,6 +75,14 @@ For the structural patterns this Skill applies, see the other reference files. T
 
 ---
 
+### Symptom: A hook the Skill designed never blocks anything
+
+**Diagnosis:** Two shape defects make a hook advisory without anyone noticing. (a) The script exits with a code other than 2 — Claude Code treats any other non-zero code as a non-blocking error and lets the action go ahead. Hook examples shipped before v5.0 of this Skill taught that defect. (b) The config uses a plural matcher array or a matcher object (`tool_name`, `path_pattern`), which is not the documented shape, so the hook may never match.
+
+**Fix:** Exit 2 on every block, with stderr naming the next step; use `"matcher": "<string>"` plus a nested `"hooks": [{"type": "command", "command": "…", "timeout": N}]` array, and do path or prompt filtering inside the script from the stdin JSON. If it is a Stop hook, also bound it (`stop_hook_active`, no-progress cap). See `cc-skills-and-hooks-composition.md` §4–§5. Then trigger the hook once deliberately and confirm the block in the transcript — the rendered behavior, not the config text, is the evidence. **[Anthropic docs — hooks, verified 2026-10-22; re-verify on the running version]**
+
+---
+
 ## 2. Skill activation issues
 
 ### Symptom: Skill doesn't fire when the user asks for CC design help

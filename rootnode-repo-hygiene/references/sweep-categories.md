@@ -178,24 +178,26 @@ F-6.{n}  [risk: high]  [confidence: high|medium|low]
 
 ## Cat 7 — Hook misconfiguration
 
-**Detection focus.** Hooks that reference nonexistent scripts, hooks placed in the wrong mechanism (preference-as-enforcement), or hooks that should exist but don't.
+**Detection focus.** Hooks that reference nonexistent scripts, hooks placed in the wrong mechanism (preference-as-enforcement), hooks that enforce with a non-blocking exit code, hooks whose `settings.json` entry does not match the documented shape, or hooks that should exist but don't.
 
 **Scan procedure.**
 - For each hook in `.claude/settings.json` (and parent settings files), verify the referenced script path exists and is executable.
 - Read CLAUDE.md and `.claude/rules/` for "remember to..." or "always do X" instructions that describe lifecycle guarantees. Surface as enforcement-as-preference candidates that should be hooks.
 - For verification-before-completion: check whether a Stop hook exists that runs the test command. Surface absence as a Cat 13 finding (recommendation-only) AND a Cat 7 finding (executable: add Stop hook) when the test infrastructure exists.
+- **Exit-code check.** For each `command` hook that is meant to enforce (guard a tool call, block a stop, reject a prompt), read the script's failure path. For `command` hooks, `exit 2` blocks on events that can block (stderr is fed back to Claude; on `UserPromptSubmit` it is shown to the user instead); `exit 1` and any other non-zero code is a non-blocking error and the action goes ahead. A `command` hook that enforces with `exit 1` is therefore non-blocking: flag it as enforcement-as-preference, because it reads as a guarantee and behaves as a preference. `PostToolUse` cannot block (the tool already ran), so an enforcement intent on `PostToolUse` is a `non-blocking-enforcement` finding too. [Anthropic docs, hooks reference, verified 2026-10-22; re-verify on the running Claude Code version]
+- **Shape check.** `settings.json` hook entries must match the documented shape: `"hooks": {"<Event>": [{"matcher": "<string>", "hooks": [{"type": "command", "command": "<cmd>", "timeout": <seconds>}]}]}`, that is, a `matcher` string plus an inner `hooks` list of `{type, command, timeout}` objects. Flag a `matchers` array, an entry with `command` but no inner `hooks` list, or a handler with no `type`. [Anthropic docs, hooks reference, verified 2026-10-22]
 
 **Expected finding format.**
 ```
 F-7.{n}  [risk: medium|high]  [confidence: high|medium|low]
-  Hook type: <missing-script | wrong-mechanism | absent-but-warranted>
+  Hook type: <missing-script | wrong-mechanism | non-blocking-enforcement | malformed-shape | absent-but-warranted>
   Location: <settings file or CLAUDE.md line>
   Evidence: <quoted hook config or instruction text>
-  Recommended action: <fix path | extract from prose to hook config | add hook>
+  Recommended action: <fix path | extract from prose to hook config | change exit 1 to exit 2 with the next step on stderr | correct the entry to the documented shape | add hook>
 ```
 
 **Confidence calibration.**
-- `high` — script reference produces a `file not found` on direct check; OR enforcement-as-preference language is unambiguous ("always run tests after editing").
+- `high` — script reference produces a `file not found` on direct check; OR enforcement-as-preference language is unambiguous ("always run tests after editing"); OR a hook whose purpose is enforcement exits `1` on its failure path; OR the entry visibly departs from the documented shape.
 - `medium` — wrong-mechanism candidate where the rule could plausibly remain in CLAUDE.md if the team accepts soft enforcement.
 - `low` — absent-but-warranted hook where the gap is inferred from missing automation rather than from explicit signal.
 

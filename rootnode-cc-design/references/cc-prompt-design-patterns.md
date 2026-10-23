@@ -48,13 +48,15 @@ These five principles appear across every authoritative source on CC prompt desi
 
 **P5. Verification gates baked into the prompt.** Every prompt that produces output specifies how the output will be verified. "Edit X. Run `pytest tests/` and verify all tests pass before declaring done." Without verification gates, CC drifts toward implementation-first behavior and the "trust-then-verify gap" emerges. **[obra/superpowers verification-before-completion iron law]**
 
+**P6. Bookkeeping belongs in a tool.** Routing, counts, digests, and audit rows come from commands the prompt names; the model copies tool output and does not compute it. A prose instruction to "append an audit row" is the smell — name the command that writes the row. This is the summary-vs-itemization rule applied at authoring time. `[practitioner: awslabs/aidlc-workflows 12-state-machine.md North-star; single source]`
+
 ---
 
 ## 3. The Explore → Plan → Implement → Verify workflow
 
 The canonical CC workflow named identically across Anthropic primary docs and every major practitioner source. Four phases:
 
-**Phase 1 — Explore.** The agent surveys the codebase or context relevant to the task. In CC, this typically uses the Explore subagent (Haiku, read-only, cheap). The output is a context-grounded understanding, not a plan.
+**Phase 1 — Explore.** The agent surveys the codebase or context relevant to the task. In CC, this typically uses the Explore subagent (Haiku 5.5 via `Explore` override, read-only, cheap). The output is a context-grounded understanding, not a plan.
 
 **Phase 2 — Plan.** The agent produces a written plan — what files will change, what's the approach, what's the verification strategy. CC supports a "plan mode" (Shift+Tab) that disables edit tools while planning. In plan mode, the user can edit the plan (Ctrl+G) before approving. The plan is an artifact (PLAN.md, SPEC.md), not a paragraph in chat.
 
@@ -234,9 +236,40 @@ Autonomous prompts drive long-running, less-supervised CC work. They require mor
 
 ## Context bounds
 - READ: @<paths>
-- WRITE: @<paths>
+- WRITE: @<paths>; the session report under <report_dir from the brief>
 - IGNORE: @<paths>
+
+## Carry the work through
+<early-stop block — see "Carry the work through" below>
+
+## Final item
+Write the session report (`cc-session-reports.md`), then stop.
 ```
+
+**Carry the work through — the early-stop countermeasure.** The 5.5-generation models can end a turn too early: Opus 5.5 in unattended runs, Sonnet 5.5 at `low`/`medium`, Haiku 5.5 at `low` with long prompts, Fable 5.1 on long tasks **[Anthropic docs — Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1 prompting guides]**. Too little, not too much (`rootnode-behavioral-tuning` tendency #15, early turn termination). In an autonomous prompt:
+
+- Treat a text-only end of turn as a report, not proof.
+- Name the early stops to avoid: a summary announcing the next step with no tool call; an offer to continue; a list of non-blocking decisions; a stop at a milestone report.
+- Name the stops you do want: destructive actions, scope changes, anything the prompt deliberately protects. The confirmation step for risky actions stays.
+- Cap harness continuation messages at 2–3 per run; past the cap, halt and report.
+
+Default block (Sonnet 5.5 / Haiku 5.5 short form) — a turn-boundary instruction, not a self-verification clause; copy verbatim: **[Anthropic docs]**
+
+```text
+Keep working until everything the user asked for is done, and only stop to ask when you can't go on without the user or before a risky step.
+
+When the work the user asked for is done and checked, stop and report. Don't add features, tests, files, docs or refactors that weren't asked for. If you think one would help, mention it at the end instead of doing it.
+```
+
+For a fully unattended Opus 5.5 run, use this block instead. It is a turn-boundary instruction (AEA §4.14 keep class), not a self-verification clause; copy verbatim: `[Anthropic docs — Prompting Claude Opus 5.5, fetched 2026-10-22]`
+
+```text
+A standing instruction from the user, the person you are working for. It is about how your turns end. A message with no tool call in it ends your turn, and the work stops there until you are asked to continue. The user has seen you end turns in four ways while work they asked for was still owed, and does not want any of them. One: a long summary of what was done that closes by announcing the next step and has no tool call, so the next thing never starts. Two: an offer to carry on with something unless the user would prefer otherwise, which stops to wait for an answer the user was not going to give. Three: a list of decisions for the user when, by your own account, none of them blocks the rest of the work. Four: deciding that this is a good place to report, because the turn has been long or a milestone is done. Status notes are welcome, and so are your recommendations on open decisions, but put them in the same message as your next tool call and carry on with whatever does not depend on the user's answer. If you notice yourself inviting the user to redirect you or offering to wait, delete it and do the next thing. The stops the user does want are the ones where nothing can move without them, or where the thing blocking you is deliberately protected from you. This does not override the need for confirmation on risky or destructive actions.
+```
+
+Placement, per the guide (paraphrased): add it at the end of the system prompt from the first request; set `thinking.display: "updates"` to see status notes; keep your own confirmation step for risky actions; leave it out of human-in-the-loop applications. Pairs with the turn-economy rule (CC_EG §5.9).
+
+**Autonomy escalation rule.** Autonomy widens only on a fresh operator turn and narrows on any trigger. A scope grant for one phase is never read as session-wide. Hands-off mode removes happy-path gates but keeps failure halts loud. The Refuter is never dropped because the run is autonomous. `[practitioner: aidlc stage-protocol-construction.md Autonomy choice]`
 
 **The pump primer pattern.** Autonomous runs typically benefit from a "pump primer" — the first work item is done manually (or in an interactive session) to validate the workflow, then the autonomous run picks up from item 2. This catches misconfiguration before the agent runs unsupervised. **[generalizable]**
 
@@ -361,19 +394,31 @@ Banned phrases at completion: "should work," "probably fine," "looks good," "I b
 
 This pattern alone catches the most common CC failure mode (silent partial completion) and is worth specifying in every prompt where verification is possible. **[obra/superpowers iron law + Anthropic's "trust-then-verify gap" framing]**
 
+**Anthropic's verification block for code tasks.** Sonnet 5.5 at `low` and Haiku 5.5 at `low`/`medium` can report a change done without a real check. This is an external-artifact verification instruction, not a self-verification clause. Copy it verbatim: **[Anthropic docs — Sonnet 5.5 prompting guide, "Verification on coding tasks"]**
+
+```text
+When you change code that can be run, built, or type-checked, run a real check that exercises the change before reporting it done: the project's tests, type-checker, or build, or the changed command itself. A syntax-only check, or a check command that failed to start, does not count; if all that is missing is the project's declared dependencies, install them with its own package manager and lockfile (e.g. npm install, pip install -r requirements.txt), never via sudo or the system package manager, unless told not to. Only if no real check can run here, say which one you did not run and why instead of reporting the change as done.
+```
+
 ---
 
 ## 10. Output discipline for CC prompts
 
-CC prompts authored in DESIGN mode carry empirically-tested output standards that don't fully surface in environment-design references. The four below emerged from production CC prompt execution (Phase 31d merge, Phase 32a/b v3.0 builds, 2026-05-06 to 2026-05-08) — each gap produced a named friction during execution. Apply them when the deliverable is an initial prompt, session prompt, or autonomous prompt that an agent will run.
+CC prompts authored in DESIGN mode carry empirically-tested output standards that don't fully surface in environment-design references. The first four below emerged from production CC prompt execution (Phase 31d merge, Phase 32a/b v3.0 builds, 2026-05-06 to 2026-05-08) — each gap produced a named friction during execution; each later entry carries its own source tag. Apply them when the deliverable is an initial prompt, session prompt, or autonomous prompt that an agent will run.
 
-**Shell environment in CC prompts.** When producing CC prompts that include shell command blocks, default to bash. The CC harness shell is bash on Windows (Git Bash) and sh/bash on Linux/macOS, even when the operator's interactive environment is PowerShell. Prompts authored against the operator's local shell land in CC and trigger live translation by the agent (`Get-Content` → `cat`, `Test-Path` → `[ -f <file> ]`, `Measure-Object -Line` → `wc -l`, backtick line-continuation → backslash). Translation usually works but relies on agent judgment, creates inconsistent execution logs, and can fail silently for less-obvious divergences. Pattern: bash as the primary command block, with PowerShell variants labeled and adjacent for the divergent set. Universal commands — all `git` and `gh` invocations, `pwd`, `ls` — work in both shells and need no variants. `[generalizable: Phase 31d merge prompt execution 2026-05-06]`
+**Shell environment in CC prompts.** When producing CC prompts that include shell command blocks, default to bash. The CC harness shell is bash on Windows (Git Bash) and sh/bash on Linux/macOS, even when the operator's interactive environment is PowerShell. Prompts authored against the operator's local shell land in CC and trigger live translation by the agent (`Get-Content` → `cat`, `Test-Path` → `[ -f <file> ]`, `Measure-Object -Line` → `wc -l`, backtick line-continuation → backslash). Translation usually works but relies on agent judgment, creates inconsistent execution logs, and can fail silently for less-obvious divergences. Pattern: bash as the primary command block, with PowerShell variants labeled and adjacent for the divergent set. Universal commands — all `git` and `gh` invocations, `pwd`, `ls` — work in both shells and need no variants. `[generalizable: Phase 31d merge prompt execution 2026-05-06]` Write commands in permission-shaped form: one command per line, no leading `cd`, no pipe that hides the permission-relevant verb, `cd` only inside a subshell, and any text containing `$`, backticks, or quotes passed through a file rather than interpolated into a shell line. `[practitioner: awslabs/aidlc-workflows conductor.md Files and commands; 08-construction-and-swarm.md]`
 
 **Pre-flight Skill enumeration in CC prompts.** When producing a multi-step CC prompt — any session prompt with phases, halts, or non-trivial scope — include a pre-flight stage that enumerates available Skills before any other file reads. Skill availability is determined at session-launch time, not at design-time, and the agent's methodology grounding depends on what's actually loaded. Prompts that proceed straight into file reads risk two failure modes: agents make decisions assuming Skills they don't have (requiring rework when discovery happens mid-execution), or agents skip Skill activation entirely and miss methodology that should have applied. The pre-flight stage takes one paragraph — enumerate available Skills, name the relevant ones the prompt expects to compose with, and explicitly note any expected Skill that's missing. See CC_ENVIRONMENT_GUIDE — pre-flight checklist (R5) for the broader pre-flight discipline this extends to runtime tooling discovery. `[generalizable: Phase 31d/32 execution learnings 2026-05-07/08]`
 
 **Continuation-phrase ambiguity gate in multi-halt CC prompts.** When producing a CC prompt with operator halts and continuation phrases, include explicit halt-on-ambiguity discipline at each resume point. Continuation phrases that look unambiguous in design can be ambiguous in execution: an operator's reply may match the literal phrase, admit a clear semantic equivalent, or admit two reasonable interpretations. A prompt that doesn't direct the agent to halt on ambiguity produces silent inference — the agent picks one interpretation and proceeds, and is wrong some non-trivial fraction of the time. Pattern at every resume point: "If the operator's continuation message is ambiguous between two or more reasonable interpretations, halt and ask one targeted clarifying question. Do not infer." This is a specific application of the broader halt-and-escalate discipline (see root_AGENT_ENVIRONMENT_ARCHITECTURE — halt-and-escalate as a first-class discipline) to the resume case. `[generalizable: Phase 31d merge prompt execution 2026-05-06]`
 
 **Forward-state-aware artifact authoring in CC prompts.** When a CC prompt instructs the agent to author downstream artifacts — PR descriptions, commit messages, audit summaries, halt reports — direct the agent to be explicit about whether forward references describe state at authoring or expected state post-commit/post-merge/post-release. Artifacts read mid-flow should not assume completed state that hasn't yet happened. Pattern: prefix forward references with explicit temporal markers ("post-merge:", "this PR will:", "after the v3.0 release will…") rather than declarative present tense ("is on main", "ships in v3.0"). The discipline is most load-bearing in PR bodies (read between PR open and PR merge, when the described state hasn't yet landed) and in audit reports authored mid-build (where the build is in progress at authoring). `[generalizable: Phase 32a/b artifact authoring 2026-05-07/08]`
+
+**Session report as the final item.** Every CC prompt authorizes a report write in its scope and ends with a "Write session report" item. The report records computed state, not narrated state, and names what it does not prove; path and filename follow the repo's audit convention via the brief's `report_dir` (default `reports/`), stamped `_{YYYYMMDD-HHMM}Z`. Schema and paste-ready block: `cc-session-reports.md`. `[generalizable: RSA runs 2026-09 — two runs left no durable record because no prompt authorized the write]`
+
+**Include-and-exclude justification.** Every gate, halt, and plan step the prompt carries names what it protects; every omitted step names what already covers it. Overlapping "just in case" ceremony is the more common failure. `[practitioner: aidlc aidlc-composer-agent.md Adversarial Framing]`
+
+**Assumption status survives.** A `[speculation]` or `[assumption]` tag in the brief stays on the fact in CLAUDE.md, the prompt, and the session report until the operator confirms it — never silently promoted to fact. See `source-grading-and-tagging.md` §4. `[practitioner: aidlc stage-protocol.md §3]`
 
 **Why the end state and not the pre state.** A prompt can be stale about where a run STARTS and still be exactly right about where it must END UP. Binding the halt to the end state removes the whole staleness class without weakening safety: an end-state hash is a correctness control, whereas a pre-state line count is only a presence control and cannot distinguish an intended file from a wrong one. Observed 2026-09-07 on a file-replacement prompt whose pre-state line count had gone stale because the replacement was already staged in the working tree; the guard was correct and the assertion was not. `[generalizable: file-replacement prompt observation 2026-09-07]`
 

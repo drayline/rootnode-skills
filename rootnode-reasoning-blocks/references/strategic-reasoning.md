@@ -47,7 +47,7 @@ Approach this allocation decision as follows:
 3. Identify dependencies — which allocations enable or block other allocations? Sequence matters as much as quantity.
 4. Test the proposed allocation against the strategy: does this distribution actually advance the stated priorities, or does it spread resources evenly in a way that advances nothing?
 5. Identify the minimum viable allocation for each priority — what is the threshold below which the investment produces no return?
-6. Recommend a specific allocation with reasoning. Explicitly name what is being underfunded or deferred and why that tradeoff is acceptable.
+6. Recommend a specific allocation and state a short rationale. Explicitly name what is being underfunded or deferred and why that tradeoff is acceptable.
 </reasoning>
 ```
 

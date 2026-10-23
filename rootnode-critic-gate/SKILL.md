@@ -19,7 +19,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   original-source: "root.node design 2026 — distilled from production engine evolution patterns"
   companion-files: "schema/profile.schema.json, profiles/lenient.json, profiles/strict.json, profiles/balanced.json, references/checks-detailed.md, references/severity-coverage.md, references/troubleshooting.md"
   changelog: "1.0.2 (2026-05-05): Activation precision tuning. Trigger list rebalanced — 'review this proposed change' + 'approve this diff' consolidated to 'review/approve this proposed change' (saves char budget); 'should this land' replaced with 'should I let this land' (1st-person symptom phrasing); 'is this safe to merge' added as new symptom trigger (merge framing covers user-vocabulary surface that change/diff framing misses). Description grew 996 → 1014 chars (10-char headroom remaining). No methodology, schema, or workflow changes; behavior identical to 1.0.1 once activated. 1.0.1 (2026-05-01): Structural patch to align with rootnode authoring convention. Added references/ folder with three on-demand-loaded files (checks-detailed, severity-coverage, troubleshooting). SKILL.md body slimmed via content extraction; behavior identical to 1.0. Deployment target: Claude Code (CC) side of CP/CC split."
@@ -28,7 +28,7 @@ metadata:
 
 # Critic Gate
 
-> **Calibration:** Tier 2 (Sonnet-graceful) - designed and tested against Opus 5 + Sonnet 5 dual-primary. Runs correctly on Sonnet 4.6 (legacy-graceful) with slightly less depth on multi-dimensional analysis; on Haiku 4.5 with extended thinking; fallback-graceful on Opus 4.8. Effort default is `high` on Opus 5 and Sonnet 5; step down to `medium` for cost-sensitive runs where evals show quality holds. See repository README for model compatibility.
+> **Calibration:** Tier 2 (Sonnet-graceful) — designed against Opus 5.5 + Sonnet 5.5 dual-primary. Runs on Haiku 5.5 at `high` effort with less depth on multi-dimensional analysis; fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. Start at the model's default effort (`medium` on Opus 5.5 and Sonnet 5.5 in Claude Code; `high` for Sonnet 5.5 on the Claude API) and re-run an effort sweep on your own evals rather than carrying a setting over. See repository README for model compatibility.
 
 Independent re-derivation of proposed changes during autonomous execution. Returns a structured verdict before any change lands. The load-bearing safety mechanism for autonomous engine evolution — without it, multi-cycle drift is guaranteed.
 
@@ -152,6 +152,10 @@ When invoked:
 ```
 
 When verdict is APPROVE, `all_findings` is empty (or contains info-only entries) and the summary is a single sentence: "Change approved; all checks pass." When verdict is REJECT, `requires_human_escalation` is true and the summary names the specific REJECT-class finding.
+
+**Could-not-inspect outcome (`status: blocked`).** A return contract has three outcomes: findings, no findings, or `status: blocked` (could not inspect — missing file, tool failure, cap hit before inspection). A reviewer that could not inspect returns `status: blocked` with the reason, never an empty findings list: "could not look" must not be encoded as APPROVE with an empty `all_findings`. The Step 2 halts (`evidence_not_provided`, `evidence_too_vague`) are `blocked` outcomes of this kind. [practitioner: AI-DLC `ai-pr-review-lens-json.md`; wording shared with `rootnode-cc-design` delegation patterns]
+
+**Advisor-tool note.** When the critic runs via the API advisor tool, the advisor must be at least as capable as the executor — for example, a Sonnet 5.5 executor rejects Opus 4.8, Opus 4.7, Sonnet 5, and Haiku 5.5 advisors. [Anthropic docs; landscape 2026-10 §4.9]
 
 ---
 

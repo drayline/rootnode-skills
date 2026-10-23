@@ -31,6 +31,8 @@ This matrix names which evaluation surfaces support which tiers in current rootn
 
 Skills that may run across multiple surfaces declare per-workflow tier compatibility in their methodology (typically in SKILL.md routing surfaces and in this reference's per-script section below).
 
+**Model roles in Tier A.** Haiku 5.5 is a valid subject model in a Tier A grader environment: it can be the model a Skill is exercised on in with-Skill and without-Skill runs, for example when the Skill is meant for subagent use. It is not a grader. D9a graders run on Opus 5.5 or Sonnet 5.5 (Opus 5 / Sonnet 5 valid fallback). Anthropic positions Haiku 5.5 for high-volume, latency-sensitive work such as classification, extraction, routing, and subagent tasks [Anthropic docs, models overview, verified 2026-10-22].
+
 ## Per-script tier compatibility
 
 For Skills with executable `scripts/` content, this table maps each script's tier requirements:

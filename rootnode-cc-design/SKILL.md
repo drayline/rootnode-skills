@@ -4,24 +4,25 @@ description: >-
   Designs Claude Code prompts and CC environments. Produces CLAUDE.md drafts,
   agent topologies, scope-authorization frameworks, halt triggers,
   Skills/hooks/MCP plans, chat-to-CC handoff specs, and EXECUTION_PLAN.md
-  remediation plans. Five modes: DESIGN (new CC deployments), EVOLVE (updates
-  from friction), RESEARCH (evaluate a CC tool/pattern), TEMPLATE (reusable
-  artifacts), REMEDIATE (consume hygiene findings → produce + execute plan).
-  Do NOT use REMEDIATE for direct cleanup (Cat 1–10 — use rootnode-repo-hygiene
-  Phase 2). Do NOT use for hygiene scanning (rootnode-repo-hygiene), chat
-  prompts (rootnode-prompt-validation), or chat Projects (rootnode-project-audit).
+  remediation plans, session-report standards. Five modes: DESIGN (new CC
+  deployments), EVOLVE (updates from friction), RESEARCH (evaluate a CC
+  tool/pattern), TEMPLATE (reusable artifacts), REMEDIATE (consume hygiene
+  findings → produce + execute plan). Do NOT use REMEDIATE for direct cleanup
+  (Cat 1–10 — use rootnode-repo-hygiene Phase 2). Do NOT use for hygiene
+  scanning (rootnode-repo-hygiene), chat prompts (rootnode-prompt-validation),
+  or chat Projects (rootnode-project-audit).
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.2.0"
-  predecessor: "rootnode-cc-design v4.0"
+  version: "5.0.0"
+  predecessor: "rootnode-cc-design v4.2"
   original-source: "root.node seed KFs (AEA, CCEG, AAP) + CC deployment research; v4.x evolves delegation architecture and REMEDIATE mode from v3 base"
   discipline_post: phase-30
 ---
 
 # Claude Code Design
 
-> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Reserve Fable 5.1 for long-horizon runs where Opus 5.5 at higher effort still fails your evals. See repository README for model compatibility.
 
 Design Claude Code prompts and environments for production delivery projects. This Skill produces paste-ready artifacts — CLAUDE.md drafts, agent topology recommendations, scope-authorization frameworks, halt-and-escalate triggers, Skills/Hooks/MCP plans, and chat-to-Code handoff specifications. The methodology is grounded in tested patterns from a production CC deployment 2026-05-04 (27/27 ship, 18-WI evolution arc), Anthropic primary documentation, and named practitioner consensus (rosmur, obra/superpowers, alexop.dev, Shrivu Shankar, Marc Nuri).
 
@@ -40,6 +41,7 @@ Auto-invoke on these trigger phrases. Column two names the mode the phrase route
 | "design CLAUDE.md" | DESIGN |
 | "build a CC prompt" / "design a CC prompt for X" | DESIGN |
 | "write a session prompt" | DESIGN |
+| "write the session report standard" | TEMPLATE |
 | "give me a CLAUDE.md skeleton" | TEMPLATE |
 | "we hit X friction in CC" / "the agent keeps doing Y" | EVOLVE |
 | "should we adopt Y for CC" / "is Z worth using" | RESEARCH |
@@ -94,7 +96,7 @@ The Skill operates from a structured **design brief** for the delivery project. 
 Read the relevant references before producing output. Each mode draws from a specific subset:
 
 - **DESIGN MODE** consults: cc-methodology-patterns, cc-environment-design-patterns, cc-skills-and-hooks-composition, chat-to-code-handoff-patterns. Optional: cc-prompt-design-patterns (if the deliverable includes a CC initial prompt or session prompt); cc-delegation-patterns (if the deployment plan involves subagents, model tiering, parallel work, or delegation caps).
-- **EVOLVE MODE** consults: cc-anti-patterns (diagnose the friction), cc-methodology-patterns (find the relevant pattern), cc-environment-design-patterns or cc-skills-and-hooks-composition (apply the fix at the correct layer); cc-delegation-patterns (when friction involves delegation, context bloat, or subagent behavior).
+- **EVOLVE MODE** consults: cc-anti-patterns (diagnose the friction), cc-methodology-patterns (find the relevant pattern), cc-environment-design-patterns or cc-skills-and-hooks-composition (apply the fix at the correct layer); cc-delegation-patterns (when friction involves delegation, context bloat, or subagent behavior). Route each correction to exactly one home — a rule at the narrowest scope, a deterministic check, or discard — and record the routing (cc-methodology-patterns §7).
 - **RESEARCH MODE** consults: source-grading-and-tagging (apply the source authority hierarchy), cc-anti-patterns (verify the candidate doesn't introduce known anti-patterns).
 - **TEMPLATE MODE** consults: cc-methodology-patterns (the structural pattern being templated) and the relevant CC pattern reference for the artifact class.
 - **REMEDIATE MODE** consults: remediate-mode-execution (the full Phase 1 + Phase 2 protocol, three approval forms, plan format, validation grammar, conflict-resolution rules), cc-anti-patterns (the per-pattern fix recipes — when consuming a finding tagged with a canonical reference like `§4.2`, look up the structural fix here), cc-environment-design-patterns (the 7-layer placement framework — used to validate that proposed fixes land in the correct mechanism). Schema: `schema/execution-plan.schema.json` defines the EXECUTION_PLAN.md structure.
@@ -105,11 +107,12 @@ Read the relevant references before producing output. Each mode draws from a spe
 - **Markdown for CLAUDE.md drafts.** CLAUDE.md is consumed by Claude Code, which expects Markdown. Use `##` and `###` headers, fenced code blocks, tables for matrices. Do not use XML tags inside CLAUDE.md drafts — those are for system prompts, which CLAUDE.md is not.
 - **Halt triggers and scope authorization.** Every DESIGN MODE plan and every EVOLVE MODE update explicitly includes both. Ultracode stays off by default and is opted into per task (see `references/cc-delegation-patterns.md` §6 for the rationale). Non-negotiable.
 - **Assert the END state, never the PRE state.** Non-negotiable. See `references/cc-prompt-design-patterns.md` § Assert the END state for the rule, the LF-normalize corollary, and the observed instances. `[generalizable]`
-- **Delegation briefs are complete or absent.** Any role the plan names carries a model, an effort level, a tool set, an isolation mode, and a return contract including a numeric length cap. Verification clauses name external artifacts; never instruct an agent to re-check its own output.
+- **Delegation briefs are complete or absent.** Any role the plan names carries a model, an effort level, a tool set, an isolation mode, and a return contract including a numeric length cap, and each delegation carries the ten-field brief (`references/cc-delegation-patterns.md` §2) — field 9 binds the spec digest, field 10 bars verdict dictation. Verification clauses name external artifacts; never instruct an agent to re-check its own output.
 - **Token budgets.** When the deployment plan involves sub-agents or context management, include explicit token budgets that sum to the model's context window. A context plan without numbers is not a context plan.
 - **Source-tagged claims.** Every substantive technical claim carries an inline source tag.
 - **Output length.** When the deliverable is a design document, CLAUDE.md draft, or session prompt, target ≤200 lines per artifact. Multi-file designs may exceed this per-file if each file is self-contained.
 - **CC-prompt-specific output discipline.** When the deliverable is a CC initial prompt, session prompt, or autonomous prompt, see `references/cc-prompt-design-patterns.md` § Output discipline for CC prompts for additional output standards (shell-agnostic syntax, pre-flight Skill enumeration, continuation-phrase ambiguity gate, forward-state-aware authoring, competing hypotheses and instrument fit for diagnostic prompts).
+- **Session reports are mandatory.** Every CC prompt authorizes a report write in its scope and ends with a "Write session report" item. The report records computed state, not narrated state — SHAs, LF digests, `git diff --name-status` rows, gate results with evidence, findings with locators — and names what it does not prove. Path and filename follow the delivery repo's audit convention, set in the design brief (`report_dir`); default `reports/`, timestamped `_{YYYYMMDD-HHMM}Z`. The report is not committed by the same prompt; it rides the next commit cycle. See `references/cc-session-reports.md`.
 
 ### Step 5 — Surface the chat→Code handoff explicitly
 
@@ -119,7 +122,7 @@ See `references/chat-to-code-handoff-patterns.md` for the readiness signals, art
 
 ### Step 6 — Recommend runtime tooling only if it fills a specific gap
 
-The rootnode runtime Skills (handoff-trigger-check, critic-gate, mode-router, profile-builder) are external tooling. Runtime Skills are thin governance over thick workflow systems — they compose with existing deployment tooling rather than replacing it. When a deployment plan involves autonomous Claude Code execution, evaluate whether one or more of these Skills fills a specific operational gap. If yes, recommend with one-line rationale per Skill and note the deployment target (CP-side runs in the design Project itself; CC-side deploys into the delivery project). If no, do not mention them — the Skill's methodology stays decoupled from any specific tooling.
+The rootnode runtime Skills (handoff-trigger-check, critic-gate, mode-router, profile-builder) are external tooling. Runtime Skills are thin governance over thick workflow systems — they compose with existing deployment tooling rather than replacing it. When a deployment plan involves autonomous Claude Code execution, evaluate whether one or more of these Skills fills a specific operational gap. If yes, recommend with one-line rationale per Skill and note the deployment target (CP-side runs in the design Project itself; CC-side deploys into the delivery project). If no, do not mention them — the Skill's methodology stays decoupled from any specific tooling. When a deployment composes `rootnode-critic-gate` (if available), recommend the kill-first review shape in `references/cc-delegation-patterns.md` §4: try to disprove each claim first, re-derive the survivors, and require locator-bearing findings.
 
 For scheduled and automated CC deployments, consult the Routines section in `references/cc-methodology-patterns.md`.
 
@@ -133,7 +136,8 @@ Read the relevant files based on the mode (Step 3 above). Each file is standalon
 |---|---|
 | `references/cc-methodology-patterns.md` | Always for DESIGN, EVOLVE, TEMPLATE modes. Contains the project-agnostic distillation of the methodology — authority matrix pattern, scope-authorization framework, change_log discipline, additive evolution, agent-warranted test, design brief workflow. |
 | `references/cc-prompt-design-patterns.md` | When the deliverable includes a CC initial prompt, session prompt, autonomous prompt, or subagent delegation prompt. Patterns organized by use case. |
-| `references/cc-delegation-patterns.md` | When the deployment plan involves subagents, model tiering, parallel work, or delegation caps. Role table (model / effort / tools / isolation / return), the eight-field delegation brief, the Builder-to-Refuter loop, orchestrator context hygiene, and the cap mechanism table. |
+| `references/cc-delegation-patterns.md` | When the deployment plan involves subagents, model tiering, parallel work, or delegation caps. Role table (model / effort / tools / isolation / return), the ten-field delegation brief, the bounded Builder-to-Refuter loop, orchestrator context hygiene, and the cap mechanism table. |
+| `references/cc-session-reports.md` | When the deliverable is any CC prompt (its final item writes the report) or a repo's audit convention. Report schema (computed, not narrated), field rules, paste-ready prompt block, template. |
 | `references/cc-environment-design-patterns.md` | Always for DESIGN mode. Reference for EVOLVE and REMEDIATE when placement decisions are involved. Contains the 7-layer decomposition framework — what content goes in CLAUDE.md vs `.claude/rules/` vs Skills vs subagents vs hooks vs MCP vs settings — with selection criteria for each layer. |
 | `references/cc-skills-and-hooks-composition.md` | When the deployment plan involves Skills, hooks, or both. Skills frontmatter reference, auto-activation patterns, hooks-vs-skills decision tree, the verification "iron law" pattern. |
 | `references/cc-anti-patterns.md` | Always for REMEDIATE mode (per-pattern fix recipes). Reference for EVOLVE when diagnosing friction. Reference for DESIGN as a "things to avoid creating" checklist. The 17-pattern catalog using canonical numbering from `root_AGENT_ANTI_PATTERNS.md` and `root_CC_ENVIRONMENT_GUIDE.md §10`, with structural signature, cause, and fix per pattern. **Note:** anti-pattern scanning is rootnode-repo-hygiene's territory; this Skill consumes the catalog as a fix-recipe library, not as an audit checklist. |
@@ -254,6 +258,8 @@ Do NOT use this Skill when:
 **User asks for a quick answer and the brief workflow feels heavy:** Skip the brief for narrow asks (one section, one prompt, one review). The brief grounds multi-faceted design work, not single-shot questions. Use judgment.
 
 **A CC prompt halted because its stated starting state was wrong:** The prompt asserted a pre-state ("expect N lines", "the file currently contains X") that went stale between authoring and execution — commonly because the replacement file was already staged, or another pass touched the tree. The guard was correct; the assertion was not. Fix at the prompt, not at the guard: make the starting condition report-only and bind the halt to a post-action digest. See Step 4, *Assert the END state, never the PRE state*. Resolve the specific stuck run by giving CC the expected `sha256sum` and instructing it to skip the already-satisfied step on an exact match.
+
+**A hook the Skill designed never blocks anything:** Check the exit code first — a hook blocks with exit code 2, or exit 0 with JSON `{"decision":"block"}` `[Anthropic docs — hooks, fetched 2026-10-22]`; any other non-zero code is a non-blocking error and the action goes ahead. Then check the config shape: a `matcher` string plus a nested `hooks` array, with path or prompt filtering inside the script. Bound any blocking Stop hook. See `references/cc-skills-and-hooks-composition.md` §4–§5.
 
 **The orchestrator session fills up even though the work was delegated:** Delegation isolates the agent's working set, not its report. An agent that returns a full file, a full test log, or a full diff moves the flood one layer out and then back in. Fix at the brief: set a return-length cap, require locations and findings rather than contents, and route oversized results to a scratch file the next agent reads. See `references/cc-delegation-patterns.md`.
 

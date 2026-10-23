@@ -106,7 +106,7 @@ The Skill composes with `rootnode-critic-gate` via the profile-level field `crit
 
 **With `critic_gate_threshold: required`:** before each step, submit the step plan to critic-gate. Verdicts:
 - APPROVE → execute step; run validation; continue.
-- REQUEST_CHANGES → adjust step per findings; re-submit. Cap: 3 cycles. After 3 without APPROVE, halt and surface to user.
+- REQUEST_CHANGES → adjust step per findings; re-submit. Cap: 3 cycles. After 3 without APPROVE, halt and surface to user. Finding IDs persist across REQUEST_CHANGES cycles as a ledger — a finding keeps its ID from first report to resolution, so the halt summary shows which findings closed, which stayed open, and which are new. Same ledger rule as the session report's `findings` field (`cc-session-reports.md`). `[generalizable structure]`
 - REJECT → halt; surface to user; user decides override or accept halt.
 
 **Critic-gate not installed AND `required`:** halt at Phase 2 entry. Do not silently downgrade.

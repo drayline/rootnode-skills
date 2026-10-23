@@ -33,7 +33,7 @@ The three sub-levels reflect strength of evidence:
 
 - **D9a (strongest):** Empirical with-Skill vs. without-Skill comparison via subagent grader. Requires subagents and runnable execution.
 - **D9b (moderate):** Empirical with-Skill execution under realistic test prompts; qualitative review without baseline. Requires runnable execution; subagents not required.
-- **D9c (weakest, valid floor):** Analytical reasoning grounded in the 10-tendency taxonomy and the Skill's countermeasure formulation. No infrastructure required.
+- **D9c (weakest, valid floor):** Analytical reasoning grounded in the 15-tendency taxonomy and the Skill's countermeasure formulation. No infrastructure required.
 
 The build summary records which sub-level was applied. Future audits read the verdict format and the cited evidence to reconstruct the evidentiary basis. D9 remains classified RECOMMENDED, not REQUIRED — Skills that pass D1–D8 but lack D9 validation are still shippable.
 
@@ -87,7 +87,7 @@ A build CV cannot claim Tier A evidence when Tier A infrastructure was unavailab
 **Procedure:**
 
 1. **Document the pressure scenario.** Describe a scenario where Claude, without the Skill loaded, would produce incorrect behavior the Skill is designed to prevent. The scenario targets the Skill's core discipline.
-2. **Identify the underlying tendency.** Cite the specific tendency from the 10-tendency taxonomy (`root_OPTIMIZATION_REFERENCE.md`) or production-observed failure modes. The expected without-Skill failure must be grounded in documented tendency, not asserted.
+2. **Identify the underlying tendency.** Cite the specific tendency from the 15-tendency taxonomy (`root_OPTIMIZATION_REFERENCE.md`) or production-observed failure modes. The expected without-Skill failure must be grounded in documented tendency, not asserted.
 3. **Map the countermeasure.** Show the reasoning chain: tendency → countermeasure → expected compliance. The Skill's formulation must address the identified tendency directly. If the formulation does not match the tendency, the Skill is solving a different problem than the one documented.
 4. **Capture in the build summary** as `D9: Tier C — analytical (tendency: <name>, countermeasure: <mechanism>)`. Cite the scenario, the tendency, the countermeasure, and the reasoning chain.
 

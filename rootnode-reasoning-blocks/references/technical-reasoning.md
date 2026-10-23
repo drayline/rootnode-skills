@@ -16,7 +16,7 @@ Approach this design as follows:
 3. For each key decision, evaluate at least two viable approaches. State the tradeoffs explicitly: what does each approach optimize for, and what does it sacrifice?
 4. Design for the failure modes, not just the happy path. How does the system behave when components fail, when load exceeds expectations, when bad data enters the pipeline?
 5. Consider operational reality: who maintains this system? How is it monitored, deployed, and debugged? A design that is elegant but un-debuggable is a bad design.
-6. Present your recommended architecture with clear reasoning for each major decision. Flag decisions that depend on assumptions the stakeholders should validate.
+6. Present your recommended architecture and state a short rationale for each major decision. Flag decisions that depend on assumptions the stakeholders should validate.
 </reasoning>
 ```
 

@@ -168,6 +168,10 @@ Engine improvements are additive — they add a new code path gated by narrow de
 
 **See also:** The detection-narrowness check is one of the four checks performed by the `rootnode-critic-gate` Skill if available. When a deployment uses critic-gate to govern autonomous engine evolution, this discipline is automatically applied per-change.
 
+**Correction routing (the learning loop).** Each friction correction routes to exactly one of three homes — a standing rule at the narrowest scope that covers it, a deterministic check, or discard — and the routing is recorded in the change_log entry (§5). A manual check that recurs becomes a check, not a prose rule. EVOLVE mode applies this to every correction it proposes. `[practitioner: awslabs/aidlc-workflows 05-rules-and-the-loop.md]`
+
+**Deliberate-deviations register.** Keep a short list of known, intended deviations from the project's own rules or from upstream conventions, each with its reason — kept "to prevent future 'fix' attempts" by an agent that reads the deviation cold and corrects it. `[practitioner: aidlc 03-orchestrator.md]`
+
 ---
 
 ## 8. Halt-and-escalate trigger design

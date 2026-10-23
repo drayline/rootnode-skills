@@ -13,18 +13,18 @@ description: >-
   when the user's primary request is a global-layer audit (use
   rootnode-global-audit if available), single-prompt evaluation (use
   rootnode-prompt-validation if available), or Memory-only optimization (use
-  rootnode-memory-optimization if available). Run on Opus 5 or Sonnet 5 at `high` effort (both defaults); depth
-  reduces on legacy models.
+  rootnode-memory-optimization if available). Run on Opus 5.5 (`medium`+) or
+  Sonnet 5.5 (`high`); depth reduces on legacy models.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   original-source: "AUDIT_FRAMEWORK.md, PROJECT_OPTIMIZER.md"
 ---
 
 # Claude Project Auditor
 
-> **Calibration:** Tier 3 (High-effort recommended) - run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Reserve Fable 5.1 for long-horizon runs where Opus 5.5 at higher effort still fails your evals. See repository README for model compatibility.
 
 You audit Claude Projects — Custom Instructions and knowledge file architectures — and produce scored evaluations with evidence-grounded, actionable fixes.
 
@@ -38,9 +38,9 @@ This is the non-negotiable constraint. Generic advice that could apply to any Pr
 
 ## Model requirements
 
-This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Project Scorecard, detects seven structural anti-patterns, and synthesizes cross-layer alignment findings when global layer information is provided. Run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code — the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Effort controls thinking depth, not visible output length — deep cross-dimensional scoring benefits from `high` or higher.
+This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Project Scorecard, detects seven structural anti-patterns, and synthesizes cross-layer alignment findings when global layer information is provided. Run on Opus 5.5 (start at its `medium` default) or Sonnet 5.5 (`high`) — the recommended starting points. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — deep cross-dimensional scoring benefits from `high` or higher.
 
-On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and Haiku 4.5 with extended thinking, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across anti-patterns and cross-layer alignment. Fallback-graceful on Opus 4.8. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them. Haiku 4.5 without extended thinking is out of scope.
+On the dual-primary tier (Opus 5.5 at its `medium` default or `high`; Sonnet 5.5 at `high`) the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and at `low` effort, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across anti-patterns and cross-layer alignment. Fallback-graceful on Opus 5 / Sonnet 5. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them.
 
 ## When to Use This Skill
 
@@ -153,7 +153,7 @@ For each dimension: state the score, cite the evidence from the Project, and exp
 
 *Are Claude-specific behavioral countermeasures present for the failure modes this Project's domain is likely to trigger?*
 
-Claude has eight known behavioral tendencies: agreeableness, hedging, verbosity, list overuse, fabricated precision, over-exploration, tool overtriggering, and LaTeX defaulting. Not all apply to every domain.
+Claude has fifteen known behavioral tendencies (the rootnode-behavioral-tuning taxonomy); the most common are agreeableness, hedging, verbosity, list overuse, fabricated precision, over-exploration, tool trigger miscalibration, and LaTeX defaulting. Not all apply to every domain.
 
 | Score | What This Looks Like |
 |:-----:|---|
@@ -212,7 +212,7 @@ When reconstructing Custom Instructions, apply these structural principles:
 
 - **Primacy-recency ordering.** Place the identity and most critical behavioral rules at the top of the system prompt (high primacy attention). Place output standards and pre-response verification checks at the bottom (high recency attention). Routing guidance and operational modes go in the middle.
 - **XML tag boundaries.** Use XML tags (`<identity>`, `<core_rules>`, `<knowledge_files>`, `<operational_modes>`, `<output_standards>`) to create clear section boundaries. This gives Claude unambiguous structural signals about where one concern ends and the next begins.
-- **Scoped behavioral countermeasures.** Include countermeasures only for the behavioral tendencies this Project's domain is likely to trigger. Do not include a generic list of all eight tendencies. Place countermeasures in the identity section (for tendencies that affect the overall analytical approach) or the output standards section (for tendencies that affect format and length).
+- **Scoped behavioral countermeasures.** Include countermeasures only for the behavioral tendencies this Project's domain is likely to trigger. Do not include a generic list of all fifteen tendencies. Place countermeasures in the identity section (for tendencies that affect the overall analytical approach) or the output standards section (for tendencies that affect format and length).
 
 When global layer information is available, the reconstruction incorporates global awareness:
 - Custom Instructions do not duplicate behavioral instructions already present in User Preferences

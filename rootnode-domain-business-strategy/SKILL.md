@@ -16,13 +16,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   original-source: "DOMAIN_PACK_BUSINESS_STRATEGY.md"
 ---
 
 # Business Strategy Prompt Methodology
 
-> **Calibration:** Tier 1 (Model-compatible) - runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured retrieval, rule evaluation, or template lookup - output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Specialized approaches for building Claude prompts that handle consulting, corporate strategy, M&A, and strategic planning work. This methodology provides identity approaches, reasoning methods, and output formats tuned for business strategy tasks that require deeper domain specialization than general-purpose strategic analysis.
 

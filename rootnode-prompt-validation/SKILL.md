@@ -17,13 +17,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   original-source: "PROMPT_TESTING_GUIDE.md"
 ---
 
 # Prompt Validation
 
-> **Calibration:** Tier 2 (Sonnet-graceful) — designed and tested against Opus 5 + Sonnet 5 dual-primary. Runs correctly on Sonnet 4.6 (legacy-graceful) with slightly less depth on multi-dimensional analysis; on Haiku 4.5 with extended thinking; fallback-graceful on Opus 4.8. Effort default is `high` on Opus 5 and Sonnet 5; step down to `medium` for cost-sensitive runs where evals show quality holds. See repository README for model compatibility.
+> **Calibration:** Tier 2 (Sonnet-graceful) — designed against Opus 5.5 + Sonnet 5.5 dual-primary. Runs on Haiku 5.5 at `high` effort with less depth on multi-dimensional analysis; fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. Start at the model's default effort (`medium` on Opus 5.5 and Sonnet 5.5 in Claude Code; `high` for Sonnet 5.5 on the Claude API) and re-run an effort sweep on your own evals rather than carrying a setting over. See repository README for model compatibility.
 
 Evaluate whether a prompt is well-constructed, diagnose why it underperforms, and fix it systematically. This Skill treats prompt evaluation as a structured discipline — score the architecture, test the output, trace failures to their root layer.
 
@@ -213,7 +213,7 @@ Score: _/5  (Yes = 1, Partially = 0.5, No = 0)
 
 ### Step 3: Fix What the Scores Reveal
 
-When scores identify weaknesses, use this condensed symptom map for the most common issues. For a comprehensive map covering all 13 documented symptoms, see `references/symptom-fix-map.md`.
+When scores identify weaknesses, use this condensed symptom map for the most common issues. For a comprehensive map covering all 15 documented symptoms, see `references/symptom-fix-map.md`.
 
 **Output is generic — could apply to any company.**
 Root cause: Insufficient context (almost always). Fix: Add specific numbers, real constraints, prior decisions, and situational details. Every concrete detail eliminates a generic assumption. If context is already specific, check identity — a role like "business consultant" may be too broad.
@@ -233,7 +233,7 @@ Root cause: Missing decisiveness instruction. Fix: Add "Be direct and decisive. 
 **Everything in bullet points when prose would be better.**
 Root cause: Missing format instruction. Claude defaults to bulleted lists without explicit format guidance. Fix: Add "Write in connected prose paragraphs. Use lists only for genuinely discrete, parallel items."
 
-For the full diagnostic flow (three-step layer-by-layer methodology), see `references/diagnostic-flow.md`. For all 13 symptoms with complete root cause analysis and targeted fixes, see `references/symptom-fix-map.md`.
+For the full diagnostic flow (three-step layer-by-layer methodology), see `references/diagnostic-flow.md`. For all 15 symptoms with complete root cause analysis and targeted fixes, see `references/symptom-fix-map.md`.
 
 ### Refinement Principles
 

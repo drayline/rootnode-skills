@@ -16,13 +16,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   original-source: "DOMAIN_PACK_CONTENT_COMMUNICATIONS.md"
 ---
 
 # Content & Communications Prompt Methodology
 
-> **Calibration:** Tier 1 (Model-compatible) - runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured retrieval, rule evaluation, or template lookup - output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Build Claude prompts that produce high-quality content — articles, copy, content strategy, messaging frameworks, email sequences, and editorial evaluations. This Skill provides tested identity, reasoning, and output approaches tuned for content and communications work.
 
@@ -179,6 +179,8 @@ When writing copy or persuasive content, Claude adds qualifiers that undermine t
 Claude gravitates toward numbered lists and subheaded sections when continuous narrative would be more engaging. Add to prompts for articles, essays, or thought leadership:
 
 *"Write in connected prose, not a list. Build an argument that flows from paragraph to paragraph. Use transitions, not subheads, as the structural device. Lists are appropriate only when the content is genuinely a set of parallel items."*
+
+**Fable 5.1 over-correction note.** Fable 5.1 formats less and writes denser prose by default. The v4.0-era anti-list and anti-bold countermeasures (this one, and any blanket "no lists / no bold" rule in a prompt) can now suppress structure the content needs. On Fable 5.1 prefer the conditional formulation — "use lists when the content is multifaceted enough that they help" — over a blanket prohibition, and keep the blanket form only where listicle output is actually observed. [Anthropic docs — Fable 5.1 prompting guide]
 
 ### Feature-First Messaging
 

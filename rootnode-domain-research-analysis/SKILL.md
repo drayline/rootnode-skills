@@ -18,13 +18,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   original-source: "DOMAIN_PACK_RESEARCH_ANALYSIS.md"
 ---
 
 # Research & Analysis Prompt Methodology
 
-> **Calibration:** Tier 1 (Model-compatible) - runs cleanly on the current dual-primary tier (Opus 5, Sonnet 5) as well as Haiku 4.5 with extended thinking. Structured retrieval, rule evaluation, or template lookup - output shape does not depend on model class. Correct-shape output also on Opus 4.8 (fallback-graceful) and Sonnet 4.6 (legacy-graceful). See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Specialized approaches for building Claude prompts that handle quantitative analysis, policy research, investigative inquiry, systematic evidence review, and research-specific deliverable formats. This Skill provides identity templates, reasoning methods, and output structures tuned for research work — where rigor, source transparency, and calibrated confidence matter most.
 
@@ -168,6 +168,18 @@ Research and analysis prompts are especially susceptible to these Claude tendenc
 Claude may generate specific statistics, percentages, p-values, or citation details that sound authoritative but are not grounded in provided data. **This is the most dangerous tendency in research work** because the output looks credible.
 
 Counter with: *"Use only data explicitly provided. If you do not have a specific number, do not estimate one — state what data would be needed and what the analysis would look like. Never invent a statistic to fill a gap."*
+
+### Unmarked Quotations (Fable 5.1)
+On Fable 5.1, summaries may reproduce source passages without quotation marks — borrowed wording presented as the model's own. When the deliverable quotes sources, require marked quotations in the Output layer and supply one worked example in the prompt (see Example 4 in `references/examples.md`). [Anthropic docs — Fable 5.1 prompting guide]
+
+Counter with (root.node-authored wording): *"Reproduce source wording only inside quotation marks, each followed by its source. Everything outside quotation marks must be your own paraphrase."*
+
+### Under-Searching at `low` Effort (Haiku 5.5 / Fable 5.1)
+At `low` effort, Haiku 5.5 and Fable 5.1 may answer from memory instead of searching. Two levers first: give the current date in the prompt, and remove tool-discouraging language carried over from older prompts. Anthropic's precondition: "First, check your prompt for language that discourages tool use, such as "only use tools when strictly necessary" or "minimize tool calls," and remove it." Then the search nudge [Anthropic docs — Sonnet 5.5 prompting guide, "Tool use in chat and knowledge work"; the date and discouraging-language levers are the documented fixes for Haiku 5.5 and Fable 5.1 at `low` per landscape 2026-10 §5]:
+
+*"Use the search tool to check specifics that may have changed since your training, such as what is allowed, required or charged, even when you feel confident. For researched work such as a report or a comparison, gather current sources rather than writing from your training knowledge."*
+
+Do not add a blanket "always search" instruction — Haiku 5.5 searched on half the no-search prompts with no accuracy gain [Anthropic docs — Haiku 5.5 prompting guide, as recorded in the catalog behavioral-tuning design spec §3].
 
 ### False Balance
 When evidence clearly favors one conclusion, Claude may present both sides as equally supported to appear objective. Real research objectivity means representing evidence accurately, including when it is lopsided.

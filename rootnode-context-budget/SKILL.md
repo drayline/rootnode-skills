@@ -13,18 +13,18 @@ description: >-
   Architecture ≤ 3. Do NOT use for content placement decisions (use
   rootnode-memory-optimization if available), full project audits (use
   rootnode-project-audit if available), or behavioral tuning (use
-  rootnode-behavioral-tuning if available). Run on Opus 5 or Sonnet 5 at `high` effort (both defaults); depth
-  reduces on legacy models.
+  rootnode-behavioral-tuning if available). Run on Opus 5.5 (`medium`+) or
+  Sonnet 5.5 (`high`); depth reduces on legacy models.
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   original-source: "root_OPTIMIZATION_REFERENCE.md"
 ---
 
 # Context Budget Analysis
 
-> **Calibration:** Tier 3 (High-effort recommended) - run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code, the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Quality degrades at `low` effort and on legacy models (Sonnet 4.6, Opus 4.8 fallback-graceful). See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Reserve Fable 5.1 for long-horizon runs where Opus 5.5 at higher effort still fails your evals. See repository README for model compatibility.
 
 Analyze Claude Project context budget health. Determine operating mode (full-context vs. retrieval). Produce tiered file placement recommendations with a strategy matched to the project's growth trajectory, work-phase timing, and content routing needs.
 
@@ -46,9 +46,9 @@ Analyze Claude Project context budget health. Determine operating mode (full-con
 
 ## Model requirements
 
-This Skill performs per-file evaluation against the six File Evaluation Dimensions, growth trajectory analysis, content routing decisions, and phased optimization planning with compression safeguards. Run on Opus 5 or Sonnet 5 (both default to `high` on Claude API and Claude Code — the recommended starting point). Step up to `xhigh` for long-horizon or particularly demanding runs. Effort controls thinking depth, not visible output length — deep per-file evaluation benefits from `high` or higher.
+This Skill performs per-file evaluation against the six File Evaluation Dimensions, growth trajectory analysis, content routing decisions, and phased optimization planning with compression safeguards. Run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — deep per-file evaluation benefits from `high` or higher.
 
-On the dual-primary tier (Opus 5, Sonnet 5) at `high` effort the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and Haiku 4.5 with extended thinking, expect compressed per-file evaluation, surface-level tier recommendations, and reduced synthesis across the growth trajectory. Quick Diagnostic mode degrades less than Full Budget Audit mode. Fallback-graceful on Opus 4.8 (classifier-flagged requests may route there silently). The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them. Haiku 4.5 without extended thinking is out of scope.
+On the dual-primary tier (Opus 5.5 at its `medium` default or `high`; Sonnet 5.5 at `high`) the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and at `low` effort, expect compressed per-file evaluation, surface-level tier recommendations, and reduced synthesis across the growth trajectory. Quick Diagnostic mode degrades less than Full Budget Audit mode. Fallback-graceful on Opus 5 / Sonnet 5 (classifier-flagged requests may route there silently). The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them.
 
 ## Core Concepts
 
@@ -65,7 +65,8 @@ Claude Projects operate in one of two modes:
 
 Two conceptually distinct things that were numerically entangled in the 200K era:
 
-- **Context window** — the model's maximum input capacity, measured in tokens per model. Currently 1M for Fable 5 / Opus 5 / Sonnet 5; 200K for Haiku 4.5. Plan-dependent for Anthropic Projects.
+- **Context window** — the model's maximum input capacity, measured in tokens per model. Currently 1M for Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5. Plan-dependent for Anthropic Projects.
+  - *Legacy note:* Haiku 4.5 has a 200K window. It is not a calibration target (earliest retirement in the active set: not sooner than 2026-10-15); apply 200K only to a deployment that still pins it.
 - **RAG threshold** — the platform-side decision point where Projects switch from full-context loading to retrieval mode. Now tracks the window (automatic per current article), rather than being a fraction of it.
 
 State the two separately in analysis. Do not carry a fixed number forward as a live threshold; the threshold moves with the model, plan, and platform. See "Historical context" below for the Phase 22 measurement that produced the ~66,500 figure previously used as an anchor.
@@ -81,7 +82,7 @@ The knowledge-budget vs. conversation-budget distinction survives the platform c
 
 **Key implication (preserved from the 200K era, still true):** Adding Skills, connecting MCPs, or expanding Custom Instructions cannot trigger RAG mode. Conversely, reducing them cannot recover knowledge file headroom. The two pools are independent for threshold purposes.
 
-Under 1M-window primary models the two pools sit further apart in absolute terms than they did under the 200K era — a project can be well below the RAG activation point while a long agentic conversation still triggers compaction. Under the 200K Haiku window, the two mechanisms sit closer together.
+Under 1M-window models — now universal across the current models — the two pools sit further apart in absolute terms than they did under the 200K era — a project can be well below the RAG activation point while a long agentic conversation still triggers compaction. *Legacy only:* under the 200K window of Haiku 4.5, the two mechanisms sit closer together.
 
 ### Token Estimation
 
@@ -90,9 +91,9 @@ Estimate knowledge file tokens: run `ls -la /mnt/project/` for byte sizes, divid
 Conversion rates: English prose ≈ 4 characters/token. Structured content (XML, code, tables) ≈ 3.25 characters/token. Mixed markdown ≈ 3.75 characters/token. Estimates are ±15% per file, ±10% for project totals.
 
 **Tokenizer notes for current models:**
-- Fable 5 uses the tokenizer introduced with Opus 4.7 — same text produces roughly 30% more tokens than models before Opus 4.7 (Anthropic's models overview page).
-- Sonnet 5 produces approximately 30% more tokens per unit of content than Sonnet 4.6 (Anthropic's whats-new-sonnet-5 page).
-- Opus 5 tokenizer specifics were not fully re-baselined in the v4.0 alignment cycle — treat measurements with explicit tolerance until re-baselined via `count_tokens`.
+- Fable 5.1 and Haiku 5.5 share the tokenizer introduced with Opus 4.7 — the same text produces roughly 30% more tokens than models before Opus 4.7 (Fable 5.1), or than Haiku 4.5 (Haiku 5.5) (Anthropic's models overview page; landscape 2026-10 §1).
+- Sonnet 5.5 uses the Sonnet 5 tokenizer, which produces approximately 30% more tokens per unit of content than Sonnet 4.6 (Anthropic's whats-new-sonnet-5 page).
+- Opus 5.5 tokenizer specifics are unstated on the fetched Anthropic pages — treat measurements with explicit tolerance until re-baselined via `count_tokens`.
 
 **Important:** Include ALL knowledge file sources: uploaded files (all types), GitHub-connected repositories, and any other connected content sources. Include the tokenizer multiplier where the target model is known.
 
@@ -108,13 +109,18 @@ Conversation runway is window-dependent: under a 200K plan against a lean projec
 
 ### Context Window Sizes — Cited Values Only
 
-Per-plan windows for claude.ai Projects (Pro / Max / Team / Enterprise) are not enumerated by a current Anthropic source available to this Skill. Prior root.node documentation carried plan-tier window numbers on recollection; those numbers are removed for v4.0 rather than asserted without citation. **Consult Anthropic's current plan documentation for per-plan window values.** The values below are cited to sources verified during the v4.0 alignment cycle (2026-07-24/25):
+Per-plan windows for claude.ai Projects (Pro / Max / Team / Enterprise) are not enumerated by a current Anthropic source available to this Skill. Prior root.node documentation carried plan-tier window numbers on recollection; those numbers are removed for v4.0 rather than asserted without citation. **Consult Anthropic's current plan documentation for per-plan window values.** The values below are cited to Anthropic sources verified 2026-10-22 (5.5-generation landscape block):
 
 | Model / Surface | Context Window | RAG Behavior | Source |
 |---|---|---|---|
-| Fable 5, Opus 5, Sonnet 5 (API) | 1M tokens (default AND max on Opus 5; no smaller variant) | User-controlled context; no platform RAG (API-side has no Projects mode) | Anthropic models overview page — `platform.claude.com/docs/en/about-claude/models/overview` |
-| Haiku 4.5 (API) | 200K tokens | User-controlled context; no platform RAG | Same |
+| Fable 5.1 (API) | 1M tokens context / 128K max output | User-controlled context; no platform RAG (API-side has no Projects mode) | Anthropic models overview page — `platform.claude.com/docs/en/about-claude/models/overview` |
+| Opus 5.5 (API) | 1M tokens context / 128K max output | Same | Same |
+| Sonnet 5.5 (API) | 1M tokens context / 128K max output | Same | Same |
+| Haiku 5.5 (API) | 1M tokens context / 128K max output (higher price band above 100K prompt tokens — see budget note below) | Same | Same |
+| *Legacy:* Haiku 4.5 (API) | 200K tokens | User-controlled context; no platform RAG | Same |
 | claude.ai Projects (any current-generation model on Anthropic Projects) | Plan-dependent (consult Anthropic plan documentation) | **Automatic** when knowledge base approaches or exceeds the model's context window | Support article: `support.claude.com/en/articles/11473015-retrieval-augmented-generation-rag-for-projects` — verbatim: "RAG automatically activates when your project approaches or exceeds the context window limits." |
+
+**Budget note — Haiku 5.5 price band.** Haiku 5.5 bills $0.10 / $0.50 per MTok (input / output) up to a 100K prompt and $0.50 / $2.50 above it; cache reads are $0.01 / $0.05 by band. A Haiku 5.5 deployment that fills its 1M window pays the higher band on the whole prompt — budget against the band, not only the window. [Anthropic docs — pricing; landscape 2026-10 §1, §6]
 
 The support article does not publish per-model or per-plan threshold numbers. Under the automatic-by-window model, the specific RAG activation point for a project depends on the model / plan / platform state; **measure empirically when the number matters** (see the "Empirical Threshold Measurement" section).
 
@@ -160,6 +166,10 @@ Two independent mechanisms. RAG switching is project-level and static (knowledge
 Diagnostic shortcuts: "Claude forgot my instructions" → context pressure OR RAG (behavioral rules not retrieved). "Claude can't find content in my files" → RAG (content not retrieved) OR context pressure (compacted). "Responses getting shorter/weaker" → context pressure.
 
 In full-context mode, compaction summarizes conversation history but leaves knowledge files intact. In retrieval mode, knowledge files load fresh each turn via search (not subject to compaction) but conversation history still compacts. Under 1M-window primary models, the two mechanisms sit further apart in absolute terms than they did under the 200K era; context pressure typically arrives later in a conversation.
+
+### Compaction Timing and Cache-Read Pricing (5.5 generation)
+
+Cache-read pricing fell on the current models: Fable 5.1 reads cached input at 0.025x the base input price, Opus 5.5 and Sonnet 5.5 at 0.05x. [Anthropic docs — pricing; landscape 2026-10 §1] For API and agentic deployments this changes the compaction calculus: "compacting early to save cost may no longer be the right cost-intelligence tradeoff" [Anthropic docs — Fable 5.1 prompting guide]. Later compaction points are a legitimate experiment — treat the compaction threshold as a tunable to measure on the deployment's own evals, not as a fixed recommendation. This does not change Projects-mode RAG activation, which the platform controls.
 
 ### Placement Tiers
 
@@ -352,7 +362,7 @@ For detailed guidance on each category, MCP infrastructure assessment, data spli
 
 ### API Deployment as Alternative Architecture
 
-When knowledge file requirements and cross-document synthesis needs exceed what Anthropic Projects can serve — very large content volumes that require cross-file reasoning that retrieval mode cannot preserve — surface API-based deployment. Context window: 1M tokens on Opus 5 / Sonnet 5 / Fable 5 (Opus 5's 1M is default AND max; no smaller variant), 200K on Haiku 4.5. Tradeoffs: per-token billing on massive inputs, higher latency (30–60+ seconds at high token counts), context rot at scale, full stack ownership (conversation management, retrieval, memory — all custom). API deployment is a different product architecture, not a casual upgrade. Recommend only when content volume and cross-document synthesis genuinely require it, and the user has engineering capacity for the integration. Do NOT recommend for projects that simply approach the current RAG activation point on their plan — most such projects benefit more from RAG quality optimization or a higher-window plan than from API-mode reconstruction.
+When knowledge file requirements and cross-document synthesis needs exceed what Anthropic Projects can serve — very large content volumes that require cross-file reasoning that retrieval mode cannot preserve — surface API-based deployment. Context window: 1M tokens on Opus 5.5 / Sonnet 5.5 / Haiku 5.5 / Fable 5.1. Tradeoffs: per-token billing on massive inputs, higher latency (30–60+ seconds at high token counts), context rot at scale, full stack ownership (conversation management, retrieval, memory — all custom). API deployment is a different product architecture, not a casual upgrade. Recommend only when content volume and cross-document synthesis genuinely require it, and the user has engineering capacity for the integration. Do NOT recommend for projects that simply approach the current RAG activation point on their plan — most such projects benefit more from RAG quality optimization or a higher-window plan than from API-mode reconstruction.
 
 ## Empirical Threshold Measurement (procedural detail)
 

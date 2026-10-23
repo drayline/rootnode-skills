@@ -192,7 +192,7 @@ For the placement-rule patterns these anti-patterns relate to, see `cc-environme
 
 **Symptoms in agent behavior:** Context-pressure symptoms (forgetting, generic responses); long sessions degrade; user has to manually `/clear` and re-explain.
 
-**Fix:** Identify recurring research-heavy patterns; promote them to explicit subagent invocations. Use the built-in Explore subagent for "find me where X is implemented" queries (Haiku, read-only, cheap). Consider 1-2 well-scoped custom subagents for repeated specialist work (security review, test writing, doc proofreading).
+**Fix:** Identify recurring research-heavy patterns; promote them to explicit subagent invocations. Use the built-in Explore subagent for "find me where X is implemented" queries (Haiku 5.5 via `Explore` override, read-only, cheap). Consider 1-2 well-scoped custom subagents for repeated specialist work (security review, test writing, doc proofreading).
 
 **Source:** alexop.dev full-stack post; Anthropic docs on Explore + general-purpose; rosmur.
 
@@ -407,6 +407,14 @@ For the placement-rule patterns these anti-patterns relate to, see `cc-environme
 **In DESIGN mode:** use as a "things to avoid creating" checklist when producing the deployment plan. Confirm explicitly that the plan does NOT introduce any of these patterns.
 
 **Catalog completeness note:** these are the 17 patterns where 3+ independent sources converged. Project-specific patterns documented in a project's own design materials complement this catalog. Add new entries via the design Project's methodology evolution discipline; promote to a generalizable catalog only after cross-project recurrence.
+
+**Candidates — not promoted** (promotion needs 3 independent deployments; listed so a match is recorded, not to fix against as canon):
+
+| Candidate | Signature | Fix |
+|---|---|---|
+| Unbounded Stop hook | A blocking Stop hook with no `stop_hook_active` check and no no-progress cap | Bound it (`cc-skills-and-hooks-composition.md` §5) |
+| Exit-code enforcement-as-preference | A guard hook that "blocks" with any exit code other than 2, or a config using a plural matcher array | Exit code 2 and the documented config shape (composition §4) |
+| Two owners per rule | Two independently written checks for one invariant | One owner, one shared check (`cc-environment-design-patterns.md` §2) |
 
 **The catalog is shared with rootnode-repo-hygiene.** That Skill uses the same 17 patterns as its scan checklist (audit verb); this Skill uses them as fix recipes (remediate / evolve / avoid verbs). When a new generalizable pattern is added, add to both Skills' references to keep them in sync.
 

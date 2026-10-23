@@ -5,3 +5,4 @@ _v2_1_staging/
 /design/staging-kf/
 __pycache__/
 *.pyc
+.claude/settings.local.json

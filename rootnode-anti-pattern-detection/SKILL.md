@@ -18,13 +18,13 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "4.0.0"
+  version: "5.0.0"
   original-source: "AUDIT_FRAMEWORK.md"
 ---
 
 # Anti-Pattern Detection for Claude Projects
 
-> **Calibration:** Tier 2 (Sonnet-graceful) — designed and tested against Opus 5 + Sonnet 5 dual-primary. Runs correctly on Sonnet 4.6 (legacy-graceful) with slightly less depth on multi-dimensional analysis; on Haiku 4.5 with extended thinking; fallback-graceful on Opus 4.8. Effort default is `high` on Opus 5 and Sonnet 5; step down to `medium` for cost-sensitive runs where evals show quality holds. See repository README for model compatibility.
+> **Calibration:** Tier 2 (Sonnet-graceful) — designed against Opus 5.5 + Sonnet 5.5 dual-primary. Runs on Haiku 5.5 at `high` effort with less depth on multi-dimensional analysis; fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. Start at the model's default effort (`medium` on Opus 5.5 and Sonnet 5.5 in Claude Code; `high` for Sonnet 5.5 on the Claude API) and re-run an effort sweep on your own evals rather than carrying a setting over. See repository README for model compatibility.
 
 Detect and fix the seven structural mistakes that cause Claude Projects to underperform. Each pattern has specific detection criteria and symptoms — diagnose by evidence, not intuition.
 

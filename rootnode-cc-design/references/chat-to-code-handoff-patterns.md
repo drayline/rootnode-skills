@@ -87,6 +87,8 @@ A clean handoff bundles the artifacts CC needs to execute autonomously. The bund
 
 **The bundle is shipped at the handoff** — Aaron pastes the artifacts into the delivery project's repo, runs the initial prompt, and CC takes over from there.
 
+**Assumption tags travel in the bundle.** A fact tagged `[speculation]` or `[assumption]` in the design brief keeps its tag in every bundled artifact — CLAUDE.md, PLAN.md, the initial prompt — until the operator confirms it. The bundle is where an unconfirmed assumption most easily turns into a standing rule. See `source-grading-and-tagging.md` §4. `[practitioner: awslabs/aidlc-workflows stage-protocol.md §3]`
+
 **For "design handoff bundle" patterns from the broader ecosystem,** see Anthropic's Claude Design launch (April 2026) which formalized the bundle pattern for design-to-code handoffs. The composition above is consistent with that pattern, adapted for general CC delivery work.
 
 ---

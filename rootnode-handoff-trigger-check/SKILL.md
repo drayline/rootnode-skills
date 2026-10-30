@@ -79,7 +79,7 @@ This is the v1.0 behavior and remains byte-identical for backward compatibility.
 
 **Behavior:** Claude offers the check rather than running it silently:
 
-> "I'm noticing [specific signal X, specific signal Y]. The handoff-gate is the formal mechanism for evaluating whether this work is ready to move to autonomous execution. Want me to run it? I can either gather the evidence from our conversation or walk through the 7 conditions with you one at a time."
+> "I'm noticing [specific signal X, specific signal Y]. The handoff trigger check is the formal mechanism for evaluating whether this work is ready to move to autonomous execution. Want me to run it? I can either gather the evidence from our conversation or walk through the 7 conditions with you one at a time."
 
 If the user accepts, Claude either:
 - (a) gathers `work_context` from the existing conversation history and runs Mode 1 mechanics — recommended when the conversation already contains the evidence, or

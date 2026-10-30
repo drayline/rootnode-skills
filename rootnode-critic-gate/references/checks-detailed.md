@@ -196,7 +196,7 @@ The lenient profile's auto-resolution behavior matters here: if the author addre
 - Invariant compliance: ✓ (tests aren't authority-matrix-protected directly)
 - Scope authorization: ✗ — blocker ("Deletion of test cases is in the out-of-scope list. Tests can be modified or expanded, never deleted, without human authorization. The 'tests are stale' claim requires a human review of WHY current behavior diverges from test expectations — that divergence may itself be the bug.")
 - Detection narrowness: skipped (not applicable to test deletion)
-- Regression risk: ✗ — blocker ("Removing tests reduces verification surface; condition 2 of handoff-gate methodology explicitly requires verification surface exists. Reducing it during execution undermines the gate that authorized the run.")
+- Regression risk: ✗ — blocker ("Removing tests reduces verification surface; condition 2 of the `rootnode-handoff-trigger-check` methodology explicitly requires verification surface exists. Reducing it during execution undermines the gate that authorized the run.")
 
 `requires_human_escalation`: true. Author cannot re-propose without scope-authorization decision.
 

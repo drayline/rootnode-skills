@@ -413,7 +413,7 @@ Two additional CP-side Skills handle design and review:
 
 The runtime Skills do not compete with full software-development workflow systems. Workflow systems (e.g., GSD, Superpowers, custom orchestrators) define *how* to do software development — exploration, planning, execution, verification, completion. The rootnode runtime Skills govern *when* autonomous execution is allowed and *with what strictness* per change.
 
-The composition pattern: handoff-gate fires before invoking a workflow system; critic-gate reviews changes emerging from a workflow system's execute-phase wave; mode-router selects the active profile that governs both gates. The runtime Skills are thin governance over thick workflow systems, not replacements for them.
+The composition pattern: `rootnode-handoff-trigger-check` fires before invoking a workflow system; critic-gate reviews changes emerging from a workflow system's execute-phase wave; mode-router selects the active profile that governs both gates. The runtime Skills are thin governance over thick workflow systems, not replacements for them.
 
 When evaluating an external Claude Code tool against rootnode runtime Skills, the right question is layer-fit (governance vs. workflow), not feature overlap.
 

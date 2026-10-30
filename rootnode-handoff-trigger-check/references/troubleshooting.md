@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Common failure modes and resolution guidance for the handoff-gate, organized by symptom. Use this when the gate is producing unexpected verdicts, when Mode 2 sensing fires inappropriately, or when a Mode 3 walkthrough isn't going well.
+Common failure modes and resolution guidance for the handoff trigger check, organized by symptom. Use this when the gate is producing unexpected verdicts, when Mode 2 sensing fires inappropriately, or when a Mode 3 walkthrough isn't going well.
 
 **When to consult this file:** When the gate's behavior in production doesn't match expectations, when authoring or debugging a profile that produces too-strict or too-lenient verdicts, or when calibrating Mode 2 sensing for a deployment.
 

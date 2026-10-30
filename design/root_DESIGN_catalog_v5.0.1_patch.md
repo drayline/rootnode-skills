@@ -1,6 +1,6 @@
 # root_DESIGN_catalog_v5.0.1_patch — catalog patch after the v5.0 D9a
 
-Status: ACCEPTED 2026-10-29. Inputs:
+Status: ACCEPTED 2026-10-29. Rev 2 (2026-10-29) adds §8: everything the build and its review identified, folded into the same cut before release. Inputs:
 - the D9a report `audit/v5_0-alignment/d9a_cc-design_v5.0_20261029-1406Z.md` and its `out/` folder;
 - the 16 open findings in `audit/v5_0-alignment/session_report_20261023-0042Z.md` (final list at its line 415);
 - the product facts verified in this cycle (§6).
@@ -116,3 +116,46 @@ Topology: Builder→Refuter, bounded at two cycles (CC_EG §3.5). The Refuter re
 - D9a result and triage (§1). The Observation 28 qualifier (§1).
 - Observation candidate: "an assertion copied from a change list tests for the change's presence, not its fit to the request". Pattern (h) neighbor of O26/O27.
 - §6 facts.
+
+## 8. Rev 2 — fold every identified item into this cut
+
+The operator directed that every identified change ship in this patch rather than a later one (anti-churn). The changes below are added to PR #28 on the same branch. The ACCEPT bound to the old diff no longer holds (receipt freeze), so the review re-runs on the full diff.
+
+**8.1 Skill content**
+
+| ID | Where | Change |
+|---|---|---|
+| R1 (F-9) | cc-design `cc-skills-and-hooks-composition.md` §5 "Bounded Stop hooks" and sketch | Append the host-cap paragraph from CC_EG §6, verbatim. In the sketch, comment the chain-total default: keep it at or below `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` (default 8) when stops can repeat without a tool call between them. |
+| R2 (F-6) | cc-design `troubleshooting.md` hook-fix paragraph | "(`stop_hook_active`, no-progress cap)" → "(chain-scoped by `stop_hook_active`; no-progress and chain-total caps; Claude Code's own continuation cap — composition reference §5)" |
+| R3 (F-7) | Every "handoff-gate" in `rootnode-*/`: critic-gate SKILL.md and `references/checks-detailed.md`; handoff-trigger-check SKILL.md, `references/examples.md` (2), `references/troubleshooting.md`; mode-router SKILL.md, `references/trigger-types-detailed.md`, `references/troubleshooting.md` | In another Skill: `rootnode-handoff-trigger-check`, plus "(if available)" where it reads as a dependency. Inside handoff-trigger-check's own files: "the handoff trigger check". Gate: `git grep -c handoff-gate -- ':(glob)rootnode-*/**'` returns nothing. |
+| R4 (F-8) | cc-design migration guard (composition reference §4 sketch and settings example) | (a) A `find` whose start path is `.`, `./`, `..`, `/`, `~` or absent, with `-delete` or `-exec rm\|mv`, and with no `-name`/`-iname`/`-path` filter → block. (b) Add the PowerShell tool: check its exact tool name and command field in the Claude Code tools reference first, add it to the matcher, and match `Remove-Item\|ri\|del\|erase\|rd\|rmdir\|Move-Item\|mi\|move\|rm\|mv` without regard to case, with the same migrations and glob rules. (c) Evaluate the glob rule per command segment, split on `;`, `&&`, `\|\|` and `\|`: only words in a segment whose command is `rm`, `mv` or `find` (or a PowerShell delete or move) count. |
+| R5 (build lessons) | cc-design `cc-prompt-design-patterns.md` §10, shell paragraph | Add three sentences. (1) A git pathspec with a trailing slash, such as `'dir-*/'`, matches nothing; use `':(glob)dir-*/**'`, and have the gate print its match count so an empty match shows. (2) An exclude pathspec does not stage files in an untracked folder; stage an explicit file list. (3) Name the interpreter: on Windows, `python` can resolve to an application's bundled copy, so prefer the `py` launcher when present and record which interpreter ran. Tag: `[observed: v5.0 catalog generator (Observation 30) and the v5.0.1 build, 2026-10-30]`. Add one sentence on `claude -p` worker allow-lists: loops and `&&` chains were denied under a `git`-only allow-list while a single `git … \| tr \| sha256sum` pipeline ran `[observed, Claude Code 2.1.302]`; name every command the worker runs, or tell it to run one pipeline per call. |
+
+R3 touches mode-router, so the touched set becomes 12, with mode-router at `5.0.1`.
+
+**8.2 Repo files delivered by chat (digest-gated)**
+
+| File | Change |
+|---|---|
+| `audit/canonical-kfs/root_CC_ENVIRONMENT_GUIDE.md` | Adds the F-9 host-cap paragraph to §6, and R3 in §9 |
+| `audit/canonical-kfs/root_AGENT_ENVIRONMENT_ARCHITECTURE.md` | R3 in §6.3 |
+| `docs/root_SKILLS_RELEASE_PLAYBOOK.md` | §1.2 install note (D1); new §1.6 patch catalog release (D2) |
+| `README.md` | Version badge v4.0 → v5.0.1. Calibration badge → Opus 5.5 + Sonnet 5.5. Bundle name made version-free (two places, so it cannot go stale). The account-sync caveat after the dual-surface paragraph. README is Tier 1, and the operator approves it at merge. |
+
+**8.3 Repo housekeeping**
+
+- `build_release_artifacts.py`: `CATALOG_VERSION` `"v5.0"` → `"v5.0.1"` (P3 option 1, operator default).
+- Commit the first build's session report and Refuter files (`audit/v5_0_1-patch/`). They ride this commit cycle.
+- Commit `design/audit-artifacts/v4.2/v42_inventory_report.md` if it exists and passes the secret scan. Leave `scratch/` untracked and list it in the report.
+
+**8.4 Seed-side (chat, not the build)**
+
+- The Project carries the same CC_EG, AEA and playbook text, written by chat on 2026-10-29.
+- build_context closeout after release:
+  - PR #27 and PR #28;
+  - the install outcome;
+  - the D9a result and triage;
+  - the Observation 28 qualifier;
+  - the Observation candidate from §7;
+  - the trailing-slash pathspec as a recurrence of the Observation 30 root cause, in the v5.0.1 build prompt;
+  - the §6 facts and the host Stop-hook cap.

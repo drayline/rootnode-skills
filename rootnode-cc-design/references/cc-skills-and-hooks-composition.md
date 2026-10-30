@@ -215,7 +215,7 @@ The doc's own warning: "Exit code 1 without valid JSON output is a non-blocking 
 {
   "hooks": {
     "PreToolUse": [
-      { "matcher": "Edit|Write|NotebookEdit|Bash",
+      { "matcher": "Edit|Write|NotebookEdit|Bash|PowerShell",
         "hooks": [ { "type": "command", "command": ".claude/hooks/guard-migrations.sh", "timeout": 10 } ] }
     ],
     "PostToolUse": [
@@ -231,7 +231,7 @@ The doc's own warning: "Exit code 1 without valid JSON output is a non-blocking 
 
 ```bash
 #!/bin/bash
-# guard-migrations.sh — Edit|Write|NotebookEdit|Bash guard; fails closed.
+# guard-migrations.sh — Edit|Write|NotebookEdit|Bash|PowerShell guard; fails closed.
 [ "${MIGRATIONS_GUARD_OFF:-0}" = "1" ] && exit 0      # off-switch; audit its use
 IN=$(cat)
 TOOL=$(printf '%s' "$IN" | jq -r '.tool_name // ""') &&
@@ -240,19 +240,31 @@ T=$(printf '%s' "$IN" | jq -r '.tool_input.file_path // .tool_input.notebook_pat
 [ -n "$TOOL" ] || { echo "guard: no tool name in hook input — refusing (fail-closed); check the hook's stdin wiring" >&2; exit 2; }
 P=$(printf '%s' "$T" | tr '\\' '/')                  # C:\repo\migrations\x -> C:/repo/migrations/x
 HIT=""
-if [ "$TOOL" = "Bash" ]; then
+case "$TOOL" in
+Bash|PowerShell)
+  if [ "$TOOL" = "Bash" ]; then RM='rm|mv'; CD='cd|pushd'; SEGCMD='rm|mv|find'; I=''
+  else RM='remove-item|ri|del|erase|rd|rmdir|move-item|mi|move|rm|mv'; CD='cd|pushd|chdir|sl|set-location|push-location'
+       SEGCMD=$RM; I=i; shopt -s nocasematch; fi                # PowerShell delete/move verbs and aliases, any case
   C=$(printf '%s' "$P" | tr -d "\"'"); S='(^|[;&|[:space:]])'; M='([^[:space:];&|]*/)?migrations([/[:space:];&|]|$)'
-  printf '%s\n' "$C" | grep -Eq "${S}(rm|mv)[[:space:]]([^;&|]*[[:space:]])?$M" && HIT=1            # rm/mv migrations/
+  printf '%s\n' "$C" | grep -Eq$I "${S}($RM)[[:space:]]([^;&|]*[[:space:]])?$M" && HIT=1           # rm/mv migrations/
   printf '%s\n' "$C" | grep -Eq "${S}find[[:space:]]([^;&|]*[[:space:]])?$M[^;&|]*-(delete|exec)" && HIT=1  # find migrations -delete
-  printf '%s\n' "$C" | grep -Eq "${S}(cd|pushd)[[:space:]]+$M.*${S}(rm|mv)[[:space:]]" && HIT=1      # cd migrations && rm …
-  if printf '%s\n' "$C" | grep -Eq "${S}(rm|mv|find)[[:space:]]"; then    # a glob that can expand to migrations
-    set -f; for W in $(printf '%s' "$C" | tr ';&|' '   '); do
+  printf '%s\n' "$C" | grep -Eq$I "${S}($CD)[[:space:]]+$M.*${S}($RM)[[:space:]]" && HIT=1        # cd migrations && rm …
+  PRE='^(sudo|command|env|nohup|time|git|then|do|else|!|[A-Za-z_][A-Za-z0-9_]*=.*)$'   # prefixes before the command
+  set -f
+  while IFS= read -r SEG; do                       # per segment: split on ; && || | ( ) { } `
+    set -- $SEG; while [ $# -gt 0 ] && [[ $1 =~ $PRE ]]; do shift; done
+    [[ ${1:-} =~ ^($SEGCMD)$ ]] || continue        # only a delete/move/find segment's words count
+    if [ "$1" = find ]; then                       # find over . ./ .. / ~ or no path, with no name filter
+      A=" $* "; D=' -(delete|exec (rm|mv)) '; F=' -(i?name|path) '
+      case "${2:--}" in .|./|..|/|'~'|-*) [[ $A =~ $D && ! $A =~ $F ]] && HIT=1 ;; esac
+    fi
+    for W in "$@"; do                              # a glob that can expand to migrations
       case "$W" in *[*?[]*) for X in migrations ./migrations x/migrations; do [[ "$X" == $W ]] && HIT=1; done ;; esac
-    done; set +f
-  fi
-else
-  case "$P" in migrations/*|*/migrations/*) HIT=1 ;; esac
-fi
+    done
+  done < <(printf '%s\n' "$C" | tr ';&|(){}`' '\n\n\n\n\n\n\n\n')
+  set +f ;;
+*) case "$P" in migrations/*|*/migrations/*) HIT=1 ;; esac ;;
+esac
 [ -z "$HIT" ] && exit 0
 mkdir -p .claude && echo "$(date -u +%FT%TZ) block $TOOL $P" >> .claude/guard.log ||   # audit row
   echo "guard: audit row not written" >&2
@@ -277,6 +289,7 @@ The verification-before-completion pattern (named in obra/superpowers, Marc Nuri
 EV=.claude/state/last-test-evidence.json; CT=.claude/state/verify-gate.count
 MAX="${VERIFY_GATE_MAX_BLOCKS:-2}"; mkdir -p .claude/state   # N: 2 interactive, 8 unattended
 MAX_TOTAL="${VERIFY_GATE_MAX_TOTAL:-$((MAX * 3))}"           # M: 3×N [assumption — tune per repo]
+# Keep M at or below CLAUDE_CODE_STOP_HOOK_BLOCK_CAP (default 8) when stops can repeat without a tool call between them.
 INPUT=$(cat)                                                 # read stdin once
 block() {  # $1 = on-task reason naming the next step
   KEY=$(sha256sum "$EV" 2>/dev/null | cut -c1-16); KEY=${KEY:-none}
@@ -327,6 +340,8 @@ Banned phrases at completion: "should work", "probably fine", "looks good".
    Either cap releases, logged. The session report records the gate `NOT_RUN`.
 
 The block reason is an on-task continuation naming the missing evidence, never an override-shaped instruction.
+
+Claude Code also caps stop-hook continuations on the host side: after eight consecutive continuations it overrides the next block and ends the turn, the count resets each time Claude calls a tool, and `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` raises it `[Anthropic docs — hooks, fetched 2026-10-30]`. Set the hook's caps to release first — a chain-total cap at or below the host cap when stops can repeat without a tool call between them — or raise the host cap deliberately and say so in the design. When the host overrides, the hook's log records a block that did not hold, and no logged release exists for the session report to cite.
 
 ### Health carrier for observer hooks
 

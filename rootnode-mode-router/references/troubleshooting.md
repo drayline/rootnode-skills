@@ -42,7 +42,7 @@ Common failure modes and resolution guidance for the Mode Router, organized by s
 
 ### Rule matches but profile doesn't exist
 
-**Symptom:** Router returns a profile name, but when handoff-gate or critic-gate tries to load that profile, it errors with "profile not found."
+**Symptom:** Router returns a profile name, but when `rootnode-handoff-trigger-check` or critic-gate tries to load that profile, it errors with "profile not found."
 
 **Diagnosis:** This is correct router behavior — the router doesn't validate profile existence. Profile existence is the consuming Skill's concern. The router returns a name; the consumer either has it or surfaces "profile not found."
 

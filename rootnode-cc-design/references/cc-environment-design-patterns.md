@@ -220,7 +220,7 @@ Hooks run deterministically on CC lifecycle events. They are the enforcement lay
 | `PostToolUse` | After a tool call completes | Auto-format edited files, run linters, log changes |
 | `Stop` | Before CC declares work complete | Verify-before-completion gates (run tests, check evidence) — bounded |
 
-Four documented events. A hook blocks with exit code 2, or exit 0 with JSON `{"decision":"block"}` `[Anthropic docs — hooks, fetched 2026-10-22]`; config is a `matcher` string plus a nested `hooks` array. Full set and contracts: `cc-skills-and-hooks-composition.md` §4. **[Anthropic docs — hooks, verified 2026-10-22]**
+Four documented events. A hook blocks with exit code 2, or exit 0 with JSON `{"decision":"block"}` `[Anthropic docs — hooks, fetched 2026-10-22]`; config is a `matcher` string plus a nested `hooks` array. Full set and contracts: `cc-skills-and-hooks-composition.md` §4.
 
 **Hook authoring is covered in detail in `cc-skills-and-hooks-composition.md`.** This section is the placement-rule pointer: enforcement guarantees go in hooks; preferences go in CLAUDE.md.
 

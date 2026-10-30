@@ -412,7 +412,7 @@ For the placement-rule patterns these anti-patterns relate to, see `cc-environme
 
 | Candidate | Signature | Fix |
 |---|---|---|
-| Unbounded Stop hook | A blocking Stop hook with no `stop_hook_active` check and no no-progress cap | Bound it (`cc-skills-and-hooks-composition.md` §5) |
+| Unbounded Stop hook | A blocking Stop hook without a chain-scoped cap, or one that releases on the first `stop_hook_active: true` and so can never reach its cap | Scope a chain-level cap with `stop_hook_active` (`cc-skills-and-hooks-composition.md` §5) |
 | Exit-code enforcement-as-preference | A guard hook that "blocks" with any exit code other than 2, or a config using a plural matcher array | Exit code 2 and the documented config shape (composition §4) |
 | Two owners per rule | Two independently written checks for one invariant | One owner, one shared check (`cc-environment-design-patterns.md` §2) |
 

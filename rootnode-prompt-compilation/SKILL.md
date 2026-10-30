@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "5.0.1"
   original-source: "PROMPT_COMPILER.md, MASTER_FRAMEWORK.md"
 ---
 
@@ -48,7 +48,7 @@ Not every task needs the full 5-layer treatment. Match prompt complexity to task
 
 ## Model requirements
 
-This Skill performs multi-stage construction across the four-stage pipeline (Parse, Select, Construct, Validate) and three modes (Prompt, Project, Prep), with decision trees spanning identity × reasoning × output × domain selection. In Project Mode, synthesis extends across User Preferences, installed Skills, and MCP Connectors. Run on Opus 5.5 (start at its `medium` default) or Sonnet 5.5 (`high`) — the recommended starting points. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — deep block selection and validation benefit from `high` or higher.
+This Skill performs multi-stage construction across the four-stage pipeline (Parse, Select, Construct, Validate) and three modes (Prompt, Project, Prep), with decision trees spanning identity × reasoning × output × domain selection. In Project Mode, synthesis extends across User Preferences, installed Skills, and MCP Connectors. Run on Opus 5.5 (start at its `medium` default) or Sonnet 5.5 (`high`) — the recommended starting points. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — for deep block selection and validation, step to `high` when verification matters or edge cases are likely.
 
 On the dual-primary tier (Opus 5.5 at its `medium` default or `high`; Sonnet 5.5 at `high`) the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and at `low` effort, expect compressed selection logic, less specific block recommendations, and reduced cross-layer validation. Fallback-graceful on Opus 5 / Sonnet 5. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight the resulting prompts by the model that produced them.
 

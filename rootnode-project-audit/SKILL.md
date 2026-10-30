@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "5.0.1"
   original-source: "AUDIT_FRAMEWORK.md, PROJECT_OPTIMIZER.md"
 ---
 
@@ -38,7 +38,7 @@ This is the non-negotiable constraint. Generic advice that could apply to any Pr
 
 ## Model requirements
 
-This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Project Scorecard, detects seven structural anti-patterns, and synthesizes cross-layer alignment findings when global layer information is provided. Run on Opus 5.5 (start at its `medium` default) or Sonnet 5.5 (`high`) — the recommended starting points. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — deep cross-dimensional scoring benefits from `high` or higher.
+This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Project Scorecard, detects seven structural anti-patterns, and synthesizes cross-layer alignment findings when global layer information is provided. Run on Opus 5.5 (start at its `medium` default) or Sonnet 5.5 (`high`) — the recommended starting points. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — for deep cross-dimensional scoring, step to `high` when verification matters or edge cases are likely.
 
 On the dual-primary tier (Opus 5.5 at its `medium` default or `high`; Sonnet 5.5 at `high`) the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and at `low` effort, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across anti-patterns and cross-layer alignment. Fallback-graceful on Opus 5 / Sonnet 5. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them.
 

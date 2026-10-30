@@ -215,7 +215,7 @@ The doc's own warning: "Exit code 1 without valid JSON output is a non-blocking 
 {
   "hooks": {
     "PreToolUse": [
-      { "matcher": "Edit|Write|Bash",
+      { "matcher": "Edit|Write|NotebookEdit|Bash",
         "hooks": [ { "type": "command", "command": ".claude/hooks/guard-migrations.sh", "timeout": 10 } ] }
     ],
     "PostToolUse": [
@@ -231,22 +231,31 @@ The doc's own warning: "Exit code 1 without valid JSON output is a non-blocking 
 
 ```bash
 #!/bin/bash
-# guard-migrations.sh — Edit|Write|Bash guard; fails closed.
+# guard-migrations.sh — Edit|Write|NotebookEdit|Bash guard; fails closed.
 [ "${MIGRATIONS_GUARD_OFF:-0}" = "1" ] && exit 0      # off-switch; audit its use
 IN=$(cat)
 TOOL=$(printf '%s' "$IN" | jq -r '.tool_name // ""') &&
-T=$(printf '%s' "$IN" | jq -r '.tool_input.file_path // .tool_input.command // ""') ||
+T=$(printf '%s' "$IN" | jq -r '.tool_input.file_path // .tool_input.notebook_path // .tool_input.command // ""') ||
   { echo "Input unreadable; rule holds. Next step: check jq and the hook input." >&2; exit 2; }
 [ -n "$TOOL" ] || { echo "guard: no tool name in hook input — refusing (fail-closed); check the hook's stdin wiring" >&2; exit 2; }
 P=$(printf '%s' "$T" | tr '\\' '/')                  # C:\repo\migrations\x -> C:/repo/migrations/x
 HIT=""
-if [ "$TOOL" = "Bash" ]; then                        # rm/mv on migrations/ or its contents
-  printf '%s\n' "$P" | tr -d "\"'" | grep -Eq '(^|[;&|[:space:]])(rm|mv)[[:space:]]([^;&|]*[[:space:]])?([^[:space:]]*/)?migrations([/[:space:];&|]|$)' && HIT=1
+if [ "$TOOL" = "Bash" ]; then
+  C=$(printf '%s' "$P" | tr -d "\"'"); S='(^|[;&|[:space:]])'; M='([^[:space:];&|]*/)?migrations([/[:space:];&|]|$)'
+  printf '%s\n' "$C" | grep -Eq "${S}(rm|mv)[[:space:]]([^;&|]*[[:space:]])?$M" && HIT=1            # rm/mv migrations/
+  printf '%s\n' "$C" | grep -Eq "${S}find[[:space:]]([^;&|]*[[:space:]])?$M[^;&|]*-(delete|exec)" && HIT=1  # find migrations -delete
+  printf '%s\n' "$C" | grep -Eq "${S}(cd|pushd)[[:space:]]+$M.*${S}(rm|mv)[[:space:]]" && HIT=1      # cd migrations && rm …
+  if printf '%s\n' "$C" | grep -Eq "${S}(rm|mv|find)[[:space:]]"; then    # a glob that can expand to migrations
+    set -f; for W in $(printf '%s' "$C" | tr ';&|' '   '); do
+      case "$W" in *[*?[]*) for X in migrations ./migrations x/migrations; do [[ "$X" == $W ]] && HIT=1; done ;; esac
+    done; set +f
+  fi
 else
   case "$P" in migrations/*|*/migrations/*) HIT=1 ;; esac
 fi
 [ -z "$HIT" ] && exit 0
-echo "$(date -u +%FT%TZ) block $TOOL $P" >> .claude/guard.log   # audit row
+mkdir -p .claude && echo "$(date -u +%FT%TZ) block $TOOL $P" >> .claude/guard.log ||   # audit row
+  echo "guard: audit row not written" >&2
 echo "migrations/ is protected. Next step: use the migration tool, then stop for review." >&2
 exit 2
 ```
@@ -266,17 +275,24 @@ The verification-before-completion pattern (named in obra/superpowers, Marc Nuri
 # verify-tests.sh — Stop guard; fails closed; bounded.
 [ "${VERIFY_GATE_OFF:-0}" = "1" ] && exit 0          # off-switch; audit its use
 EV=.claude/state/last-test-evidence.json; CT=.claude/state/verify-gate.count
-MAX="${VERIFY_GATE_MAX_BLOCKS:-2}"; mkdir -p .claude/state   # 2 interactive, 8 unattended
+MAX="${VERIFY_GATE_MAX_BLOCKS:-2}"; mkdir -p .claude/state   # N: 2 interactive, 8 unattended
+MAX_TOTAL="${VERIFY_GATE_MAX_TOTAL:-$((MAX * 3))}"           # M: 3×N [assumption — tune per repo]
+INPUT=$(cat)                                                 # read stdin once
 block() {  # $1 = on-task reason naming the next step
   KEY=$(sha256sum "$EV" 2>/dev/null | cut -c1-16); KEY=${KEY:-none}
-  LAST=""; N=0; [ -f "$CT" ] && read -r LAST N < "$CT"
+  LAST=""; N=0; TOTAL=0; [ -f "$CT" ] && read -r LAST N TOTAL < "$CT"
   if [ "$LAST" = "$KEY" ]; then N=$((N + 1)); else N=1; fi
-  echo "$KEY $N" > "$CT"; echo "$(date -u +%FT%TZ) block $KEY $N" >> .claude/state/verify-gate.log
-  [ "$N" -gt "$MAX" ] && exit 0                      # bound 2: release, logged
+  TOTAL=$((${TOTAL:-0} + 1))
+  echo "$KEY $N $TOTAL" > "$CT"; echo "$(date -u +%FT%TZ) block $KEY $N $TOTAL" >> .claude/state/verify-gate.log
+  if [ "$N" -gt "$MAX" ] || [ "$TOTAL" -gt "$MAX_TOTAL" ]; then   # bound 2: release, logged
+    echo "$(date -u +%FT%TZ) release $KEY $N $TOTAL" >> .claude/state/verify-gate.log; exit 0
+  fi
   echo "$1" >&2; exit 2
 }
-command -v jq >/dev/null || block "jq not found — evidence not evaluated; cap still applies"
-[ "$(jq -r '.stop_hook_active // false')" = "true" ] && exit 0   # bound 1
+ACTIVE=true                                          # bound 1: no jq or unreadable input = continuation
+command -v jq >/dev/null && ACTIVE=$(printf '%s' "$INPUT" | jq -r '.stop_hook_active // false' 2>/dev/null || echo true)
+[ "$ACTIVE" = "true" ] || rm -f "$CT"                # a new stop chain resets the counter
+command -v jq >/dev/null || block "jq not found — evidence not evaluated; caps still apply"
 [ -f "$EV" ] || block "Next step: run the test suite and record the result to $EV."
 AGE=$(($(date +%s) - $(stat -c %Y "$EV" 2>/dev/null || stat -f %m "$EV")))
 [ "$AGE" -le 300 ] || block "Next step: re-run the test suite; the evidence is over 5 minutes old."
@@ -303,8 +319,12 @@ Banned phrases at completion: "should work", "probably fine", "looks good".
 
 "A stuck block is the ONE way to trap a session" `[practitioner: awslabs/aidlc-workflows core/hooks/aidlc-continue-workflow.ts header]`. Every iron-law hook this Skill emits has both bounds:
 
-1. **Honor `stop_hook_active`** — when Claude is already continuing because of a stop hook, do not block again. `[Anthropic docs — hooks; verify the field name on the running version]`
-2. **No-progress cap** — a state file counts blocks on unchanged evidence and releases after N (AI-DLC working values: 2 interactive, 8 unattended), resetting when the evidence changes. The release is logged; the session report records the gate `NOT_RUN`.
+1. **Scope the count with `stop_hook_active`** — Read `stop_hook_active` to scope the count. The field is true when Claude is already continuing because of a stop hook. A hook that ignores it can trap the session. A hook that releases on the first `true` can block only once per stop chain, so no block cap can trigger. Reset the chain counter when the field is false; count blocks while it is true. Without `jq`, treat every stop as a chain continuation, so the caps still release. `[Anthropic docs — hooks, fetched 2026-10-30; verify the field name on the running version]`
+2. **Two caps** — a state file holds `KEY N TOTAL` for the current chain:
+   - **No-progress:** N blocks on unchanged evidence, resetting when the evidence changes (AI-DLC working values: 2 interactive, 8 unattended).
+   - **Chain total:** M blocks in the chain whatever the evidence, default 3×N `[assumption — tune per repo]`.
+
+   Either cap releases, logged. The session report records the gate `NOT_RUN`.
 
 The block reason is an on-task continuation naming the missing evidence, never an override-shaped instruction.
 

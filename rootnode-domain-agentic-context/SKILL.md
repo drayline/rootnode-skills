@@ -16,7 +16,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "5.0.1"
   original-source: "DOMAIN_PACK_AGENTIC_CONTEXT.md"
 ---
 

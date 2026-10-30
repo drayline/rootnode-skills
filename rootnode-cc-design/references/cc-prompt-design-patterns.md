@@ -224,6 +224,7 @@ Autonomous prompts drive long-running, less-supervised CC work. They require mor
 - <trigger 1>
 - <trigger 2>
 - <trigger 3>
+- Resume: after the operator fixes the cause, re-run this prompt; completed steps are skipped by <restart marker or idempotent check>.
 
 ## Progress reporting
 - After every work item: append to @STATUS.md
@@ -246,7 +247,7 @@ Autonomous prompts drive long-running, less-supervised CC work. They require mor
 Write the session report (`cc-session-reports.md`), then stop.
 ```
 
-**Carry the work through — the early-stop countermeasure.** The 5.5-generation models can end a turn too early: Opus 5.5 in unattended runs, Sonnet 5.5 at `low`/`medium`, Haiku 5.5 at `low` with long prompts, Fable 5.1 on long tasks **[Anthropic docs — Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1 prompting guides]**. Too little, not too much (`rootnode-behavioral-tuning` tendency #15, early turn termination). In an autonomous prompt:
+**Carry the work through — the early-stop countermeasure.** The 5.5-generation models can end a turn too early: Opus 5.5 in unattended runs, Sonnet 5.5 at `low`/`medium`, Haiku 5.5 at `low` with long prompts, Fable 5.1 on long tasks **[Anthropic docs — Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1 prompting guides]**. Too little, not too much — `rootnode-behavioral-tuning` (if available) tendency #15, early turn termination. In an autonomous prompt:
 
 - Treat a text-only end of turn as a report, not proof.
 - Name the early stops to avoid: a summary announcing the next step with no tool call; an offer to continue; a list of non-blocking decisions; a stop at a milestone report.

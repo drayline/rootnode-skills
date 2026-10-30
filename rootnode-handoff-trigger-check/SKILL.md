@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "5.0.1"
   original-source: "root.node design 2026 — runtime layer (gates, router, profile builder)"
   companion-files: "schema/profile.schema.json, profiles/strict.json, profiles/balanced.json, profiles/lenient.json, references/examples.md, references/troubleshooting.md, references/sensing-triggers-detailed.md"
   changelog: "1.1.2 (2026-05-05): Activation precision tuning. Added two symptom-phrased triggers (\"are we ready to ship this,\" \"should I just hand this off\") to broaden activation under user vocabulary that doesn't include the word 'handoff.' No methodology, schema, or workflow changes; behavior identical to 1.1.1 once activated. 1.1.1 (2026-05-01): Structural patch to align with rootnode authoring convention. Added references/ folder with three on-demand-loaded files (examples, troubleshooting, sensing-triggers-detailed). SKILL.md body slimmed ~23% via content extraction (Examples and Troubleshooting sections moved out; sensing-triggers detail expanded into a dedicated reference); behavior identical to 1.1. 1.1 (2026-05-01): Added Mode 2 (proactive sensing) and Mode 3 (conversational walkthrough). Mode 1 (deliberate gate) behavior unchanged from 1.0 — backward compatible. Deployment target: chat-Project (CP) side of CP/CC split."
@@ -33,7 +33,7 @@ Evaluate whether work-in-design is ready to hand off to autonomous execution. Ru
 
 The premise: **the costliest mistake in human/agent collaboration is holding work in human hands after it's ready to be executed.** A documented production case shipped 27 similar instances in under 24 hours of autonomous Claude Code time after a week of human-led ground-truth setup on the first instance; the week was necessary, but the cost was holding instances 2-27 in human hands for any time at all after the engine passed verification on instance 1. This Skill exists to make that handoff moment a measurable trigger, not a vibes call.
 
-## v4.0 update — condition 7 (token/usage budget headroom) under 1M windows
+## Condition 7 — token/usage budget headroom under 1M windows
 
 All four current models — Fable 5.1, Opus 5.5, Sonnet 5.5, and Haiku 5.5 — support a 1M-token context window with 128K max output; 1M is the default in Claude Code (`CLAUDE_CODE_DISABLE_1M_CONTEXT=1` reverts to 200K; verify against the running Claude Code version) [Anthropic docs, models overview and Claude Code model-config, verified 2026-10-22]. The 200K default window applies to legacy models: Haiku 4.5 (200K only) and Sonnet 4.6 / Sonnet 4.5 without the `[1m]` suffix. The token-headroom math in condition 7 should account for the larger window: a chat conversation that consumed ~150K tokens leaves substantial headroom on any current model, but crowds a legacy 200K Haiku 4.5 window.
 

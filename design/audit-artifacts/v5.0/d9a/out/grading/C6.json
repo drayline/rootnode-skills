@@ -1,0 +1,61 @@
+{
+  "status": "GRADED",
+  "key": {
+    "X": "v4.2",
+    "Y": "v5.0"
+  },
+  "attempt": 1,
+  "grader_model": "claude-opus-5-5",
+  "grader_cc_skills": [],
+  "raw": "{\"case\": \"C6\", \"results\": [{\"id\": \"A1\", \"X\": {\"pass\": true, \"evidence\": \"Run the Refuter on the Opus tier at `high` effort. In frontmatter, use the `opus` alias rather than a pinned model ID.\"}, \"Y\": {\"pass\": true, \"evidence\": \"Run the Refuter on **Opus 5.5 at `high` effort**.\"}}, {\"id\": \"A2\", \"X\": {\"pass\": true, \"evidence\": \"Never run it below the Builder's tier.\"}, \"Y\": {\"pass\": true, \"evidence\": \"Meets the reviewer \u2265 builder rule for both Builder tiers (Sonnet 5.5 baseline, Opus 5.5 for hard specs).\"}}, {\"id\": \"A3\", \"X\": {\"pass\": true, \"evidence\": \"Run the Refuter on the Opus tier at `high` effort.\"}, \"Y\": {\"pass\": true, \"evidence\": \"**Adopt Opus 5.5 at `high`** and set it through the mechanism, not in prose.\"}}, {\"id\": \"A4\", \"X\": {\"pass\": true, \"evidence\": \"The model names may be out of date. The reference's model column is dated 2026-09-09 and says \\\"Opus 5\\\".\"}, \"Y\": {\"pass\": true, \"evidence\": \"model: opus        # [product fact 2026-10-22 \u2014 verify against the running Claude Code version]\"}}], \"notes\": \"Both pass all four. X names the Opus tier via alias rather than Opus 5.5 explicitly, but it identifies Opus 5.5 as the current Opus, so A1 passes. Y names Opus 5.5 directly.\"}",
+  "grade": {
+    "case": "C6",
+    "results": [
+      {
+        "id": "A1",
+        "X": {
+          "pass": true,
+          "evidence": "Run the Refuter on the Opus tier at `high` effort. In frontmatter, use the `opus` alias rather than a pinned model ID."
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "Run the Refuter on **Opus 5.5 at `high` effort**."
+        }
+      },
+      {
+        "id": "A2",
+        "X": {
+          "pass": true,
+          "evidence": "Never run it below the Builder's tier."
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "Meets the reviewer \u2265 builder rule for both Builder tiers (Sonnet 5.5 baseline, Opus 5.5 for hard specs)."
+        }
+      },
+      {
+        "id": "A3",
+        "X": {
+          "pass": true,
+          "evidence": "Run the Refuter on the Opus tier at `high` effort."
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "**Adopt Opus 5.5 at `high`** and set it through the mechanism, not in prose."
+        }
+      },
+      {
+        "id": "A4",
+        "X": {
+          "pass": true,
+          "evidence": "The model names may be out of date. The reference's model column is dated 2026-09-09 and says \"Opus 5\"."
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "model: opus        # [product fact 2026-10-22 \u2014 verify against the running Claude Code version]"
+        }
+      }
+    ],
+    "notes": "Both pass all four. X names the Opus tier via alias rather than Opus 5.5 explicitly, but it identifies Opus 5.5 as the current Opus, so A1 passes. Y names Opus 5.5 directly."
+  }
+}

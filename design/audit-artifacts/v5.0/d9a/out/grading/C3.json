@@ -1,0 +1,50 @@
+{
+  "status": "GRADED",
+  "key": {
+    "X": "v5.0",
+    "Y": "v4.2"
+  },
+  "attempt": 1,
+  "grader_model": "claude-opus-5-5",
+  "grader_cc_skills": [],
+  "raw": "{\"case\": \"C3\", \"results\": [{\"id\": \"A1\", \"X\": {\"pass\": false, \"evidence\": \"absent\"}, \"Y\": {\"pass\": false, \"evidence\": \"absent\"}}, {\"id\": \"A2\", \"X\": {\"pass\": true, \"evidence\": \"if (ep.same > MAX_SAME || ep.total > MAX_TOTAL) { const why = ep.same > MAX_SAME ? `no progress: identical failure on ${ep.same} consecutive stops` : `ceiling: ${ep.total} stops in this episode`;\"}, \"Y\": {\"pass\": true, \"evidence\": \"if (priorBlocks >= MAX_BLOCKS) { removeFile(counterFile); const note = writeHaltNote(sessionId, result, outputTail);\"}}, {\"id\": \"A3\", \"X\": {\"pass\": true, \"evidence\": \"`npm test is failing (${result.failure}; block ${ep.total}/${MAX_TOTAL}). ` ... `--- last ${TAIL_LINES} lines of npm test output ---\\\\n${result.tail}\\\\n`\"}, \"Y\": {\"pass\": true, \"evidence\": \"`VERIFICATION IRON LAW: \\\\`npm test\\\\` is failing (${result.summary}).` ... `--- last ${TAIL_LINES} lines of npm test output ---`, outputTail\"}}], \"notes\": \"Both read stop_hook_active but use it only to reset or continue a block counter. Neither allows the stop when it is true. Y allows on true only in the counter-write-failure path, which is not the general behavior. Both cap blocking and include the test output tail.\"}",
+  "grade": {
+    "case": "C3",
+    "results": [
+      {
+        "id": "A1",
+        "X": {
+          "pass": false,
+          "evidence": "absent"
+        },
+        "Y": {
+          "pass": false,
+          "evidence": "absent"
+        }
+      },
+      {
+        "id": "A2",
+        "X": {
+          "pass": true,
+          "evidence": "if (ep.same > MAX_SAME || ep.total > MAX_TOTAL) { const why = ep.same > MAX_SAME ? `no progress: identical failure on ${ep.same} consecutive stops` : `ceiling: ${ep.total} stops in this episode`;"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "if (priorBlocks >= MAX_BLOCKS) { removeFile(counterFile); const note = writeHaltNote(sessionId, result, outputTail);"
+        }
+      },
+      {
+        "id": "A3",
+        "X": {
+          "pass": true,
+          "evidence": "`npm test is failing (${result.failure}; block ${ep.total}/${MAX_TOTAL}). ` ... `--- last ${TAIL_LINES} lines of npm test output ---\\n${result.tail}\\n`"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "`VERIFICATION IRON LAW: \\`npm test\\` is failing (${result.summary}).` ... `--- last ${TAIL_LINES} lines of npm test output ---`, outputTail"
+        }
+      }
+    ],
+    "notes": "Both read stop_hook_active but use it only to reset or continue a block counter. Neither allows the stop when it is true. Y allows on true only in the counter-write-failure path, which is not the general behavior. Both cap blocking and include the test output tail."
+  }
+}

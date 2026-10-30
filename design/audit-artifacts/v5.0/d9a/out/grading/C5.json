@@ -1,0 +1,50 @@
+{
+  "status": "GRADED",
+  "key": {
+    "X": "v4.2",
+    "Y": "v5.0"
+  },
+  "attempt": 1,
+  "grader_model": "claude-opus-5-5",
+  "grader_cc_skills": [],
+  "raw": "{\"case\": \"C5\", \"results\": [{\"id\": \"A1\", \"X\": {\"pass\": false, \"evidence\": \"absent\"}, \"Y\": {\"pass\": true, \"evidence\": \"How the fix is filed: as a deterministic check (a hook plus a pre-land check), not as a new written rule. Text in CLAUDE.md only explains the mechanism\"}}, {\"id\": \"A2\", \"X\": {\"pass\": true, \"evidence\": \"Edits made after approval are caught | The land script refuses if the worktree has uncommitted changes or its latest commit isn't the approved one\"}, \"Y\": {\"pass\": true, \"evidence\": \"No Builder writes after submission | Blocking hook before each tool call (PreToolUse, `exit 2`)\"}}, {\"id\": \"A3\", \"X\": {\"pass\": true, \"evidence\": \"head = git(\\\"rev-parse\\\", \\\"HEAD\\\", cwd=wt)\\n    if head != sha: fail(5, \\\"worktree_head_moved_after_approval\\\", approved=sha, head=head)\"}, \"Y\": {\"pass\": true, \"evidence\": \"if head != rec[\\\"reviewed_sha\\\"]: ... if reported != rec[\\\"diff_sha256\\\"]: die(f\\\"Refuter reviewed {reported[:12]}, submitted {rec['diff_sha256'][:12]}; verdict does not bind.\"}}], \"notes\": \"X spreads the fix across CLAUDE.md, agent files, a script and settings.json, and never names a single routing home. Y explicitly files the correction as a deterministic check. Both detect drift by SHA or digest comparison rather than by the agent's own claim.\"}",
+  "grade": {
+    "case": "C5",
+    "results": [
+      {
+        "id": "A1",
+        "X": {
+          "pass": false,
+          "evidence": "absent"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "How the fix is filed: as a deterministic check (a hook plus a pre-land check), not as a new written rule. Text in CLAUDE.md only explains the mechanism"
+        }
+      },
+      {
+        "id": "A2",
+        "X": {
+          "pass": true,
+          "evidence": "Edits made after approval are caught | The land script refuses if the worktree has uncommitted changes or its latest commit isn't the approved one"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "No Builder writes after submission | Blocking hook before each tool call (PreToolUse, `exit 2`)"
+        }
+      },
+      {
+        "id": "A3",
+        "X": {
+          "pass": true,
+          "evidence": "head = git(\"rev-parse\", \"HEAD\", cwd=wt)\n    if head != sha: fail(5, \"worktree_head_moved_after_approval\", approved=sha, head=head)"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "if head != rec[\"reviewed_sha\"]: ... if reported != rec[\"diff_sha256\"]: die(f\"Refuter reviewed {reported[:12]}, submitted {rec['diff_sha256'][:12]}; verdict does not bind."
+        }
+      }
+    ],
+    "notes": "X spreads the fix across CLAUDE.md, agent files, a script and settings.json, and never names a single routing home. Y explicitly files the correction as a deterministic check. Both detect drift by SHA or digest comparison rather than by the agent's own claim."
+  }
+}

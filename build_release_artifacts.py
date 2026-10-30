@@ -56,7 +56,7 @@ EXPECTED_CC = 5
 
 # Names the all-Skills bundle written on full builds (uploaded to the
 # catalog-<ver> umbrella release). Bump this per catalog release.
-CATALOG_VERSION = "v5.0"
+CATALOG_VERSION = "v5.0.1"
 
 # --- Exclusions (ported from package_skill.py) ---------------------------------
 EXCLUDE_DIRS = {"__pycache__", "node_modules"}

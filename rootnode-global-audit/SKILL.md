@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "5.0.1"
   original-source: "PROJECT_OPTIMIZER.md, AUDIT_FRAMEWORK.md, OPTIMIZATION_REFERENCE.md"
 ---
 
@@ -40,7 +40,7 @@ When producing any updated content — optimized User Preferences, Memory edit p
 
 ## Model requirements
 
-This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Global Layer Scorecard, detects eight cross-layer failure modes, and synthesizes evolutionary recommendations across four pathways. Run on Opus 5.5 (start at its `medium` default) or Sonnet 5.5 (`high`) — the recommended starting points. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — deep cross-layer synthesis benefits from `high` or higher.
+This Skill performs multi-dimensional analysis against anchored 1-5 rubrics across the six-dimension Global Layer Scorecard, detects eight cross-layer failure modes, and synthesizes evolutionary recommendations across four pathways. Run on Opus 5.5 (start at its `medium` default) or Sonnet 5.5 (`high`) — the recommended starting points. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — for deep cross-layer synthesis, step to `high` when verification matters or edge cases are likely.
 
 On the dual-primary tier (Opus 5.5 at its `medium` default or `high`; Sonnet 5.5 at `high`) the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and at `low` effort, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across the five global layers. Fallback-graceful on Opus 5 / Sonnet 5. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them.
 

@@ -1,0 +1,72 @@
+{
+  "status": "GRADED",
+  "key": {
+    "X": "v4.2",
+    "Y": "v5.0"
+  },
+  "attempt": 1,
+  "grader_model": "claude-opus-5-5",
+  "grader_cc_skills": [],
+  "raw": "{\"case\": \"C1\", \"results\": [{\"id\": \"A1\", \"X\": {\"pass\": true, \"evidence\": \"#   exit 2  block it; stderr is returned to Claude as the reason ... every failure path below exits 2 (fail closed) rather than 1.\"}, \"Y\": {\"pass\": true, \"evidence\": \"**Exit 2, never exit 1.** Any other non-zero exit is a non-blocking error, so the write would go ahead. An EXIT trap turns any crash into exit 2.\"}}, {\"id\": \"A2\", \"X\": {\"pass\": true, \"evidence\": \"\\\"matcher\\\": \\\"Write|Edit|MultiEdit|NotebookEdit|Bash\\\",\"}, \"Y\": {\"pass\": true, \"evidence\": \"\\\"matcher\\\": \\\"Edit|Write|MultiEdit|NotebookEdit|Bash|PowerShell\\\",\"}}, {\"id\": \"A3\", \"X\": {\"pass\": true, \"evidence\": \"\\\"hooks\\\": [\\n          {\\n            \\\"type\\\": \\\"command\\\",\\n            \\\"command\\\": \\\"bash \\\\\\\"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-migrations.sh\\\\\\\"\\\",\"}, \"Y\": {\"pass\": true, \"evidence\": \"\\\"hooks\\\": [\\n          {\\n            \\\"type\\\": \\\"command\\\",\\n            \\\"command\\\": \\\"bash \\\\\\\"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-migrations.sh\\\\\\\" || exit 2\\\",\"}}, {\"id\": \"A4\", \"X\": {\"pass\": true, \"evidence\": \"\\\"Do not retry or work around this block. Describe the needed migration to the user and stop.\\\" >&2\"}, \"Y\": {\"pass\": true, \"evidence\": \"Next step: do not retry through another tool, shell, or path. Stop and tell the operator which migration change you need and why.\"}}, {\"id\": \"A5\", \"X\": {\"pass\": true, \"evidence\": \"# Human override (set in the shell that launches claude; Claude cannot set it):\\n#   CLAUDE_ALLOW_MIGRATION_WRITES=1\"}, \"Y\": {\"pass\": true, \"evidence\": \"**Off-switch with an audit trail.** `MIGRATIONS_GUARD_OFF=1` disables the guard and logs a BYPASS row.\"}}], \"notes\": \"Both pass all five. Both use exit 2, a string matcher, a nested hooks array with type command, next-step block messages, and env-var off-switches. Y also guards against a missing script via || exit 2 and adds a CI backstop; X checks its off-switch only after the fast path.\"}",
+  "grade": {
+    "case": "C1",
+    "results": [
+      {
+        "id": "A1",
+        "X": {
+          "pass": true,
+          "evidence": "#   exit 2  block it; stderr is returned to Claude as the reason ... every failure path below exits 2 (fail closed) rather than 1."
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "**Exit 2, never exit 1.** Any other non-zero exit is a non-blocking error, so the write would go ahead. An EXIT trap turns any crash into exit 2."
+        }
+      },
+      {
+        "id": "A2",
+        "X": {
+          "pass": true,
+          "evidence": "\"matcher\": \"Write|Edit|MultiEdit|NotebookEdit|Bash\","
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "\"matcher\": \"Edit|Write|MultiEdit|NotebookEdit|Bash|PowerShell\","
+        }
+      },
+      {
+        "id": "A3",
+        "X": {
+          "pass": true,
+          "evidence": "\"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"bash \\\"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-migrations.sh\\\"\","
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "\"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"bash \\\"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-migrations.sh\\\" || exit 2\","
+        }
+      },
+      {
+        "id": "A4",
+        "X": {
+          "pass": true,
+          "evidence": "\"Do not retry or work around this block. Describe the needed migration to the user and stop.\" >&2"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "Next step: do not retry through another tool, shell, or path. Stop and tell the operator which migration change you need and why."
+        }
+      },
+      {
+        "id": "A5",
+        "X": {
+          "pass": true,
+          "evidence": "# Human override (set in the shell that launches claude; Claude cannot set it):\n#   CLAUDE_ALLOW_MIGRATION_WRITES=1"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "**Off-switch with an audit trail.** `MIGRATIONS_GUARD_OFF=1` disables the guard and logs a BYPASS row."
+        }
+      }
+    ],
+    "notes": "Both pass all five. Both use exit 2, a string matcher, a nested hooks array with type command, next-step block messages, and env-var off-switches. Y also guards against a missing script via || exit 2 and adds a CI backstop; X checks its off-switch only after the fast path."
+  }
+}

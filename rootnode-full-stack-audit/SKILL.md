@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "5.0.1"
   original-source: "PROJECT_OPTIMIZER.md, AUDIT_FRAMEWORK.md, OPTIMIZATION_REFERENCE.md"
 ---
 
@@ -40,7 +40,7 @@ When producing reconstructed Custom Instructions, optimized User Preferences, or
 
 ## Model requirements
 
-This Skill performs the most complex analysis in the catalog — combining Project audit (six-dimension Project Scorecard, seven anti-patterns) with Global audit (six-dimension Global Layer Scorecard) plus cross-layer alignment checks and evolutionary recommendations across all nine layers. Run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — the multi-scorecard synthesis benefits from `high` or higher.
+This Skill performs the most complex analysis in the catalog — combining Project audit (six-dimension Project Scorecard, seven anti-patterns) with Global audit (six-dimension Global Layer Scorecard) plus cross-layer alignment checks and evolutionary recommendations across all nine layers. Run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length.
 
 On the dual-primary tier (Opus 5.5 at its `medium` default or `high`; Sonnet 5.5 at `high`) the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and at `low` effort, expect compressed evaluation steps, surface-level scoring on some dimensions, and reduced synthesis across the Project and Global layers. Fallback-graceful on Opus 5 / Sonnet 5. The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them.
 

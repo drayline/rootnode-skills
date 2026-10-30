@@ -1,0 +1,220 @@
+{
+  "verdict": "PASS_WITH_FINDINGS",
+  "graded": 6,
+  "cases": 6,
+  "totals": {
+    "v4.2": "17/26",
+    "v5.0": "23/26"
+  },
+  "differential": 6,
+  "per_case": [
+    {
+      "case": "C1",
+      "status": "GRADED",
+      "assertions": [
+        {
+          "id": "A1",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A2",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A3",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A4",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A5",
+          "v4.2": true,
+          "v5.0": true
+        }
+      ],
+      "v4.2": 5,
+      "v5.0": 5
+    },
+    {
+      "case": "C2",
+      "status": "GRADED",
+      "assertions": [
+        {
+          "id": "A1",
+          "v4.2": false,
+          "v5.0": true
+        },
+        {
+          "id": "A2",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A3",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A4",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A5",
+          "v4.2": false,
+          "v5.0": false
+        }
+      ],
+      "v4.2": 3,
+      "v5.0": 4
+    },
+    {
+      "case": "C3",
+      "status": "GRADED",
+      "assertions": [
+        {
+          "id": "A1",
+          "v4.2": false,
+          "v5.0": false
+        },
+        {
+          "id": "A2",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A3",
+          "v4.2": true,
+          "v5.0": true
+        }
+      ],
+      "v4.2": 2,
+      "v5.0": 2
+    },
+    {
+      "case": "C4",
+      "status": "GRADED",
+      "assertions": [
+        {
+          "id": "A1",
+          "v4.2": false,
+          "v5.0": true
+        },
+        {
+          "id": "A2",
+          "v4.2": false,
+          "v5.0": true
+        },
+        {
+          "id": "A3",
+          "v4.2": false,
+          "v5.0": true
+        },
+        {
+          "id": "A4",
+          "v4.2": false,
+          "v5.0": true
+        },
+        {
+          "id": "A5",
+          "v4.2": false,
+          "v5.0": true
+        },
+        {
+          "id": "A6",
+          "v4.2": true,
+          "v5.0": false
+        }
+      ],
+      "v4.2": 1,
+      "v5.0": 5
+    },
+    {
+      "case": "C5",
+      "status": "GRADED",
+      "assertions": [
+        {
+          "id": "A1",
+          "v4.2": false,
+          "v5.0": true
+        },
+        {
+          "id": "A2",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A3",
+          "v4.2": true,
+          "v5.0": true
+        }
+      ],
+      "v4.2": 2,
+      "v5.0": 3
+    },
+    {
+      "case": "C6",
+      "status": "GRADED",
+      "assertions": [
+        {
+          "id": "A1",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A2",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A3",
+          "v4.2": true,
+          "v5.0": true
+        },
+        {
+          "id": "A4",
+          "v4.2": true,
+          "v5.0": true
+        }
+      ],
+      "v4.2": 4,
+      "v5.0": 4
+    }
+  ],
+  "v5_0_misses": [
+    {
+      "case": "C2",
+      "assertion": "A5",
+      "text": "Each halt names an exact continuation phrase for resuming.",
+      "v5.0_evidence": "absent"
+    },
+    {
+      "case": "C3",
+      "assertion": "A1",
+      "text": "The script reads stop_hook_active from the hook input and allows the stop when it is true.",
+      "v5.0_evidence": "absent"
+    },
+    {
+      "case": "C4",
+      "assertion": "A6",
+      "text": "A scout or search role is named on Haiku 5.5.",
+      "v5.0_evidence": "absent"
+    }
+  ],
+  "observations": [
+    "C1 A1: v4.2 passed an assertion the spec predicted it would fail",
+    "C1 A2: v4.2 passed an assertion the spec predicted it would fail",
+    "C2 A2: v4.2 passed an assertion the spec predicted it would fail",
+    "C3 A2: v4.2 passed an assertion the spec predicted it would fail",
+    "C4 A6: v4.2 passed an assertion the spec predicted it would fail",
+    "C5 A2: v4.2 passed an assertion the spec predicted it would fail",
+    "C6 A1: v4.2 passed an assertion the spec predicted it would fail"
+  ],
+  "claude_children_this_invocation": 21
+}

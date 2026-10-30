@@ -10,7 +10,7 @@
 
 27 Skills that diagnose, build, and optimize every architectural layer across chat-Projects, conversations, and Claude Code repos.
 
-![Skills](https://img.shields.io/badge/Skills-27-CC8A0A) ![Version](https://img.shields.io/badge/Version-v4.0-CC8A0A) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Calibrated](https://img.shields.io/badge/Calibrated-Opus_5_%2B_Sonnet_5-8B929E)
+![Skills](https://img.shields.io/badge/Skills-27-CC8A0A) ![Version](https://img.shields.io/badge/Version-v5.0.1-CC8A0A) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Calibrated](https://img.shields.io/badge/Calibrated-Opus_5.5_%2B_Sonnet_5.5-8B929E)
 
 ---
 
@@ -18,11 +18,13 @@
 
 These Skills install into two surfaces: **chat-Projects** (Claude.ai web app or Claude desktop app) and **Claude Code** (the execution surface). Most Skills are chat-Project-only. Three are Claude Code-only. Two operate in both.
 
-**For chat-Projects.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest) — the catalog umbrella, with every Skill indexed by category. Download the individual `-cp.zip` files for the Skills you want (no unzipping required), or grab the all-Skills bundle `rootnode-catalog-v4.0.zip` and unzip it once. Upload the `-cp.zip` files in **Settings → Capabilities → Skills**. Skills install once and become available across every Project in your Claude account.
+**For chat-Projects.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest) — the catalog umbrella, with every Skill indexed by category. Download the individual `-cp.zip` files for the Skills you want (no unzipping required), or grab the all-Skills bundle `rootnode-catalog-<version>.zip` and unzip it once. Upload the `-cp.zip` files in **Settings → Capabilities → Skills**. Skills install once and become available across every Project in your Claude account.
 
-**For Claude Code.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest), download the `-cc.zip` files for the Skills you want (or the all-Skills bundle `rootnode-catalog-v4.0.zip`, unzipped once), then extract the `-cc.zip` archives into `~/.claude/skills/` (user-level — available across every repo) or `.claude/skills/` (per-repo). Each `-cc.zip` expands to a folder matching the Skill name. Skills auto-activate from natural language prompts inside Claude Code sessions.
+**For Claude Code.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest), download the `-cc.zip` files for the Skills you want (or the all-Skills bundle `rootnode-catalog-<version>.zip`, unzipped once), then extract the `-cc.zip` archives into `~/.claude/skills/` (user-level — available across every repo) or `.claude/skills/` (per-repo). Each `-cc.zip` expands to a folder matching the Skill name. Skills auto-activate from natural language prompts inside Claude Code sessions.
 
 The two dual-surface Skills (`rootnode-skill-builder` and `rootnode-cc-design`) publish both `-cp.zip` and `-cc.zip` variants — download the one matching your install target.
+
+**Already uploaded to Claude.ai?** Claude Code v2.1.273 or later, signed in with the same Claude account, loads the Skills on your account automatically; they appear as `anthropic-skills:<name>`. Don't also extract `-cc.zip` copies of those Skills into `~/.claude/skills/`, or Claude Code loads both. The `-cc.zip` files are for Claude Code sessions that sign in with an API key, where account Skills don't sync, and for setups that don't use Claude.ai.
 
 > [!NOTE]
 > Activate any Skill with natural language — no commands, no special syntax. Install all 27 for the full architecture system; every Skill also works standalone.

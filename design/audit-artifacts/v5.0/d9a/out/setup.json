@@ -1,0 +1,22 @@
+{
+  "v4.2": {
+    "tag": "rootnode-cc-design/v4.2",
+    "zip_sha256": "2d6223162dc972080643a09b53381f38e0392a98d3be1ae56e7406a60e208f5b",
+    "files": 13,
+    "mismatched": [],
+    "extra_in_zip": [],
+    "skill_md_lf_sha256": "4a85a0468dbf106b63206aa65c371ab82a41751bbf056a3ac8da99dccbfce397",
+    "expected": "4a85a0468dbf106b63206aa65c371ab82a41751bbf056a3ac8da99dccbfce397",
+    "gate": "PASS"
+  },
+  "v5.0": {
+    "tag": "rootnode-cc-design/v5.0",
+    "zip_sha256": "a2a4558a3af640a7aa7a27d2359d8b8e61a37725ee1a3526a38281cf1fddf15a",
+    "files": 14,
+    "mismatched": [],
+    "extra_in_zip": [],
+    "skill_md_lf_sha256": "02ac690c1275953b9314927121e17c4768fc1c49b69f7ab181a5188fe2011345",
+    "expected": "02ac690c1275953b9314927121e17c4768fc1c49b69f7ab181a5188fe2011345",
+    "gate": "PASS"
+  }
+}

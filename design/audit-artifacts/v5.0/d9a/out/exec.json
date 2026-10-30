@@ -1,0 +1,18 @@
+{
+  "C1/v4.2": {
+    "result": "NOT_RUN",
+    "why": "no bash"
+  },
+  "C1/v5.0": {
+    "result": "NOT_RUN",
+    "why": "no bash"
+  },
+  "C3/v4.2": {
+    "result": "NOT_RUN",
+    "why": "no bash"
+  },
+  "C3/v5.0": {
+    "result": "NOT_RUN",
+    "why": "no bash"
+  }
+}

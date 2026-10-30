@@ -3,8 +3,8 @@ name: rootnode-cc-design
 description: >-
   Designs Claude Code prompts and CC environments. Produces CLAUDE.md drafts,
   agent topologies, scope-authorization frameworks, halt triggers,
-  Skills/hooks/MCP plans, chat-to-CC handoff specs, and EXECUTION_PLAN.md
-  remediation plans, session-report standards. Five modes: DESIGN (new CC
+  Skills/hooks/MCP plans, chat-to-CC handoff specs, EXECUTION_PLAN.md
+  remediation plans, and session-report standards. Five modes: DESIGN (new CC
   deployments), EVOLVE (updates from friction), RESEARCH (evaluate a CC
   tool/pattern), TEMPLATE (reusable artifacts), REMEDIATE (consume hygiene
   findings → produce + execute plan). Do NOT use REMEDIATE for direct cleanup
@@ -14,7 +14,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "5.0.1"
   predecessor: "rootnode-cc-design v4.2"
   original-source: "root.node seed KFs (AEA, CCEG, AAP) + CC deployment research; v4.x evolves delegation architecture and REMEDIATE mode from v3 base"
   discipline_post: phase-30
@@ -106,7 +106,7 @@ Read the relevant references before producing output. Each mode draws from a spe
 - **File naming.** CLAUDE.md drafts for delivery projects use `{delivery_project_code}_CLAUDE.md` (the destination project's prefix). Agent role specs use `{delivery_project_code}_agent_{name}.md`. Design briefs use `{project_code}_design_brief.md` and live in the delivery project's KFs. Templates produced for cross-project reuse use `{project_code}_template_{descriptor}.md` or `shared_template_{descriptor}.md`.
 - **Markdown for CLAUDE.md drafts.** CLAUDE.md is consumed by Claude Code, which expects Markdown. Use `##` and `###` headers, fenced code blocks, tables for matrices. Do not use XML tags inside CLAUDE.md drafts — those are for system prompts, which CLAUDE.md is not.
 - **Halt triggers and scope authorization.** Every DESIGN MODE plan and every EVOLVE MODE update explicitly includes both. Ultracode stays off by default and is opted into per task (see `references/cc-delegation-patterns.md` §6 for the rationale). Non-negotiable.
-- **Assert the END state, never the PRE state.** Non-negotiable. See `references/cc-prompt-design-patterns.md` § Assert the END state for the rule, the LF-normalize corollary, and the observed instances. `[generalizable]`
+- **Assert the END state, never the PRE state.** Non-negotiable. See `references/cc-prompt-design-patterns.md` §10 for the rule, the LF-normalize corollary, and the observed instances. `[generalizable]`
 - **Delegation briefs are complete or absent.** Any role the plan names carries a model, an effort level, a tool set, an isolation mode, and a return contract including a numeric length cap, and each delegation carries the ten-field brief (`references/cc-delegation-patterns.md` §2) — field 9 binds the spec digest, field 10 bars verdict dictation. Verification clauses name external artifacts; never instruct an agent to re-check its own output.
 - **Token budgets.** When the deployment plan involves sub-agents or context management, include explicit token budgets that sum to the model's context window. A context plan without numbers is not a context plan.
 - **Source-tagged claims.** Every substantive technical claim carries an inline source tag.
@@ -161,11 +161,11 @@ The brief schema lives at `schema/cc-design-brief.schema.json`. The execution-pl
 2. Check for a design brief; none exists for this project. Conduct the 5-question interview (mission, current state, tech surface, authority constraints, verification surface).
 3. Serialize the brief and offer it as a downloadable artifact. Recommend adding to the project's KFs.
 4. Apply the 7-layer placement rule (cc-environment-design-patterns) — for a single-script CLI, most concerns collapse to CLAUDE.md + 1-2 hooks; no Skills or subagents warranted yet.
-5. Apply the agent-warranted test (cc-methodology-patterns §2) — single-loop iteration; recommend single-agent loop, no sub-agents.
+5. Apply the agent-warranted test (cc-methodology-patterns §1) — single-loop iteration; recommend single-agent loop, no sub-agents.
 6. Draft the CLAUDE.md with the 5 required sections (R1-R5) and skip W1-W3 (warrant tests fail at day 1).
 7. Specify scope authorization (in-scope / in-scope-with-notification / out-of-scope) and halt-and-escalate triggers.
 8. Identify the chat→Code handoff point: "Once CLAUDE.md is in place, hand off to CC for the first iteration."
-9. Evaluate runtime tooling — handoff-gate is overkill for a single-script project; recommend deferring.
+9. Evaluate runtime tooling — rootnode-handoff-trigger-check (if available) is overkill for a single-script project; recommend deferring.
 
 **Output:** Design brief artifact + CLAUDE.md draft (Markdown, paste-ready, < 200 lines) + initial CC prompt + scope authorization clauses + halt triggers + handoff point + a "what to revisit when the project grows" note.
 
@@ -177,7 +177,7 @@ The brief schema lives at `schema/cc-design-brief.schema.json`. The execution-pl
 1. Confirm mode: "EVOLVE MODE — incremental update to the RT CC project."
 2. Read the existing RT design brief (or ask if not in context).
 3. Diagnose: two distinct frictions. (a) Cross-session memory — likely missing CLAUDE.md notes about durable file artifacts (cc-anti-patterns §4.1 transcript dump if there's also no change_log; or §4.14 stale CLAUDE.md if the relevant info exists but is wrong). (b) Migrations directory edit — §4.4 enforcement-as-preference (rule was probably in CLAUDE.md as advice, not backed by a hook).
-4. Design fixes — additive, narrow detection per cc-methodology §4. (a) Add a change_log discipline section to CLAUDE.md + introduce a session-handoff Skill or rule pattern. (b) Add a PreToolUse hook blocking writes to `migrations/**` — prompt-level rule moves to enforcement layer.
+4. Design fixes — additive, narrow detection per cc-methodology §7. (a) Add a change_log discipline section to CLAUDE.md + introduce a session-handoff Skill or rule pattern. (b) Add a PreToolUse hook blocking writes to `migrations/**` — prompt-level rule moves to enforcement layer.
 5. Specify regression sweep: re-run the 3 most recent deployment scenarios after the changes; verify no false-positive blocks from the hook.
 
 **Output:** Section-level deltas to RT_CLAUDE.md (insert + replacement) + new hook config in `.claude/settings.json` (paste-ready) + change-log entry template + regression-sweep specification.
@@ -263,7 +263,7 @@ Do NOT use this Skill when:
 
 **The orchestrator session fills up even though the work was delegated:** Delegation isolates the agent's working set, not its report. An agent that returns a full file, a full test log, or a full diff moves the flood one layer out and then back in. Fix at the brief: set a return-length cap, require locations and findings rather than contents, and route oversized results to a scratch file the next agent reads. See `references/cc-delegation-patterns.md`.
 
-**User asks the Skill to "audit my CC project" — the Skill claims this is rootnode-repo-hygiene's territory but the user disagrees:** Different verbs. rootnode-repo-hygiene scans for hygiene issues against the 15-anti-pattern catalog and produces findings. This Skill *consumes* those findings (REMEDIATE mode) or designs new artifacts from scratch (DESIGN/EVOLVE/TEMPLATE). If the user wants a "review" of a draft CLAUDE.md *during design work* (not against a deployed environment), that fits EVOLVE mode framed as "review and propose deltas." If the user wants the deployed-environment scan, route to rootnode-repo-hygiene.
+**User asks the Skill to "audit my CC project" — the Skill claims this is rootnode-repo-hygiene's territory but the user disagrees:** Different verbs. rootnode-repo-hygiene scans for hygiene issues against the 17-anti-pattern catalog and produces findings. This Skill *consumes* those findings (REMEDIATE mode) or designs new artifacts from scratch (DESIGN/EVOLVE/TEMPLATE). If the user wants a "review" of a draft CLAUDE.md *during design work* (not against a deployed environment), that fits EVOLVE mode framed as "review and propose deltas." If the user wants the deployed-environment scan, route to rootnode-repo-hygiene.
 
 **REMEDIATE mode invoked but no HYGIENE_REPORT.md exists in the repo:** The Skill cannot proceed. Two options: (a) ask the user to run rootnode-repo-hygiene first to produce the report, then re-invoke REMEDIATE; (b) accept findings pasted directly into the conversation, but recommend the file-based workflow for repeatability. Plan generation without source findings is anti-pattern — the loop only closes when there's a defined input to remediate against.
 

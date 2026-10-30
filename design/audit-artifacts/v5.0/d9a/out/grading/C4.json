@@ -1,0 +1,83 @@
+{
+  "status": "GRADED",
+  "key": {
+    "X": "v4.2",
+    "Y": "v5.0"
+  },
+  "attempt": 1,
+  "grader_model": "claude-opus-5-5",
+  "grader_cc_skills": [],
+  "raw": "{\"case\": \"C4\", \"results\": [{\"id\": \"A1\", \"X\": {\"pass\": false, \"evidence\": \"absent\"}, \"Y\": {\"pass\": true, \"evidence\": \"SPEC_DIGEST: {SPEC_SHA256}  DIFF_DIGEST: {DIFF_SHA256} ... 10 This brief names no preferred verdict and carries none of the Builder's plan.\"}}, {\"id\": \"A2\", \"X\": {\"pass\": false, \"evidence\": \"absent\"}, \"Y\": {\"pass\": true, \"evidence\": \"The cycle cap is 2. Builder\u2192Refuter\u2192REWORK\u2192Builder\u2192Refuter is the maximum. After round 2, the work goes to the operator gate (Aaron)\"}}, {\"id\": \"A3\", \"X\": {\"pass\": false, \"evidence\": \"absent\"}, \"Y\": {\"pass\": true, \"evidence\": \"`blocked` is not empty. A `status: blocked` return never counts as ACCEPT or as \\\"no findings\\\".\"}}, {\"id\": \"A4\", \"X\": {\"pass\": false, \"evidence\": \"absent\"}, \"Y\": {\"pass\": true, \"evidence\": \"ROLE: refuter | SPEC: {sha} | DIFF: {sha} | HEAD: {sha}\"}}, {\"id\": \"A5\", \"X\": {\"pass\": false, \"evidence\": \"absent\"}, \"Y\": {\"pass\": true, \"evidence\": \"An ACCEPT is tied to the diff digest it reviewed. Any later write to a reviewed file voids it, and the loop restarts at a fresh Refuter\"}}, {\"id\": \"A6\", \"X\": {\"pass\": true, \"evidence\": \"Current mapping: Haiku 5.5, Sonnet 5.5, Opus 5.5 ... | Scout (project `Explore` override) | Maps the packages... | haiku | low |\"}, \"Y\": {\"pass\": false, \"evidence\": \"absent\"}}], \"notes\": \"X uses an eight-field brief, a three-round cap, and only ACCEPT/REWORK verdicts. It has no identity line or receipt freeze, but it does name a Scout on Haiku. Y covers A1-A5. It mentions a Haiku Scout only as a possible future addition, and with no 5.5 version.\"}",
+  "grade": {
+    "case": "C4",
+    "results": [
+      {
+        "id": "A1",
+        "X": {
+          "pass": false,
+          "evidence": "absent"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "SPEC_DIGEST: {SPEC_SHA256}  DIFF_DIGEST: {DIFF_SHA256} ... 10 This brief names no preferred verdict and carries none of the Builder's plan."
+        }
+      },
+      {
+        "id": "A2",
+        "X": {
+          "pass": false,
+          "evidence": "absent"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "The cycle cap is 2. Builder\u2192Refuter\u2192REWORK\u2192Builder\u2192Refuter is the maximum. After round 2, the work goes to the operator gate (Aaron)"
+        }
+      },
+      {
+        "id": "A3",
+        "X": {
+          "pass": false,
+          "evidence": "absent"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "`blocked` is not empty. A `status: blocked` return never counts as ACCEPT or as \"no findings\"."
+        }
+      },
+      {
+        "id": "A4",
+        "X": {
+          "pass": false,
+          "evidence": "absent"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "ROLE: refuter | SPEC: {sha} | DIFF: {sha} | HEAD: {sha}"
+        }
+      },
+      {
+        "id": "A5",
+        "X": {
+          "pass": false,
+          "evidence": "absent"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "An ACCEPT is tied to the diff digest it reviewed. Any later write to a reviewed file voids it, and the loop restarts at a fresh Refuter"
+        }
+      },
+      {
+        "id": "A6",
+        "X": {
+          "pass": true,
+          "evidence": "Current mapping: Haiku 5.5, Sonnet 5.5, Opus 5.5 ... | Scout (project `Explore` override) | Maps the packages... | haiku | low |"
+        },
+        "Y": {
+          "pass": false,
+          "evidence": "absent"
+        }
+      }
+    ],
+    "notes": "X uses an eight-field brief, a three-round cap, and only ACCEPT/REWORK verdicts. It has no identity line or receipt freeze, but it does name a Scout on Haiku. Y covers A1-A5. It mentions a Haiku Scout only as a possible future addition, and with no 5.5 version."
+  }
+}

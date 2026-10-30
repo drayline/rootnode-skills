@@ -1,6 +1,6 @@
 # Worked Examples
 
-Five end-to-end examples of the handoff-gate in action across all three invocation modes. Use this when you need to see how `work_context` translates to a verdict in practice, or when modeling a new use case against an existing pattern.
+Five end-to-end examples of the handoff trigger check in action across all three invocation modes. Use this when you need to see how `work_context` translates to a verdict in practice, or when modeling a new use case against an existing pattern.
 
 **When to consult this file:** When the SKILL.md "Examples" section's stub points here for the full conversational scaffolding, when authoring a profile or test case and you want to see how an existing profile evaluates real evidence, or when a user asks "show me what this looks like in practice."
 
@@ -139,7 +139,7 @@ A design conversation reaches handoff readiness without the user explicitly aski
 
 **Claude offers:**
 
-> I'm noticing the conversation has just named 12 more vendor codes that need the same treatment, and the first one is already done. The handoff-gate Skill is the formal mechanism for evaluating whether this is ready to hand off to autonomous Claude Code. Want me to run it now? I can gather the evidence from our conversation, or walk through the 7 conditions with you one at a time.
+> I'm noticing the conversation has just named 12 more vendor codes that need the same treatment, and the first one is already done. The handoff trigger check Skill is the formal mechanism for evaluating whether this is ready to hand off to autonomous Claude Code. Want me to run it now? I can gather the evidence from our conversation, or walk through the 7 conditions with you one at a time.
 
 **User:** "Yes — gather it from the conversation."
 

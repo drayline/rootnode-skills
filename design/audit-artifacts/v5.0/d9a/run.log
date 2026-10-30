@@ -1,0 +1,28 @@
+== setup
+{"v4.2": "PASS", "v5.0": "PASS"}
+== probe
+{"arm-v4.2": ["PASS", ["rootnode-cc-design"]], "arm-v5.0": ["PASS", ["rootnode-cc-design"]], "grader": ["PASS", []]}
+== arms
+C1 v4.2 attempt 1: VALID []
+C1 v5.0 attempt 1: VALID []
+C2 v5.0 attempt 1: VALID []
+C2 v4.2 attempt 1: VALID []
+C3 v4.2 attempt 1: VALID []
+C3 v5.0 attempt 1: VALID []
+C4 v5.0 attempt 1: VALID []
+C4 v4.2 attempt 1: VALID []
+C5 v4.2 attempt 1: VALID []
+C5 v5.0 attempt 1: VALID []
+C6 v5.0 attempt 1: VALID []
+C6 v4.2 attempt 1: VALID []
+== grade
+C1: GRADED
+C2: GRADED
+C3: GRADED
+C4: GRADED
+C5: GRADED
+C6: GRADED
+== exec
+{"C1/v4.2": "NOT_RUN", "C1/v5.0": "NOT_RUN", "C3/v4.2": "NOT_RUN", "C3/v5.0": "NOT_RUN"}
+== score
+{"verdict": "PASS_WITH_FINDINGS", "graded": 6, "totals": {"v4.2": "17/26", "v5.0": "23/26"}, "differential": 6}

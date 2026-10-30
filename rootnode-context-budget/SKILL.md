@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "5.0.1"
   original-source: "root_OPTIMIZATION_REFERENCE.md"
 ---
 
@@ -46,7 +46,7 @@ Analyze Claude Project context budget health. Determine operating mode (full-con
 
 ## Model requirements
 
-This Skill performs per-file evaluation against the six File Evaluation Dimensions, growth trajectory analysis, content routing decisions, and phased optimization planning with compression safeguards. Run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length — deep per-file evaluation benefits from `high` or higher.
+This Skill performs per-file evaluation against the six File Evaluation Dimensions, growth trajectory analysis, content routing decisions, and phased optimization planning with compression safeguards. Run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Effort controls thinking depth, not visible output length.
 
 On the dual-primary tier (Opus 5.5 at its `medium` default or `high`; Sonnet 5.5 at `high`) the Skill runs with full depth. On Sonnet 4.6 (legacy-graceful) and at `low` effort, expect compressed per-file evaluation, surface-level tier recommendations, and reduced synthesis across the growth trajectory. Quick Diagnostic mode degrades less than Full Budget Audit mode. Fallback-graceful on Opus 5 / Sonnet 5 (classifier-flagged requests may route there silently). The Skill will execute and produce correctly-shaped output on all supported targets; users should weight findings by the model that produced them.
 
@@ -120,7 +120,7 @@ Per-plan windows for claude.ai Projects (Pro / Max / Team / Enterprise) are not 
 | *Legacy:* Haiku 4.5 (API) | 200K tokens | User-controlled context; no platform RAG | Same |
 | claude.ai Projects (any current-generation model on Anthropic Projects) | Plan-dependent (consult Anthropic plan documentation) | **Automatic** when knowledge base approaches or exceeds the model's context window | Support article: `support.claude.com/en/articles/11473015-retrieval-augmented-generation-rag-for-projects` — verbatim: "RAG automatically activates when your project approaches or exceeds the context window limits." |
 
-**Budget note — Haiku 5.5 price band.** Haiku 5.5 bills $0.10 / $0.50 per MTok (input / output) up to a 100K prompt and $0.50 / $2.50 above it; cache reads are $0.01 / $0.05 by band. A Haiku 5.5 deployment that fills its 1M window pays the higher band on the whole prompt — budget against the band, not only the window. [Anthropic docs — pricing; landscape 2026-10 §1, §6]
+**Budget note — Haiku 5.5 price band.** Haiku 5.5 bills $0.10 / $0.50 per MTok (input / output) for a prompt of up to 100K tokens and $0.50 / $2.50 for a prompt above 100K; cache reads are $0.01 / $0.05 by band. [`root_CLAUDE_OPTIMIZATION_NOTES.md` §3 — model landscape dated block, verified 2026-10-22]
 
 The support article does not publish per-model or per-plan threshold numbers. Under the automatic-by-window model, the specific RAG activation point for a project depends on the model / plan / platform state; **measure empirically when the number matters** (see the "Empirical Threshold Measurement" section).
 

@@ -188,7 +188,7 @@ Three worked examples illustrating end-to-end routing decisions across trigger t
 2. Sleeping window (22:00-06:00)? No — 14:30 outside.
 3. Weekday work hours (Mon-Fri 09:00-17:00 AND geofence=at_office)? **Yes** — match.
 
-**Output:** `selected_profile: balanced`. The handoff-gate and critic-gate will both apply day-job thresholds for this work.
+**Output:** `selected_profile: balanced`. `rootnode-handoff-trigger-check` and critic-gate will both apply day-job thresholds for this work.
 
 The compound trigger (time window AND geofence) demonstrates that real intent requires combining trigger types. Time-window-alone would match Friday 14:30 even if the user is working from home; the geofence narrows to "at the office."
 

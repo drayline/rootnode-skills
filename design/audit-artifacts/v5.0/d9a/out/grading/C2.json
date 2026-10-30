@@ -1,0 +1,72 @@
+{
+  "status": "GRADED",
+  "key": {
+    "X": "v4.2",
+    "Y": "v5.0"
+  },
+  "attempt": 1,
+  "grader_model": "claude-opus-5-5",
+  "grader_cc_skills": [],
+  "raw": "{\"case\": \"C2\", \"results\": [{\"id\": \"A1\", \"X\": {\"pass\": false, \"evidence\": \"absent\"}, \"Y\": {\"pass\": true, \"evidence\": \"If you notice yourself inviting the user to redirect you or offering to wait, delete it and do the next thing. ... (For this run, \\\"stops the user does want\\\" = the halt triggers above.)\"}}, {\"id\": \"A2\", \"X\": {\"pass\": true, \"evidence\": \"HALT.md is written only if you halt. RUN_SUMMARY.md is always written last.\"}, \"Y\": {\"pass\": true, \"evidence\": \"## Final item \u2014 Write session report (on every outcome: COMPLETED, HALTED <trigger #>, BLOCKED)\"}}, {\"id\": \"A3\", \"X\": {\"pass\": true, \"evidence\": \"Directory: reports/migration_{RUN_ID}/ ... RUN_SUMMARY.md is always written last.\"}, \"Y\": {\"pass\": true, \"evidence\": \"Write to reports/RUN_NAME_<stamp>Z.md, where the stamp comes from `date -u +%Y%m%d-%H%M`.\"}}, {\"id\": \"A4\", \"X\": {\"pass\": true, \"evidence\": \"Run CURRENT_REVISION_CMD. It must equal the head revision of the phase-1 migrations; otherwise HALT.\"}, \"Y\": {\"pass\": true, \"evidence\": \"Gates, all checked against the end state: - G2.1 `MIGRATE_CURRENT_CMD` prints exactly the head revision id recorded in G1.2.\"}}, {\"id\": \"A5\", \"X\": {\"pass\": false, \"evidence\": \"absent\"}, \"Y\": {\"pass\": false, \"evidence\": \"absent\"}}], \"notes\": \"X says never ask and halting is correct, but it never tells the agent to keep working until the work is done. Y has an explicit carry-through block tied to its halt triggers. Neither response gives an exact phrase for resuming after a halt.\"}",
+  "grade": {
+    "case": "C2",
+    "results": [
+      {
+        "id": "A1",
+        "X": {
+          "pass": false,
+          "evidence": "absent"
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "If you notice yourself inviting the user to redirect you or offering to wait, delete it and do the next thing. ... (For this run, \"stops the user does want\" = the halt triggers above.)"
+        }
+      },
+      {
+        "id": "A2",
+        "X": {
+          "pass": true,
+          "evidence": "HALT.md is written only if you halt. RUN_SUMMARY.md is always written last."
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "## Final item \u2014 Write session report (on every outcome: COMPLETED, HALTED <trigger #>, BLOCKED)"
+        }
+      },
+      {
+        "id": "A3",
+        "X": {
+          "pass": true,
+          "evidence": "Directory: reports/migration_{RUN_ID}/ ... RUN_SUMMARY.md is always written last."
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "Write to reports/RUN_NAME_<stamp>Z.md, where the stamp comes from `date -u +%Y%m%d-%H%M`."
+        }
+      },
+      {
+        "id": "A4",
+        "X": {
+          "pass": true,
+          "evidence": "Run CURRENT_REVISION_CMD. It must equal the head revision of the phase-1 migrations; otherwise HALT."
+        },
+        "Y": {
+          "pass": true,
+          "evidence": "Gates, all checked against the end state: - G2.1 `MIGRATE_CURRENT_CMD` prints exactly the head revision id recorded in G1.2."
+        }
+      },
+      {
+        "id": "A5",
+        "X": {
+          "pass": false,
+          "evidence": "absent"
+        },
+        "Y": {
+          "pass": false,
+          "evidence": "absent"
+        }
+      }
+    ],
+    "notes": "X says never ask and halting is correct, but it never tells the agent to keep working until the work is done. Y has an explicit carry-through block tied to its halt triggers. Neither response gives an exact phrase for resuming after a halt."
+  }
+}

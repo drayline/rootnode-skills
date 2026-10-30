@@ -38,6 +38,8 @@ Surface map (the authoritative assignment):
 
 → **29 artifacts = 24 `-cp` (flat) + 5 `-cc` (wrapper)** from 27 source folders. The `-cp`/`-cc` suffix is applied by the packager, never present on the source folder. The umbrella bundle (`rootnode-catalog-vN.zip`) contains all 29 of these artifact zips.
 
+**Install paths and account sync.** Skills uploaded to a claude.ai account also load in Claude Code: Claude Code v2.1.273 or later, signed in with that account, downloads them to `~/.claude/skills/synced/` and loads them as `anthropic-skills:<name>` `[Anthropic docs — Claude Code skills, fetched 2026-10-22]`. A user who uploads the Skills to claude.ai needs no `-cc` install, and a `-cc` copy of the same Skill under `~/.claude/skills/` loads it a second time. The `-cc` zips serve Claude Code sessions that authenticate with an API key, which do not sync, and users who do not upload Skills to claude.ai. The README Quick Start carries the same caveat.
+
 ### 1.3 Packaging toolchain
 
 Repo-root script roster is **three** (as of v4.0):
@@ -68,6 +70,19 @@ A **single-Skill cut** is a supported release shape distinct from the full catal
   3. The release does not introduce or break a link the README `/releases/latest` path (or the umbrella body) depends on.
 - **When to promote to a full catalog release instead.** As soon as any of the above fails — a second Skill needs to ship alongside, a shared/cross-Skill file changed, or the umbrella index needs re-linking — cut a full catalog release (per Phase A/B) so the umbrella and per-Skill releases move in lockstep.
 - **Anti-churn.** The `catalog-vN` Latest tag stays put. A single-Skill cut that marks itself `--latest` breaks the README install path (per §3, "README → `/releases/latest`, not a pinned tag" depends on the umbrella keeping `--latest`).
+
+### 1.6 Patch catalog release
+
+A patch that changes more than one Skill, or a file another Skill relies on, ships as a **patch catalog release**. Shape settled at v5.0.1 (2026-10-29):
+
+- **Per-Skill releases** only for the Skills that changed: tag `rootnode-<skill>/vN.N.N`, `--latest=false`. Unchanged Skills are not re-tagged.
+- **Umbrella** `catalog-vN.N.N`, marked `--latest`, carrying one bundle asset `rootnode-catalog-vN.N.N.zip` with all 29 artifacts built from merged `main` — changed Skills at their new version, unchanged Skills at their current one — so the bundle stays the one full-catalog download.
+- **Umbrella notes** link every Skill's current per-Skill release: the new tag for a changed Skill, the existing tag for an unchanged one.
+- **Packager:** bump `CATALOG_VERSION` in `build_release_artifacts.py` in the content PR (Phase A), as at v5.0.
+- **Per-Skill notes:** run `generate_release_notes.py` with a per-cycle config that lists only the changed Skills, and set its expected counts to match.
+- **Repo catalog** regenerates after verification, as for a full release.
+
+A patch that changes exactly one Skill with no cross-Skill effect stays a single-Skill cut (§1.5).
 
 ---
 

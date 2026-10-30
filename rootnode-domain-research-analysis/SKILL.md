@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "5.0.1"
   original-source: "DOMAIN_PACK_RESEARCH_ANALYSIS.md"
 ---
 
@@ -44,7 +44,7 @@ Each prompt you build from this Skill has three layers: an **identity** (who Cla
 4. **Add a context section** with the specific data, sources, or background material for the task.
 5. **Apply the quality checks** at the bottom of this file.
 
-For annotated examples of complete research prompts, see `references/examples.md`.
+For annotated examples of complete research prompts, plus one output-format fragment (Example 4), see `references/examples.md`.
 
 ---
 

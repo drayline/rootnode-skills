@@ -19,7 +19,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "5.0.1"
   original-source: "root.node design 2026 — runtime layer (gates, router, profile builder)"
   companion-files: "schema/router-config.schema.json, configs/example-router.json, examples/routing-walkthrough.md, references/trigger-types-detailed.md, references/compound-trigger-semantics.md, references/troubleshooting.md"
   changelog: "1.0.2 (2026-05-05): Brand-strip patch per Phase 27/28 methodology absorption. Body line 34 cchq reference replaced with rootnode runtime layer framing; behavior identical to 1.0.1. No structural or methodology changes. 1.0.1 (2026-05-01): Structural patch to align with rootnode authoring convention. Added references/ folder with three on-demand-loaded files (trigger-types-detailed, compound-trigger-semantics, troubleshooting). SKILL.md body slimmed via content extraction; behavior identical to 1.0. Deployment target: Claude Code (CC) side of CP/CC split."
@@ -102,7 +102,7 @@ Optional:
 
 **Step 5 — Generate verdict.** Produce structured JSON output (see Output Format below). Include the selected profile, the trigger that matched (or `default_fallback`), and optionally the full evaluation trace.
 
-**Step 6 — Return.** Output the JSON. The consuming Skill (handoff-gate, critic-gate, etc.) reads `selected_profile` and proceeds.
+**Step 6 — Return.** Output the JSON. The consuming Skill (`rootnode-handoff-trigger-check`, critic-gate, etc.) reads `selected_profile` and proceeds.
 
 ---
 

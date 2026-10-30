@@ -3,7 +3,7 @@
 **Cycle:** rootnode-skills catalog v5.0 (5.5-generation alignment)
 **Inputs:** `root_MODEL_LANDSCAPE_2026-10.md` (the dated landscape block — every model fact below cites it; none is restated as a durable fact); repo `drayline/rootnode-skills` at `820e5c0` (2026-09-13 catalog-regen merge; catalog `audit/repo-catalog/root_repo_catalog_20260913.md`); `rootnode-skill-builder` v4.0.0 (pre-build gates and the 9-dimension gate applied in §6).
 **Companion specs:** `root_DESIGN_cc-design_v5.md` (the only Skill with structural change), `root_DESIGN_behavioral-tuning_v5.md` (the only Skill with taxonomy change). This spec owns the other 25 Skills and all catalog-level surfaces.
-**Status:** DRAFT for operator decision on D1–D6. CC build prompt follows acceptance.
+**Status:** ACCEPTED 2026-10-22 — D1–D5 as recommended, D6 as revised. CC build prompt follows acceptance.
 
 ---
 
@@ -71,7 +71,7 @@ Legend — **L** = calibration line only (§3.1 template by tier) + `metadata.ve
 |---|---|---|---|
 | rootnode-anti-pattern-detection | T2 | L+ | Anywhere the Skill cites the behavioral taxonomy count or "Opus 5" conditioning: 14 → 15; add #15 to any symptom-routing table that lists tendencies by number (verify by grep at build; SKILL.md line 27 is the only model mention found) |
 | rootnode-behavioral-tuning | T2 | **S** | `root_DESIGN_behavioral-tuning_v5.md` |
-| rootnode-block-selection | T1 | L | — |
+| rootnode-block-selection | T2 | L | — |
 | rootnode-cc-design | T3 | **S** | `root_DESIGN_cc-design_v5.md` |
 | rootnode-context-budget | T3 | L+ | (a) line 68: context window "1M for Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5"; delete the "200K for Haiku 4.5" clause from the primary sentence and move it to a legacy note. (b) lines 84–85: the 200K-Haiku paragraph becomes legacy-only; the 1M framing is now universal on current models. (c) lines 93–95 tokenizer notes: Fable 5.1 and Haiku 5.5 share the Opus 4.7-era tokenizer (~30% more than pre-4.7 / Haiku 4.5); Sonnet 5.5 = Sonnet 5 tokenizer; **Opus 5.5 tokenizer unstated — keep the "treat with tolerance until `count_tokens`" line**. (d) table at lines 115–116: four current rows (all 1M / 128K) + Haiku 5.5's >100K price band as a budget note; Haiku 4.5 row moves under a "legacy" sub-row. (e) line 355: "Context window: 1M" unchanged. (f) NEW budget note: cache-read pricing fell (Fable 5.1 0.025×, Opus/Sonnet 5.5 0.05×) — "compacting early to save cost may no longer be the right cost-intelligence tradeoff" [Anthropic, Fable 5.1 prompting guide]; later compaction points are a legitimate experiment. (g) line 123 historical ~66,500 paragraph unchanged |
 | rootnode-critic-gate | T2 | L+ | Add one paragraph under its output contract: a reviewer that could not inspect returns `status: blocked`, never an empty findings list (AI-DLC-derived; see cc-design spec §5.3 for the shared wording). Advisor-tool note: when the critic runs via the API advisor tool, the advisor must be at least as capable as the executor (landscape §4.9) |

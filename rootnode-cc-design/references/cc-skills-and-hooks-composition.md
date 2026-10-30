@@ -259,7 +259,7 @@ Bash|PowerShell)
       case "${2:--}" in .|./|..|/|'~'|-*) [[ $A =~ $D && ! $A =~ $F ]] && HIT=1 ;; esac
     fi
     for W in "$@"; do                              # a glob that can expand to migrations
-      case "$W" in *[*?[]*) for X in migrations ./migrations x/migrations; do [[ "$X" == $W ]] && HIT=1; done ;; esac
+      case "$W" in *[*?[]*) for X in migrations ./migrations ../migrations x/migrations; do [[ "$X" == $W ]] && HIT=1; done ;; esac
     done
   done < <(printf '%s\n' "$C" | tr ';&|(){}`' '\n\n\n\n\n\n\n\n')
   set +f ;;
@@ -271,6 +271,8 @@ mkdir -p .claude && echo "$(date -u +%FT%TZ) block $TOOL $P" >> .claude/guard.lo
 echo "migrations/ is protected. Next step: use the migration tool, then stop for review." >&2
 exit 2
 ```
+
+**What the guard cannot see.** It matches command text, so a delete that does not appear as text gets through: a pipe-fed delete (`ls migrations | xargs rm`, `Get-ChildItem migrations | Remove-Item`), a script or another interpreter that deletes, or a variable that expands to the path. For a guarantee, pair the guard with the mechanisms that deny writes to the path. An `Edit` deny rule, `"permissions": { "deny": ["Edit(migrations/**)"] }`, matches a `migrations` folder at any depth and covers Claude's file tools, the file commands Claude Code recognizes in Bash, and redirect targets, but not "arbitrary subprocesses that read or write files indirectly". The sandbox's `sandbox.filesystem.denyWrite` (for example `["./migrations"]`, with `sandbox.enabled` true) is enforced by the operating system on Bash, PowerShell and Monitor commands and the processes they start, and Claude Code adds `Edit` deny rules to the same list. The sandbox runs on macOS, Linux and WSL2; on native Windows, Claude Code runs commands unsandboxed, so the OS-level half needs WSL2 or a container there. By default a sandbox that cannot start falls back to unsandboxed commands; `sandbox.failIfUnavailable` makes Claude Code exit instead. `[Anthropic docs — permissions, sandboxing, settings reference, fetched 2026-10-30]` The guard then adds an on-task message and an audit row; it is not the guarantee itself.
 
 ---
 
@@ -287,9 +289,8 @@ The verification-before-completion pattern (named in obra/superpowers, Marc Nuri
 # verify-tests.sh — Stop guard; fails closed; bounded.
 [ "${VERIFY_GATE_OFF:-0}" = "1" ] && exit 0          # off-switch; audit its use
 EV=.claude/state/last-test-evidence.json; CT=.claude/state/verify-gate.count
-MAX="${VERIFY_GATE_MAX_BLOCKS:-2}"; mkdir -p .claude/state   # N: 2 interactive, 8 unattended
+MAX="${VERIFY_GATE_MAX_BLOCKS:-2}"; mkdir -p .claude/state   # N: 2 interactive, 8 unattended; keep N ≤ CLAUDE_CODE_STOP_HOOK_BLOCK_CAP (default 8)
 MAX_TOTAL="${VERIFY_GATE_MAX_TOTAL:-$((MAX * 3))}"           # M: 3×N [assumption — tune per repo]
-# Keep M at or below CLAUDE_CODE_STOP_HOOK_BLOCK_CAP (default 8) when stops can repeat without a tool call between them.
 INPUT=$(cat)                                                 # read stdin once
 block() {  # $1 = on-task reason naming the next step
   KEY=$(sha256sum "$EV" 2>/dev/null | cut -c1-16); KEY=${KEY:-none}
@@ -341,7 +342,7 @@ Banned phrases at completion: "should work", "probably fine", "looks good".
 
 The block reason is an on-task continuation naming the missing evidence, never an override-shaped instruction.
 
-Claude Code also caps stop-hook continuations on the host side: after eight consecutive continuations it overrides the next block and ends the turn, the count resets each time Claude calls a tool, and `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` raises it `[Anthropic docs — hooks, fetched 2026-10-30]`. Set the hook's caps to release first — a chain-total cap at or below the host cap when stops can repeat without a tool call between them — or raise the host cap deliberately and say so in the design. When the host overrides, the hook's log records a block that did not hold, and no logged release exists for the session report to cite.
+Claude Code also caps stop-hook continuations on the host side: after eight consecutive continuations it overrides the next block and ends the turn, the count resets each time Claude calls a tool, and `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` raises it `[Anthropic docs — hooks, fetched 2026-10-30]`. Keep the no-progress cap N at or below the host cap, or raise the host cap with it and say so in the design. A stop with no tool call before it leaves the evidence unchanged, so N and the host's count advance together; at N equal to the host cap, the hook releases on its own count before the host would override it. The chain-total cap M advances past N only when the evidence changes, which takes a tool call and resets the host's count, so M never meets the host cap. When the host overrides, the hook's log records a block that did not hold, and no logged release exists for the session report to cite.
 
 ### Health carrier for observer hooks
 

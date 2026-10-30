@@ -1,6 +1,6 @@
 # root_DESIGN_catalog_v5.0.1_patch — catalog patch after the v5.0 D9a
 
-Status: ACCEPTED 2026-10-29. Rev 2 (2026-10-29) adds §8: everything the build and its review identified, folded into the same cut before release. Inputs:
+Status: ACCEPTED 2026-10-29. Rev 2 (2026-10-29) adds §8: everything the build and its review identified, folded into the same cut before release. Rev 3 (2026-10-29) adds §9: the rev 2 build's findings, then freezes the cut. Inputs:
 - the D9a report `audit/v5_0-alignment/d9a_cc-design_v5.0_20261029-1406Z.md` and its `out/` folder;
 - the 16 open findings in `audit/v5_0-alignment/session_report_20261023-0042Z.md` (final list at its line 415);
 - the product facts verified in this cycle (§6).
@@ -159,3 +159,46 @@ R3 touches mode-router, so the touched set becomes 12, with mode-router at `5.0.
   - the Observation candidate from §7;
   - the trailing-slash pathspec as a recurrence of the Observation 30 root cause, in the v5.0.1 build prompt;
   - the §6 facts and the host Stop-hook cap.
+
+## 9. Rev 3 — the rev 2 build's findings, then freeze
+
+| ID | Where | Change |
+|---|---|---|
+| S1 (F-14) | CC_EG §6 (mirror, from staging) and cc-design `cc-skills-and-hooks-composition.md` §5 "Bounded Stop hooks", where the paragraph is a verbatim copy | Replace "Set the hook's caps to release first — a chain-total cap at or below the host cap when stops can repeat without a tool call between them — or raise the host cap deliberately and say so in the design." with the staged CC_EG sentence. The point: the host's count runs alongside N, not M. A stop with no tool call leaves the evidence unchanged, so N advances. M advances past N only when the evidence changes, which takes a tool call and resets the host's count. No default changes: N = 8 unattended equals the host cap, so the hook releases first. In the sketch, delete the comment line under `MAX_TOTAL=` and extend the `MAX=` comment to: `# N: 2 interactive, 8 unattended; keep N ≤ CLAUDE_CODE_STOP_HOOK_BLOCK_CAP (default 8)`. |
+| S2 (F-10) | Guard glob candidates | `for X in migrations ./migrations x/migrations` → `for X in migrations ./migrations ../migrations x/migrations` |
+| S3 (F-11) | Guard, a paragraph after the sketch | **What the guard cannot see.** It matches command text, so a delete that does not appear as text gets through. Examples: a pipe-fed delete (`ls migrations \| xargs rm`, `Get-ChildItem migrations \| Remove-Item`), a script or another interpreter that deletes, or a variable that expands to the path. For a guarantee, pair the guard with the Claude Code mechanism that denies writes to the path. Check that mechanism in the permissions and sandboxing docs, and quote the rule syntax and the platforms it covers. The guard then adds an on-task message and an audit row; it is not the guarantee itself. Do not name a mechanism the docs do not state. |
+| S4 (F-12) | This spec, §4 G5 | Erratum. N = 2 means two blocks, then release on the third stop. A literal reading of "2 further `true` stops … block, then the next releases" gives three blocks. The A1 rule ("release when `N > MAX`") controls, and both builds applied it. |
+| S5 (F-13) | Commit list | Commit, after the G8 scan: `audit/v5_0_1-patch/session_report_20261030-0107Z.md`, `session_report_20261030-0224Z.md`, `refuter_brief_r2c1.md`, `refuter_r2c1.json`, `design/audit-artifacts/v4.2/root_CC_DESIGN_v42_spec.md`, `design/audit-artifacts/v4.2/root_CC_LANDSCAPE_20260911.md`. `design/audit-artifacts/v4.2/scratch/` stays untracked. |
+
+No Skill outside cc-design changes, so the touched set stays at 12.
+
+**Freeze.** After rev 3 the cut is closed. A finding from the rev 3 build or its review goes to the next patch unless it is a regression in this PR (SBD §3.9 stopping rule). Shell-pattern coverage in an example guard has no natural end. S3 replaces further pattern-chasing by stating the guard's limit and pointing to the mechanism that enforces.
+
+## 10. Release docs in the content PR
+
+Playbook §2 Phase A step 3 puts the release notes in the content PR, and §1.6 sets their shape for a patch catalog release. PR #28 did not carry them through rev 2, so they join it here. They are planned release content, not findings, so the §9 freeze does not apply to them.
+
+| Target | Source | LF-sha256 of the end state |
+|---|---|---|
+| `audit/v5_0_1-patch/release-notes-v5.0.1-config.py` | `design/staging-kf/release-notes-v5.0.1-config.py` | `af36d3355bba909823fbba68d5aa0d2715910f12c5f266d80d871562646c3986` |
+| `release-notes/catalog-v5.0.1.md` | `design/staging-kf/catalog-v5.0.1.md` | `a5c017c6ad20b55208a20c9f5a46b001fedd221260d4c793e0e7dd79af13de4f` |
+| `CHANGELOG.md` | `origin/main` content, one blank line, then `design/staging-kf/CHANGELOG_v5.0.1_entry.md` (`8f08943143d7220ab36a8526a5ed6cc6d86bc0ae34e178a323b60c31d05730a4`) | `3eccbe6f146d479a0f40ecf3ca2a5e001f04b1a9ef43b4aac7793be389a05702` |
+
+The 12 per-Skill notes are generated, not copied: `generate_release_notes.py --config audit/v5_0_1-patch/release-notes-v5.0.1-config.py` writes `release-notes/<skill>-v5.0.1.md` and prints `Counts OK` for A 9, B 2, C 1, total 12.
+
+| File in `release-notes/` | LF-sha256 |
+|---|---|
+| `rootnode-cc-design-v5.0.1.md` | `6f4f5b885b270893ffdc6cba078a3c59d3ad88ed681ef4ca0e182d1f60c011e4` |
+| `rootnode-context-budget-v5.0.1.md` | `4e47eb8b6e189ed20c287c16d9f31f37f1b6c3cdfd79690ace364e09d4108c43` |
+| `rootnode-critic-gate-v5.0.1.md` | `6974ee1df2eb0000a27204a22cdd0ef698e55b50fc80254eff250dd0e64559b9` |
+| `rootnode-domain-agentic-context-v5.0.1.md` | `496b97b463cffc8390481ca3e3fa12e52d9572cb9b77f1c69438ad93d17587bc` |
+| `rootnode-domain-research-analysis-v5.0.1.md` | `9e9ac6d6656677747d31cf4c032c6999bde27c0ccedb907552091a498ab5d867` |
+| `rootnode-full-stack-audit-v5.0.1.md` | `4aa73d80945711f920b81e6fa63929426eb4975e1a27b93fe5e912a6f79f594f` |
+| `rootnode-global-audit-v5.0.1.md` | `a9ee6195a6c3490fb0bf045603117adb59aa8b7c1677c60b6ce96ae08385ec39` |
+| `rootnode-handoff-trigger-check-v5.0.1.md` | `e99cbb6fbe4a5688d63e588da84867329959735aac7912ea4a5a6827258d5b5d` |
+| `rootnode-mode-router-v5.0.1.md` | `2203936b1487123e1a1564e265820f17f13a259abc244800289b356b2264778e` |
+| `rootnode-project-audit-v5.0.1.md` | `f050eae13b2dcd4d76aa0ac57a61bbf987aad0943839e0837f655713007ba6e3` |
+| `rootnode-prompt-compilation-v5.0.1.md` | `928cd8c526b96a1fa4f01ace4ffe875e0875ea38db0ae5defa2877606c37066d` |
+| `rootnode-prompt-validation-v5.0.1.md` | `0a10e46bea456c6f4852d41537ef7317070006a95925b7a2653a76d308e5f08a` |
+
+Umbrella invariants: 27 `releases/tag/rootnode-` links; 12 end in `/v5.0.1)`, one for each Skill at 5.0.1, and 15 end in `/v5.0)`, one for each Skill at 5.0.0; 0 `]](`; one `## Download`; the bundle named `rootnode-catalog-v5.0.1.zip`.

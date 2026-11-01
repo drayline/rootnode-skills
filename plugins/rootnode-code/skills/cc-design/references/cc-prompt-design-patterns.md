@@ -1,0 +1,434 @@
+# Claude Code Prompt Design Patterns
+
+Patterns for designing the prompts that drive Claude Code work — initial prompts that kick off a session, session prompts that govern multi-turn work, autonomous prompts that run with less supervision, and subagent delegation prompts that hand work to specialist agents.
+
+This reference is for DESIGN mode when the deliverable includes a CC prompt of any kind, and for EVOLVE mode when the friction is "the prompt isn't producing what we want." For environment design (CLAUDE.md, hooks, settings), see `cc-environment-design-patterns.md`. For Skills authoring, see `cc-skills-and-hooks-composition.md`.
+
+---
+
+## Table of contents
+
+1. The four prompt classes — when each applies
+2. Universal prompt principles (apply to all classes)
+3. The Explore → Plan → Implement → Verify workflow
+4. Initial prompt patterns
+5. Session prompt patterns
+6. Autonomous prompt patterns
+7. Subagent delegation prompt patterns
+8. Files-as-context: the spec-file pattern
+9. The verification iron law
+10. Output discipline for CC prompts
+
+---
+
+## 1. The four prompt classes — when each applies
+
+| Class | Purpose | Typical length | Where it lives |
+|---|---|---|---|
+| **Initial prompt** | Kicks off a fresh session against a defined work scope | 50-300 words | Pasted into a fresh `claude` invocation; or stored at `prompts/{task-name}.md` and read in |
+| **Session prompt** | Continues or refines work within an active session; includes context the session needs | 20-200 words | Typed in the active session |
+| **Autonomous prompt** | Drives long-running, less-supervised work (overnight runs, multi-stage builds) | 100-500 words | Stored at `prompts/{run-name}.md`; invoked via headless mode or from an orchestrator |
+| **Subagent delegation prompt** | Routes a specific subtask to a specialist agent | 30-150 words | Constructed by the parent session when it spawns a subagent |
+
+The deployment plan in DESIGN mode should specify which prompt classes are needed and where they live. Most projects need at least an initial prompt template; many also need session and subagent prompt templates.
+
+---
+
+## 2. Universal prompt principles (apply to all classes)
+
+These five principles appear across every authoritative source on CC prompt design (Anthropic primary docs, rosmur/claudecode-best-practices, obra/superpowers, alexop.dev, Shrivu Shankar). They apply to every prompt class.
+
+**P1. Specific and actionable beats vague and aspirational.** "Run `npm test` before declaring done" beats "test your changes." "Use 2-space indentation" beats "format code properly." Vague prompts consume context tokens without changing behavior. **[Anthropic docs + practitioner consensus]**
+
+**P2. Imperative form.** Direct instructions, not suggestions. "Edit X. Run Y. Verify Z." beats "You might want to consider editing X." The prompt is a directive, not a discussion. **[Anthropic docs]**
+
+**P3. Critical instructions at the top.** Put the most important rules and behaviors first. Use `## Important` or `## Critical` headers. CC processes prompts top-to-bottom; buried critical instructions get less weight. **[Anthropic docs + Shrivu Shankar]**
+
+**P4. Files-as-context, not transcript-dumps.** Reference files the agent should read (`@PLAN.md`, `@spec/api.md`) rather than pasting their content into the prompt. CC's tool calls fetch file contents on demand; pasting them duplicates context. **[12 convergence patterns; named anti-pattern across all 3 external research reports]**
+
+**P5. Verification gates baked into the prompt.** Every prompt that produces output specifies how the output will be verified. "Edit X. Run `pytest tests/` and verify all tests pass before declaring done." Without verification gates, CC drifts toward implementation-first behavior and the "trust-then-verify gap" emerges. **[obra/superpowers verification-before-completion iron law]**
+
+**P6. Bookkeeping belongs in a tool.** Routing, counts, digests, and audit rows come from commands the prompt names; the model copies tool output and does not compute it. A prose instruction to "append an audit row" is the smell — name the command that writes the row. This is the summary-vs-itemization rule applied at authoring time. `[practitioner: awslabs/aidlc-workflows 12-state-machine.md North-star; single source]`
+
+---
+
+## 3. The Explore → Plan → Implement → Verify workflow
+
+The canonical CC workflow named identically across Anthropic primary docs and every major practitioner source. Four phases:
+
+**Phase 1 — Explore.** The agent surveys the codebase or context relevant to the task. In CC, this typically uses the Explore subagent (Haiku 5.5 via `Explore` override, read-only, cheap). The output is a context-grounded understanding, not a plan.
+
+**Phase 2 — Plan.** The agent produces a written plan — what files will change, what's the approach, what's the verification strategy. CC supports a "plan mode" (Shift+Tab) that disables edit tools while planning. In plan mode, the user can edit the plan (Ctrl+G) before approving. The plan is an artifact (PLAN.md, SPEC.md), not a paragraph in chat.
+
+**Phase 3 — Implement.** The agent executes the plan. The implementation should match the plan; deviation should surface as a plan revision, not a silent change.
+
+**Phase 4 — Verify.** The agent runs the verification gates specified in the plan. Tests, lints, smoke checks, manual review hooks. The agent does not declare "done" until verification passes.
+
+**The anti-pattern this prevents:** "vibe coding" — agent reads a vague request, jumps into edits, produces something that compiles but solves the wrong problem or breaks adjacent functionality. Plan-before-code is the single highest-leverage discipline in CC work. **[Anthropic primary docs + obra/superpowers + rosmur + coleam00 + shinpr — full convergence]**
+
+**When to skip the plan:** Anthropic's own framing — "if you could describe the diff in one sentence, skip the plan." Trivial typo fixes, single-line config changes, or one-file refactors that have a clear shape don't warrant planning overhead. **[Anthropic docs — explicitly named exception]**
+
+**Initial prompt template (workflow-aware):**
+
+```markdown
+Task: <one-sentence task description>
+
+Workflow:
+1. Explore the relevant code surface. Read @docs/architecture.md and any files in `src/<area>/` that might be affected.
+2. Produce a plan in `PLAN.md` covering: files to change, approach, verification strategy, rollback plan.
+3. Wait for plan approval before implementing.
+4. Implement per the approved plan.
+5. Run `<verification commands>` and confirm pass before declaring done.
+
+Authority bounds: <reference to CLAUDE.md authority matrix or specific rules>
+
+Halt and escalate if: <reference to halt-and-escalate triggers>
+```
+
+---
+
+## 4. Initial prompt patterns
+
+The initial prompt sets the work scope, references the relevant context files, and specifies the workflow. It does NOT re-state CLAUDE.md rules — those are loaded by CC automatically. The initial prompt's job is to scope the specific task within the standing rules.
+
+**Pattern: Scope-and-workflow.** The most common initial prompt shape.
+
+```markdown
+Task: <task in one sentence>
+
+Read first: @PLAN.md, @docs/<relevant>.md, @CHANGELOG.md (last 5 entries).
+
+Approach: <Explore → Plan → Implement → Verify, or "skip plan" if trivial>
+
+Verification: <specific commands the agent must run before declaring done>
+
+Out-of-scope for this task: <anything the agent might reasonably do but shouldn't this time>
+```
+
+**Pattern: Scoped-iteration.** For a known iteration on a previously-shipped artifact.
+
+```markdown
+Task: <iteration on artifact X>
+
+Reference state:
+- Current artifact: @<path>
+- Spec: @<path-to-spec>
+- Last change: see @CHANGELOG.md entry "<id>"
+
+Goal: <specific outcome of this iteration>
+
+Constraints:
+- <constraint 1>
+- <constraint 2>
+
+Verify: <specific verification commands>
+```
+
+**Pattern: Bug-fix.** Tightly scoped fix with a defined regression test.
+
+```markdown
+Task: Fix <bug>.
+
+Reproduce first: run `<command>`. Expected behavior: <X>. Actual behavior: <Y>.
+
+Workflow:
+1. Reproduce the bug.
+2. Add a failing test that captures the bug.
+3. Implement the fix.
+4. Confirm the test passes and the full suite still passes.
+5. Add a CHANGELOG entry per the project's change_log discipline.
+
+Authority: bug fix only. Do not refactor adjacent code. Do not add features.
+```
+
+**Anti-patterns to avoid in initial prompts:**
+- Pasting CLAUDE.md content into the prompt (CC reads CLAUDE.md automatically; duplication wastes tokens)
+- Pasting prior chat transcripts ("transcript dump")
+- Listing every conceivable thing the agent might do (creates "kitchen sink" sessions)
+- Vague success criteria ("make it better")
+- No verification gate (the agent will declare done without checking)
+
+---
+
+## 5. Session prompt patterns
+
+Session prompts continue or refine work within an active CC session. They're shorter than initial prompts because the session already has loaded context.
+
+**Pattern: Iteration.** "The first cut isn't quite right; here's the refinement."
+
+```markdown
+The function in @<path> handles the happy path but fails on <case>. Add handling for <case> following the same pattern as <reference function>. Run the tests after.
+```
+
+**Pattern: Course-correction.** The agent went off-track; redirect.
+
+```markdown
+Stop. The change you just made breaks the contract specified in @<spec>. Revert and try again. The rule is: <specific rule>.
+```
+
+**Pattern: Scope-narrowing.** The agent is doing too much; narrow.
+
+```markdown
+Focus only on <specific subset>. Do not touch <other area> in this session. We'll handle that separately.
+```
+
+**Pattern: Verification-on-demand.** Make the agent prove the current state.
+
+```markdown
+Run `<verification command>` and show me the output. Don't make any changes until I respond.
+```
+
+**Anti-patterns to avoid in session prompts:**
+- Re-explaining context that's already in the session (waste)
+- Asking open-ended questions when a directive is needed ("what do you think we should do?" — usually the user knows)
+- Letting the session sprawl across unrelated tasks (use `/clear` to start a clean session for unrelated work)
+
+---
+
+## 6. Autonomous prompt patterns
+
+Autonomous prompts drive long-running, less-supervised CC work. They require more explicit framing than interactive prompts because the agent can't ask clarifying questions in real-time.
+
+**Required elements for any autonomous prompt:**
+
+1. **Mission statement** — what success looks like, in one paragraph
+2. **Scope authorization** — what's in-scope, in-scope-with-notification, out-of-scope (mirror the CLAUDE.md scope rules)
+3. **Halt-and-escalate triggers** — explicit conditions under which the agent must stop and surface
+4. **Verification gates** — specific commands that must pass before any "done" declaration
+5. **Progress reporting cadence** — how often the agent should write to a status file (every N changes, every M minutes)
+6. **Error handling protocol** — what to do on test failure, build failure, ambiguous input
+7. **Context bounds** — what files to read, what to ignore, what to write to
+
+**Pattern: Autonomous-build template.**
+
+```markdown
+# Autonomous run: <run name>
+
+## Mission
+<one paragraph: what success looks like>
+
+## Scope
+- In-scope: <list>
+- In-scope with notification: <list>; log to STATUS.md
+- Out-of-scope (HALT and escalate): <list>
+
+## Workflow per work item
+1. Read the next item from @WORK_QUEUE.md
+2. Apply the standard Explore → Plan → Implement → Verify cycle
+3. Update CHANGELOG.md with the entry per the change_log discipline
+4. Run the full verification suite: `<commands>`
+5. If verification passes: mark item complete in @STATUS.md, move to next item
+6. If verification fails: HALT, write diagnosis to @HALT.md, exit
+
+## Halt-and-escalate triggers (any of these → HALT)
+- <trigger 1>
+- <trigger 2>
+- <trigger 3>
+- Resume: after the operator fixes the cause, re-run this prompt; completed steps are skipped by <restart marker or idempotent check>.
+
+## Progress reporting
+- After every work item: append to @STATUS.md
+- Every 30 minutes (heartbeat): touch @HEARTBEAT.md
+
+## Error handling
+- Test failure → HALT, write diagnosis
+- Ambiguous input from a work item → HALT, do not guess
+- Tool unavailable → HALT, write diagnosis
+
+## Context bounds
+- READ: @<paths>
+- WRITE: @<paths>; the session report under <report_dir from the brief>
+- IGNORE: @<paths>
+
+## Carry the work through
+<early-stop block — see "Carry the work through" below>
+
+## Final item
+Write the session report (`cc-session-reports.md`), then stop.
+```
+
+**Carry the work through — the early-stop countermeasure.** The 5.5-generation models can end a turn too early: Opus 5.5 in unattended runs, Sonnet 5.5 at `low`/`medium`, Haiku 5.5 at `low` with long prompts, Fable 5.1 on long tasks **[Anthropic docs — Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1 prompting guides]**. Too little, not too much — `behavioral-tuning` (if available) tendency #15, early turn termination. In an autonomous prompt:
+
+- Treat a text-only end of turn as a report, not proof.
+- Name the early stops to avoid: a summary announcing the next step with no tool call; an offer to continue; a list of non-blocking decisions; a stop at a milestone report.
+- Name the stops you do want: destructive actions, scope changes, anything the prompt deliberately protects. The confirmation step for risky actions stays.
+- Cap harness continuation messages at 2–3 per run; past the cap, halt and report.
+
+Default block (Sonnet 5.5 / Haiku 5.5 short form) — a turn-boundary instruction, not a self-verification clause; copy verbatim: **[Anthropic docs]**
+
+```text
+Keep working until everything the user asked for is done, and only stop to ask when you can't go on without the user or before a risky step.
+
+When the work the user asked for is done and checked, stop and report. Don't add features, tests, files, docs or refactors that weren't asked for. If you think one would help, mention it at the end instead of doing it.
+```
+
+For a fully unattended Opus 5.5 run, use this block instead. It is a turn-boundary instruction (AEA §4.14 keep class), not a self-verification clause; copy verbatim: `[Anthropic docs — Prompting Claude Opus 5.5, fetched 2026-10-22]`
+
+```text
+A standing instruction from the user, the person you are working for. It is about how your turns end. A message with no tool call in it ends your turn, and the work stops there until you are asked to continue. The user has seen you end turns in four ways while work they asked for was still owed, and does not want any of them. One: a long summary of what was done that closes by announcing the next step and has no tool call, so the next thing never starts. Two: an offer to carry on with something unless the user would prefer otherwise, which stops to wait for an answer the user was not going to give. Three: a list of decisions for the user when, by your own account, none of them blocks the rest of the work. Four: deciding that this is a good place to report, because the turn has been long or a milestone is done. Status notes are welcome, and so are your recommendations on open decisions, but put them in the same message as your next tool call and carry on with whatever does not depend on the user's answer. If you notice yourself inviting the user to redirect you or offering to wait, delete it and do the next thing. The stops the user does want are the ones where nothing can move without them, or where the thing blocking you is deliberately protected from you. This does not override the need for confirmation on risky or destructive actions.
+```
+
+Placement, per the guide (paraphrased): add it at the end of the system prompt from the first request; set `thinking.display: "updates"` to see status notes; keep your own confirmation step for risky actions; leave it out of human-in-the-loop applications. Pairs with the turn-economy rule (CC_EG §5.9).
+
+**Autonomy escalation rule.** Autonomy widens only on a fresh operator turn and narrows on any trigger. A scope grant for one phase is never read as session-wide. Hands-off mode removes happy-path gates but keeps failure halts loud. The Refuter is never dropped because the run is autonomous. `[practitioner: aidlc stage-protocol-construction.md Autonomy choice]`
+
+**The pump primer pattern.** Autonomous runs typically benefit from a "pump primer" — the first work item is done manually (or in an interactive session) to validate the workflow, then the autonomous run picks up from item 2. This catches misconfiguration before the agent runs unsupervised. **[generalizable]**
+
+**See also:** The pre-execution readiness check for autonomous work is the `handoff-trigger-check` Skill if available — recommended before launching any autonomous run that will execute more than ~5 work items.
+
+---
+
+## 7. Subagent delegation prompt patterns
+
+Subagents are spawned with their own context window. The delegation prompt is the only context the subagent has — there is no "shared session" to draw from. Design the prompt accordingly.
+
+**Required elements for any subagent prompt:**
+
+1. **Specific task** — one verifiable outcome, not "explore X" without a defined output
+2. **Return format** — what the parent session expects back (summary, finding list with priority, diff with rationale, JSON object with named fields)
+3. **Tool restrictions** — what the subagent is allowed to use; restrict to read-only for review roles
+4. **Context bounds** — what files are in-scope to read; everything outside is out-of-scope
+5. **Anti-pollution rule** — "do not echo file contents back; summarize with file path + line range references"
+
+**Pattern: Read-only investigator.**
+
+```markdown
+Investigate <specific question>.
+
+Read: @<path1>, @<path2>, anything in `src/<area>/` matching `<pattern>`.
+
+Tools: read-only. Do not edit any files.
+
+Return:
+- A 3-5 sentence summary of findings.
+- A list of file:line references that support the findings.
+- One sentence on confidence ("High — direct evidence in <file>" or "Low — inferred from <indirect evidence>").
+
+Do not echo file contents back. Reference by path + line range.
+```
+
+**Pattern: Spec-driven implementer.**
+
+```markdown
+Implement <specific change> per the spec at @<spec-path>.
+
+Workflow: read the spec, implement, run `<verification>`, return the diff.
+
+Return:
+- The diff (paths and changes).
+- Verification output (pass/fail per gate).
+- One sentence: "complete" or "incomplete because <reason>".
+
+Halt and return early if: the spec is ambiguous; verification fails; the change requires touching files not in scope.
+
+Scope: only files in `src/<specific-area>/`.
+```
+
+**Pattern: Cross-verifier (the S/B/C/X X-role from production CC deployment 2026-05-04).**
+
+```markdown
+Cross-verify the audits in @<audit-path-1>, @<audit-path-2>, @<audit-path-3>.
+
+For each disagreement between the three audits:
+1. Identify the disagreement (which agent says what).
+2. Investigate the underlying source to determine which is correct.
+3. Return a single reconciled verdict per disagreement.
+
+Return:
+- A summary table: <issue> | <agent-A verdict> | <agent-B verdict> | <agent-C verdict> | <reconciled verdict> | <evidence>
+- Overall ship verdict: PASS / PASS_WITH_NOTES / FAIL.
+
+Read-only access. Do not modify any audit files.
+```
+
+**Anti-patterns to avoid in subagent prompts:**
+- Open-ended exploration ("look around and tell me what you find" — produces unbounded output)
+- No return format ("investigate X" — parent session has to parse arbitrary prose)
+- Tool overprovisioning (giving an investigator full edit tools — invites scope creep)
+- "Brainstorm creatively" / "consider all angles" — produces unfocused output that doesn't compose with parent session work
+- Cross-subagent coordination ("ask the other agent if..." — subagents don't share context; use agent teams instead)
+
+---
+
+## 8. Files-as-context: the spec-file pattern
+
+Project decisions belong in version-controlled files, not in chat history. The spec file is the canonical source of truth for what the agent should do; the prompt references the spec, not vice versa.
+
+**The spec-file shapes:**
+
+| File | Purpose | When to use |
+|---|---|---|
+| `PLAN.md` | A plan for a specific change or feature, produced in plan mode | After Explore phase; before Implement phase |
+| `SPEC.md` | A long-lived specification for an artifact (an API, a data model, a feature) | When the artifact has multiple iterations and the spec is the canonical reference |
+| `INITIAL.md` | The kickoff context for a new feature (mission, scope, constraints) | At project start; for major new features |
+| `PRP.md` (Product Requirements Prompt) | A structured prompt template for executing a feature, per coleam00/context-engineering-intro | When the team uses the PRP pattern for feature delivery |
+| `HANDOFF.md` | Continuation context between sessions when work spans multiple sessions | At session close; read at next session open |
+| `AGENTS.md` | Agent role specs for the project's custom subagents | When the project has 2+ custom subagents |
+| `CHANGELOG.md` | Per-change log entries per the change_log discipline | After every change |
+
+**The pattern:** the prompt is a few sentences; the spec file is the substantial content. This keeps prompts short, makes specs reviewable, and keeps the agent's behavior auditable (the agent can read the spec; the human can read the spec; the diff between intended and actual behavior is visible).
+
+**Reference syntax in CC:** use `@<path>` to reference a file. CC reads the file when it processes the prompt. `@PLAN.md` is shorter and more reliable than pasting PLAN.md content into the prompt.
+
+---
+
+## 9. The verification iron law
+
+From obra/superpowers' verification-before-completion Skill, named identically across multiple practitioner sources: **never declare work complete without evidence that verification passed.** No "should work," no "probably fine," no "looks good." Evidence: test output, diff, lint clean, smoke check passing.
+
+**Apply in every prompt** by:
+1. Specifying the verification commands explicitly.
+2. Banning speculative completion language in the prompt itself ("Do not declare done with phrases like 'should work' or 'probably fine'. Show the verification output.").
+3. Where the project warrants enforcement (not just preference), back the iron law with a Stop hook that blocks completion without test evidence. See `cc-skills-and-hooks-composition.md` §"The verification iron law as hook."
+
+**Working pattern from obra/superpowers:**
+
+```markdown
+Before declaring done:
+1. Run `<test command>`. Show the output.
+2. Run `<lint command>`. Show the output.
+3. If both pass: declare done with evidence. Format: "Verified: tests N passed in Xs; lint clean. Done."
+4. If either fails: do not declare done. Diagnose and re-attempt, or HALT and surface the failure.
+
+Banned phrases at completion: "should work," "probably fine," "looks good," "I believe this is correct."
+```
+
+This pattern alone catches the most common CC failure mode (silent partial completion) and is worth specifying in every prompt where verification is possible. **[obra/superpowers iron law + Anthropic's "trust-then-verify gap" framing]**
+
+**Anthropic's verification block for code tasks.** Sonnet 5.5 at `low` and Haiku 5.5 at `low`/`medium` can report a change done without a real check. This is an external-artifact verification instruction, not a self-verification clause. Copy it verbatim: **[Anthropic docs — Sonnet 5.5 prompting guide, "Verification on coding tasks"]**
+
+```text
+When you change code that can be run, built, or type-checked, run a real check that exercises the change before reporting it done: the project's tests, type-checker, or build, or the changed command itself. A syntax-only check, or a check command that failed to start, does not count; if all that is missing is the project's declared dependencies, install them with its own package manager and lockfile (e.g. npm install, pip install -r requirements.txt), never via sudo or the system package manager, unless told not to. Only if no real check can run here, say which one you did not run and why instead of reporting the change as done.
+```
+
+---
+
+## 10. Output discipline for CC prompts
+
+CC prompts authored in DESIGN mode carry empirically-tested output standards that don't fully surface in environment-design references. The first four below emerged from production CC prompt execution (Phase 31d merge, Phase 32a/b v3.0 builds, 2026-05-06 to 2026-05-08) — each gap produced a named friction during execution; each later entry carries its own source tag. Apply them when the deliverable is an initial prompt, session prompt, or autonomous prompt that an agent will run.
+
+**Shell environment in CC prompts.** When producing CC prompts that include shell command blocks, default to bash. The CC harness shell is bash on Windows (Git Bash) and sh/bash on Linux/macOS, even when the operator's interactive environment is PowerShell. Prompts authored against the operator's local shell land in CC and trigger live translation by the agent (`Get-Content` → `cat`, `Test-Path` → `[ -f <file> ]`, `Measure-Object -Line` → `wc -l`, backtick line-continuation → backslash). Translation usually works but relies on agent judgment, creates inconsistent execution logs, and can fail silently for less-obvious divergences. Pattern: bash as the primary command block, with PowerShell variants labeled and adjacent for the divergent set. Universal commands — all `git` and `gh` invocations, `pwd`, `ls` — work in both shells and need no variants. `[generalizable: Phase 31d merge prompt execution 2026-05-06]` Write commands in permission-shaped form: one command per line, no leading `cd`, no pipe that hides the permission-relevant verb, `cd` only inside a subshell, and any text containing `$`, backticks, or quotes passed through a file rather than interpolated into a shell line. `[practitioner: awslabs/aidlc-workflows conductor.md Files and commands; 08-construction-and-swarm.md]` A git pathspec with a trailing slash, such as `'dir-*/'`, matches nothing; use `':(glob)dir-*/**'`, and have the gate print its match count so an empty match shows. An exclude pathspec does not stage files in an untracked folder; stage an explicit file list. Name the interpreter: on Windows, `python` can resolve to an application's bundled copy, so prefer the `py` launcher when present and record which interpreter ran. `[observed: v5.0 catalog generator (Observation 30) and the v5.0.1 build, 2026-10-30]` In a `claude -p` worker, loops and `&&` chains were denied under a `git`-only allow-list while a single `git … | tr | sha256sum` pipeline ran `[observed, Claude Code 2.1.302]`; name every command the worker runs, or tell it to run one pipeline per call.
+
+**Pre-flight Skill enumeration in CC prompts.** When producing a multi-step CC prompt — any session prompt with phases, halts, or non-trivial scope — include a pre-flight stage that enumerates available Skills before any other file reads. Skill availability is determined at session-launch time, not at design-time, and the agent's methodology grounding depends on what's actually loaded. Prompts that proceed straight into file reads risk two failure modes: agents make decisions assuming Skills they don't have (requiring rework when discovery happens mid-execution), or agents skip Skill activation entirely and miss methodology that should have applied. The pre-flight stage takes one paragraph — enumerate available Skills, name the relevant ones the prompt expects to compose with, and explicitly note any expected Skill that's missing. See CC_ENVIRONMENT_GUIDE — pre-flight checklist (R5) for the broader pre-flight discipline this extends to runtime tooling discovery. `[generalizable: Phase 31d/32 execution learnings 2026-05-07/08]`
+
+**Continuation-phrase ambiguity gate in multi-halt CC prompts.** When producing a CC prompt with operator halts and continuation phrases, include explicit halt-on-ambiguity discipline at each resume point. Continuation phrases that look unambiguous in design can be ambiguous in execution: an operator's reply may match the literal phrase, admit a clear semantic equivalent, or admit two reasonable interpretations. A prompt that doesn't direct the agent to halt on ambiguity produces silent inference — the agent picks one interpretation and proceeds, and is wrong some non-trivial fraction of the time. Pattern at every resume point: "If the operator's continuation message is ambiguous between two or more reasonable interpretations, halt and ask one targeted clarifying question. Do not infer." This is a specific application of the broader halt-and-escalate discipline (see root_AGENT_ENVIRONMENT_ARCHITECTURE — halt-and-escalate as a first-class discipline) to the resume case. `[generalizable: Phase 31d merge prompt execution 2026-05-06]`
+
+**Forward-state-aware artifact authoring in CC prompts.** When a CC prompt instructs the agent to author downstream artifacts — PR descriptions, commit messages, audit summaries, halt reports — direct the agent to be explicit about whether forward references describe state at authoring or expected state post-commit/post-merge/post-release. Artifacts read mid-flow should not assume completed state that hasn't yet happened. Pattern: prefix forward references with explicit temporal markers ("post-merge:", "this PR will:", "after the v3.0 release will…") rather than declarative present tense ("is on main", "ships in v3.0"). The discipline is most load-bearing in PR bodies (read between PR open and PR merge, when the described state hasn't yet landed) and in audit reports authored mid-build (where the build is in progress at authoring). `[generalizable: Phase 32a/b artifact authoring 2026-05-07/08]`
+
+**Session report as the final item.** Every CC prompt authorizes a report write in its scope and ends with a "Write session report" item. The report records computed state, not narrated state, and names what it does not prove; path and filename follow the repo's audit convention via the brief's `report_dir` (default `reports/`), stamped `_{YYYYMMDD-HHMM}Z`. Schema and paste-ready block: `cc-session-reports.md`. `[generalizable: RSA runs 2026-09 — two runs left no durable record because no prompt authorized the write]`
+
+**Include-and-exclude justification.** Every gate, halt, and plan step the prompt carries names what it protects; every omitted step names what already covers it. Overlapping "just in case" ceremony is the more common failure. `[practitioner: aidlc aidlc-composer-agent.md Adversarial Framing]`
+
+**Assumption status survives.** A `[speculation]` or `[assumption]` tag in the brief stays on the fact in CLAUDE.md, the prompt, and the session report until the operator confirms it — never silently promoted to fact. See `source-grading-and-tagging.md` §4. `[practitioner: aidlc stage-protocol.md §3]`
+
+**Why the end state and not the pre state.** A prompt can be stale about where a run STARTS and still be exactly right about where it must END UP. Binding the halt to the end state removes the whole staleness class without weakening safety: an end-state hash is a correctness control, whereas a pre-state line count is only a presence control and cannot distinguish an intended file from a wrong one. Observed 2026-09-07 on a file-replacement prompt whose pre-state line count had gone stale because the replacement was already staged in the working tree; the guard was correct and the assertion was not. `[generalizable: file-replacement prompt observation 2026-09-07]`
+
+**Normalize before you hash.** A digest gate is only as good as the bytes it binds to. Specify it against LF-normalized content and say so in the prompt, because a file assembled by editing a CRLF source with LF insertions is mixed, and git with `core.autocrlf=true` commits the LF blob regardless of what sits on disk. A raw-bytes gate on a text file is then unsatisfiable: no commit can ever match it, and the only way to "fix" it is a `.gitattributes -text` entry that enshrines an editing artifact as if it were design intent. Observed 2026-09-09 on this Skill's own v4.1 build, where the gate was correct in shape and wrong in what it bound to. The same discipline applies to measuring the gap: count CR bytes with `tr -cd '\r' | wc -c`, since a shell test that cannot express a carriage return returns a null that falsifies nothing (AEA §4.14). `[generalizable: rootnode-cc-design v4.1 build 2026-09-09]`
+
+**Competing hypotheses in diagnostic prompts.** When a prompt asks the agent to find a cause, a ranked list of candidates invites the agent to confirm the top entry and stop. Structure the candidates as competing hypotheses. Each one states its **mechanism** (how it would produce the symptom), its **evidence** (why it is on the list), its **predicted fix**, and its **discriminating observation**: what a named test shows if this is the cause, and what it shows if it is not. Two hypotheses with identical predicted observations are one hypothesis, so merge them rather than padding the list. `[generalizable: CC_ENVIRONMENT_GUIDE §5.8]`
+
+**Instrument fit before measurement.** Before a diagnostic or verification prompt names an instrument, confirm the instrument can exhibit the mechanism under test. An instrument that cannot returns a null that falsifies nothing, and a null read as evidence retires a live hypothesis on no grounds. When the instrument does not fit, name a different one, a manual operator step if necessary, and record the fit reasoning so a later session reads a skipped measurement as a decision rather than an omission. Observed three times in this Skill's own v4.1 validation: a same-line grep could not see a product-fact marker placed after a JSON block; a load check verified a file's digest but not that the Skill had loaded; and `grep -c $'\r'` under `/bin/sh` returned 0 for a file full of carriage returns. `[generalizable: AEA §4.14; rootnode-cc-design v4.1 validation 2026-09-10]`
+
+---
+
+## End of CC prompt design patterns reference

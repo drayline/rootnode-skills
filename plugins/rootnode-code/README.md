@@ -11,6 +11,8 @@ In Claude Code these list as `/rootnode-code:<skill>`.
 
 The plugin also carries two hooks: a guard that blocks edits to protected migration paths, and a bounded Stop hook that requires test evidence. Hooks run in Cowork and Claude Code only; chat loads the skills and ignores the hooks.
 
+Both hooks apply in every repository where the plugin is enabled. The Stop hook needs test evidence at `.claude/state/last-test-evidence.json`, and writes its state under `.claude/state/`. In a repository without tests, set `VERIFY_GATE_OFF=1`. To turn off the migration guard, set `MIGRATIONS_GUARD_OFF=1`.
+
 ## Install
 
 Install in one place only: on your claude.ai account or locally in Claude Code, never both. A plugin added to your account syncs to Claude Code on its own, so installing it locally as well loads two copies.

@@ -1,0 +1,17 @@
+{
+  "name": "rootnode-tuning",
+  "displayName": "root.node Tuning",
+  "version": "6.0.0",
+  "description": "Diagnose Claude behavioral tendencies and produce targeted countermeasures for prompts and Project instructions.",
+  "author": {
+    "name": "Drayline LLC",
+    "url": "https://rootnode.design"
+  },
+  "repository": "https://github.com/drayline/rootnode-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "behavioral-tuning",
+    "prompt-engineering",
+    "claude-behavior"
+  ]
+}

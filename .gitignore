@@ -6,3 +6,4 @@ _v2_1_staging/
 __pycache__/
 *.pyc
 .claude/settings.local.json
+plugins/*/evals/results/

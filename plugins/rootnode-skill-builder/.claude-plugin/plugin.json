@@ -1,0 +1,17 @@
+{
+  "name": "rootnode-skill-builder",
+  "displayName": "root.node Skill Builder",
+  "version": "6.0.0",
+  "description": "Build, review, and evaluate Skills with warrant checks, description discipline, packaging, and eval tooling.",
+  "author": {
+    "name": "Drayline LLC",
+    "url": "https://rootnode.design"
+  },
+  "repository": "https://github.com/drayline/rootnode-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "skills",
+    "skill-authoring",
+    "evals"
+  ]
+}

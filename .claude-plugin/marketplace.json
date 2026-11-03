@@ -5,38 +5,35 @@
     "url": "https://rootnode.design"
   },
   "description": "root.node — the architecture system for Claude. Measured plugins for Project and global-layer audit, Claude Code environment design, prompt compilation, and behavioral tuning.",
-  "metadata": {
-    "pluginRoot": "./plugins"
-  },
   "plugins": [
     {
       "name": "rootnode-projects",
-      "source": "rootnode-projects",
+      "source": "./plugins/rootnode-projects",
       "category": "audit"
     },
     {
       "name": "rootnode-code",
-      "source": "rootnode-code",
+      "source": "./plugins/rootnode-code",
       "category": "claude-code"
     },
     {
       "name": "rootnode-prompts",
-      "source": "rootnode-prompts",
+      "source": "./plugins/rootnode-prompts",
       "category": "prompting"
     },
     {
       "name": "rootnode-tuning",
-      "source": "rootnode-tuning",
+      "source": "./plugins/rootnode-tuning",
       "category": "behavior"
     },
     {
       "name": "rootnode-governance",
-      "source": "rootnode-governance",
+      "source": "./plugins/rootnode-governance",
       "category": "runtime"
     },
     {
       "name": "rootnode-skill-builder",
-      "source": "rootnode-skill-builder",
+      "source": "./plugins/rootnode-skill-builder",
       "category": "authoring"
     }
   ]

@@ -24,7 +24,7 @@ A catalog release has three outputs, and only the first one reaches installed us
 
 ### 1.2 Install paths and account sync
 
-The marketplace is named `rootnode` (`.claude-plugin/marketplace.json`, `metadata.pluginRoot: ./plugins`). Three install paths, in the order the README presents them:
+The marketplace is named `rootnode` (`.claude-plugin/marketplace.json`). Each entry's `source` is a `./plugins/<plugin>` path, because claude.ai sync rejects bare names under `metadata.pluginRoot` (SBD §4.7). Three install paths, in the order the README presents them:
 
 - **claude.ai (recommended).** **Customize > Plugins > Add > Add marketplace** → `drayline/rootnode-skills`, turn on **Sync automatically**, then add the plugins wanted. One account install reaches chat, Cowork and Claude Code; Claude Code signed in with that account loads each plugin as `<plugin>@synced`. Chat ignores plugin hooks and agents.
 - **Claude Code without an account sync** (API-key sessions). `claude plugin marketplace add drayline/rootnode-skills`, then `claude plugin install <plugin>@rootnode`. Auto-update is off by default for a third-party marketplace, so updates take `claude plugin update`. `[dated product fact — verify on the running Claude Code version]`
@@ -42,7 +42,7 @@ Repo-root script roster is **two** from the v6.0 release PR on:
 
 **Not the release packager.** Anthropic's single-Skill `package_skill.py` lives upstream at `anthropics/skills` → `skills/skill-creator/scripts/package_skill.py` (writes `<name>.skill` with a `<name>/` wrapper); skill-builder's own `scripts/package_zip.py` is adapted from it. Neither is used to cut a release (SBD §4.7).
 
-**Validation instruments.** `claude plugin validate .` (marketplace) and `claude plugin validate ./plugins/<plugin> --strict` (each plugin) must pass before a release. `[dated product fact — verify on the running Claude Code version]`
+**Validation instruments.** `claude plugin validate .` (marketplace) and `claude plugin validate ./plugins/<plugin> --strict` (each plugin) must pass before a release. `[dated product fact — verify on the running Claude Code version]` They check Claude Code's rules only; claude.ai sync applies its own, so the operator's first **Add marketplace** after a manifest change is a separate check (SBD §4.7).
 
 Historical cycle tooling (`audit/v3_1-release/`, the per-cycle notes configs under `audit/v4_0-alignment/` and later) stays at its original path as cycle history.
 

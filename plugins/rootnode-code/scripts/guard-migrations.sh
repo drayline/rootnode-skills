@@ -1,11 +1,19 @@
 #!/bin/bash
-# guard-migrations.sh — Edit|Write|NotebookEdit|Bash|PowerShell guard; fails closed.
+# guard-migrations.sh — Edit|Write|NotebookEdit|Bash|PowerShell guard.
+# With jq: parses the tool's target; fails closed on unreadable input.
+# Without jq: no parsing. Blocks any hook input that contains "migrations", in any case, and allows the rest.
 [ "${MIGRATIONS_GUARD_OFF:-0}" = "1" ] && exit 0      # off-switch; audit its use
 IN=$(cat)
-command -v jq >/dev/null || case "$IN" in                 # no jq: hold the rule only where the input names it
-  *migrations*) echo "jq not found; input names migrations, so the rule holds. Next step: install jq." >&2; exit 2 ;;
-  *) exit 0 ;;
-esac
+if ! command -v jq >/dev/null; then
+  case "$(printf '%s' "$IN" | tr '[:upper:]' '[:lower:]')" in
+  *migrations*)
+    mkdir -p .claude && echo "$(date -u +%FT%TZ) block no-jq" >> .claude/guard.log ||   # audit row
+      echo "guard: audit row not written" >&2
+    echo "jq is missing and this call mentions migrations, so it is blocked. Next step: install jq (winget install jqlang.jq, brew install jq, or apt-get install jq)." >&2
+    exit 2 ;;
+  esac
+  exit 0
+fi
 TOOL=$(printf '%s' "$IN" | jq -r '.tool_name // ""') &&
 T=$(printf '%s' "$IN" | jq -r '.tool_input.file_path // .tool_input.notebook_path // .tool_input.command // ""') ||
   { echo "Input unreadable; rule holds. Next step: check jq and the hook input." >&2; exit 2; }

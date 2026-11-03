@@ -81,7 +81,9 @@ def read_version(plugin_path: Path) -> str:
 
 def write_zip(plugin_path: Path, version: str) -> Path:
     zip_path = DIST_DIR / f"{plugin_path.name}-v{version}.zip"
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+    # Built under a temporary name so a failed build cannot replace a good zip.
+    tmp_path = zip_path.with_suffix(".zip.tmp")
+    with zipfile.ZipFile(tmp_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for f in sorted(plugin_path.rglob("*")):
             if not f.is_file():
                 continue
@@ -97,10 +99,12 @@ def write_zip(plugin_path: Path, version: str) -> Path:
                     sys.exit(1)
                 info = zipfile.ZipInfo.from_file(f, arcname)
                 info.compress_type = zipfile.ZIP_DEFLATED
+                info.create_system = 3  # Unix, so extractors honor the mode bits
                 info.external_attr = 0o100755 << 16
                 zf.writestr(info, data)
             else:
                 zf.write(f, arcname)
+    tmp_path.replace(zip_path)
     return zip_path
 
 

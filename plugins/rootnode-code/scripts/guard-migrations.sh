@@ -2,6 +2,10 @@
 # guard-migrations.sh — Edit|Write|NotebookEdit|Bash|PowerShell guard; fails closed.
 [ "${MIGRATIONS_GUARD_OFF:-0}" = "1" ] && exit 0      # off-switch; audit its use
 IN=$(cat)
+command -v jq >/dev/null || case "$IN" in                 # no jq: hold the rule only where the input names it
+  *migrations*) echo "jq not found; input names migrations, so the rule holds. Next step: install jq." >&2; exit 2 ;;
+  *) exit 0 ;;
+esac
 TOOL=$(printf '%s' "$IN" | jq -r '.tool_name // ""') &&
 T=$(printf '%s' "$IN" | jq -r '.tool_input.file_path // .tool_input.notebook_path // .tool_input.command // ""') ||
   { echo "Input unreadable; rule holds. Next step: check jq and the hook input." >&2; exit 2; }

@@ -1,5 +1,5 @@
 # rootnode-skills — Repo Catalog
-_Generated 2026-11-02 | HEAD cb61ad916026607dca8dcbb2754adac992023640 (feat/plugin-packaging-v6.0, not yet merged) | regenerated per playbook Post-verification step_
+_Generated 2026-11-02 | HEAD 87c43a5a042a45c5e401e916a36ac1d6b6770483 (feat/plugin-packaging-v6.0, not yet merged) | regenerated per playbook Post-verification step_
 
 Regenerated 2026-11-02 for the catalog v6.0 content PR, ahead of any release, so the PR carries the new layout. Tags and GitHub releases are unchanged from `root_repo_catalog_20261030.md` because no tag or release is part of this PR. The release prompt regenerates this file again after its verification. Section structure matches `root_repo_catalog_20261030.md`, with new Plugins and Marketplace sections, the Skills section moved to `plugins/*/skills/`, and the CATALOG_VERSION section replaced by the packager constants.
 
@@ -66,6 +66,7 @@ audit/repo-catalog/root_repo_catalog_20260911.md
 audit/repo-catalog/root_repo_catalog_20260913.md
 audit/repo-catalog/root_repo_catalog_20261023.md
 audit/repo-catalog/root_repo_catalog_20261030.md
+audit/repo-catalog/root_repo_catalog_20261102.md
 audit/v3_1-release/create_releases.py
 audit/v3_1-release/generate_release_notes.py
 audit/v3_1-release/root_canonical_drift_remediation_CHANGES.md
@@ -447,7 +448,7 @@ release-notes/rootnode-skill-builder-v3.1.md
 release-notes/rootnode-skill-builder-v4.0.md
 release-notes/rootnode-skill-builder-v5.0.md
 ```
-433 tracked files. The snapshot itself adds one when committed.
+434 tracked files. The snapshot itself adds one when committed.
 
 ## canonical-kfs roster (7)
 _Source: `git ls-files audit/canonical-kfs/`; count via `git ls-files audit/canonical-kfs/ | wc -l`; content changes via `git log --oneline 2c04b70..HEAD -- audit/canonical-kfs`_
@@ -657,6 +658,8 @@ design/root_skill_5gen_alignment_design.md
 ## Recent commits (20)
 _Source: `git log --oneline -20`_
 ```
+87c43a5 fix: settle no-jq guard behavior and scope the Stop hook
+589b67c chore(catalog): regenerate for the v6.0 content PR
 cb61ad9 fix: harden hooks and packager after review
 a056e19 feat: ship the migration guard and bounded Stop hook in rootnode-code
 8d6fcc7 feat: add a five-case eval suite to rootnode-projects
@@ -675,8 +678,6 @@ d991e02 docs(audit): v5.0.1 build reports and review files; v4.2 design records
 6a257f9 docs(audit): catalog v5.0.1 spec and cc-design v5.0 D9a evidence
 a88d449 fix: catalog v5.0.1 patch — Stop-hook chain bounds, resume rule, 16 v5.0 findings, KF mirror sync
 e336bce Merge pull request #27 from drayline/docs/kf-sync-v5.0
-5cf0592 docs(canonical-kfs): v5.0 seed sync — 5.5-generation alignment
-1a8cb74 Merge pull request #26 from drayline/chore/catalog-regen-v5.0
 ```
 
 ## Tags (133)
@@ -983,10 +984,12 @@ _Source: `grep -nE 'EXPECTED_TOTAL|CATALOG_VERSION' build_release_artifacts.py`_
 
 ## Cycle-delta summary vs `root_repo_catalog_20261030.md`
 
-- **Tracked files: 390 → 433 (+43).** `git diff --name-status -M 2c04b70 HEAD`: 43 A, 155 R, 2 M, 0 D. The snapshot itself adds one more when committed.
-- **Added files (43):** 6 outside `plugins/` (`.claude-plugin/marketplace.json`, `audit/repo-catalog/root_repo_catalog_20261030.md`, `audit/v5_0_1-patch/refuter_brief_r3c1.md`, `audit/v5_0_1-patch/refuter_r3c1.json`, `audit/v5_0_1-patch/session_report_20261030-0303Z.md`, `design/root_DESIGN_plugin_packaging.md`); 18 per-plugin manifests, READMEs, and LICENSE copies; 4 `rootnode-code` hook files; 15 eval files.
+- **Tracked files: 390 → 434 (+44).** `git diff --name-status -M 2c04b70 HEAD`: 44 A, 155 R, 3 M, 0 D. The snapshot itself adds one more when committed.
+- **Added files (44):** 7 outside `plugins/` (`.claude-plugin/marketplace.json`, `audit/repo-catalog/root_repo_catalog_20261030.md`, `audit/repo-catalog/root_repo_catalog_20261102.md`, `audit/v5_0_1-patch/refuter_brief_r3c1.md`, `audit/v5_0_1-patch/refuter_r3c1.json`, `audit/v5_0_1-patch/session_report_20261030-0303Z.md`, `design/root_DESIGN_plugin_packaging.md`); 18 per-plugin manifests, READMEs, and LICENSE copies; 4 `rootnode-code` hook files; 15 eval files.
 - **Skills folders: 27 → 27, all moved to `plugins/*/skills/`.** Tracked files left at root `rootnode-*/` paths: 0.
 - **Plugins: 0 → 6.** Marketplace added at `.claude-plugin/marketplace.json`.
-- **Modified:** `.gitignore`, `build_release_artifacts.py`.
+- **Modified:** `.gitignore`, `CLAUDE.md`, `build_release_artifacts.py`.
 - **canonical-kfs, docs/, release-notes/, CHANGELOG.md:** unchanged. Tags 133 and GitHub releases 131: unchanged.
 - **design/:** `design/audit-artifacts/v4.2/scratch/` is no longer on disk; the operator moved it out of the repo.
+- **design/staging-kf/ (gitignored): 10 → 0 files on disk.** Not part of this PR; the operator is confirming it separately.
+- **CLAUDE.md:** the Tier 1 rule and the Skill-source halt trigger now match `plugins/*/skills/*/`. The packaging conventions still describe the retired zip shapes and change with the release prompt.

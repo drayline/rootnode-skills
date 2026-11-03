@@ -258,7 +258,7 @@ The tooling layer is ported from upstream Anthropic `skill-creator`. Upstream ev
 **Detection mechanism:**
 
 - Maintain `design/skill-creator/` as the upstream source-of-truth snapshot in the rootnode-skills repo.
-- Periodic comparison: walk each ported file in `rootnode-skill-builder/scripts/`, `agents/`, and `eval-viewer/` against its upstream counterpart in `design/skill-creator/`. Surface differences.
+- Periodic comparison: walk each ported file in `plugins/rootnode-skill-builder/skills/skill-builder/scripts/`, `agents/`, and `eval-viewer/` against its upstream counterpart in `design/skill-creator/`. Surface differences.
 - Categorize differences:
   - **Verbatim-class divergence** (schemas, structural contracts): treat as bugs in the port. File a fix.
   - **Tone-class divergence** (docstrings, prose comments): expected; no action unless the upstream change carries methodology implications.

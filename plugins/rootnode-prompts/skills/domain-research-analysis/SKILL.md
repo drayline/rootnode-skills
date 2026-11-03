@@ -18,7 +18,8 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.1"
+  version: "6.0.0"
+  predecessor: "rootnode-domain-research-analysis v5.0.1"
   original-source: "DOMAIN_PACK_RESEARCH_ANALYSIS.md"
 ---
 

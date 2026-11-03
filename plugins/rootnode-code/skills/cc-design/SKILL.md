@@ -14,8 +14,8 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.1"
-  predecessor: "rootnode-cc-design v4.2"
+  version: "6.0.0"
+  predecessor: "rootnode-cc-design v5.0.1"
   original-source: "root.node seed KFs (AEA, CCEG, AAP) + CC deployment research; v4.x evolves delegation architecture and REMEDIATE mode from v3 base"
   discipline_post: phase-30
 ---

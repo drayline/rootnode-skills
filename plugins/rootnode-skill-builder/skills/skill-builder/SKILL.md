@@ -18,8 +18,8 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
-  predecessor: "rootnode-skill-builder v2.1"
+  version: "6.0.0"
+  predecessor: "rootnode-skill-builder v5.0.0"
   original-source: "root.node seed Project KFs (post-Phase 32a methodology updates) + rootnode-skill-builder v2.1 source"
   discipline_post: phase-30
 ---

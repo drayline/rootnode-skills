@@ -17,7 +17,8 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.1"
+  version: "6.0.0"
+  predecessor: "rootnode-prompt-validation v5.0.1"
   original-source: "PROMPT_TESTING_GUIDE.md"
 ---
 

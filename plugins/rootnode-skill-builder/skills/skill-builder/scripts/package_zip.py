@@ -16,8 +16,8 @@ Usage:
     python scripts/package_zip.py <path/to/skill-folder> [--output OUTPUT_PATH]
 
 Example:
-    python scripts/package_zip.py rootnode-skill-builder/
-    python scripts/package_zip.py rootnode-skill-builder/ --output design/audit-artifacts/v3.0/rootnode-skill-builder.zip
+    python scripts/package_zip.py plugins/rootnode-skill-builder/skills/skill-builder/
+    python scripts/package_zip.py plugins/rootnode-skill-builder/skills/skill-builder/ --output design/audit-artifacts/<version>/skill-builder.zip
 """
 
 import argparse

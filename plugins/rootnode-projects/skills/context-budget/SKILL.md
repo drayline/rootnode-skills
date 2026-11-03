@@ -18,7 +18,8 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.1"
+  version: "6.0.0"
+  predecessor: "rootnode-context-budget v5.0.1"
   original-source: "root_OPTIMIZATION_REFERENCE.md"
 ---
 

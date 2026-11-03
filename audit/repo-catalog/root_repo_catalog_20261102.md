@@ -1,5 +1,5 @@
 # rootnode-skills — Repo Catalog
-_Generated 2026-11-02 | HEAD 87c43a5a042a45c5e401e916a36ac1d6b6770483 (feat/plugin-packaging-v6.0, not yet merged) | regenerated per playbook Post-verification step_
+_Generated 2026-11-02 | HEAD d95ba73b648ea56c14f102fcc0150aca8288bcb4 (feat/plugin-packaging-v6.0, not yet merged) | regenerated per playbook Post-verification step_
 
 Regenerated 2026-11-02 for the catalog v6.0 content PR, ahead of any release, so the PR carries the new layout. Tags and GitHub releases are unchanged from `root_repo_catalog_20261030.md` because no tag or release is part of this PR. The release prompt regenerates this file again after its verification. Section structure matches `root_repo_catalog_20261030.md`, with new Plugins and Marketplace sections, the Skills section moved to `plugins/*/skills/`, and the CATALOG_VERSION section replaced by the packager constants.
 
@@ -448,7 +448,7 @@ release-notes/rootnode-skill-builder-v3.1.md
 release-notes/rootnode-skill-builder-v4.0.md
 release-notes/rootnode-skill-builder-v5.0.md
 ```
-434 tracked files. The snapshot itself adds one when committed.
+434 tracked files, including this snapshot as committed at the generation HEAD.
 
 ## canonical-kfs roster (7)
 _Source: `git ls-files audit/canonical-kfs/`; count via `git ls-files audit/canonical-kfs/ | wc -l`; content changes via `git log --oneline 2c04b70..HEAD -- audit/canonical-kfs`_
@@ -658,6 +658,7 @@ design/root_skill_5gen_alignment_design.md
 ## Recent commits (20)
 _Source: `git log --oneline -20`_
 ```
+d95ba73 chore(catalog): regenerate at the review-fix tip
 87c43a5 fix: settle no-jq guard behavior and scope the Stop hook
 589b67c chore(catalog): regenerate for the v6.0 content PR
 cb61ad9 fix: harden hooks and packager after review
@@ -677,7 +678,6 @@ d991e02 docs(audit): v5.0.1 build reports and review files; v4.2 design records
 0cab5c8 fix: catalog v5.0.1 rev 2 — host Stop cap, handoff-trigger-check naming, guard gaps, prompt shell lessons, KF and docs sync
 6a257f9 docs(audit): catalog v5.0.1 spec and cc-design v5.0 D9a evidence
 a88d449 fix: catalog v5.0.1 patch — Stop-hook chain bounds, resume rule, 16 v5.0 findings, KF mirror sync
-e336bce Merge pull request #27 from drayline/docs/kf-sync-v5.0
 ```
 
 ## Tags (133)

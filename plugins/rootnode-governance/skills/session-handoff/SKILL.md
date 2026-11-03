@@ -18,8 +18,8 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
-  predecessor: "rootnode-session-handoff v1.0"
+  version: "6.0.0"
+  predecessor: "rootnode-session-handoff v5.0.0"
   original-source: "Seed-project methodology synthesis + rootnode-session-handoff v1.0 source"
   discipline_post: phase-32
 ---

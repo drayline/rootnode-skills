@@ -18,7 +18,8 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "6.0.0"
+  predecessor: "rootnode-profile-builder v5.0.0"
   original-source: "root.node design 2026 — runtime layer (gates, router, profile builder)"
   companion-files: "examples/sample-interview-flow.md, references/schema-walking-patterns.md, references/common-schema-shapes.md, references/troubleshooting.md"
   changelog: "1.0.2 (2026-05-05): Brand-strip patch per Phase 27/28 methodology absorption. Six SKILL.md cchq references replaced with rootnode framing (description, body lines 29, 31, 154, 157); default output path convention rewritten from ~/.cchq/profiles/ to ~/.rootnode/profiles/ (line 53); four corresponding path references updated in examples/sample-interview-flow.md (lines 135, 136, 146, 147). Behavior identical to 1.0.1 — no methodology, schema, or workflow changes. 1.0.1 (2026-05-01): Structural patch to align with rootnode authoring convention. Added references/ folder with three on-demand-loaded files (schema-walking-patterns, common-schema-shapes, troubleshooting). SKILL.md body slimmed via content extraction; behavior identical to 1.0. Deployment target: Claude.ai Project (CP) side of CP/CC split."

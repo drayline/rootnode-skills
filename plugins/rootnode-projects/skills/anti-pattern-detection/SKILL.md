@@ -18,7 +18,8 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "6.0.0"
+  predecessor: "rootnode-anti-pattern-detection v5.0.0"
   original-source: "AUDIT_FRAMEWORK.md"
 ---
 

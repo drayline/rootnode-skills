@@ -16,7 +16,8 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "5.0.0"
+  version: "6.0.0"
+  predecessor: "rootnode-domain-business-strategy v5.0.0"
   original-source: "DOMAIN_PACK_BUSINESS_STRATEGY.md"
 ---
 

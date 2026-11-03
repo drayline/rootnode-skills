@@ -13,7 +13,7 @@ Caller invokes:
 Build me a handoff profile for working at my desk.
 ```
 
-Skill detects: target Skill is `handoff-trigger-check`, locates `~/.claude/skills/handoff-trigger-check/schema/profile.schema.json`, parses it.
+Skill detects: target Skill is `handoff-trigger-check`, locates that Skill's own `schema/profile.schema.json` (in a plugin install it sits under the `rootnode-governance` plugin), parses it.
 
 Skill plans interview:
 - 7 required fields (name, description, threshold_rule, budget_safety_margin, budget_data_source, schema_version is auto-set)

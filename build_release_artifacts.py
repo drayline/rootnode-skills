@@ -16,7 +16,14 @@ Eval suites stay in the repo: evals/ is left out of the zip at the plugin root
 and at each skill root. Shell scripts are stored as LF with mode 0755 so hooks
 run on Linux and macOS no matter where the zip was built.
 
-Full-build expectation: 6 plugins -> 6 zips.
+Full-build expectation: 6 plugins -> 6 zips. A full build first deletes every
+dist/*.zip so a stale zip from an earlier layout or version cannot sit beside
+the new ones; a partial build deletes nothing.
+
+Every build first checks embedded copies: a Skill reference that marks a
+fenced block with <!-- shipped: <repo path> --> must carry that file in the
+next fenced block, equal after LF normalization (one trailing newline is
+ignored). A mismatch stops the build with exit 2 before any zip is written.
 
 Usage:
     python build_release_artifacts.py              # all plugins (asserts 6)
@@ -25,6 +32,7 @@ Usage:
 
 import fnmatch
 import json
+import re
 import sys
 import zipfile
 from pathlib import Path
@@ -42,6 +50,10 @@ EXCLUDE_DIRS = {"__pycache__", "node_modules"}
 EXCLUDE_GLOBS = {"*.pyc"}
 EXCLUDE_FILES = {".DS_Store", ".gitattributes"}
 ROOT_EXCLUDE_DIRS = {"evals"}  # excluded only at the plugin and skill roots
+
+# --- Embedded copies -------------------------------------------------------------
+SHIPPED_MARKER = re.compile(r"<!--\s*shipped:\s*(\S+)\s*-->")
+FENCE_OPEN = re.compile(r"^(`{3,}|~{3,})")
 
 
 def should_exclude(rel_to_plugin: Path) -> bool:
@@ -108,6 +120,85 @@ def write_zip(plugin_path: Path, version: str) -> Path:
     return zip_path
 
 
+def _lf(text: str) -> str:
+    text = text.replace("\r\n", "\n")
+    return text[:-1] if text.endswith("\n") else text
+
+
+def _next_fenced_block(lines, start):
+    """Body of the first fenced block at or after lines[start], or None."""
+    for i in range(start, len(lines)):
+        m = FENCE_OPEN.match(lines[i])
+        if not m:
+            continue
+        fence = m.group(1)
+        for j in range(i + 1, len(lines)):
+            s = lines[j].rstrip()
+            if s and set(s) == {fence[0]} and len(s) >= len(fence):
+                return "\n".join(lines[i + 1:j])
+        return None  # opened but never closed
+    return None
+
+
+def check_embedded_copies() -> int:
+    """Compare each <!-- shipped: path --> block with the file it names.
+    Returns the number of markers checked; exits 2 on the first mismatch."""
+    checked = 0
+    for ref in sorted(PLUGINS_DIR.glob("*/skills/*/references/**/*")):
+        if not ref.is_file():
+            continue
+        try:
+            lines = _lf(ref.read_text(encoding="utf-8")).split("\n")
+        except (OSError, UnicodeDecodeError):
+            continue  # not a text reference; nothing to check
+        for n, line in enumerate(lines):
+            m = SHIPPED_MARKER.search(line)
+            if not m:
+                continue
+            rel_ref = ref.relative_to(REPO_ROOT).as_posix()
+            shipped_rel = m.group(1)
+            shipped = REPO_ROOT / shipped_rel
+            block = _next_fenced_block(lines, n + 1)
+            if block is None:
+                print(f"  FAIL: {rel_ref}:{n + 1}: marker for {shipped_rel} "
+                      "has no closed fenced block after it")
+                sys.exit(2)
+            try:
+                want = _lf(shipped.read_bytes().decode("utf-8"))
+            except (OSError, UnicodeDecodeError) as exc:
+                print(f"  FAIL: {rel_ref}:{n + 1}: cannot read shipped file "
+                      f"{shipped_rel}: {exc}")
+                sys.exit(2)
+            if block != want:
+                got_l, want_l = block.split("\n"), want.split("\n")
+                k = next((i for i, (a, b) in enumerate(zip(got_l, want_l)) if a != b),
+                         min(len(got_l), len(want_l)))
+                got_s = got_l[k] if k < len(got_l) else "<end of block>"
+                want_s = want_l[k] if k < len(want_l) else "<end of file>"
+                print(f"  FAIL: embedded copy differs from the shipped file\n"
+                      f"    reference: {rel_ref}\n"
+                      f"    shipped:   {shipped_rel}\n"
+                      f"    first differing line {k + 1}:\n"
+                      f"      reference: {got_s}\n"
+                      f"      shipped:   {want_s}")
+                sys.exit(2)
+            checked += 1
+    return checked
+
+
+def clear_stale_zips() -> int:
+    """Full build only: remove every dist/*.zip before writing new ones."""
+    removed = 0
+    for z in sorted(DIST_DIR.glob("*.zip")):
+        try:
+            z.unlink()
+        except OSError as exc:
+            print(f"  FAIL: cannot delete stale {z.name}: {exc}")
+            sys.exit(1)
+        removed += 1
+    return removed
+
+
 def manifest_at_root(zip_path: Path) -> bool:
     with zipfile.ZipFile(zip_path) as zf:
         return MANIFEST in zf.namelist()
@@ -137,7 +228,10 @@ def main():
         print("No plugins found.")
         sys.exit(1)
 
+    print(f"Embedded copies checked: {check_embedded_copies()}")
     DIST_DIR.mkdir(exist_ok=True)
+    if not specific:
+        print(f"Stale zips deleted from dist/: {clear_stale_zips()}")
     built: list[Path] = []
     problems = []
     print(f"Building release artifacts for {len(plugins)} plugin(s) -> dist/\n")

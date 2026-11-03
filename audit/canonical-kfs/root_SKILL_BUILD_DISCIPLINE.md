@@ -2,7 +2,7 @@
 
 The canonical home for rootnode Skill build methodology. Establishes the disciplines that govern how a rootnode Skill gets built from a design specification, validated, packaged, and shipped: pre-build gates, the 9-dimension quality gate, build-event audit artifacts, token-budget heuristics, version-and-lifecycle rules, methodology preservation across releases, design-spec consumption, description refinement loop discipline, and environment-adaptive degradation discipline.
 
-This KF applies to Skills on both surfaces (CP-side methodology Skills and CC-side runtime Skills). Surface-invariant Skill-authoring principles live here. The build tool that operationalizes these disciplines is `rootnode-skill-builder` (currently v3.0, this release). The Skill's references cite this KF as the canonical source; the KF is the methodology, the Skill is the application.
+This KF applies to Skills on both surfaces (CP-side methodology Skills and CC-side runtime Skills). Surface-invariant Skill-authoring principles live here. The build tool that operationalizes these disciplines is the `skill-builder` Skill, shipped in the `rootnode-skill-builder` plugin (6.0.0 at catalog v6.0; the Skill was named `rootnode-skill-builder` before v6.0). The Skill's references cite this KF as the canonical source; the KF is the methodology, the Skill is the application.
 
 When designing a new Skill, building a Skill from a design spec, reviewing an existing Skill, or planning a versioned successor, this is the first KF consulted. For surface-invariant principles that govern Skill behavior at runtime (placement discipline, source authority hierarchy, evidence grounding), see `root_AGENT_ENVIRONMENT_ARCHITECTURE.md`. For the unified anti-pattern catalog scanned by quality gate dimension 7, see `root_AGENT_ANTI_PATTERNS.md`.
 
@@ -75,7 +75,7 @@ Three gates run before any Skill build work begins. Each gate has a pass conditi
 **Pass condition.** Three checks all pass:
 
 1. **Surface placement is clear.** CP-side (runs in chat-side Projects) or CC-side (deploys to delivery project repositories) or both — and the placement is justified by the Skill's natural surface.
-2. **Composition is documented.** Which existing rootnode Skills compose with this one (handoff-trigger-check, profile-builder, skill-builder, rootnode-cc-design, prompt-validation, project-audit, critic-gate, mode-router, repo-hygiene, etc.). Soft pointers only — the Skill works standalone.
+2. **Composition is documented.** Which existing rootnode Skills compose with this one (handoff-trigger-check, profile-builder, skill-builder, cc-design, prompt-validation, project-audit, critic-gate, mode-router, repo-hygiene, etc.). Soft pointers only — the Skill works standalone.
 3. **No duplication.** The Skill fills a clear gap, not a sliver of an existing Skill's domain. Vocabulary, surface, and verb-class differentiate from each adjacent Skill.
 
 **Halt action.** If duplication is detected, surface to user. Ask whether to extend the existing Skill instead of building a duplicate. Building a duplicate creates routing collisions that are hard to undo. Vocabulary, surface, and verb-class are the disambiguation axes; check each.
@@ -98,7 +98,7 @@ After the build pipeline produces SKILL.md and references, the Skill is scored a
 
 **Common catches.** Description over budget after YAML parse (block scalar expansion); body over 500 lines (move detail to references/); reserved-word collision in name; folder/name mismatch.
 
-**Rootnode catalog extension.** All Skills shipped under the `rootnode-` namespace must include tier-marker language in the SKILL.md body declaring model compatibility (e.g., "Opus recommended; non-Opus models may produce less complete output."). The marker signals to consumers which tier the Skill is calibrated for and sets graceful-degradation expectations. This check is rootnode-internal — not part of the Agent Skills spec — but is enforced at PR review for any new Skill or major version bump in the catalog. Common catch: CC-only runtime Skills (critic-gate, mode-router, repo-hygiene) shipped without tier-marker language because the calibration scope decision focused on chat-side Project Skills first; corrected during catalog audit.
+**Rootnode catalog extension.** All Skills shipped in a root.node plugin (the `rootnode-` plugin namespace; before v6.0, the `rootnode-` name prefix) must include tier-marker language in the SKILL.md body declaring model compatibility (e.g., "Opus recommended; non-Opus models may produce less complete output."). The marker signals to consumers which tier the Skill is calibrated for and sets graceful-degradation expectations. This check is rootnode-internal — not part of the Agent Skills spec — but is enforced at PR review for any new Skill or major version bump in the catalog. Common catch: CC-only runtime Skills (critic-gate, mode-router, repo-hygiene) shipped without tier-marker language because the calibration scope decision focused on chat-side Project Skills first; corrected during catalog audit.
 
 `[rootnode-specific; grounded in Phase 32 expansion catalog audit 2026-05-09 — 3 CC-only Skills missing tier-marker language]`
 
@@ -202,6 +202,12 @@ The sub-levels exist because validation infrastructure differs across build envi
 **Grader model.** Run the grader subagent on **Opus 5.5 or Sonnet 5.5** (the current dual-primary tier; landscape block in `root_CLAUDE_OPTIMIZATION_NOTES.md` §3, 2026-10-22). Fable 5.1 is acceptable but wastes cost for the grading task. Opus 5 or Sonnet 5 remains valid as a fallback if the primary refuses the grading prompt. Haiku 5.5 is a valid subject model — an arm can run on it — but not a grader: a grader must be at least as capable as the run it grades, the reviewer-≥-builder rule of `root_CC_ENVIRONMENT_GUIDE.md` §3.5. The grader is external-artifact verification (it grades a different run's output against a rubric) and survives D4's verification-instruction discipline unchanged — it is independent grading of a different agent's output, not the change agent re-checking its own work.
 
 **D9a arm hygiene.** Install each arm's Skill into its project before launching the generation session — hot-reload is confirmed on Claude Code 2.1.136, but installing before launch removes the question from the run. Verify the arm by a loaded-Skill listing plus the SKILL.md LF digest; `metadata.version` cannot distinguish commits inside one PR. Parking the user-level copy no longer isolates an arm: Claude Code v2.1.273+ signed in with claude.ai loads the account's Skills as `anthropic-skills:<name>` beside any project or personal copy. Run each arm as `claude -p` in its own folder outside the repo, with the arm's Skill at project level and `--setting-sources project,local`, and gate every run on the harness `init` event's `skills` list showing exactly one copy (observed 2026-10-29 on Claude Code 2.1.302 and 2.1.312; a plain `claude -p` loaded both copies). Verify a synced copy by its parsed frontmatter plus body, not its raw digest — claude.ai re-serializes SKILL.md frontmatter on upload. Keep the grader's environment identical to the run it is compared with. Pin and report the model ID from the harness transcript, never from an alias.
+
+**Plugin eval harness.** For a Skill shipped in a plugin, `claude plugin eval` is the default D9a harness: it runs each case in `evals/<case>/` with the plugin (WITH) and without it (W/OUT), three runs per arm, and reports the per-case Δ. Pin `--model` and `--judge-model` so a model rollout does not read as a Skill regression, choose the judge by the grader-model rule above (the first v6.0 run used Haiku 5.5, below that floor), and set `--max-cost-usd` on every run. The collapse test — does one line of standing guidance do as well as the Skill? — is a third run of the same cases with `--ablation none` and the one-line guidance as `append_system_prompt`; a Skill whose Δ over that line is within run-to-run noise is a consolidation candidate. The arm-hygiene clause above still applies: the v6.0 run did not observe directly whether the account-synced copies were absent from both arms. `[Claude Code v2.1.269+ for plugin eval; a dated product fact — verify the flags on the running version. Grounded in the v6.0 plugin packaging cycle, 2026-11-02.]`
+
+**Assertions come from the case, not the change list.** Derive each D9a assertion from the correct answer for its case, not from the release's feature list, and state for each assertion the condition under which the feature should be absent. A rubric copied from a change list scores a feature's presence as correctness and fails an output that correctly omits it. `[observed: cc-design 5.0 D9a, 2026-10-29 — F-1, F-3; Observation 31]`
+
+**A grader must be able to fail the baseline.** Write each assertion against a property the W/OUT arm is expected to miss, and say what that miss looks like. When both arms score at the ceiling, Δ = 0 cannot distinguish "the Skill adds nothing" from "the rubric cannot see what the Skill adds" — the instrument-fit failure of `root_AGENT_ENVIRONMENT_ARCHITECTURE.md` §4.14. Treat a ceiling-level W/OUT score as an instrument defect to fix before reading Δ, not as a finding about the Skill. `[observed: v6.0 first plugin eval, 2026-11-02 — rootnode-projects, 5 cases, WITH 1.00 / W/OUT 1.00 on every case; Observation 34]`
 
 **Pass evidence.** Cite the scenario set, the grader model used, the trigger evals run, the grader outputs (pass/fail per assertion for both GREEN and RED), and the differential analysis. Captured in the build summary as `D9: Tier A — empirical comparison (grader: <model>, N scenarios, GREEN/RED differential = X%)`.
 
@@ -326,26 +332,25 @@ To make audit-time provenance discrimination unambiguous, post-discipline Skills
 
 **Retroactive application.** Skills built post-Phase 31a where the marker was not yet emitted are eligible for retroactive marker addition. The Phase 31d remediation cycle adds `metadata.discipline_post: phase-30` to the 7 confirmed post-Phase-30 Skills (cc-design v2, repo-hygiene v1, critic-gate, mode-router, handoff-trigger-check, profile-builder, skill-builder v2). Pre-discipline Skills do not receive the marker — their absence of it is the correct signal.
 
-### 4.7 Release packaging — surface-mapped shapes and the orchestrator
+### 4.7 Release packaging — plugins and the packager
 
-Release packaging produces two zip *shapes*, and each Skill ships the shape(s) its target surface needs. The shape is not a stylistic choice — the wrong shape for a given consumer produces install failures. (The release *process* that uses these shapes lives in `root_SKILLS_RELEASE_PLAYBOOK.md` §1–§2; this section is the build-discipline view of the shapes and the tooling.)
+Since catalog v6.0 (2026-11-02) the distribution unit is the plugin, not the Skill zip. The 27 Skills ship in six plugins from one marketplace. The release *process* lives in `root_SKILLS_RELEASE_PLAYBOOK.md` §1–§2; this section is the build-discipline view of the layout and the tooling.
 
-**Two shapes.**
-- **Flat** (SKILL.md at zip root: `SKILL.md` + `references/` + subdirs, no wrapper folder). The shape Claude.ai / CP Projects upload expects — the installer reads `SKILL.md` at the root. Suffixed `-cp`.
-- **Wrapper** (a nested `{skill-name}/` folder holding the contents: `{skill-name}/SKILL.md` + `{skill-name}/references/` + `{skill-name}/scripts/` + `{skill-name}/agents/`, whichever apply). The shape CC install expects — the folder is extracted into `~/.claude/skills/`; a flat zip would extract loose files and break the install. Suffixed `-cc`. This is also the shape used for **local install testing and PR audit evidence** (committed under `design/audit-artifacts/`), since testing a Skill means installing it into `~/.claude/skills/`.
+**Layout.** A Skill's source folder is `plugins/<plugin>/skills/<name>/`, where `<name>` equals the SKILL.md `name:` field (D1). Each plugin carries `.claude-plugin/plugin.json`, whose `version` is the release unit (§6.6), plus a README and a LICENSE, and optionally `evals/` and plugin-level `hooks/` and `scripts/`. The repo root carries `.claude-plugin/marketplace.json` (marketplace `rootnode`, `metadata.pluginRoot: ./plugins`). An installed Skill appears as `<plugin>:<name>`, for example `rootnode-projects:project-audit`. The v6.0 grouping is rootnode-projects 7, rootnode-prompts 11, rootnode-governance 5, rootnode-code 2, rootnode-tuning 1, rootnode-skill-builder 1 — 27. The authoritative roster is `audit/repo-catalog/` and `marketplace.json`, not this paragraph. A plugin bound for claude.ai stays inside that surface's limits: no `bin/` directory (it blocks the install), at most 5,000 files and 200 MB.
 
-**Surface map → shape.** Which shape a Skill ships is fixed by its surface, not by build-vs-release context: CP-surface Skills ship **flat** (`-cp`); CC-surface Skills ship **wrapper** (`-cc`); dual-surface Skills ship **both**. Across the catalog that is **29 release artifacts = 24 `-cp` (flat) + 5 `-cc` (wrapper)** from 27 source folders (22 cp-only + 3 cc-only + 2 dual). The `-cp`/`-cc` suffix is applied by the packager and is never present on the source folder. (Authoritative surface map: playbook §1.2.)
+**One shape.** `build_release_artifacts.py` writes one zip per plugin, `dist/<plugin>-v<version>.zip`, with the version read from that plugin's `plugin.json` and `.claude-plugin/plugin.json` at the zip root — the shape claude.ai **Upload plugin** takes. It leaves `evals/` out at the plugin root and at each Skill root, stores shell scripts as LF with mode 0755, and asserts six zips on a full build. The `-cp` flat, `-cc` wrapper and catalog-bundle zips retired at v6.0 (design D5), and with them the 24 + 5 = 29 surface map: a plugin serves chat, Cowork and Claude Code from one artifact. `build_releases.py`, the flat-only legacy packager, is removed in the v6.0 release PR. For the authoritative packager inventory, see `audit/repo-catalog/`.
 
-**The orchestrator (canonical release packager).** `build_release_artifacts.py` is the single release packager: it reads the surface map, emits flat for `-cp` / wrapper for `-cc`, applies the suffix, self-asserts the 24 + 5 = 29 count (non-zero exit on mismatch), and on a full build runs `write_bundle()` to archive all 29 artifact zips into `dist/rootnode-catalog-vN.zip` (the catalog-umbrella bundle). A release runs this. Both shape emitters live inside the orchestrator — the wrapper-shape logic is ported from Anthropic's upstream `package_skill.py` (a skill-creator packager that is **not** a tracked file in this repo; see [build_release_artifacts.py:7](build_release_artifacts.py#L7) and [:61](build_release_artifacts.py#L61) for the porting attribution). The tracked sibling is:
-- `build_releases.py` — flat shape only, `.zip`, no suffix/routing. Legacy half-tool; superseded by the orchestrator but retained as a reference. Neither `build_releases.py` alone nor the orchestrator plus a nonexistent upstream `package_skill.py` produces a correct release set; only `build_release_artifacts.py` does.
+**Validation.** `claude plugin validate .` checks the marketplace and `claude plugin validate ./plugins/<plugin> --strict` checks each plugin. A release does not ship a plugin that fails either. `[dated product fact — verify on the running Claude Code version]`
 
-Keep the orchestrator and `build_releases.py` tracked in the repo. For the authoritative packager inventory, see `audit/repo-catalog/`.
+**`package_skill.py`.** Anthropic's single-Skill packager lives upstream at `anthropics/skills`, `skills/skill-creator/scripts/package_skill.py` (verified 2026-11-02 at commit `ca45fc496a3436251f191354091d557da31c15b5`). It writes `<name>.skill`, a zip whose entries sit under a `<name>/` folder, and leaves a root-level `evals/` out. Its validator, `quick_validate.py`, accepts six frontmatter keys — `name`, `description`, `license`, `allowed-tools`, `metadata`, `compatibility` — and rejects any other. It is not a tracked file in this repo and it is not the release packager. Use it, or skill-builder's `scripts/package_zip.py` (adapted from it, and also not the release packager), only for a single-Skill upload outside the plugin path.
 
-**Shape must match surface (the failure mode).** Attaching a flat zip where CC install expects a wrapper extracts loose files into `~/.claude/skills/` and breaks the install; attaching a wrapper zip where Claude.ai upload expects flat fails the platform installer (it reads for `SKILL.md` at the zip root and finds a folder instead). The suffix encodes the shape so the two cannot be confused.
+**Why plugins.** One account install reaches chat, Cowork and Claude Code. The marketplace gives an update channel: **Sync automatically** on claude.ai, and `claude plugin update` on Claude Code, where auto-update for a third-party marketplace is off by default. `claude plugin eval` gives a native lift instrument (§3.9a). A zip had none of the three.
 
-**Build-vs-release framing (reframed).** Earlier text framed this as "flat is the release form, wrapper is the PR-evidence form." That is only true for CP-surface Skills. The accurate model: the **release ships the surface-mapped set** — flat for CP-surface Skills, wrapper for CC-surface Skills, both for dual — produced by the orchestrator at release time. Separately, a **single-Skill enhancement build** produces the shape(s) for that Skill's surface(s) and additionally produces a wrapper for local install testing / PR audit evidence regardless of distribution surface (you install into `~/.claude/skills/` to test). So a CP-only Skill distributes flat but may carry a wrapper as build evidence; a CC-only Skill distributes the same wrapper shape it tests with; a dual Skill distributes both. Release pre-flight verifies the surface-mapped set exists (the orchestrator's 29-assert) before tag creation.
+**Double-load hazard.** A plugin installed on the account syncs to Claude Code as `<plugin>@synced`. A local install of the same plugin, or a pre-v6.0 standalone upload of the same Skill under its `rootnode-` name, loads a second copy with an overlapping description (§6.2). Install on claude.ai or locally, not both, and turn off the pre-v6.0 standalone Skills once the plugins are installed.
 
-`[generalizable; grounded in Phase 32c pre-flight 2026-05-08 (operator surfaced that an audit-artifacts wrapper zip is correct for CC install but not for a flat-expecting Claude.ai upload) and the catalog v3.1 release 2026-06-25/26 (the surface-mapped orchestrator build_release_artifacts.py + the umbrella bundle settled the model; supersedes the prior "flat = the release form" framing). Script-name correction (v4.0 alignment cycle 2026-07-25): upstream `package_skill.py` is not a tracked repo file — it is Anthropic's skill-creator packager whose wrapper-shape exclusion rules were ported into the orchestrator; the orchestrator emits `.zip`. The `skill-builder` Skill's internal `scripts/package_zip.py` is a *separate* build-pipeline packager (adapted from the same upstream `package_skill.py` for `.zip` + `eval-viewer/` inclusion) — not the release-time packager, and not to be conflated with the orchestrator.]`
+**Hooks ship with the plugin.** A hook declared in `plugins/<plugin>/hooks/hooks.json` runs in every repository where the plugin is enabled; chat ignores hooks and agents. A Skill reference that embeds a shipped script must match the shipped file byte for byte after LF normalization. The packager enforces this and fails the build on drift (check added in the v6.0 release PR), because the v6.0 build left the cc-design composition reference carrying the pre-ship sketches.
+
+`[generalizable for the layout and the single-shape rule; grounded in the v6.0 plugin packaging cycle 2026-10-31 → 11-02 (design `design/root_DESIGN_plugin_packaging.md` D1–D6; PR #30, merge `d0c5bea3b1eeeda6f4eee087b388ba88fa7ab03e`), the claude.ai Upload plugin test of `rootnode-projects-v6.0.0.zip`, and the upstream read of `anthropics/skills`. Supersedes the v3.1 surface-mapped `-cp`/`-cc` model.]`
 
 ---
 
@@ -410,6 +415,16 @@ Patch releases (v1.0.0 → v1.0.1) and minor releases (v1.0 → v1.1) within the
 ### 6.5 Rollback
 
 Successor releases do not eliminate the predecessor's deployable artifact. The predecessor zip remains in `Projects/{CODE}/research/` as a durable archive; rollback is `rm -rf successor && unzip predecessor` — non-destructive.
+
+### 6.6 Plugin versioning and the v6.0 rename
+
+Since v6.0 the plugin is the version unit a user sees. `plugin.json` `version` pins installed users until it changes, so raising it is the release act, and merging a raised version to `main` publishes it to marketplace users. Raise a plugin's version on every release that changes any file in that plugin; leave the other plugins alone.
+
+A Skill's `metadata.version` stays as the per-Skill catalog record. At v6.0 all 27 move to `6.0.0`. After v6.0, a release that changes a Skill sets that Skill's `metadata.version` to its plugin's new version, and an unchanged Skill keeps its value, so a Skill's version names the plugin release that last changed it.
+
+The v6.0 rename applied §6.2 to the whole catalog: all 27 `name:` fields lost the `rootnode-` prefix (design D3), so every v6.0 Skill is a successor under the rename rule and carries `metadata.predecessor: "rootnode-<name> v<last version>"`. The §6.2 hazard has a v6.0 form: the pre-v6.0 standalone uploads (`rootnode-<name>`) and the plugin copies (`<plugin>:<name>`) load side by side until the standalone uploads are turned off.
+
+`[rootnode-specific; grounded in the v6.0 plugin packaging cycle, 2026-11-02. The Skill-version coupling rule is a v6.0 default set at the seed-side propagation, not a design-spec decision.]`
 
 ---
 
@@ -531,7 +546,7 @@ This is not consensus engineering — the primary model's spec is canonical; the
 
 The 1024-character description field is the highest-leverage surface in a Skill — it is the auto-activation index entry that determines whether the Skill triggers on a user query. A description that fails to trigger renders every other discipline (build gates, quality gate, methodology preservation) inert; the Skill exists but the user never reaches it. The description refinement loop is the methodology that hardens a description against under-triggering and over-triggering through evidence-based iteration rather than authorial heuristic.
 
-Two reasons this discipline lives at the methodology layer rather than as a Skill-specific procedure: it generalizes across every Skill build, not just `rootnode-skill-builder`'s — any future build CV that produces a description benefits from the same iteration shape — and the train/test split discipline that prevents overfitting is methodology-grade, not implementation detail. The reference application lives in `rootnode-skill-builder/references/description-optimization.md`; the canonical home for the discipline is here.
+Two reasons this discipline lives at the methodology layer rather than as a Skill-specific procedure: it generalizes across every Skill build, not just skill-builder's — any future build CV that produces a description benefits from the same iteration shape — and the train/test split discipline that prevents overfitting is methodology-grade, not implementation detail. The reference application lives in `plugins/rootnode-skill-builder/skills/skill-builder/references/description-optimization.md`; the canonical home for the discipline is here.
 
 ### 9.1 Trigger eval generation
 
@@ -555,7 +570,7 @@ When subagent execution is available, the description refinement loop runs as an
 4. Score the revised description against the held-out test set.
 5. Repeat for N iterations; select the revision with the highest test-set score, not the highest train-set score — train-set wins are ambiguous between true improvement and overfitting.
 
-The reference implementation is `rootnode-skill-builder/scripts/description_optimizer.py`. The build CV's role is to generate the trigger eval corpus and review the optimizer's iteration outputs; the optimizer's role is to mechanize the iteration loop and surface the per-iteration train/test scores for review.
+The reference implementation is `plugins/rootnode-skill-builder/skills/skill-builder/scripts/description_optimizer.py`. The build CV's role is to generate the trigger eval corpus and review the optimizer's iteration outputs; the optimizer's role is to mechanize the iteration loop and surface the per-iteration train/test scores for review.
 
 ### 9.4 Anti-overfitting principle
 
@@ -565,7 +580,7 @@ The held-out discipline is the structural reason the corpus is split rather than
 
 ### 9.5 Triggering detection mechanism
 
-The auto-activation engine signals a Skill trigger via the model's stream-event protocol: a `content_block_start` event with type `tool_use` and the Skill's name in the tool field. The triggering detection mechanism — the procedure that determines whether a given query triggered the Skill — monitors the stream for this event pattern and records the trigger result per query. The detection mechanism is preserved verbatim in `rootnode-skill-builder/scripts/description_optimizer.py` and documented in `references/description-optimization.md`.
+The auto-activation engine signals a Skill trigger via the model's stream-event protocol: a `content_block_start` event with type `tool_use` and the Skill's name in the tool field. The triggering detection mechanism — the procedure that determines whether a given query triggered the Skill — monitors the stream for this event pattern and records the trigger result per query. The detection mechanism is preserved verbatim in `plugins/rootnode-skill-builder/skills/skill-builder/scripts/description_optimizer.py` and documented in `references/description-optimization.md`.
 
 The detection is critical because manual inspection of conversational output cannot reliably tell whether the Skill was invoked or whether the model simply produced output similar to what the Skill would have produced. The stream-event signal is the only ground-truth source. Refinement loops that score by output similarity rather than by trigger-event detection produce false positives (the model produced Skill-like output without triggering) and false negatives (the Skill triggered but the output didn't visibly differ).
 
@@ -579,7 +594,7 @@ The description refinement loop is invoked by D9 sub-levels:
 
 The trigger eval corpus generated for description refinement is the same corpus used by D9a/D9b for behavioral validation. Generating one corpus serves both dimensions; this is intentional, not duplication. Tier applicability is determined per the environment-adaptive degradation discipline (§10).
 
-For full procedural detail (eval query schema verbatim, query realism principles, train/test split mechanics, optimization prompt structure, run mechanics), see `rootnode-skill-builder/references/description-optimization.md`.
+For full procedural detail (eval query schema verbatim, query realism principles, train/test split mechanics, optimization prompt structure, run mechanics), see `plugins/rootnode-skill-builder/skills/skill-builder/references/description-optimization.md`.
 
 ---
 
@@ -631,13 +646,13 @@ Each tier has an explicit fallback to the next lower tier when an evaluation ste
 
 Tier applicability gates the D9 sub-level (§3.9): D9a requires Tier A; D9b requires Tier B or Tier A; D9c is always available as the analytical floor. The description refinement loop (§9) uses the same tier model — Tier A invokes the automated optimizer, Tier B/C falls back to the manual walkthrough. Other empirical workflows (version comparison, benchmark aggregation) follow the same tier pattern.
 
-For per-script tier compatibility tables and detailed fallback patterns, see `rootnode-skill-builder/references/multi-environment-adaptation.md`.
+For per-script tier compatibility tables and detailed fallback patterns, see `plugins/rootnode-skill-builder/skills/skill-builder/references/multi-environment-adaptation.md`.
 
 ---
 
 ## 11. Catalog-wide consistency discipline
 
-When the rootnode-skill-builder methodology evolves a SKILL.md convention (frontmatter shape, required body structure, metadata field set, validator rules), all dependent Skills in the rootnode catalog should be audited for the same convention in a coordinated maintenance cycle. Without this discipline, the catalog drifts into mixed conventions over time, producing technical debt that compounds across releases.
+When the skill-builder methodology evolves a SKILL.md convention (frontmatter shape, required body structure, metadata field set, validator rules), all dependent Skills in the rootnode catalog should be audited for the same convention in a coordinated maintenance cycle. Without this discipline, the catalog drifts into mixed conventions over time, producing technical debt that compounds across releases.
 
 ### 11.1 Trigger
 
@@ -723,7 +738,7 @@ For the unified anti-pattern catalog:
 
 For the build tool itself:
 
-- **The rootnode-skill-builder Skill (currently v3.0, this release):** the operational application of these disciplines. Its references (`decomposition-framework.md`, `warrant-check-criteria.md`, `ecosystem-placement-decision.md`, `auto-activation-discipline.md`, `anti-pattern-catalog.md`, `conversion-guide.md`, `skills-spec.md`) cite back to this KF as the canonical methodology. When this KF evolves, skill-builder's references regenerate against the new canonical.
+- **The skill-builder Skill (`rootnode-skill-builder` plugin, 6.0.0 at catalog v6.0):** the operational application of these disciplines. Its references (`decomposition-framework.md`, `warrant-check-criteria.md`, `ecosystem-placement-decision.md`, `auto-activation-discipline.md`, `anti-pattern-catalog.md`, `conversion-guide.md`, `skills-spec.md`) cite back to this KF as the canonical methodology. When this KF evolves, skill-builder's references regenerate against the new canonical.
 
 For Project-level context budget (different concern):
 

@@ -229,11 +229,26 @@ The doc's own warning: "Exit code 1 without valid JSON output is a non-blocking 
 }
 ```
 
+The `rootnode-code` plugin ships both scripts with this wiring in `hooks/hooks.json`, using `"${CLAUDE_PLUGIN_ROOT}"/scripts/<name>` paths; the blocks below are those scripts.
+
+<!-- shipped: plugins/rootnode-code/scripts/guard-migrations.sh -->
 ```bash
 #!/bin/bash
-# guard-migrations.sh — Edit|Write|NotebookEdit|Bash|PowerShell guard; fails closed.
+# guard-migrations.sh — Edit|Write|NotebookEdit|Bash|PowerShell guard.
+# With jq: parses the tool's target; fails closed on unreadable input.
+# Without jq: no parsing. Blocks any hook input that contains "migrations", in any case, and allows the rest.
 [ "${MIGRATIONS_GUARD_OFF:-0}" = "1" ] && exit 0      # off-switch; audit its use
 IN=$(cat)
+if ! command -v jq >/dev/null; then
+  case "$(printf '%s' "$IN" | tr '[:upper:]' '[:lower:]')" in
+  *migrations*)
+    mkdir -p .claude && echo "$(date -u +%FT%TZ) block no-jq" >> .claude/guard.log ||   # audit row
+      echo "guard: audit row not written" >&2
+    echo "jq is missing and this call mentions migrations, so it is blocked. Next step: install jq (winget install jqlang.jq, brew install jq, or apt-get install jq)." >&2
+    exit 2 ;;
+  esac
+  exit 0
+fi
 TOOL=$(printf '%s' "$IN" | jq -r '.tool_name // ""') &&
 T=$(printf '%s' "$IN" | jq -r '.tool_input.file_path // .tool_input.notebook_path // .tool_input.command // ""') ||
   { echo "Input unreadable; rule holds. Next step: check jq and the hook input." >&2; exit 2; }
@@ -272,7 +287,9 @@ echo "migrations/ is protected. Next step: use the migration tool, then stop for
 exit 2
 ```
 
-**What the guard cannot see.** It matches command text, so a delete that does not appear as text gets through: a pipe-fed delete (`ls migrations | xargs rm`, `Get-ChildItem migrations | Remove-Item`), a script or another interpreter that deletes, or a variable that expands to the path. For a guarantee, pair the guard with the mechanisms that deny writes to the path. An `Edit` deny rule, `"permissions": { "deny": ["Edit(migrations/**)"] }`, matches a `migrations` folder at any depth and covers Claude's file tools, the file commands Claude Code recognizes in Bash, and redirect targets, but not "arbitrary subprocesses that read or write files indirectly". The sandbox's `sandbox.filesystem.denyWrite` (for example `["./migrations"]`, with `sandbox.enabled` true) is enforced by the operating system on Bash, PowerShell and Monitor commands and the processes they start, and Claude Code adds `Edit` deny rules to the same list. The sandbox runs on macOS, Linux and WSL2; on native Windows, Claude Code runs commands unsandboxed, so the OS-level half needs WSL2 or a container there. By default a sandbox that cannot start falls back to unsandboxed commands; `sandbox.failIfUnavailable` makes Claude Code exit instead. `[Anthropic docs — permissions, sandboxing, settings reference, fetched 2026-10-30]` The guard then adds an on-task message and an audit row; it is not the guarantee itself.
+**Without `jq`.** The guard does no parsing. It blocks any gated call whose hook input contains `migrations` in any case, including a file's content or a path outside the target, writes a `block no-jq` audit row to `.claude/guard.log` (or warns on stderr when it cannot), and names installing `jq` as the next step; everything else passes. That branch also blocks the pipe-fed delete below, but a wildcard (`rm *`) or a quote-split name such as `mig''rations` gets through. With `jq`, a block writes `block <tool> <path>` to the same log and tells Claude to use the migration tool, then stop for review.
+
+**What the guard cannot see.** With `jq`, it matches command text, so a delete that does not appear as text gets through: a pipe-fed delete (`ls migrations | xargs rm`, `Get-ChildItem migrations | Remove-Item`), a script or another interpreter that deletes, or a variable that expands to the path. For a guarantee, pair the guard with the mechanisms that deny writes to the path. An `Edit` deny rule, `"permissions": { "deny": ["Edit(migrations/**)"] }`, matches a `migrations` folder at any depth and covers Claude's file tools, the file commands Claude Code recognizes in Bash, and redirect targets, but not "arbitrary subprocesses that read or write files indirectly". The sandbox's `sandbox.filesystem.denyWrite` belongs in project settings, `.claude/settings.json`, where `./` resolves to the project root: there `["./migrations"]`, with `sandbox.enabled` true, is enforced by the operating system on Bash, PowerShell and Monitor commands and the processes they start, and Claude Code adds `Edit` deny rules to the same list. That entry covers only the root `migrations` folder; the `Edit` deny rule supplies the any-depth coverage. The sandbox runs on macOS, Linux and WSL2; on native Windows, Claude Code runs commands unsandboxed, so the OS-level half needs WSL2 there. By default a sandbox that cannot start falls back to unsandboxed commands; `sandbox.failIfUnavailable` makes Claude Code exit instead. `[Anthropic docs — permissions, sandboxing, settings reference, fetched 2026-10-30]` The guard then adds an on-task message and an audit row; it is not the guarantee itself.
 
 ---
 
@@ -282,14 +299,28 @@ The verification-before-completion pattern (named in obra/superpowers, Marc Nuri
 
 **The pattern:** a `Stop` hook that blocks completion unless the agent provides evidence of test passage.
 
-**Implementation sketch (`.claude/hooks/verify-tests.sh`):**
+**Shipped script (`verify-tests.sh`; `.claude/hooks/verify-tests.sh` in the authoring example):**
 
+<!-- shipped: plugins/rootnode-code/scripts/verify-tests.sh -->
 ```bash
 #!/bin/bash
-# verify-tests.sh — Stop guard; fails closed; bounded.
+# verify-tests.sh — Stop guard; fails closed; bounded. Exits 0 in a repo with no detectable test command.
 [ "${VERIFY_GATE_OFF:-0}" = "1" ] && exit 0          # off-switch; audit its use
 EV=.claude/state/last-test-evidence.json; CT=.claude/state/verify-gate.count
+has_test_command() {                                 # common conventions, checked at the session's working directory
+  [ -f "$EV" ] && return 0                           # recorded evidence opts the repo in
+  grep -s '"test"[[:space:]]*:' package.json | grep -qv 'no test specified' && return 0
+  grep -qsE '^(unit)?tests?:' Makefile makefile GNUmakefile && return 0
+  grep -qs '^\[tool\.pytest' pyproject.toml && return 0
+  for F in pytest.ini tox.ini noxfile.py go.mod Cargo.toml pom.xml build.gradle build.gradle.kts mix.exs; do
+    [ -f "$F" ] && return 0
+  done
+  { compgen -G '*.sln' || compgen -G '*.csproj'; } >/dev/null && return 0
+  [ -d tests ] || [ -d test ] || [ -d spec ]
+}
+has_test_command || exit 0                           # nothing to verify: no block, no state written
 MAX="${VERIFY_GATE_MAX_BLOCKS:-2}"; mkdir -p .claude/state   # N: 2 interactive, 8 unattended; keep N ≤ CLAUDE_CODE_STOP_HOOK_BLOCK_CAP (default 8)
+HOST="${CLAUDE_CODE_STOP_HOOK_BLOCK_CAP:-8}"; [ "$MAX" -le "$HOST" ] 2>/dev/null || MAX=$HOST   # enforce N ≤ host cap
 MAX_TOTAL="${VERIFY_GATE_MAX_TOTAL:-$((MAX * 3))}"           # M: 3×N [assumption — tune per repo]
 INPUT=$(cat)                                                 # read stdin once
 block() {  # $1 = on-task reason naming the next step
@@ -307,12 +338,14 @@ ACTIVE=true                                          # bound 1: no jq or unreada
 command -v jq >/dev/null && ACTIVE=$(printf '%s' "$INPUT" | jq -r '.stop_hook_active // false' 2>/dev/null || echo true)
 [ "$ACTIVE" = "true" ] || rm -f "$CT"                # a new stop chain resets the counter
 command -v jq >/dev/null || block "jq not found — evidence not evaluated; caps still apply"
-[ -f "$EV" ] || block "Next step: run the test suite and record the result to $EV."
+[ -f "$EV" ] || block "Next step: run the test suite and record the result to $EV with \"pass\": true or false."
 AGE=$(($(date +%s) - $(stat -c %Y "$EV" 2>/dev/null || stat -f %m "$EV")))
 [ "$AGE" -le 300 ] || block "Next step: re-run the test suite; the evidence is over 5 minutes old."
-[ "$(jq -r '.pass' "$EV")" = "true" ] || block "Next step: fix the failures recorded in $EV and re-run the suite."
+[ "$(jq -r '.pass' "$EV")" = "true" ] || block "Next step: $EV does not show \"pass\": true. Fix any failures, re-run the suite, and record the result."
 rm -f "$CT"; exit 0
 ```
+
+In a repository where it finds no test command (no `"test":` line in `package.json` other than npm's `no test specified` placeholder, no `test`/`tests`/`unittest`/`unittests` Makefile target, no `[tool.pytest` section in `pyproject.toml`, none of the listed build files, `.sln`, `.csproj`, or `tests`/`test`/`spec` folder) and no recorded evidence, the hook exits 0 before it reads stdin or writes state. Recorded evidence opts a repository in whatever else it contains. N defaults to 2 and is clamped to `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` (default 8); M defaults to 3×N. Without `jq`, every stop counts as a chain continuation, so the counter never resets on its own: the hook blocks with `jq not found — evidence not evaluated; caps still apply` at most N times on unchanged evidence and M times in total per repository, until `.claude/state/verify-gate.count` is deleted. With `jq`, each block message names the next step: record the result with `"pass": true` or false, re-run a suite whose evidence is over five minutes old, or fix the failures when the evidence does not show `"pass": true`.
 
 **Combined with a CLAUDE.md prompt rule:**
 

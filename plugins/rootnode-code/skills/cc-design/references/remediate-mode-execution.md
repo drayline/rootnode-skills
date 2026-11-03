@@ -153,7 +153,7 @@ The plan file is Markdown with a YAML front-matter block. The full schema is at 
 ---
 plan_id: <uuid or short identifier>
 generated_at: <ISO-8601 timestamp>
-generated_by: rootnode-cc-design v2.0
+generated_by: cc-design v6.0.0
 input_report: HYGIENE_REPORT.md
 addresses_findings: [F-1.1, F-12.1, F-13.1, ...]
 summary: |

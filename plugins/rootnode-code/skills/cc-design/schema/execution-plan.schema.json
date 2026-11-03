@@ -31,8 +31,8 @@
     },
     "generated_by": {
       "type": "string",
-      "description": "Skill identifier and version that produced the plan. Format: 'rootnode-cc-design v<version>'.",
-      "pattern": "^rootnode-cc-design v\\d+\\.\\d+(\\.\\d+)?$"
+      "description": "Skill identifier and version that produced the plan. Format: 'cc-design v<version>'; plans stamped 'rootnode-cc-design v<version>' before v6.0 still validate.",
+      "pattern": "^(rootnode-)?cc-design v\\d+\\.\\d+(\\.\\d+)?$"
     },
     "input_report": {
       "type": "string",

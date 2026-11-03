@@ -60,3 +60,15 @@ This PR will move 12 Skills to 5.0.1 per `design/root_DESIGN_catalog_v5.0.1_patc
 - rootnode-prompt-validation, rootnode-domain-agentic-context 5.0.1 — current-tier wording (F16)
 - rootnode-domain-research-analysis 5.0.1 — examples pointer (F24)
 - Catalog surfaces — canonical-KF mirrors CC_EG, AAP, SBD and AEA synced from staging; README badges, bundle name and sync caveat; release playbook §1.2 and §1.6; packager `CATALOG_VERSION`; `release-notes/*-v5.0.1.md` and `release-notes/catalog-v5.0.1.md`; `audit/v5_0_1-patch/` (build reports, review files, release-notes config)
+
+## Catalog v6.0 — plugin marketplace (`release/v6.0`)
+
+This PR completes the plugin layout from PR #30 per `design/root_DESIGN_plugin_packaging.md` (D1–D6): all 27 Skills move to 6.0.0 inside six plugins listed by `.claude-plugin/marketplace.json`, and merging it publishes them. Release shape: six per-plugin releases `<plugin>/v6.0.0` (`--latest=false`, one zip each) and a `catalog-v6.0` umbrella marked Latest with the six plugin zips; the `-cp`/`-cc` zips and the catalog bundle retire.
+
+- rootnode-projects 6.0.0 — project-audit, global-audit, full-stack-audit, anti-pattern-detection, memory-optimization, context-budget, project-brief; first eval suite (5 cases for `claude plugin eval`, kept out of the zip; first run showed no lift)
+- rootnode-code 6.0.0 — cc-design, repo-hygiene; ships the migration guard and the bounded test-evidence Stop hook; README hook claims match the shipped scripts; cc-design hook reference embeds both scripts under `shipped:` markers, F-15 `denyWrite` settings scope, F-16 CR-count positive control, execution-plan schema accepts `cc-design v…`
+- rootnode-prompts 6.0.0 — prompt-compilation, prompt-validation, block-selection, identity-blocks, reasoning-blocks, output-blocks, five domain packs
+- rootnode-tuning 6.0.0 — behavioral-tuning
+- rootnode-governance 6.0.0 — critic-gate, mode-router, handoff-trigger-check, session-handoff, profile-builder; profile-builder example finds the schema in a plugin install
+- rootnode-skill-builder 6.0.0 — skill-builder; path references and `package_zip.py` docstring use the plugin layout
+- Catalog surfaces — canonical-KF mirrors SBD and CC_EG synced from staging; `docs/root_SKILLS_RELEASE_PLAYBOOK.md` replaced; CLAUDE.md mission, packaging and releases sections; README Quick Start, plugin table, badge, unprefixed Skill names, roadmap; packager clears stale zips and checks embedded copies; `generate_release_notes.py` writes per-plugin notes; `build_releases.py` removed; `release-notes/*-v6.0.0.md`, `release-notes/catalog-v6.0.md`, `audit/v6_0-release/` (release-notes config)

@@ -1,0 +1,43 @@
+{
+  "name": "rootnode",
+  "owner": {
+    "name": "Drayline LLC",
+    "url": "https://rootnode.design"
+  },
+  "description": "root.node — the architecture system for Claude. Measured plugins for Project and global-layer audit, Claude Code environment design, prompt compilation, and behavioral tuning.",
+  "metadata": {
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "rootnode-projects",
+      "source": "rootnode-projects",
+      "category": "audit"
+    },
+    {
+      "name": "rootnode-code",
+      "source": "rootnode-code",
+      "category": "claude-code"
+    },
+    {
+      "name": "rootnode-prompts",
+      "source": "rootnode-prompts",
+      "category": "prompting"
+    },
+    {
+      "name": "rootnode-tuning",
+      "source": "rootnode-tuning",
+      "category": "behavior"
+    },
+    {
+      "name": "rootnode-governance",
+      "source": "rootnode-governance",
+      "category": "runtime"
+    },
+    {
+      "name": "rootnode-skill-builder",
+      "source": "rootnode-skill-builder",
+      "category": "authoring"
+    }
+  ]
+}

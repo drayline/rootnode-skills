@@ -1,0 +1,18 @@
+{
+  "name": "rootnode-code",
+  "displayName": "root.node Code",
+  "version": "6.0.0",
+  "description": "Design and maintain Claude Code environments: environment design and remediation, repository hygiene scanning, plus a migration guard and a bounded test-evidence Stop hook.",
+  "author": {
+    "name": "Drayline LLC",
+    "url": "https://rootnode.design"
+  },
+  "repository": "https://github.com/drayline/rootnode-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "claude-code",
+    "environment-design",
+    "hooks",
+    "repo-hygiene"
+  ]
+}

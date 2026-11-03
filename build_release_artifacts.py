@@ -1,129 +1,128 @@
 #!/usr/bin/env python3
 """
-build_release_artifacts.py — Build the surface-mapped, suffixed release artifacts
-for the rootnode-skills catalog.
+build_release_artifacts.py — Build the plugin release artifacts for the
+rootnode-skills catalog.
 
-This is the single release-packaging entry point. It supersedes the manual
-two-script dance (build_releases.py for flat + package_skill.py for wrapper),
-producing every release zip with the correct shape, surface suffix, and naming.
+This is the single release-packaging entry point. It writes one zip per plugin
+directory under plugins/ into dist/, named from the plugin's own manifest:
 
-For each (Skill, surface) it writes one zip into dist/:
-  - CP surface -> FLAT zip    (contents at zip root)              -> rootnode-<skill>-cp.zip
-  - CC surface -> WRAPPER zip (nested rootnode-<skill>/ folder)   -> rootnode-<skill>-cc.zip
+  plugins/<plugin>/ -> dist/<plugin>-v<version>.zip
 
-Why the two shapes:
-  - CP (Claude.ai Projects) Skill upload reads SKILL.md at the zip ROOT -> flat.
-  - CC keeps each Skill as a folder at ~/.claude/skills/rootnode-<skill>/.
-    The wrapper zip contains that folder, so extraction yields the ready-named
-    folder to drop in. A flat CC zip would extract loose files -> broken install.
+Each zip holds the plugin's contents at the zip root, with
+.claude-plugin/plugin.json at the root as Upload plugin on claude.ai requires.
+The plugin name already carries the rootnode- prefix.
 
-Surface map (THE single place to edit if catalog surface assignments change):
-  CC_ONLY : ships -cc only
-  DUAL    : ships both -cp and -cc
-  (every other rootnode-* folder ships -cp only)
+Eval suites stay in the repo: evals/ is left out of the zip at the plugin root
+and at each skill root. Shell scripts are stored as LF with mode 0755 so hooks
+run on Linux and macOS no matter where the zip was built.
 
-Full-build expectation: 22 cp-only + 3 cc-only + (2 dual x 2) = 29 artifacts
-                        = 24 '-cp' (flat) + 5 '-cc' (wrapper).
-
-On a full build it also writes dist/rootnode-catalog-<VERSION>.zip: a single
-bundle of all 29 zips. Upload it to the catalog umbrella release so users can
-grab the whole catalog in one download. (Per-Skill releases still carry the
-individual zips; the bundle is the "give me everything" path.) The bundle is
-written only on a full build, never on a specific-skill subset.
+Full-build expectation: 6 plugins -> 6 zips.
 
 Usage:
-    python build_release_artifacts.py             # all skills (asserts 29)
-    python build_release_artifacts.py skill ...   # specific skills (by suffix or full name)
+    python build_release_artifacts.py              # all plugins (asserts 6)
+    python build_release_artifacts.py plugin ...   # specific plugins (by suffix or full name)
 """
 
 import fnmatch
+import json
 import sys
 import zipfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
+PLUGINS_DIR = REPO_ROOT / "plugins"
 DIST_DIR = REPO_ROOT / "dist"
-SKILL_PREFIX = "rootnode-"
+PLUGIN_PREFIX = "rootnode-"
+MANIFEST = ".claude-plugin/plugin.json"
 
-# --- Surface map: names are the part AFTER the rootnode- prefix ----------------
-CC_ONLY = {"critic-gate", "mode-router", "repo-hygiene"}
-DUAL = {"skill-builder", "cc-design"}
-# Everything else under rootnode-* is CP-only.
+EXPECTED_TOTAL = 6
 
-EXPECTED_TOTAL = 29
-EXPECTED_CP = 24
-EXPECTED_CC = 5
-
-# Names the all-Skills bundle written on full builds (uploaded to the
-# catalog-<ver> umbrella release). Bump this per catalog release.
-CATALOG_VERSION = "v5.0.1"
-
-# --- Exclusions (ported from package_skill.py) ---------------------------------
+# --- Exclusions ----------------------------------------------------------------
 EXCLUDE_DIRS = {"__pycache__", "node_modules"}
 EXCLUDE_GLOBS = {"*.pyc"}
-EXCLUDE_FILES = {".DS_Store"}
-ROOT_EXCLUDE_DIRS = {"evals"}  # excluded only at the skill root, not when nested deeper
+EXCLUDE_FILES = {".DS_Store", ".gitattributes"}
+ROOT_EXCLUDE_DIRS = {"evals"}  # excluded only at the plugin and skill roots
 
 
-def should_exclude(rel_to_parent: Path) -> bool:
-    """rel_to_parent is relative to skill_path.parent: parts[0] = skill folder,
-    parts[1] = first subdir."""
-    parts = rel_to_parent.parts
+def should_exclude(rel_to_plugin: Path) -> bool:
+    """rel_to_plugin is relative to the plugin folder: parts[0] = first subdir,
+    and under skills/, parts[1] = skill folder and parts[2] = its first subdir."""
+    parts = rel_to_plugin.parts
     if any(p in EXCLUDE_DIRS for p in parts):
         return True
-    if len(parts) > 1 and parts[1] in ROOT_EXCLUDE_DIRS:
+    if parts[0] in ROOT_EXCLUDE_DIRS:
         return True
-    if rel_to_parent.name in EXCLUDE_FILES:
+    if parts[0] == "skills" and len(parts) > 2 and parts[2] in ROOT_EXCLUDE_DIRS:
         return True
-    return any(fnmatch.fnmatch(rel_to_parent.name, pat) for pat in EXCLUDE_GLOBS)
+    if rel_to_plugin.name in EXCLUDE_FILES:
+        return True
+    return any(fnmatch.fnmatch(rel_to_plugin.name, pat) for pat in EXCLUDE_GLOBS)
 
 
-def surfaces_for(short_name: str) -> list[str]:
-    if short_name in CC_ONLY:
-        return ["cc"]
-    if short_name in DUAL:
-        return ["cp", "cc"]
-    return ["cp"]
+def read_version(plugin_path: Path) -> str:
+    """The manifest is the source of truth for the zip name. A missing or
+    malformed manifest stops the build rather than producing a misnamed zip."""
+    manifest_path = plugin_path / MANIFEST
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        print(f"  FAIL: cannot read {manifest_path}: {exc}")
+        sys.exit(1)
+    if manifest.get("name") != plugin_path.name:
+        print(f"  FAIL: {manifest_path} name {manifest.get('name')!r} "
+              f"!= folder {plugin_path.name!r}")
+        sys.exit(1)
+    version = manifest.get("version")
+    if not version:
+        print(f"  FAIL: {manifest_path} has no version")
+        sys.exit(1)
+    return version
 
 
-def write_zip(skill_path: Path, surface: str) -> Path:
-    zip_path = DIST_DIR / f"{skill_path.name}-{surface}.zip"
-    # FLAT (cp):   anchor = skill folder  -> arcnames are contents at zip root.
-    # WRAPPER (cc): anchor = parent        -> arcnames are nested under rootnode-<skill>/.
-    anchor = skill_path if surface == "cp" else skill_path.parent
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-        for f in sorted(skill_path.rglob("*")):
+def write_zip(plugin_path: Path, version: str) -> Path:
+    zip_path = DIST_DIR / f"{plugin_path.name}-v{version}.zip"
+    # Built under a temporary name so a failed build cannot replace a good zip.
+    tmp_path = zip_path.with_suffix(".zip.tmp")
+    with zipfile.ZipFile(tmp_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in sorted(plugin_path.rglob("*")):
             if not f.is_file():
                 continue
-            if should_exclude(f.relative_to(skill_path.parent)):
+            rel = f.relative_to(plugin_path)
+            if should_exclude(rel):
                 continue
-            zf.write(f, f.relative_to(anchor).as_posix())
+            arcname = rel.as_posix()
+            if f.suffix == ".sh":
+                data = f.read_bytes()
+                if b"\r" in data:
+                    print(f"  FAIL: {arcname} has CRLF line endings; "
+                          "it will not run on Linux or macOS")
+                    sys.exit(1)
+                info = zipfile.ZipInfo.from_file(f, arcname)
+                info.compress_type = zipfile.ZIP_DEFLATED
+                info.create_system = 3  # Unix, so extractors honor the mode bits
+                info.external_attr = 0o100755 << 16
+                zf.writestr(info, data)
+            else:
+                zf.write(f, arcname)
+    tmp_path.replace(zip_path)
     return zip_path
 
 
-def write_bundle(zip_paths: list[Path]) -> Path:
-    """Bundle every per-Skill zip into one archive for the catalog release, so a
-    user can download the whole catalog in a single file. Each inner zip sits at
-    the bundle root and remains the installable unit (unzip the bundle -> 29 zips
-    -> upload/install the ones you want)."""
-    bundle = DIST_DIR / f"rootnode-catalog-{CATALOG_VERSION}.zip"
-    with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as zf:
-        for z in sorted(zip_paths):
-            zf.write(z, z.name)
-    return bundle
+def manifest_at_root(zip_path: Path) -> bool:
+    with zipfile.ZipFile(zip_path) as zf:
+        return MANIFEST in zf.namelist()
 
 
-def find_skills(specific):
-    skills = sorted(
-        p for p in REPO_ROOT.iterdir()
-        if p.is_dir() and p.name.startswith(SKILL_PREFIX)
-    )
+def find_plugins(specific):
+    if not PLUGINS_DIR.is_dir():
+        return []
+    plugins = sorted(p for p in PLUGINS_DIR.iterdir() if p.is_dir())
     if not specific:
-        return skills
+        return plugins
     out = []
     for name in specific:
-        norm = name if name.startswith(SKILL_PREFIX) else SKILL_PREFIX + name
-        match = next((s for s in skills if s.name == norm), None)
+        norm = name if name.startswith(PLUGIN_PREFIX) else PLUGIN_PREFIX + name
+        match = next((p for p in plugins if p.name == norm), None)
         if match:
             out.append(match)
         else:
@@ -133,47 +132,31 @@ def find_skills(specific):
 
 def main():
     specific = sys.argv[1:] or None
-    skills = find_skills(specific)
-    if not skills:
-        print("No skills found.")
+    plugins = find_plugins(specific)
+    if not plugins:
+        print("No plugins found.")
         sys.exit(1)
 
     DIST_DIR.mkdir(exist_ok=True)
-    cp_n = cc_n = 0
     built: list[Path] = []
-    print(f"Building release artifacts for {len(skills)} skill(s) -> dist/\n")
-    for skill in skills:
-        short = skill.name[len(SKILL_PREFIX):]
-        for surface in surfaces_for(short):
-            z = write_zip(skill, surface)
-            built.append(z)
-            kb = z.stat().st_size / 1024
-            shape = "flat" if surface == "cp" else "wrapper"
-            print(f"  [OK] {z.name}  ({shape}, {kb:.1f} KB)")
-            if surface == "cp":
-                cp_n += 1
-            else:
-                cc_n += 1
+    problems = []
+    print(f"Building release artifacts for {len(plugins)} plugin(s) -> dist/\n")
+    for plugin in plugins:
+        z = write_zip(plugin, read_version(plugin))
+        built.append(z)
+        kb = z.stat().st_size / 1024
+        print(f"  [OK] {z.name}  ({kb:.1f} KB)")
+        if not manifest_at_root(z):
+            problems.append(f"{z.name} has no {MANIFEST} at the zip root")
 
-    total = cp_n + cc_n
-    print(f"\n{total} artifacts: {cp_n} -cp (flat) + {cc_n} -cc (wrapper)")
+    total = len(built)
+    print(f"\n{total} artifacts")
 
-    if not specific:
-        problems = []
-        if total != EXPECTED_TOTAL:
-            problems.append(f"total {total} != {EXPECTED_TOTAL}")
-        if cp_n != EXPECTED_CP:
-            problems.append(f"-cp {cp_n} != {EXPECTED_CP}")
-        if cc_n != EXPECTED_CC:
-            problems.append(f"-cc {cc_n} != {EXPECTED_CC}")
-        if problems:
-            print("  FAIL (full build): " + "; ".join(problems)
-                  + ". Check the surface map / catalog count.")
-            sys.exit(2)
-        bundle = write_bundle(built)
-        mb = bundle.stat().st_size / (1024 * 1024)
-        print(f"\nBundle: {bundle.name}  ({len(built)} zips, {mb:.2f} MB)"
-              f"  -> upload to the catalog-{CATALOG_VERSION} release")
+    if not specific and total != EXPECTED_TOTAL:
+        problems.append(f"total {total} != {EXPECTED_TOTAL}")
+    if problems:
+        print("  FAIL: " + "; ".join(problems) + ". Check the plugins/ layout.")
+        sys.exit(2)
     print("Done.")
 
 

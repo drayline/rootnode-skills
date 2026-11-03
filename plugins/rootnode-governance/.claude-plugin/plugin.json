@@ -1,0 +1,17 @@
+{
+  "name": "rootnode-governance",
+  "displayName": "root.node Governance",
+  "version": "6.0.0",
+  "description": "Govern autonomous work: critic gate, mode router, handoff readiness check, session handoff, and profile builder.",
+  "author": {
+    "name": "Drayline LLC",
+    "url": "https://rootnode.design"
+  },
+  "repository": "https://github.com/drayline/rootnode-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "governance",
+    "autonomous-execution",
+    "session-handoff"
+  ]
+}

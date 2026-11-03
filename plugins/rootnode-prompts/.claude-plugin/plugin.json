@@ -1,0 +1,17 @@
+{
+  "name": "rootnode-prompts",
+  "displayName": "root.node Prompts",
+  "version": "6.0.0",
+  "description": "Compile and score prompts: prompt compilation and validation, block selection, identity, reasoning, and output blocks, and five domain packs.",
+  "author": {
+    "name": "Drayline LLC",
+    "url": "https://rootnode.design"
+  },
+  "repository": "https://github.com/drayline/rootnode-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "prompt-engineering",
+    "prompt-compilation",
+    "prompt-validation"
+  ]
+}

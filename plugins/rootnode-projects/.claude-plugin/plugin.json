@@ -1,0 +1,17 @@
+{
+  "name": "rootnode-projects",
+  "displayName": "root.node Projects",
+  "version": "6.0.0",
+  "description": "Audit and optimize Claude Projects and the claude.ai global layer: Project scorecard, global-layer scorecard, full-stack audit, anti-pattern detection, memory and context-budget optimization, project brief.",
+  "author": {
+    "name": "Drayline LLC",
+    "url": "https://rootnode.design"
+  },
+  "repository": "https://github.com/drayline/rootnode-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "claude-projects",
+    "audit",
+    "context-engineering"
+  ]
+}

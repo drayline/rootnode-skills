@@ -18,7 +18,7 @@ Three tiers based on what content represents:
 
 **Tier 1 — Mirror-exact (sync from authoritative source only):**
 - `audit/canonical-kfs/*.md` — synced from approved seed Project KFs only (Phase 32a-style staging review required upstream)
-- `rootnode-*/SKILL.md`, `rootnode-*/references/*.md`, `rootnode-*/scripts/*`, `rootnode-*/agents/*` — modified ONLY via session prompts that reference an approved design spec
+- `plugins/*/skills/*/SKILL.md`, `plugins/*/skills/*/references/*.md`, `plugins/*/skills/*/scripts/*`, `plugins/*/skills/*/agents/*` — modified ONLY via session prompts that reference an approved design spec
 - `LICENSE`, `README.md` — modified ONLY with explicit operator approval
 
 **Tier 2 — In-scope-with-notification:**
@@ -51,7 +51,7 @@ In addition to `~/.claude/CLAUDE.md` universal halt triggers, halt for any of th
 
 1. **Direct push to main blocked.** `main` is branch-protected; never attempt direct push. PRs are the only path to main.
 2. **Force-push to any branch.** Halt; never force-push without explicit operator scope-expansion authorization.
-3. **Skill source modification outside an approved session prompt.** `rootnode-*/` content changes require a session prompt referencing a locked design spec.
+3. **Skill source modification outside an approved session prompt.** `plugins/*/skills/*/` content changes require a session prompt referencing a locked design spec.
 4. **Tag or release operations outside a release prompt.** Tagging and GitHub release creation belong to dedicated release prompts (e.g., `root_CC_skill_builder_v3_release.md`); do not improvise.
 5. **Modification of `audit/canonical-kfs/` outside an approved sync precondition step.** These files mirror approved seed Project KFs; only sync from `design/staging-kf/` as part of an approved release branch precondition (Phase 32b §32b.1.5 pattern). Do not hand-edit them, even to fix a KF drift you notice mid-session — surface the change instead (see *Knowledge-file change surfacing* below).
 6. **Build prompt halt summary instructs continuation phrase mismatch.** If a session prompt specifies an exact continuation phrase to signal next phase (e.g., `"Phase 32a closed; proceed with Phase 32b."`) and operator response is ambiguous or different, halt and ask one targeted clarifying question.

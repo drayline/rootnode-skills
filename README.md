@@ -10,24 +10,46 @@
 
 27 Skills that diagnose, build, and optimize every architectural layer across chat-Projects, conversations, and Claude Code repos.
 
-![Skills](https://img.shields.io/badge/Skills-27-CC8A0A) ![Version](https://img.shields.io/badge/Version-v5.0.1-CC8A0A) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Calibrated](https://img.shields.io/badge/Calibrated-Opus_5.5_%2B_Sonnet_5.5-8B929E)
+![Skills](https://img.shields.io/badge/Skills-27-CC8A0A) ![Version](https://img.shields.io/badge/Version-v6.0-CC8A0A) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Calibrated](https://img.shields.io/badge/Calibrated-Opus_5.5_%2B_Sonnet_5.5-8B929E)
 
 ---
 
 ## Quick Start
 
-These Skills install into two surfaces: **chat-Projects** (Claude.ai web app or Claude desktop app) and **Claude Code** (the execution surface). Most Skills are chat-Project-only. Three are Claude Code-only. Two operate in both.
+root.node ships as six plugins in one marketplace. Install them on your claude.ai account once and the Skills load in chat, Cowork, and Claude Code.
 
-**For chat-Projects.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest) — the catalog umbrella, with every Skill indexed by category. Download the individual `-cp.zip` files for the Skills you want (no unzipping required), or grab the all-Skills bundle `rootnode-catalog-<version>.zip` and unzip it once. Upload the `-cp.zip` files in **Settings → Capabilities → Skills**. Skills install once and become available across every Project in your Claude account.
+**claude.ai (recommended).** Open **Customize > Plugins > Add > Add marketplace**, enter `drayline/rootnode-skills`, and turn on **Sync automatically**. Then add the plugins you want. Claude Code signed in with the same account loads them as `<plugin>@synced`.
 
-**For Claude Code.** Go to the [latest release](https://github.com/drayline/rootnode-skills/releases/latest), download the `-cc.zip` files for the Skills you want (or the all-Skills bundle `rootnode-catalog-<version>.zip`, unzipped once), then extract the `-cc.zip` archives into `~/.claude/skills/` (user-level — available across every repo) or `.claude/skills/` (per-repo). Each `-cc.zip` expands to a folder matching the Skill name. Skills auto-activate from natural language prompts inside Claude Code sessions.
+**Claude Code with an API key.**
 
-The two dual-surface Skills (`rootnode-skill-builder` and `rootnode-cc-design`) publish both `-cp.zip` and `-cc.zip` variants — download the one matching your install target.
+```
+claude plugin marketplace add drayline/rootnode-skills
+claude plugin install rootnode-projects@rootnode
+```
 
-**Already uploaded to Claude.ai?** Claude Code v2.1.273 or later, signed in with the same Claude account, loads the Skills on your account automatically; they appear as `anthropic-skills:<name>`. Don't also extract `-cc.zip` copies of those Skills into `~/.claude/skills/`, or Claude Code loads both. The `-cc.zip` files are for Claude Code sessions that sign in with an API key, where account Skills don't sync, and for setups that don't use Claude.ai.
+Repeat the install for each plugin you want. Auto-update is off by default for third-party marketplaces; run `claude plugin update` to pull a new version.
+
+**Manual.** The [latest release](https://github.com/drayline/rootnode-skills/releases/latest) carries the six plugin zips. Upload one at **Customize > Plugins > Add > Upload plugin**. A manual upload does not update itself.
+
+Install each plugin once — on your account *or* locally in Claude Code, not both — or Claude Code loads two copies.
+
+| Plugin | Skills | For |
+|---|---|---|
+| `rootnode-projects` | project-audit, global-audit, full-stack-audit, anti-pattern-detection, memory-optimization, context-budget, project-brief | Auditing and optimizing Claude Projects and the claude.ai global layer |
+| `rootnode-code` | cc-design, repo-hygiene, plus a migration guard and a bounded test-evidence Stop hook | Designing and maintaining Claude Code environments |
+| `rootnode-prompts` | prompt-compilation, prompt-validation, block-selection, identity-blocks, reasoning-blocks, output-blocks, and five domain packs | Compiling and scoring prompts |
+| `rootnode-tuning` | behavioral-tuning | Countermeasures for Claude's behavioral tendencies |
+| `rootnode-governance` | critic-gate, mode-router, handoff-trigger-check, session-handoff, profile-builder | Governing autonomous work |
+| `rootnode-skill-builder` | skill-builder | Building, reviewing, and evaluating Skills |
+
+**Upgrading from v5.x or earlier?** v6.0 renamed every Skill: the `rootnode-` prefix moved from the Skill to its plugin, so `rootnode-project-audit` is now `rootnode-projects:project-audit`. After you add the plugins, turn off or delete the old `rootnode-*` Skills where you uploaded them, and remove any `rootnode-*` folders from `~/.claude/skills/`. Otherwise both copies load.
+
+**Evidence status.** `rootnode-projects` ships the catalog's first eval suite (`plugins/rootnode-projects/evals/`, 5 cases for `claude plugin eval`). Its first run showed no lift over the base model: every case scored the same with and without the plugin, because the graders did not test anything the base model misses. Stricter graders and suites for the other plugins come next. Until then, treat the plugins as unmeasured.
+
+The `rootnode-code` hooks run in every repository where that plugin is enabled. Chat ignores hooks.
 
 > [!NOTE]
-> Activate any Skill with natural language — no commands, no special syntax. Install all 27 for the full architecture system; every Skill also works standalone.
+> Activate any Skill with natural language — no commands, no special syntax. Every Skill also works standalone.
 
 > [!TIP]
 > **Calibrated for Claude Opus 5.5 + Sonnet 5.5 (dual-primary), v5.0.** Fable 5.1 integrated-aware; Haiku 5.5 subagent-aware; Opus 5 / Sonnet 5 fallback-graceful (Skills produce correct-shape output there when classifier-flagged requests fall back silently); Sonnet 4.6 legacy-graceful. Most Skills work fully across the current model landscape; a few produce best results on Opus 5.5 (at its `medium` default or `high`) or Sonnet 5.5 at `high`. See [Model Compatibility](#model-compatibility) for details.
@@ -50,7 +72,7 @@ These Skills treat the entire ecosystem as a unified system — scoring each lay
 
 Two surfaces, layered architecture across each. Skills are mapped to the layers they **impact**. A Skill that builds knowledge files appears on the Knowledge Files layer because that's the layer it modifies; a Skill that audits five layers at once appears on each of them.
 
-**One Skill spans every layer.** `rootnode-full-stack-audit` runs Project audit + Global audit + Cross-Layer Alignment in a single pass — the only Skill in the catalog that operates across scopes rather than within one. See [Cross-Layer](#cross-layer) in Core Skills for details.
+**One Skill spans every layer.** `full-stack-audit` runs Project audit + Global audit + Cross-Layer Alignment in a single pass — the only Skill in the catalog that operates across scopes rather than within one. See [Cross-Layer](#cross-layer) in Core Skills for details.
 
 ### Global Scope
 
@@ -100,7 +122,7 @@ Three Skills run inside the Repo layer at execution time: `critic-gate` evaluate
 
 ### Dual-Surface Skills
 
-Two Skills operate in both surfaces. `rootnode-skill-builder` builds, validates, packages, and tests Skills that target either chat-Projects or Claude Code — six workflows including build, iterate, optimize, compare, review, and revise. `rootnode-cc-design` designs Claude Code environments — five modes spanning new deployments, evolution from friction, research, reusable templates, and remediation of hygiene findings.
+Two Skills operate in both surfaces. `skill-builder` builds, validates, packages, and tests Skills that target either chat-Projects or Claude Code — six workflows including build, iterate, optimize, compare, review, and revise. `cc-design` designs Claude Code environments — five modes spanning new deployments, evolution from friction, research, reusable templates, and remediation of hygiene findings.
 
 These Skills install once and operate identically across the two surfaces, which is why the architecture diagram tags them with the dual-surface marker (⇄).
 
@@ -141,27 +163,27 @@ These operate directly on the architectural layers. They are the primary tools f
 
 | Skill | Tier | Surface | What It Does |
 |---|---|---|---|
-| `rootnode-prompt-compilation` | T3 | Chat | Four-stage pipeline (Parse, Select, Construct, Validate) that builds complete prompts and scaffolds entire Claude Projects — Custom Instructions, knowledge file architecture, and global layer advisory. |
-| `rootnode-skill-builder` | T2 | Both ⇄ | Converts design specifications into deployment-ready Skill packages (SKILL.md + references/ + scripts/ + agents/). Six workflows including build, iterate, optimize, compare, review, revise. |
-| `rootnode-cc-design` | T3 | Both ⇄ | Designs Claude Code environments. Five modes: design (new deployments, CLAUDE.md drafts, agent topology), evolve (updates from friction), research (evaluate CC tools/patterns), template (reusable artifacts), remediate (consume hygiene findings → produce + execute plan). |
+| `prompt-compilation` | T3 | Chat | Four-stage pipeline (Parse, Select, Construct, Validate) that builds complete prompts and scaffolds entire Claude Projects — Custom Instructions, knowledge file architecture, and global layer advisory. |
+| `skill-builder` | T2 | Both ⇄ | Converts design specifications into deployment-ready Skill packages (SKILL.md + references/ + scripts/ + agents/). Six workflows including build, iterate, optimize, compare, review, revise. |
+| `cc-design` | T3 | Both ⇄ | Designs Claude Code environments. Five modes: design (new deployments, CLAUDE.md drafts, agent topology), evolve (updates from friction), research (evaluate CC tools/patterns), template (reusable artifacts), remediate (consume hygiene findings → produce + execute plan). |
 
 ### Diagnose
 
 | Skill | Tier | Surface | What It Does |
 |---|---|---|---|
-| `rootnode-project-audit` | T3 | Chat | Scores a Project on six dimensions with anchored 1-5 rubrics. Finds what's broken and prescribes targeted fixes. |
-| `rootnode-global-audit` | T3 | Chat | Audits all five global layers (Preferences, Styles, Memory, Skills, Connectors) using a six-dimension scorecard. Detects cross-layer failure modes. |
-| `rootnode-anti-pattern-detection` | T2 | Chat | Detects seven structural patterns that cause ignored instructions and degraded output. |
-| `rootnode-prompt-validation` | T2 | Chat | Six-dimension Prompt Scorecard for evaluating prompts. Maps each weakness to a structural fix. |
-| `rootnode-repo-hygiene` | T3 | Code | 14-category sweep + 7-layer leak check + anti-pattern detection across an existing Claude Code deployment. Produces `HYGIENE_REPORT.md` consumable by `cc-design` REMEDIATE mode. |
+| `project-audit` | T3 | Chat | Scores a Project on six dimensions with anchored 1-5 rubrics. Finds what's broken and prescribes targeted fixes. |
+| `global-audit` | T3 | Chat | Audits all five global layers (Preferences, Styles, Memory, Skills, Connectors) using a six-dimension scorecard. Detects cross-layer failure modes. |
+| `anti-pattern-detection` | T2 | Chat | Detects seven structural patterns that cause ignored instructions and degraded output. |
+| `prompt-validation` | T2 | Chat | Six-dimension Prompt Scorecard for evaluating prompts. Maps each weakness to a structural fix. |
+| `repo-hygiene` | T3 | Code | 14-category sweep + 7-layer leak check + anti-pattern detection across an existing Claude Code deployment. Produces `HYGIENE_REPORT.md` consumable by `cc-design` REMEDIATE mode. |
 
 ### Optimize
 
 | Skill | Tier | Surface | What It Does |
 |---|---|---|---|
-| `rootnode-behavioral-tuning` | T2 | Chat | Diagnoses ten Claude behavioral tendencies (verbosity, hedging, agreeableness, fabricated precision, and others) with countermeasure templates ready to deploy. |
-| `rootnode-memory-optimization` | T2 | Chat | Rebalances content across Memory, Custom Instructions, knowledge files, and User Preferences. Produces edit prescriptions and trimming recommendations. |
-| `rootnode-context-budget` | T3 | Chat | Full context budget analysis under the current automatic-RAG-by-window model: per-file evaluation across six dimensions, content routing by category, growth trajectory assessment, retrieval quality audit, and phased optimization with compression safeguards. Rebuilt for the 1M-window primary landscape; historical 200K-era measurements preserved as context. |
+| `behavioral-tuning` | T2 | Chat | Diagnoses ten Claude behavioral tendencies (verbosity, hedging, agreeableness, fabricated precision, and others) with countermeasure templates ready to deploy. |
+| `memory-optimization` | T2 | Chat | Rebalances content across Memory, Custom Instructions, knowledge files, and User Preferences. Produces edit prescriptions and trimming recommendations. |
+| `context-budget` | T3 | Chat | Full context budget analysis under the current automatic-RAG-by-window model: per-file evaluation across six dimensions, content routing by category, growth trajectory assessment, retrieval quality audit, and phased optimization with compression safeguards. Rebuilt for the 1M-window primary landscape; historical 200K-era measurements preserved as context. |
 
 ### Cross-Layer
 
@@ -169,7 +191,7 @@ This Skill operates across the architecture rather than within a single scope. I
 
 | Skill | Tier | Surface | What It Does |
 |---|---|---|---|
-| `rootnode-full-stack-audit` | T3 | Chat | Runs Project audit + Global audit + Cross-Layer Alignment Check in a single pass. Scores both Project and Global layers using their respective six-dimension scorecards, detects cross-layer failure modes that single-scope audits can't see, and produces a unified action plan ordered by impact. |
+| `full-stack-audit` | T3 | Chat | Runs Project audit + Global audit + Cross-Layer Alignment Check in a single pass. Scores both Project and Global layers using their respective six-dimension scorecards, detects cross-layer failure modes that single-scope audits can't see, and produces a unified action plan ordered by impact. |
 
 ### Bridge
 
@@ -177,8 +199,8 @@ These Skills produce artifacts that travel between conversations and chat-Projec
 
 | Skill | Tier | Surface | What It Does |
 |---|---|---|---|
-| `rootnode-project-brief` | T1 | Chat | Generates a structured Project Brief — extracts goals, architecture, knowledge file inventory, Custom Instructions summary, Memory contents, current state, and key decisions from a Claude Project. Briefs serve as uploadable context for cross-Project work. |
-| `rootnode-session-handoff` | T1 | Chat | Produces structured XML session continuation documents. Captures active work streams, decisions with rationale, uploaded file content, conversation knowledge, and open items into an ingestion-optimized handoff file. |
+| `project-brief` | T1 | Chat | Generates a structured Project Brief — extracts goals, architecture, knowledge file inventory, Custom Instructions summary, Memory contents, current state, and key decisions from a Claude Project. Briefs serve as uploadable context for cross-Project work. |
+| `session-handoff` | T1 | Chat | Produces structured XML session continuation documents. Captures active work streams, decisions with rationale, uploaded file content, conversation knowledge, and open items into an ingestion-optimized handoff file. |
 
 ### Cross-Boundary Triggers
 
@@ -186,8 +208,8 @@ These Skills live on the chat side but produce artifacts consumed by Claude Code
 
 | Skill | Tier | Surface | What It Does |
 |---|---|---|---|
-| `rootnode-handoff-trigger-check` | T1 | Chat | Evaluates whether work-in-design is ready to hand off from a chat conversation to autonomous execution. Runs a 7-condition gate (spec stability, verification surface, invariants, pump-primer, work decomposition, rollback cost, token budget headroom) and returns a structured JSON verdict. |
-| `rootnode-profile-builder` | T1 | Chat | Conversational profile builder. Reads a target JSON Schema, conducts a progressive-depth interview, validates answers, and writes the resulting profile to a destination path. Schema-agnostic — produces validated configs for any Skill that consumes profile-shaped data, including `mode-router` and `critic-gate`. |
+| `handoff-trigger-check` | T1 | Chat | Evaluates whether work-in-design is ready to hand off from a chat conversation to autonomous execution. Runs a 7-condition gate (spec stability, verification surface, invariants, pump-primer, work decomposition, rollback cost, token budget headroom) and returns a structured JSON verdict. |
+| `profile-builder` | T1 | Chat | Conversational profile builder. Reads a target JSON Schema, conducts a progressive-depth interview, validates answers, and writes the resulting profile to a destination path. Schema-agnostic — produces validated configs for any Skill that consumes profile-shaped data, including `mode-router` and `critic-gate`. |
 
 ### Runtime
 
@@ -195,8 +217,8 @@ These Skills run inside Claude Code at execution time. They consume profile arti
 
 | Skill | Tier | Surface | What It Does |
 |---|---|---|---|
-| `rootnode-critic-gate` | T2 | Code | Profile-driven gate that evaluates work against configured thresholds before merge or handoff. Reads a critic profile produced by `profile-builder`, applies the gate, returns a structured verdict with rationale. |
-| `rootnode-mode-router` | T1 | Code | Profile-driven router that reads a mode configuration and routes work by strictness, scope, or context. The runtime counterpart to chat-side `block-selection` — same selection logic, different surface. |
+| `critic-gate` | T2 | Code | Profile-driven gate that evaluates work against configured thresholds before merge or handoff. Reads a critic profile produced by `profile-builder`, applies the gate, returns a structured verdict with rationale. |
+| `mode-router` | T1 | Code | Profile-driven router that reads a mode configuration and routes work by strictness, scope, or context. The runtime counterpart to chat-side `block-selection` — same selection logic, different surface. |
 
 ---
 
@@ -210,10 +232,10 @@ Deep catalogs of tested prompt approaches. The Compiler selects from these durin
 
 | Skill | Tier | Contents |
 |---|---|---|
-| `rootnode-block-selection` | T2 | Decision trees for choosing the right identity, reasoning, and output approach for any task type. The router for the libraries below. |
-| `rootnode-identity-blocks` | T1 | 8 identity approaches (Strategic Advisor, Technical Architect, Research Synthesist, and more) |
-| `rootnode-reasoning-blocks` | T1 | 18 reasoning variants across 6 categories (Analytical, Strategic, Creative, Technical, Research, Comparative) |
-| `rootnode-output-blocks` | T1 | 10 output format specifications (Executive Brief, Technical Design, Decision Matrix, and more) |
+| `block-selection` | T2 | Decision trees for choosing the right identity, reasoning, and output approach for any task type. The router for the libraries below. |
+| `identity-blocks` | T1 | 8 identity approaches (Strategic Advisor, Technical Architect, Research Synthesist, and more) |
+| `reasoning-blocks` | T1 | 18 reasoning variants across 6 categories (Analytical, Strategic, Creative, Technical, Research, Comparative) |
+| `output-blocks` | T1 | 10 output format specifications (Executive Brief, Technical Design, Decision Matrix, and more) |
 
 ### Domain Packs
 
@@ -221,11 +243,11 @@ Specialized identity, reasoning, and output approaches tuned for specific profes
 
 | Skill | Tier | Domain |
 |---|---|---|
-| `rootnode-domain-business-strategy` | T1 | Consulting, competitive analysis, corporate strategy, M&A |
-| `rootnode-domain-software-engineering` | T1 | System design, code review, incident response, security, API design |
-| `rootnode-domain-content-communications` | T1 | Writing, editing, content strategy, copywriting, persuasion |
-| `rootnode-domain-research-analysis` | T1 | Data analysis, policy research, evidence synthesis, systematic review |
-| `rootnode-domain-agentic-context` | T1 | AI agent design, tool interfaces, context architecture, multi-agent coordination |
+| `domain-business-strategy` | T1 | Consulting, competitive analysis, corporate strategy, M&A |
+| `domain-software-engineering` | T1 | System design, code review, incident response, security, API design |
+| `domain-content-communications` | T1 | Writing, editing, content strategy, copywriting, persuasion |
+| `domain-research-analysis` | T1 | Data analysis, policy research, evidence synthesis, systematic review |
+| `domain-agentic-context` | T1 | AI agent design, tool interfaces, context architecture, multi-agent coordination |
 
 ---
 
@@ -267,7 +289,7 @@ With all 27 installed, Skills compose naturally around the work — chat-side or
 
 **Routine deployment.** Scheduled Claude Code surfaces — daily-triad (three sequential passes) and weekly-audit patterns — for teams that want continuous-watch governance instead of session-by-session invocation. The composition pattern is locked; the Routine deployment is in active design.
 
-**rootnode-for-code plugin.** A curated bundle of the highest-impact CC Skills shipped as a single plugin install for Claude Code users who want the system without picking Skills à la carte.
+**Measured lift.** Eval suites for every plugin under `claude plugin eval`, re-run on each model release, and consolidation of Skills that show no lift over the base model.
 
 **Calibration Engine.** Automated regression testing for every Skill against new Claude model releases. When a new Opus or Sonnet ships, the Calibration Engine catches behavioral drift before it lands in user environments and recalibrates countermeasures across the catalog.
 

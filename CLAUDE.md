@@ -6,7 +6,7 @@ Project-scoped CLAUDE.md for the rootnode-skills repository. Overrides `~/.claud
 
 ## Mission
 
-Public Skill catalog for the root.node ecosystem. Skills are versioned, packaged as zips, and released via GitHub releases at `github.com/drayline/rootnode-skills`. Substantive work in this repo (release builds, audits, hygiene sweeps, KF sync operations) happens via **session prompts** — each session prompt carries its own identity, scope authorization, halt triggers, and work queue.
+Public plugin marketplace for the root.node ecosystem. The 27 Skills ship in six plugins under `plugins/`, listed by `.claude-plugin/marketplace.json`; merging a raised `plugin.json` version to `main` publishes it, and GitHub releases at `github.com/drayline/rootnode-skills` record each version. Substantive work in this repo (release builds, audits, hygiene sweeps, KF sync operations) happens via **session prompts** — each session prompt carries its own identity, scope authorization, halt triggers, and work queue.
 
 This CLAUDE.md provides repo-level governance that applies to ALL sessions. Session prompts override these defaults for the session's specific scope.
 
@@ -99,29 +99,21 @@ Write the surfaced change to the session's audit artifact (e.g., `audit/<session
 
 ## Packaging conventions
 
-Two zip shapes, one per surface. The source folder on disk (`rootnode-<skill>/`) is **un-suffixed**; the `-cp`/`-cc` suffix is a packaging-output naming convention applied to the zip, never to the source folder.
+One artifact shape: one zip per plugin. A Skill's source folder is `plugins/<plugin>/skills/<name>/`, where `<name>` matches its SKILL.md `name:`; installed, it appears as `<plugin>:<name>`.
 
-- **`-cp` = flat.** Zip contents sit at the root — `SKILL.md`, `references/`, `agents/`, etc. directly, with no wrapper folder — because CP (Claude.ai Projects) Skill upload reads `SKILL.md` from the zip root.
-- **`-cc` = wrapper.** Zip contains a nested `rootnode-<skill>/` folder with the contents inside it. CC keeps each Skill as a folder at `~/.claude/skills/rootnode-<skill>/`, so the wrapper exists *so that extracting the zip yields the ready-named folder to drop in*. A flat `-cc` zip would extract loose files with no folder and break the install.
+- **Zip:** `dist/<plugin>-v<version>.zip`, with `<version>` read from `plugins/<plugin>/.claude-plugin/plugin.json` and `.claude-plugin/plugin.json` at the zip root (the shape claude.ai **Upload plugin** takes). `evals/` is left out at the plugin root and at each Skill root. Shell scripts are stored LF with mode 0755.
+- **Count:** six plugins, six zips. `build_release_artifacts.py` asserts it on a full build and exits non-zero on a mismatch.
+- **Stale output:** a full build clears `dist/*.zip` first. Release steps name each asset path; never upload `dist/*.zip`.
+- **Embedded copies:** a Skill reference that embeds a shipped script marks the block with `<!-- shipped: <repo path> -->`; the packager fails the build when the block and the file differ after LF normalization.
+- **Validation:** `claude plugin validate .` and `claude plugin validate ./plugins/<plugin> --strict` pass before a release.
 
-Surface → shape → release artifact:
-
-- cp-only Skills → flat → `rootnode-<skill>-cp.zip` — **22**
-- cc-only Skills → wrapper → `rootnode-<skill>-cc.zip` — **3**
-- dual-surface Skills (`skill-builder`, `cc-design`) → both → `-cp.zip` + `-cc.zip` — **2 × 2 = 4**
-- **29 release artifacts from 27 source folders.**
-
-Shipping a CC Skill flat, or a CP Skill wrapped, is an install failure — not a cosmetic mismatch.
-
-**Release packaging:** `build_release_artifacts.py` is the single entry point. It reads the surface map (`CC_ONLY` = critic-gate / mode-router / repo-hygiene; `DUAL` = skill-builder / cc-design; all other `rootnode-*` = cp-only), emits flat for each `-cp` and wrapper for each `-cc`, applies the suffix, and self-asserts the 24 `-cp` + 5 `-cc` = 29 total. Both shape emitters live inside the orchestrator; wrapper-shape logic was ported from Anthropic's upstream `package_skill.py` (not tracked in this repo — see `build_release_artifacts.py:7` and `:61`). Two tracked sibling scripts at repo root: `build_releases.py` (flat shape only, superseded — legacy reference) and `generate_release_notes.py` (version-agnostic release-notes generator added in the v4.0 alignment cycle per D7 expansion; takes `VERSION`, `TIER_LABEL`, `CATALOG_RELEASE`, and Skill data from a per-cycle Python config file under `audit/v<N>-*/`). Repo-root script roster is **three**. For the authoritative packager inventory, see `audit/repo-catalog/`.
-
-Canonical methodology lives in **SBD §4.7** (surface-mapped model, reconciled in the v3.1 propagation cycle): §4.7 frames the release as shipping *both* shapes surface-mapped (superseding the earlier "flat = the release form" framing). Note: the `skill-builder` Skill's internal `scripts/package_zip.py` is a *separate* build-pipeline packager (adapted from upstream `package_skill.py` for `.zip` + `eval-viewer/` inclusion) — not the release-time packager, and not to be conflated with the orchestrator.
+The `-cp` flat and `-cc` wrapper zips and the `rootnode-catalog-vN.zip` bundle retired at v6.0; they remain on the v3.0–v5.0.1 releases as history. Repo-root script roster is **two**: `build_release_artifacts.py` (the release packager) and `generate_release_notes.py` (per-plugin release notes from a per-cycle config under `audit/v<N>_<M>-release/`). Anthropic's `package_skill.py` (upstream at `anthropics/skills`, `skills/skill-creator/scripts/package_skill.py`) and skill-builder's internal `scripts/package_zip.py` are single-Skill packagers, not release tools. For the authoritative packager inventory, see `audit/repo-catalog/`. Canonical methodology: SBD §4.7 (layout and packager) and §6.6 (versioning).
 
 ---
 
 ## Releases
 
-Before cutting a catalog release, read `docs/root_SKILLS_RELEASE_PLAYBOOK.md`. It carries the release model (27 per-Skill releases + a notes-plus-bundle `catalog-vN` umbrella marked `--latest` — catalog-index notes plus a `rootnode-catalog-vN.zip` bundle of all 29 artifacts), the two-phase branch-protection-aware process (content PR → operator merge → tags/releases off merged `main`), the packaging convention, tag naming, and the anti-churn rules. The executable step-by-step is the versioned release prompt (e.g. `root_CC_PROMPT_v3_1_release.md`); the playbook is the model and the standing rules behind it.
+Before cutting a catalog release, read `docs/root_SKILLS_RELEASE_PLAYBOOK.md`. It carries the release model (merging a raised plugin version to `main` publishes it; per-plugin releases tagged `<plugin>/v<version>` (the plugin name carries the `rootnode-` prefix) record it; a `catalog-vN.N` umbrella marked `--latest` carries the six plugin zips and the catalog index), the two-phase branch-protection-aware process (content PR → operator merge → tags/releases off merged `main`), tag naming, and the anti-churn rules. The executable step-by-step is the versioned release prompt; the playbook is the model and the standing rules behind it.
 
 ---
 

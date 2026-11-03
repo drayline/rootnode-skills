@@ -1,5 +1,5 @@
 # rootnode-skills — Repo Catalog
-_Generated 2026-11-02 | HEAD d95ba73b648ea56c14f102fcc0150aca8288bcb4 (feat/plugin-packaging-v6.0, not yet merged) | regenerated per playbook Post-verification step_
+_Generated 2026-11-02 | HEAD 9f8b058fec431bea74cc15dafbf4c5c99ba154ad (feat/plugin-packaging-v6.0, not yet merged) | regenerated per playbook Post-verification step_
 
 Regenerated 2026-11-02 for the catalog v6.0 content PR, ahead of any release, so the PR carries the new layout. Tags and GitHub releases are unchanged from `root_repo_catalog_20261030.md` because no tag or release is part of this PR. The release prompt regenerates this file again after its verification. Section structure matches `root_repo_catalog_20261030.md`, with new Plugins and Marketplace sections, the Skills section moved to `plugins/*/skills/`, and the CATALOG_VERSION section replaced by the packager constants.
 
@@ -658,6 +658,7 @@ design/root_skill_5gen_alignment_design.md
 ## Recent commits (20)
 _Source: `git log --oneline -20`_
 ```
+9f8b058 chore(catalog): correct the snapshot's self-count note
 d95ba73 chore(catalog): regenerate at the review-fix tip
 87c43a5 fix: settle no-jq guard behavior and scope the Stop hook
 589b67c chore(catalog): regenerate for the v6.0 content PR
@@ -677,7 +678,6 @@ d991e02 docs(audit): v5.0.1 build reports and review files; v4.2 design records
 4538de0 docs(audit): v5.0.1 build report and review files; v4.2 inventory report
 0cab5c8 fix: catalog v5.0.1 rev 2 — host Stop cap, handoff-trigger-check naming, guard gaps, prompt shell lessons, KF and docs sync
 6a257f9 docs(audit): catalog v5.0.1 spec and cc-design v5.0 D9a evidence
-a88d449 fix: catalog v5.0.1 patch — Stop-hook chain bounds, resume rule, 16 v5.0 findings, KF mirror sync
 ```
 
 ## Tags (133)
@@ -984,7 +984,7 @@ _Source: `grep -nE 'EXPECTED_TOTAL|CATALOG_VERSION' build_release_artifacts.py`_
 
 ## Cycle-delta summary vs `root_repo_catalog_20261030.md`
 
-- **Tracked files: 390 → 434 (+44).** `git diff --name-status -M 2c04b70 HEAD`: 44 A, 155 R, 3 M, 0 D. The snapshot itself adds one more when committed.
+- **Tracked files: 390 → 434 (+44).** `git diff --name-status -M 2c04b70 HEAD`: 44 A, 155 R, 3 M, 0 D. The count includes this snapshot as committed at the generation HEAD.
 - **Added files (44):** 7 outside `plugins/` (`.claude-plugin/marketplace.json`, `audit/repo-catalog/root_repo_catalog_20261030.md`, `audit/repo-catalog/root_repo_catalog_20261102.md`, `audit/v5_0_1-patch/refuter_brief_r3c1.md`, `audit/v5_0_1-patch/refuter_r3c1.json`, `audit/v5_0_1-patch/session_report_20261030-0303Z.md`, `design/root_DESIGN_plugin_packaging.md`); 18 per-plugin manifests, READMEs, and LICENSE copies; 4 `rootnode-code` hook files; 15 eval files.
 - **Skills folders: 27 → 27, all moved to `plugins/*/skills/`.** Tracked files left at root `rootnode-*/` paths: 0.
 - **Plugins: 0 → 6.** Marketplace added at `.claude-plugin/marketplace.json`.

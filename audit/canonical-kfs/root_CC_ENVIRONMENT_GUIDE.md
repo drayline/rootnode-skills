@@ -413,6 +413,8 @@ Before naming an instrument, run the instrument-fit test from AEA §4.14. An ins
 
 `[generalizable; grounded in the 2026-09-09 v4.1 cycle, where the shell one-liner grep -c $'\r' under /bin/sh returned 0 for a file full of carriage returns — /bin/sh does not expand $'...' — and that null was reported as fact against a correct contrary report. Count CR bytes with tr -cd '\r' | wc -c instead]`
 
+**Name the instrument.** A gate that names a property also names the instrument that reads it, and a zero is trusted only after a positive control shows the instrument can return a non-zero. Count carriage returns with `tr -cd '\r' | wc -c`. `grep` is unreliable for CR in two ways: under `/bin/sh`, `$'\r'` does not expand; and Git for Windows `grep` drops the CR at line end, so it counts 0 on a CRLF file even with a correct pattern. `[observed: v5.0.1 rev 3 build, 2026-10-30; Observation 32]`
+
 ### 5.9 Turn-economy rule
 
 A multi-phase CC prompt runs end to end and halts only at genuine operator gates — a merge decision, an accept/reject decision on a design. A halt whose only purpose is letting chat read a report and hand back the next paste is a design defect in the prompt, not a legitimate review gate. This applies to session prompts authored in design conversations; it does not apply to CLAUDE.md standing context, which governs every session rather than one prompt.

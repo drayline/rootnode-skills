@@ -1,145 +1,139 @@
 # rootnode-skills Release Playbook & Lessons Learned
 
-Canonical runbook for cutting a `drayline/rootnode-skills` catalog release. Read this **before** any release conversation — chat-side planning or CC execution. It exists because the v3.1 release (2026-06-25/26) churned hard on things that were already settled but not written down, and then needed a follow-on UX fix when the umbrella shipped notes-only and the download path was poor. Every decision, convention, and anti-churn rule we landed on — including the post-ship bundle/README fix — is here so the next catalog update is fast and low-friction.
+Canonical runbook for cutting a `drayline/rootnode-skills` catalog release. Read this **before** any release conversation — chat-side planning or CC execution. It exists because the v3.1 release (2026-06-25/26) churned hard on things that were already settled but not written down. Since catalog v6.0 (2026-11-02) the release unit is the **plugin**: the 27 Skills ship in six plugins from one marketplace, and the per-Skill zip model of v3.0–v5.0.1 is retired. Every decision, convention, and anti-churn rule is here so the next catalog update is fast and low-friction.
 
-**Companion artifacts.** The executable release prompt (`root_CC_PROMPT_vN_release.md`) is the step-by-step CC prompt for a specific version; this playbook is the *why* and the *standing rules* behind it. Packaging conventions also live in the repo `CLAUDE.md` (`## Packaging conventions`).
+**Companion artifacts.** The executable release prompt (`root_CC_release_vN.md`, or the older `root_CC_PROMPT_vN_release.md` form) is the step-by-step CC prompt for a specific version; this playbook is the *why* and the *standing rules* behind it. Packaging conventions also live in the repo `CLAUDE.md` (`## Packaging conventions`) and, as build discipline, in `root_SKILL_BUILD_DISCIPLINE.md` §4.7 and §6.6.
 
-**Artifact lifecycle — read this first.** A version-stamped release prompt (e.g., `root_CC_PROMPT_v3_1_release.md`) is **spent once its version ships**. Do not re-edit a spent release prompt to capture a new lesson — it is a record of one execution, not a living document. The durable home for release knowledge is *this playbook* (version-agnostic) plus the repo `CLAUDE.md` packaging section and the committed packager. Each new release **derives its prompt from this playbook** (copy → bump version → adjust deltas), never from the prior spent prompt. The v3.1 bundle/README fix, for instance, lives here and in `build_release_artifacts.py` — it was deliberately *not* back-patched into the spent v3.1 prompt.
+**Artifact lifecycle — read this first.** A version-stamped release prompt is **spent once its version ships**. Do not re-edit a spent release prompt to capture a new lesson — it is a record of one execution, not a living document. The durable home for release knowledge is *this playbook* (version-agnostic) plus the repo `CLAUDE.md` packaging section and the committed packager. Each new release **derives its prompt from this playbook** (copy → bump version → adjust deltas), never from the prior spent prompt.
 
 ---
 
 ## 1. Release architecture — the model (never re-derive this)
 
-### 1.1 Two artifact types per catalog version
+### 1.1 What a catalog release produces
 
-A catalog release is **27 per-Skill releases + 1 catalog umbrella** — not one bundle.
+A catalog release has three outputs, and only the first one reaches installed users.
 
-- **Per-Skill releases.** One GitHub release per Skill, tag `rootnode-<skill>/vN`, carrying that Skill's surface zip(s). This is where the individual downloadable packages live.
-- **Catalog umbrella.** One release tagged `catalog-vN`, marked `--latest`, carrying **(a) the catalog-index notes and (b) exactly one bundle asset, `rootnode-catalog-vN.zip`** (all 29 artifact zips packaged together). Its body is the catalog index: a categorized list linking every per-Skill release, plus Architecture and Site sections, plus a `## Download` section pointing at the bundle. It frames the per-Skill releases as one unified system and is what GitHub surfaces as "Latest."
+- **Marketplace publish.** Merging a raised `version` in `plugins/<plugin>/.claude-plugin/plugin.json` to `main` publishes that plugin version. claude.ai accounts with **Sync automatically** on pick it up on the next sync; Claude Code users pick it up with `claude plugin update`. Merge is publish — so the content PR must be release-complete before the operator merges it (§3).
+- **Per-plugin releases.** One GitHub release per plugin that changed, tag `<plugin>/v<version>`, where `<plugin>` is the full plugin name (it carries the `rootnode-` prefix) and `<version>` is read from that plugin's `plugin.json` (e.g. `rootnode-projects/v6.0.0`), `--latest=false`. Each carries exactly one asset, `<plugin>-v<version>.zip`, and its notes from `release-notes/<plugin>-v<version>.md`. These are the record and the manual-download path, not the install path.
+- **Catalog umbrella.** One release tagged `catalog-vN.N` (or `catalog-vN.N.N` for a patch), marked `--latest`, notes from `release-notes/catalog-vN.N[.N].md`, carrying **the six plugin zips as loose assets** — each plugin at its current version. Its body is the catalog index: what changed, install (marketplace first), a `## Download` section, a plugin index that links every plugin's current release and lists the Skills inside it, plus Architecture and Site sections. It frames the plugins as one system and is what GitHub surfaces as "Latest."
 
-This superseded the **v2.x model** (a single release with all Skill zips attached loose, no per-Skill releases) at v3.0. Do not revert to the all-zips-in-one-release form.
+**Model history.** v2.x: one release, all Skill zips loose. v3.0: per-Skill releases plus a notes-only umbrella. v3.1: the umbrella gained one bundle asset (`rootnode-catalog-vN.zip`, a zip of the 29 surface zips) after the notes-only umbrella left users at GitHub's auto Source-code archives. v6.0: per-plugin releases plus an umbrella with six loose plugin zips; the bundle and the `-cp`/`-cc` surface zips retired (design D4/D5). Do not revert to an earlier form.
 
-**Umbrella asset rule (revised at v3.1).** The 29 **individual** per-Skill artifact zips are NOT attached loose to the umbrella — they live on their per-Skill releases. The umbrella carries exactly **one** asset: the `rootnode-catalog-vN.zip` bundle (every artifact in one download). This was the v3.1 UX fix. The original v3.1 umbrella shipped **notes-only (zero assets)**, which left users with no single "everything" download and effectively pushed them at GitHub's auto-generated Source-code archives — which are not a usable Skills download and cannot be removed. The bundle asset plus a `## Download` section in the notes steer users past those archives to a real download. (Earlier drafts of this playbook described the umbrella as "notes-only"; that is the pre-UX-fix model and is superseded by this section.)
+**Umbrella asset rule (revised at v6.0).** Six assets is a short list, and every asset installs as-is through claude.ai **Upload plugin**; the v3.1 bundle was a zip of zips that had to be unpacked first. So the umbrella attaches the six plugin zips directly and no bundle. GitHub's auto Source-code archives still appear and still cannot be removed; the `## Download` section steers users past them.
 
-### 1.2 Packaging shapes and surface mapping
+### 1.2 Install paths and account sync
 
-Two zip shapes, one per surface, from the same un-suffixed source folder (`rootnode-<skill>/`):
+The marketplace is named `rootnode` (`.claude-plugin/marketplace.json`, `metadata.pluginRoot: ./plugins`). Three install paths, in the order the README presents them:
 
-- **`-cp` = flat.** Contents at the zip root (`SKILL.md`, `references/`, …). CP / Claude.ai Projects upload reads `SKILL.md` at the root.
-- **`-cc` = wrapper.** A nested `rootnode-<skill>/` folder containing the contents. CC extracts the folder into `~/.claude/skills/`; a flat `-cc` would extract loose files and break the install.
+- **claude.ai (recommended).** **Customize > Plugins > Add > Add marketplace** → `drayline/rootnode-skills`, turn on **Sync automatically**, then add the plugins wanted. One account install reaches chat, Cowork and Claude Code; Claude Code signed in with that account loads each plugin as `<plugin>@synced`. Chat ignores plugin hooks and agents.
+- **Claude Code without an account sync** (API-key sessions). `claude plugin marketplace add drayline/rootnode-skills`, then `claude plugin install <plugin>@rootnode`. Auto-update is off by default for a third-party marketplace, so updates take `claude plugin update`. `[dated product fact — verify on the running Claude Code version]`
+- **Manual.** Download `<plugin>-v<version>.zip` from a release and use claude.ai **Upload plugin**. No update channel.
 
-Surface map (the authoritative assignment):
-
-| Bucket | Count | Skills | Ships |
-|---|---|---|---|
-| cp-only | 22 | everything not listed below | `-cp` |
-| cc-only | 3 | `critic-gate`, `mode-router`, `repo-hygiene` | `-cc` |
-| dual | 2 | `skill-builder`, `cc-design` | `-cp` + `-cc` |
-
-→ **29 artifacts = 24 `-cp` (flat) + 5 `-cc` (wrapper)** from 27 source folders. The `-cp`/`-cc` suffix is applied by the packager, never present on the source folder. The umbrella bundle (`rootnode-catalog-vN.zip`) contains all 29 of these artifact zips.
-
-**Install paths and account sync.** Skills uploaded to a claude.ai account also load in Claude Code: Claude Code v2.1.273 or later, signed in with that account, downloads them to `~/.claude/skills/synced/` and loads them as `anthropic-skills:<name>` `[Anthropic docs — Claude Code skills, fetched 2026-10-22]`. A user who uploads the Skills to claude.ai needs no `-cc` install, and a `-cc` copy of the same Skill under `~/.claude/skills/` loads it a second time. The `-cc` zips serve Claude Code sessions that authenticate with an API key, which do not sync, and users who do not upload Skills to claude.ai. The README Quick Start carries the same caveat.
+**Double-load hazard.** Installing the same plugin on the account and locally loads two copies. So does keeping a pre-v6.0 standalone upload (`rootnode-<skill>`) beside the plugin copy (`<plugin>:<skill>`). Install on the account *or* locally, and turn off the pre-v6.0 standalone Skills once the plugins are in. The README Quick Start carries the same rule.
 
 ### 1.3 Packaging toolchain
 
-Repo-root script roster is **three** (as of v4.0):
+Repo-root script roster is **two** from the v6.0 release PR on:
 
-- **`build_release_artifacts.py` — THE release packager.** Single entry point. Reads the surface map, emits flat for `-cp` / wrapper for `-cc`, applies the suffix, and self-asserts 24+5=29 (non-zero exit on mismatch). On a **full build** it also runs `write_bundle()` to archive all 29 artifact zips into `dist/rootnode-catalog-vN.zip` — the umbrella bundle. This is what a release runs. Both shape emitters live inside the orchestrator; wrapper-shape logic is ported from Anthropic's upstream `package_skill.py` (see `build_release_artifacts.py:7` and `:61`), which is **not** a tracked file in this repo.
-- `build_releases.py` — flat shape only, no suffix, no surface routing, no bundle. Superseded by the orchestrator; retained as a legacy reference only.
-- **`generate_release_notes.py` — the version-agnostic release-notes generator** (added v4.0 per D7 expansion). Takes `VERSION`, `TIER_LABEL`, `CATALOG_RELEASE`, `VARIANT_A/B/C`, and `EXPECTED_COUNTS` from a per-cycle Python config file. Preserves the three variant templates (`-cp` flat / `-cc` wrapper / dual) and the 22+3+2=29-artifact count assertion from the v3.1 artifact it succeeded. Per-cycle configs live under `audit/v<N>-*/` (e.g., `audit/v4_0-alignment/release-notes-v4.0-config.py`).
+- **`build_release_artifacts.py` — THE release packager.** Writes one zip per plugin, `dist/<plugin>-v<version>.zip`, with `<version>` read from that plugin's `plugin.json` and `.claude-plugin/plugin.json` at the zip root (the shape **Upload plugin** takes). Leaves `evals/` out at the plugin root and each Skill root; stores shell scripts LF with mode 0755; asserts six zips on a full build (non-zero exit on mismatch). On a full build it clears stale `dist/*.zip` first, and it fails the build when a Skill reference's embedded copy of a shipped script drifts from the shipped file. Both behaviors land in the v6.0 release PR.
+- **`generate_release_notes.py` — the release-notes generator.** Driven by a per-cycle config under `audit/v<N>_<M>-release/`. From v6.0 it writes per-plugin notes (`release-notes/<plugin>-v<version>.md`) for the plugins the config lists; the umbrella notes are authored by hand.
+- `build_releases.py` (flat per-Skill zips, legacy since v3.1) is removed in the v6.0 release PR.
 
-Historical v3.1 cycle tooling — `audit/v3_1-release/generate_release_notes.py` (the version-hardcoded artifact this repo-root generator succeeded) and `audit/v3_1-release/create_releases.py` — remains as cycle-artifact history at its original path. Do not use it for post-v3.1 releases; use `generate_release_notes.py` at repo root instead.
+**Not the release packager.** Anthropic's single-Skill `package_skill.py` lives upstream at `anthropics/skills` → `skills/skill-creator/scripts/package_skill.py` (writes `<name>.skill` with a `<name>/` wrapper); skill-builder's own `scripts/package_zip.py` is adapted from it. Neither is used to cut a release (SBD §4.7).
 
-**Authoritative packager inventory: `audit/repo-catalog/`** (regenerated at the end of every release — see Phase B post-verification step). Where §1.3 and the catalog disagree, the catalog wins and this section is a defect to fix.
+**Validation instruments.** `claude plugin validate .` (marketplace) and `claude plugin validate ./plugins/<plugin> --strict` (each plugin) must pass before a release. `[dated product fact — verify on the running Claude Code version]`
+
+Historical cycle tooling (`audit/v3_1-release/`, the per-cycle notes configs under `audit/v4_0-alignment/` and later) stays at its original path as cycle history.
+
+**Authoritative packager inventory: `audit/repo-catalog/`** (regenerated at the end of every release — see Post-verification). Where §1.3 and the catalog disagree, the catalog wins and this section is a defect to fix.
 
 ### 1.4 Tag naming
 
-- **Per-Skill:** `rootnode-<skill>/vN`. Uniform prefix as of v3.1. (v3.0 had two prefix-less dual-surface tags — `skill-builder/v3.0`, `cc-design/v3.0`. Do not carry that asymmetry forward.)
-- **Catalog umbrella:** `catalog-vN` (not `vN` — distinct from per-Skill tags).
-- **Bundle asset name:** `rootnode-catalog-vN.zip` — distinct from the umbrella *tag* `catalog-vN`. The asset is what users download; the tag is what the release is keyed on.
+- **Per-plugin:** `<plugin>/v<plugin.json version>`, with the full plugin name — always three-part semver, e.g. `rootnode-code/v6.0.0`.
+- **Catalog umbrella:** `catalog-vN.N` for a catalog version, `catalog-vN.N.N` for a patch catalog release. The catalog version is the umbrella's label; plugin versions move independently after v6.0.0.
+- **Historical per-Skill tags** `rootnode-<skill>/vN` (v3.1–v5.0.1) and the two v3.0 prefix-less tags stay as history. No new per-Skill tags after v5.0.1. The `rootnode-skill-builder/` prefix now carries the Skill's history (v3.1–v5.0) and the plugin's line (v6.0.0 on); check any pattern-generated tag against `git tag --list` before creating it (§4 rule 5).
 
-### 1.5 Alternate release shape — the single-Skill cut
+### 1.5 Alternate release shape — the single-plugin cut
 
-A **single-Skill cut** is a supported release shape distinct from the full catalog release. Use it when exactly one Skill needs a minor release and the catalog does not.
+Use a **single-plugin cut** when exactly one plugin changes and the catalog does not.
 
-- **What it produces.** One per-Skill release only, tag `rootnode-<skill>/vN.N` (or `vN.N.N` for a patch), carrying that Skill's surface zip(s) — cp-only, cc-only, or dual per the surface map.
-- **What it does NOT produce.** No new `catalog-vN` umbrella, no new bundle, no new catalog-index notes, no regenerated repo catalog. The prior `catalog-vN` umbrella retains `--latest`; the README `/releases/latest` link continues to resolve to it.
-- **Conditions for using this shape.** All must hold:
-  1. Only one Skill has changed (one Skill's minor or patch release, no cross-Skill co-release).
-  2. The change has no cross-Skill dependencies — no shared reference file bumps, no changes another Skill relies on.
-  3. The release does not introduce or break a link the README `/releases/latest` path (or the umbrella body) depends on.
-- **When to promote to a full catalog release instead.** As soon as any of the above fails — a second Skill needs to ship alongside, a shared/cross-Skill file changed, or the umbrella index needs re-linking — cut a full catalog release (per Phase A/B) so the umbrella and per-Skill releases move in lockstep.
-- **Anti-churn.** The `catalog-vN` Latest tag stays put. A single-Skill cut that marks itself `--latest` breaks the README install path (per §3, "README → `/releases/latest`, not a pinned tag" depends on the umbrella keeping `--latest`).
+- **What it produces.** The raised `plugin.json` version merged to `main` (the publish), one per-plugin release `<plugin>/v<version>` with its zip and notes, and a CHANGELOG entry.
+- **What it does NOT produce.** No new umbrella, no new catalog-index notes, no regenerated repo catalog. The prior umbrella keeps `--latest`; its asset for that plugin is one version behind until the next catalog release, and the per-plugin release is the manual download for the new version.
+- **Conditions.** All must hold: (1) only one plugin changed; (2) no file another plugin relies on changed; (3) no README or umbrella link depends on the change.
+- **Promote to a catalog release** as soon as any condition fails, so the umbrella and the plugins move in lockstep.
+- **Anti-churn.** A per-plugin release never marks itself `--latest`; the README's `/releases/latest` link depends on the umbrella keeping it.
 
 ### 1.6 Patch catalog release
 
-A patch that changes more than one Skill, or a file another Skill relies on, ships as a **patch catalog release**. Shape settled at v5.0.1 (2026-10-29):
+A patch that changes more than one plugin, or a file another plugin relies on, ships as a **patch catalog release**. Shape settled at v5.0.1 (2026-10-29), restated for plugins at v6.0:
 
-- **Per-Skill releases** only for the Skills that changed: tag `rootnode-<skill>/vN.N.N`, `--latest=false`. Unchanged Skills are not re-tagged.
-- **Umbrella** `catalog-vN.N.N`, marked `--latest`, carrying one bundle asset `rootnode-catalog-vN.N.N.zip` with all 29 artifacts built from merged `main` — changed Skills at their new version, unchanged Skills at their current one — so the bundle stays the one full-catalog download.
-- **Umbrella notes** link every Skill's current per-Skill release: the new tag for a changed Skill, the existing tag for an unchanged one.
-- **Packager:** bump `CATALOG_VERSION` in `build_release_artifacts.py` in the content PR (Phase A), as at v5.0.
-- **Per-Skill notes:** run `generate_release_notes.py` with a per-cycle config that lists only the changed Skills, and set its expected counts to match.
+- **Version bumps** only in the plugins that changed (patch component). Changed Skills take their plugin's new version in `metadata.version`; unchanged Skills keep theirs (SBD §6.6).
+- **Per-plugin releases** only for the changed plugins: tag `<plugin>/vN.N.N`, `--latest=false`. Unchanged plugins are not re-tagged.
+- **Umbrella** `catalog-vN.N.N`, marked `--latest`, carrying all six plugin zips built from merged `main` — changed plugins at their new version, unchanged plugins at their current one — so the umbrella stays the one full-catalog download.
+- **Umbrella notes** link every plugin's current release: the new tag for a changed plugin, the existing tag for an unchanged one.
+- **Content PR carries the release docs:** the per-plugin notes for the changed plugins, the umbrella notes `release-notes/catalog-vN.N.N.md`, and the CHANGELOG entry ride the content PR (§2 Phase A step 4), exactly as for a full release. Write them before the Refuter review, so the reviewed diff includes them.
 - **Repo catalog** regenerates after verification, as for a full release.
 
-A patch that changes exactly one Skill with no cross-Skill effect stays a single-Skill cut (§1.5).
+A patch that changes exactly one plugin with no cross-plugin effect stays a single-plugin cut (§1.5).
 
 ---
 
 ## 2. Release process — two-phase, branch-protection-aware
 
-`main` is branch-protected (CLAUDE.md halt #1): **no direct commits.** All repo commits land via a `release/vN` branch → PR → operator merge (Phase A). Tags and GitHub releases are created off merged `main` afterward (Phase B), so every tag points at the complete state.
+`main` is branch-protected (CLAUDE.md halt #1): **no direct commits.** All repo commits land via a `release/vN.N` branch → PR → operator merge (Phase A). Tags and GitHub releases are created off merged `main` afterward (Phase B), so every tag points at the complete state. Because merge is also the marketplace publish, the Phase A merge gate is the publish gate.
 
 ### Pre-flight
-1. `git checkout main && git pull`; confirm the alignment/content work has merged (spot-check Skill `version` fields).
+1. `git checkout main && git pull`; confirm the content work has merged (spot-check `plugin.json` versions and Skill `metadata.version` fields).
 2. `gh auth status` authenticated.
-3. Confirm `build_release_artifacts.py` is present, its surface map still matches the catalog, and its `write_bundle()` step is intact (bundle is part of a full build).
+3. `claude plugin validate .` and `claude plugin validate ./plugins/<each> --strict` pass.
 4. Confirm the staging manifest: `design/staging-kf/` contains exactly the KFs to sync, nothing else (stale drafts pollute the mirror).
-5. Confirm the vN README and the `catalog-vN.md` umbrella notes are available, and that the umbrella notes use embedded `[name](url)` links (not bare URLs, not double-wrapped) — see §3 and §4 rule 7.
+5. Confirm the umbrella notes use embedded `[name](url)` links (not bare URLs, not double-wrapped) — see §3 and §4 rule 7.
 
 ### Phase A — content PR (all commits; operator merges)
-1. Branch `release/vN`. Commit `build_release_artifacts.py` if not yet tracked.
+1. Branch `release/vN.N`.
 2. **Canonical-KF sync** — named files only, never a glob. Copy each staged KF → `audit/canonical-kfs/` by name; CRLF-normalized `diff` each against its expected delta; **clear staging** after a verified sync.
-3. **Release notes** — per-Skill (`release-notes/<skill>-vN.md`) **and** the catalog umbrella (`release-notes/catalog-vN.md`).
-4. **README bump** — and point install/download links at **`/releases/latest`** (resolves to the umbrella while it's `--latest`), calling out the bundle. See the README dependency in §3.
-5. Push, open PR, **HALT for operator review + merge.**
+3. **Version bumps** — raise `version` in each changed plugin's `plugin.json`; set changed Skills' `metadata.version` per SBD §6.6.
+4. **Release docs** — per-plugin notes (`release-notes/<plugin>-v<version>.md`) for each changed plugin, the umbrella notes (`release-notes/catalog-vN.N.md`), and the CHANGELOG entry. Written before the Refuter review, so the reviewed diff includes them.
+5. **README** — marketplace install path first (§1.2), the plugin table, and download links at **`/releases/latest`** (resolves to the umbrella while it is `--latest`).
+6. Push, open PR, **HALT for operator review + merge.** The merge publishes.
 
 ### Phase B — tags + releases off merged `main`
-6. Re-sync to merged `main`; verify the PR landed.
-7. **Package:** `python build_release_artifacts.py` → 29 zips (self-asserted) **+ `dist/rootnode-catalog-vN.zip` bundle** on the full build.
-8. **Per-Skill releases:** `gh release create <skill>/vN … <zip(s)>` ×27, sequential, halt on any failure.
-9. **Catalog umbrella (notes + bundle, `--latest`):**
-   - `gh release create catalog-vN --notes-file release-notes/catalog-vN.md --latest` — full categorized index body. Apply notes **via `--notes-file` (raw bytes)**, never by pasting a rendered copy (that is what double-wrapped the links at v3.1 — see §3 / §4 rule 7).
-   - `gh release upload catalog-vN dist/rootnode-catalog-vN.zip --clobber` — attach the bundle.
-   - The umbrella is **kept as the `--latest` release**. No per-Skill release may be marked `--latest` afterward — the README depends on `/releases/latest` resolving to the umbrella.
+7. Re-sync to merged `main`; verify the tip is the PR merge commit and report its SHA verbatim. Package from that commit, never from the release branch.
+8. **Package:** `py -3 build_release_artifacts.py` (the operator's machine resolves `python` to an unrelated interpreter) → six zips, self-asserted. Record each zip's sha256.
+9. **Per-plugin releases:** for each changed plugin, `gh release create <plugin>/v<version> dist/<plugin>-v<version>.zip --target <merge SHA> --title "<plugin> v<version>" --notes-file release-notes/<plugin>-v<version>.md --latest=false`. Name each asset path explicitly, never `dist/*.zip`. Sequential; halt on any failure.
+10. **Catalog umbrella:** `gh release create catalog-vN.N --target <merge SHA> --title "root.node catalog vN.N" --notes-file release-notes/catalog-vN.N.md --latest` followed by the six explicit zip paths. Apply notes **via `--notes-file` (raw bytes)**, never by pasting a rendered copy (§3 / §4 rule 7). The umbrella stays the only `--latest` release.
 
 ### Verification (all must hold)
-- Content PR merged; canonical-kfs synced to expected deltas; staging cleared; notes + README on `main`.
-- 29 zips, correct cp/cc split and shapes (spot-check a dual, a cc-only, a cp-only); bundle `rootnode-catalog-vN.zip` built.
-- 27 per-Skill releases at `<skill>/vN`; dual-surface carry both zips.
-- `catalog-vN` umbrella created, `--latest`, body links all 27 and resolves, and carries the **`rootnode-catalog-vN.zip` bundle** as a real download. (GitHub's auto Source-code archives will also appear; they are not a usable Skills download and cannot be removed — the bundle is the answer to that.)
+- Content PR merged; canonical-kfs synced to expected deltas; staging cleared; notes, CHANGELOG and README on `main`.
+- **Marketplace on `main`:** `gh api repos/drayline/rootnode-skills/contents/.claude-plugin/marketplace.json` decodes and lists the six plugins; each plugin's `plugin.json` on `main` reads the expected version.
+- Six zips built, each with `.claude-plugin/plugin.json` at the zip root and a name that matches its `plugin.json` version.
+- One per-plugin release per changed plugin, one asset each, asset sha256 equal to the build's.
+- `catalog-vN.N` umbrella created, `--latest`, six assets whose sha256 equal the build's.
 - **Umbrella notes verified BOTH ways:**
-  - **Stored body** — `gh release view catalog-vN --json body`: assert `]](` == 0 (no double-wrapped links), `releases/tag/rootnode-` == 27 (all per-Skill links present), `## Download` present.
-  - **Rendered page** — open the release page in a browser and confirm the links are clickable, not literal text. An `href` present in the stored body is NOT proof of a clean render (§4 rule 7).
-- README install/download links point at `/releases/latest`, resolve to the umbrella, and the umbrella is the only `--latest` release.
+  - **Stored body** — `gh release view catalog-vN.N --json body`: `]](` == 0 (no double-wrapped links); `releases/tag/rootnode-` == the number of plugin links the notes carry (six); `## Download` present.
+  - **Rendered body** — `gh api -H "Accept: application/vnd.github.html+json" repos/drayline/rootnode-skills/releases/tags/catalog-vN.N --jq .body_html`: the plugin links render as `<a href=…>` anchors and no literal `[name](` text survives. An `href` in the stored body is NOT proof of a clean render (§4 rule 7).
+- README install/download links resolve, and the umbrella is the only `--latest` release.
 - Show `gh release list` as evidence. Banned completion phrases: "should work," "probably fine," "looks good."
+- **Live install (operator).** Adding the marketplace on claude.ai and on Claude Code is an operator check after Phase B; a CC session cannot perform it and does not report it as done.
 
 ### Post-verification — repo catalog regeneration
 
-10. **Regenerate `audit/repo-catalog/`.** After every Verification bullet above passes, produce a fresh `audit/repo-catalog/root_repo_catalog_<YYYYMMDD>.md` matching the section structure of the prior snapshot. Every section derives from a live command (`git ls-files`, `git tag --list`, `gh release list`, `ls`, `git log --oneline -20`), never from memory or the prior catalog. Regenerating **after** verification captures the new per-Skill tags, the umbrella release, and the current `--latest` — running the catalog pre-package would bake in staleness in the Tags and GitHub Releases sections. Commit on `main` via a follow-up hygiene PR (branch protection forbids direct commits); commit message convention `chore(catalog): regenerate for vN`. The catalog is what future sessions read as the ground truth for repo contents; failure to regenerate is what produced the v4.0 pre-flight defect (a month-stale catalog was unreachable and an incorrect playbook became authoritative in its place — see the reconciliation cycle 2026-07-25).
+11. **Regenerate `audit/repo-catalog/`.** After every Verification bullet above passes, produce a fresh `audit/repo-catalog/root_repo_catalog_<YYYYMMDD>.md` matching the section structure of the prior snapshot. Every section derives from a live command (`git ls-files`, `git tag --list`, `gh release list`, `ls`, `git log --oneline -20`), never from memory or the prior catalog. Regenerating **after** verification captures the new tags, the umbrella release, and the current `--latest` — running the catalog pre-package would bake in staleness in the Tags and GitHub Releases sections. Commit on `main` via a follow-up hygiene PR (branch protection forbids direct commits); commit message convention `chore(catalog): regenerate for vN.N`. The instruction to regenerate enumerates the expected deltas rather than naming files by assumption. The catalog is what future sessions read as the ground truth for repo contents; failure to regenerate is what produced the v4.0 pre-flight defect (a month-stale catalog was unreachable and an incorrect playbook became authoritative in its place — see the reconciliation cycle 2026-07-25).
 
 ---
 
 ## 3. Decisions & conventions (with rationale)
 
-- **Per-Skill releases + notes-plus-bundle umbrella.** Per-Skill releases let users pin and pull individual Skills; the umbrella gives the catalog a single discoverable `--latest` anchor, a changelog, and a one-file "everything" download (the bundle) without forcing users to collect 27 releases. The umbrella carries the bundle, not the 29 loose zips. Chosen at v3.0 (per-Skill + umbrella) and refined at v3.1 (bundle on the umbrella).
-- **Bundle on the umbrella; individual zips on per-Skill releases.** Keeps the umbrella a clean index + one "everything" download instead of a long multi-asset scroll (the 29 zips plus the bundle, on top of GitHub's two unremovable auto archives), while per-Skill releases remain the place to pull a single Skill. *Alternative considered:* attach all 29 to the umbrella for zero-navigation single-Skill downloads — left open; revisit only if single-Skill discoverability directly from the umbrella becomes a real need.
-- **README → `/releases/latest`, not a pinned `catalog-vN` tag.** Install links auto-track each catalog ship without a per-release README edit. **Dependency:** `/releases/latest` resolves to the umbrella **only while the umbrella stays `--latest`** — so no per-Skill release may be marked `--latest` after the umbrella. Enforced in Phase B step 9 and Verification.
-- **Umbrella notes are applied as raw bytes via `--notes-file`, never pasted from a rendered copy.** The v3.1 double-wrapped-link bug (`[[name](url)](url)`, which renders as literal text) came from pasting a rendered-page copy back into the notes — *not* from the link format. Embedded `[name](url)` renders fine (the v3.0 body proved it). The format was never the problem; the application path was. Apply notes from the source markdown file; if a fix is needed post-create, `gh release edit catalog-vN --notes-file <file>`.
-- **Two-phase branch model.** Branch protection forbids direct `main` commits, so content (KFs, notes, README) goes through a PR; tags/releases are created off merged `main` so they reference the final state. Conflating these (committing on `main`) bounces against protection.
-- **Packaging by surface.** CP upload needs flat; CC install needs the wrapped folder. Wrong shape = install failure, not cosmetics. The suffix encodes the shape.
+- **The plugin is the release unit (v6.0, design D4/D5).** A plugin installs once per account across chat, Cowork and Claude Code and has an update channel; a Skill zip had neither, and no telemetry. Per-plugin releases replace per-Skill releases; the surface zips and the bundle retired with them.
+- **Merge is publish.** The marketplace reads `main`, so a raised `plugin.json` version reaches synced users on merge, before any tag exists. Tags and releases record a publish; they do not cause one. A content PR therefore carries everything the release needs — versions, notes, CHANGELOG, README — before the merge gate.
+- **Six loose zips on the umbrella; no bundle.** Each asset installs directly through **Upload plugin**, and six is a short list. The v3.1 bundle solved a 29-asset problem that no longer exists.
+- **README → marketplace first, `/releases/latest` second.** The marketplace is the path with updates; the release link is the manual fallback and auto-tracks each catalog ship. **Dependency:** `/releases/latest` resolves to the umbrella **only while the umbrella stays `--latest`** — so no per-plugin release may be marked `--latest`.
+- **Explicit asset paths, never a glob.** `dist/` is build output that keeps old zips between runs; a release step using `dist/*.zip` would ship retired artifacts. Name every asset path, and let the packager clear stale zips on a full build.
+- **Umbrella notes are applied as raw bytes via `--notes-file`, never pasted from a rendered copy.** The v3.1 double-wrapped-link bug (`[[name](url)](url)`, which renders as literal text) came from pasting a rendered-page copy back into the notes — *not* from the link format. Embedded `[name](url)` renders fine. Apply notes from the source markdown file; if a fix is needed post-create, `gh release edit catalog-vN.N --notes-file <file>`.
+- **Two-phase branch model.** Branch protection forbids direct `main` commits, so content goes through a PR; tags/releases are created off merged `main` so they reference the final state.
 - **Named-file canonical sync, never a glob.** A blind `cp staging/*.md canonical/` propagates any stale leftover into the mirror. Copy by name, diff each, clear staging after.
-- **Catalog umbrella body is the full index, not a summary.** The umbrella's value is the categorized link map to all per-Skill releases (9 functional categories) + Architecture + Site + the `## Download` section. A thin summary defeats the purpose.
+- **Catalog umbrella body is the full index, not a summary.** The umbrella's value is the plugin index — each plugin linked to its current release with the Skills inside it listed — plus install, `## Download`, Architecture and Site. A thin summary defeats the purpose.
 
 ---
 
@@ -162,25 +156,29 @@ The v3.1 session burned roughly a dozen turns on avoidable churn. Every instance
 | Knowledge | Home |
 |---|---|
 | Release model, process, anti-churn rules (this doc) | Repo `docs/root_SKILLS_RELEASE_PLAYBOOK.md` (CC reads it) **and** seed project reference |
-| Packaging + umbrella-asset convention (`-cp` flat / `-cc` wrapper, surface map, 29-math, bundle-on-umbrella) | Repo `CLAUDE.md` → `## Packaging conventions` **and** this playbook §1.1 / §1.3 |
-| Executable release steps | `root_CC_PROMPT_vN_release.md` → copy, bump version, adjust deltas next cycle (the prior version's prompt is spent — see Artifact lifecycle) |
+| Packaging convention (plugin layout, one zip per plugin, six-zip assertion, explicit asset paths) | Repo `CLAUDE.md` → `## Packaging conventions`, this playbook §1.1 / §1.3, and SBD §4.7 |
+| Plugin and Skill versioning, the v6.0 rename | SBD §6.6; this playbook §1.4–§1.6 |
+| Install paths and the double-load rule | Repo `README.md` Quick Start and this playbook §1.2 |
+| Executable release steps | `root_CC_release_vN.md` → copy, bump version, adjust deltas next cycle (the prior version's prompt is spent — see Artifact lifecycle) |
 | Drift + corrected pattern + the verify-rendered observation | `root_build_context.md` (Self-Optimization Observations + release-pattern note) |
-| Packaging-format methodology fixes | SBD §4.7 refinement (see §6) — flows through KF → staging → canonical sync |
+| Packaging-format methodology fixes | SBD §4.7 refinement — flows through KF → staging → canonical sync |
 
 ---
 
 ## 6. Known debt / next-cycle inputs
 
-Closed in v4.0 alignment cycle (July 2026):
+Closed at v6.0 (2026-11-02):
 
-- **SBD §4.7 refinement — CLOSED.** The K1/K2 residual (SBD §4.7 lines 335 / 337 / :343 asserting `package_skill.py` is a tracked repo file) was corrected during v4.0 W1 SBD recalibration via the seed-Project edit → staging → canonical-KF sync path. Corrections apply the exact replacement text from `audit/repo-catalog/REPO_CLAIM_RECONCILIATION.md` K1/K2: the wrapper shape is produced by `build_release_artifacts.py` directly (upstream origin: Anthropic's `package_skill.py` — not a tracked file). The `skill-builder`-internal `scripts/package_zip.py` remains a *separate* build-pipeline packager and stays disambiguated.
-- **OPT_REF body recalibration — CLOSED.** Full body recalibration completed as part of v4.0 W1. The header and body are calibrated to Opus 5 + Sonnet 5 dual-primary; the ~45 4.7-era body refs are updated to the 5-generation landscape; the tendency taxonomy expanded per design §9 (14 tendencies + 2 non-tendency defects); the Context Budget Principles section rebuilt per D6 (automatic-RAG-by-window, with the ~66,500 figure preserved as a historical Phase 22 measurement).
-- **README compatibility-matrix + per-Skill tier-marker regeneration — CLOSED at v4.0 Phase 2.** Regenerated against the v4.0 tier assignments (not the v3.1 ones) as part of the W2 mechanical sweep.
-- **Tag-naming standardization — CLOSED.** Uniform `rootnode-<skill>/vN` verified at v3.1; the v3.0 asymmetry is historical and closed. No further action.
+- **Distribution model — CLOSED.** The plugin marketplace replaced per-Skill zips (design `design/root_DESIGN_plugin_packaging.md`, D1–D6). The roadmap item "`rootnode-for-code` plugin bundle" is superseded by the `rootnode-code` plugin.
+- **`package_skill.py` location — CLOSED.** Verified upstream at `anthropics/skills` `skills/skill-creator/scripts/package_skill.py` (commit `ca45fc496a3436251f191354091d557da31c15b5`); SBD §4.7 records it. It is not the release packager.
+- **Landscape-volatility discipline — CLOSED.** AEA §4.15, validated through use in the v5.0 cycle.
 
 Remaining / carried forward:
 
-- **`rootnode-for-code` plugin bundle** — roadmap, owned by the Distribution project, out of scope for the catalog release.
-- **Tokenizer re-baselining** — Opus 5 and Sonnet 5 tokenizer specifics were not fully re-baselined against `count_tokens` in the v4.0 cycle. Carry as a Calibration Lab item for the next cycle; treat measurements with explicit tolerance until re-baselined.
-- **Landscape-volatility discipline (D8 methodology)** — codified in AEA §4.15 for v4.0. Design docs authored under this discipline isolate model landscape facts in a dated block that decisions reference; validate the pattern's ergonomics through the next design cycle's use.
-- **Structural anti-pattern candidates surfaced but not added (v4.0 AAP recommendation).** Two Opus-5-era behavioral patterns evaluated as candidates for promotion to structural entries in `root_AGENT_ANTI_PATTERNS.md`: *Verification-instruction accumulation* and *Subagent-verification harness pattern*. Both are documented as behavioral tendencies in `root_OPTIMIZATION_REFERENCE.md`; the recommendation is to promote at least the first if the sweep discipline recurs across CC deployments audited over the next cycle.
+- **Lift evals.** Only `rootnode-projects` ships an eval suite (5 cases). Its first run scored WITH 1.00 / W/OUT 1.00 on every case, so Δ = 0 says nothing yet: the graders cannot fail the baseline (SBD §3.9a). Rewrite the graders against properties the baseline misses, then extend suites to the other plugins. The should-trigger fire rate was 6 of 9, with global-audit at 1 of 3 — a description problem for the SBD §9 loop.
+- **Marketplace install not yet observed.** The v6.0 build tested **Upload plugin** for `rootnode-projects` only; marketplace add on claude.ai and on Claude Code is first checked after the v6.0 release.
+- **Hook coverage.** `rootnode-code` hooks were run live on Windows only; macOS behavior, the working directory after `cd`, and real no-`jq` sessions are unverified.
+- **Directory submission.** Later; submit `rootnode-projects` first, after its evals show lift.
+- **Website sync.** rootnode.design still asserts v3.0; its install instructions move to the marketplace path.
+- **Tokenizer re-baselining** — a Calibration Lab item; treat measurements with explicit tolerance until re-baselined.
+- **Structural anti-pattern candidates.** Seven candidates remain unpromoted in `root_AGENT_ANTI_PATTERNS.md` §6 (3+ independent deployments threshold unmet).

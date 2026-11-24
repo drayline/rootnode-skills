@@ -1,0 +1,4 @@
+{
+  "name": "fixture",
+  "scripts": { "test": "node tests/t.test.js" }
+}

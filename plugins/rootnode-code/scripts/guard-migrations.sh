@@ -1,19 +1,32 @@
 #!/bin/bash
-# guard-migrations.sh — Edit|Write|NotebookEdit|Bash|PowerShell guard.
-# With jq: parses the tool's target; fails closed on unreadable input.
+# guard-migrations.sh — Edit|Write|NotebookEdit|Bash|PowerShell guard. Acts only in a repository whose
+# .claude/rootnode-gates.json sets "migrations_guard": {"enabled": true}. Audit rows go to the plugin's state folder.
+# With jq: parses the tool's target; input that is not a JSON object leaves the guard inactive.
 # Without jq: no parsing. Blocks any hook input that contains "migrations", in any case, and allows the rest.
 [ "${MIGRATIONS_GUARD_OFF:-0}" = "1" ] && exit 0      # off-switch; audit its use
+HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+. "$HERE/gate-lib.sh" 2>/dev/null || { echo "rootnode-code: gate-lib.sh not found; migrations guard inactive" >&2; exit 0; }
 IN=$(cat)
+DIR=$(gate_input "$IN" .cwd); ROOT=$(gate_root "${DIR:-$PWD}")
+[ -n "$ROOT" ] || exit 0                             # not a git working copy
+CFG="$ROOT/$GATE_CONFIG"; [ -f "$CFG" ] || exit 0    # no config: the guard is off
+STATE=$(gate_state_dir)
+audit() { gate_log guard block "$ROOT" "$1" || echo "guard: audit row not written" >&2; }
 if ! command -v jq >/dev/null; then
+  grep -q '"migrations_guard"' "$CFG" && grep -Eq '"enabled"[[:space:]]*:[[:space:]]*true' "$CFG" || exit 0
   case "$(printf '%s' "$IN" | tr '[:upper:]' '[:lower:]')" in
   *migrations*)
-    mkdir -p .claude && echo "$(date -u +%FT%TZ) block no-jq" >> .claude/guard.log ||   # audit row
-      echo "guard: audit row not written" >&2
+    audit no-jq
     echo "jq is missing and this call mentions migrations, so it is blocked. Next step: install jq (winget install jqlang.jq, brew install jq, or apt-get install jq)." >&2
     exit 2 ;;
   esac
   exit 0
 fi
+ON=$(gate_jq '.migrations_guard.enabled == true' "$CFG") ||
+  { echo "rootnode-code: $CFG is not valid JSON; migrations guard inactive" >&2; exit 0; }
+[ "$ON" = true ] || exit 0
+printf '%s' "$IN" | jq -e 'type == "object"' >/dev/null 2>&1 ||
+  { echo "rootnode-code: hook input is not a JSON object; migrations guard inactive" >&2; exit 0; }
 TOOL=$(printf '%s' "$IN" | jq -r '.tool_name // ""') &&
 T=$(printf '%s' "$IN" | jq -r '.tool_input.file_path // .tool_input.notebook_path // .tool_input.command // ""') ||
   { echo "Input unreadable; rule holds. Next step: check jq and the hook input." >&2; exit 2; }
@@ -46,7 +59,6 @@ Bash|PowerShell)
 *) case "$P" in migrations/*|*/migrations/*) HIT=1 ;; esac ;;
 esac
 [ -z "$HIT" ] && exit 0
-mkdir -p .claude && echo "$(date -u +%FT%TZ) block $TOOL $P" >> .claude/guard.log ||   # audit row
-  echo "guard: audit row not written" >&2
+audit "$TOOL $P"
 echo "migrations/ is protected. Next step: use the migration tool, then stop for review." >&2
 exit 2

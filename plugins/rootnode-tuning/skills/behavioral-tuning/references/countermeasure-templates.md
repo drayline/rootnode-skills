@@ -1,8 +1,8 @@
 # Extended Countermeasure Templates
 
-Additional variants and placement patterns for the 15-tendency taxonomy documented in SKILL.md. Each section below supplements the base countermeasure with identity-level embeddings, output-standards integrations, stronger variants for severe cases, and combination guidance when multiple tendencies co-occur. Section numbers match the tendency numbers in SKILL.md. Updated for Opus 5.5 + Sonnet 5.5 dual-primary calibration (v5.0 alignment cycle). History: the v4.0 cycle (Opus 5 generation) refactored verbosity into a three-surface family (#3a conversational / #3b agentic narration / #3c written deliverables) and added #11 over-verification, #12 scope expansion, #13 subagent over-delegation, and #14 correction narration. The v5.0 cycle adds #15 early turn termination, adds 5.5-generation facets to #3c, #4, #5, #6, #7, #11, #12, and #13, and moves sections 11–14 out of the former addendum into first-class sections. Four prompt/environment-conditional defects are handled by rewriting prompts or harnesses, not by counter-instructions — see the appendix at the end.
+Additional variants and placement patterns for the 17-tendency taxonomy documented in SKILL.md. Each section below supplements the base countermeasure with identity-level embeddings, output-standards integrations, stronger variants for severe cases, and combination guidance when multiple tendencies co-occur. Section numbers match the tendency numbers in SKILL.md. Updated for Opus 5.5 + Sonnet 5.5 dual-primary calibration (v5.0 alignment cycle). History: the v4.0 cycle (Opus 5 generation) refactored verbosity into a three-surface family (#3a conversational / #3b agentic narration / #3c written deliverables) and added #11 over-verification, #12 scope expansion, #13 subagent over-delegation, and #14 correction narration. The v5.0 cycle adds #15 early turn termination, adds 5.5-generation facets to #3c, #4, #5, #6, #7, #11, #12, and #13, and moves sections 11–14 out of the former addendum into first-class sections. Four prompt/environment-conditional defects are handled by rewriting prompts or harnesses, not by counter-instructions — see the appendix at the end.
 
-Effort context for every deployment note below: the Claude Code default is `medium` on Opus 5.5 / Sonnet 5.5 / Haiku 5.5 (Fable 5.1: `high`); API defaults are Opus 5.5 `medium`, Sonnet 5.5 `high`, Fable 5.1 `high` (dated landscape block `root_MODEL_LANDSCAPE_2026-10`). Countermeasures that v4.0 excluded on the strength of `high`-effort mitigation are applied on observation at `medium`, not excluded by default. **Two countermeasure shapes run opposite to insertion.** #11 over-verification is fixed by REMOVAL of instructions (Section 11). #15 early turn termination is fixed first by raising effort, then by a turn-boundary block (Section 15). Anthropic-derived text is tagged `[Anthropic docs]`; untagged templates are rootnode-authored.
+Effort context for every deployment note below: the Claude Code default is `medium` on Opus 5.5 / Sonnet 5.5 / Haiku 5.5 (Fable 5.2: not stated for Claude Code on the pages fetched 2026-11-24); API defaults are Opus 5.5 `medium`, Sonnet 5.5 `high`, Fable 5.2 `high` (dated landscape block `root_MODEL_LANDSCAPE_2026-10`). Countermeasures that v4.0 excluded on the strength of `high`-effort mitigation are applied on observation at `medium`, not excluded by default. **Two countermeasure shapes run opposite to insertion.** #11 over-verification is fixed by REMOVAL of instructions (Section 11). #15 early turn termination is fixed first by raising effort, then by a turn-boundary block (Section 15). Anthropic-derived text is tagged `[Anthropic docs]`; untagged templates are rootnode-authored.
 
 ---
 
@@ -22,12 +22,14 @@ Effort context for every deployment note below: the Claude Code default is `medi
 - [Section 12: Scope expansion](#section-12-scope-expansion) — scope-constraint templates; unrequested additions
 - [Section 13: Subagent over-delegation](#section-13-subagent-over-delegation) — reviewer-launch block; delegation caps for CC and API agent surfaces
 - [Section 14: Correction narration](#section-14-correction-narration) — restrict corrections to material ones
-- [Section 15: Early turn termination](#section-15-early-turn-termination) — effort first; default block; unattended variant; harness complement
+- [Section 15: Early turn termination](#section-15-early-turn-termination) — effort first; default block; unattended variant; harness complement; Fable 5.2 conditioning
+- [Section 16: Caution accumulation](#section-16-caution-accumulation) — removal, scoping and positive-scope template; stop rule for CC
+- [Section 17: Silent long runs](#section-17-silent-long-runs) — harness first; opening-updates-recap template for watched sessions
 - [Worked examples](#worked-examples)
 - [Combining multiple countermeasures](#combining-multiple-countermeasures)
 - [Deployment-context checklist](#deployment-context-checklist)
 - [Language Calibration](#language-calibration)
-- [Prompt/environment-conditional defects (not tendencies)](#promptenvironment-conditional-defects-not-tendencies) — conservative-review literalism, thinking-disabled artifacts, mid-turn injection misread, reasoning-extraction refusal
+- [Prompt/environment-conditional defects (not tendencies)](#promptenvironment-conditional-defects-not-tendencies) — conservative-review literalism, thinking-disabled artifacts, mid-turn injection misread, reasoning-extraction refusal, prompt-visible token budget
 
 ---
 
@@ -514,6 +516,8 @@ When you change code that can be run, built, or type-checked, run a real check t
 Once you have answered something, treat that answer as done. On later turns, focus your thinking on what the user is asking now, and don't go back over an earlier answer unless the user asks about it or points out a problem with it.
 ```
 
+**Caution (Fable 5.2).** On Fable 5.2 at `high`, the two lines above reduced thinking on follow-up questions and made the model far less likely to point out mistakes in its earlier answers `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. Leave them out where re-examining earlier answers matters; elsewhere, test whether the model still flags its own mistakes before adopting them.
+
 **Deployment calibration.** Chat interface: MEDIUM (chat workloads are less verification-heavy) · Claude Projects: MEDIUM · Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5): HIGH (agentic workloads with verification scaffolding accumulated over prior model generations) · API (agent workloads at effort ≥ high): HIGH.
 
 ---
@@ -559,6 +563,8 @@ warranted, describe it in one sentence at the end and let the operator decide
 
 **Deployment calibration.** Chat interface: MEDIUM · Claude Projects: MEDIUM · Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5): HIGH (agentic sessions where the model can act on scope expansion by writing files, spawning subagents, etc.) · API (agent workloads at effort ≥ high): HIGH.
 
+**Ownership framing is a costed lever (Fable 5.2).** "You are the owner and long-term maintainer of this codebase, and its design is up to you." `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]` makes the model consolidate duplicate code (under 10% of runs without it, about 75% with it) — and raises output tokens by 70 to 80% and produces changes nobody asked for, including tests, docs and, in some runs, changed feature behavior. A no-drive-by-refactors rule earlier in the same prompt did not cancel it. Use it only when the operator owns that design decision; never as a default.
+
 ---
 
 ## Section 13: Subagent over-delegation
@@ -569,6 +575,8 @@ warranted, describe it in one sentence at the end and let the operator decide
 ```text
 When the work the user asked for is done and its checks pass, stop and report. Don't start extra rounds of review or hardening on your own, and don't launch reviewer sub-agents unless the user asked for a review. If you think a deeper review is worth doing, say so at the end.
 ```
+
+**Facet — self-review delegation (Fable 5.2).** At `xhigh` and `max`, Fable 5.2 starts subagents to review its own work, which Fable 5.1 did not do on the same tasks; subagents can be a large share of session cost `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. Levers: effort (`high` before `xhigh`), the cap mechanism below, and — only if the model starts more subagents than the task needs — a subagent tool description that states what a subagent adds to session cost, when delegation is worth it and when not, and how to brief one. Review standing delegation lines in system prompts, Skills and agent files first.
 
 **Standard template (CLAUDE.md core rules for CC deployments):**
 ```
@@ -620,7 +628,7 @@ and move on without noting it.
 
 **What it looks like** (added in the v5.0 cycle). The model ends its turn while work it was asked for is still owed: a summary that closes by announcing the next step, with no tool call; an offer to continue "unless you'd prefer otherwise"; a list of decisions for the user when none of them blocks the remaining work; a report because the turn has been long or a milestone is done; at low effort, pausing to confirm a plan or asking a question it could answer itself; in long agent prompts, handing the task back. Distinct from #12 scope expansion (the model does too much) and #6 over-exploration (search breadth within a task). #15 is too little, and its countermeasure runs in the opposite direction from #12's — which is why it is a separate tendency, not a #12 facet.
 
-**Warrant.** Documented with a prompt-level countermeasure in all four current Anthropic prompting guides: Opus 5.5 ("Unattended agentic runs"), Sonnet 5.5 ("Carrying work through" at `low`/`medium`), Haiku 5.5 ("Early stopping" — raising `low` → `medium` "roughly halved early stopping" `[Anthropic docs]`), and Fable 5.1 ("Finishing the whole task").
+**Warrant.** Documented with a prompt-level countermeasure in all four current Anthropic prompting guides: Opus 5.5 ("Unattended agentic runs"), Sonnet 5.5 ("Carrying work through" at `low`/`medium`), Haiku 5.5 ("Early stopping" — raising `low` → `medium` "roughly halved early stopping" `[Anthropic docs]`), and Fable 5.1 ("Finishing the whole task"). **Fable 5.2 conditioning:** the Fable 5.2 guide documents it again ("Finish the whole task"), more often at `low` and `medium`; in Anthropic's replay of agentic coding sessions at `medium`, a finishing block roughly halved the sessions that ended with continuable work, at about 30% more output tokens, and the model asked less often with it — keep the deployment's own confirmation step for risky actions `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`.
 
 **Deployment calibration** (D9c analytical from the guides; not measured): Chat interface (default effort): LOW — a chat turn is supposed to end · Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5): MEDIUM at `medium`, HIGH at `low`; LOW at `high` and above; long system prompts raise it (Haiku 5.5 guide) · API agentic (developer-controlled effort): as Claude Code by effort level; HIGH for fully unattended loops with no harness continuation · Cowork / scheduled runs: HIGH — no operator present to send the continuation.
 
@@ -644,6 +652,51 @@ A standing instruction from the user, the person you are working for. It is abou
 - Treat a text-only end of turn "as a report rather than as proof the task is done" `[Anthropic docs — Opus 5.5 guide]`.
 - When open items remain, send a continuation message naming them. Cap continuations at two or three per task.
 - If something the model started is still running (a background command, a subagent), the task is not done — wait, and return its output as the next user message.
+
+## Section 16: Caution accumulation
+
+**What it looks like** (added in v6.1). The agent asks for approval on routine steps, holds back ordinary actions, or stops at the first error, because cautions have piled up in memory, notes, rules and instruction files; absolute "never" rules are applied far outside the case they were written for. The model may have written some of those cautions itself. The opposite of #12 (too little action, not too much); distinct from #15 (the agent keeps the turn but will not act).
+
+**Warrant.** Prompting Claude Fable 5.2, "Keep caution from piling up" and "Review prompts and harnesses designed for earlier models" `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`: cautious instructions build up through memory, notes and instruction files; the model treats an instruction that contains "never" as absolute; in early testing this showed mostly when several agents worked together. Also the operator's own observation across projects, 2026-11-24.
+
+**Deployment calibration** (D9c analytical, not measured): multi-agent and long-lived projects with Memory or handoff chains: HIGH · Claude Code with a large CLAUDE.md and rules: MEDIUM to HIGH · Chat interface: LOW · single-shot API: LOW.
+
+**Levers, in order.**
+1. **Remove** cautions whose reason no longer holds, at every model generation.
+2. **Scope** each absolute: "ask for approval before deleting files", not "never delete files" — and give the reason.
+3. **Positive scope**: name the routine steps that need no approval. "Act more freely" is too vague.
+4. **Narrow validation stops** such as "stop and review at the first error".
+5. **Restart** a system that stays stuck, with its memory and notes trimmed.
+
+Keep the deployment's own confirmation step for risky or irreversible actions; this tendency is about the routine ones.
+
+**Positive-scope template (core rules; the lists come from the project's scope authorization):**
+```text
+Routine steps that need no approval: {LIST}. Do them without asking.
+Ask before: {SCOPED LIST, each item with its reason}.
+A rule in memory, notes or an instruction file applies only while its reason holds. If you find one whose reason no longer applies, name the file and the line in your report. Do not keep following it silently, and do not delete it yourself.
+```
+
+**Claude Code.** In a CLAUDE.md or session prompt, the template sits beside the halt triggers, and the halt triggers follow the stop rule: stop only when the next action cannot be undone, when a decision could reasonably go either way and only the operator can make it, or when a spend cap is reached (`root_CC_ENVIRONMENT_GUIDE.md` §4; `cc-design` if available). A halt that meets none of the three conditions is the prompt-side source of this tendency.
+
+---
+
+## Section 17: Silent long runs
+
+**What it looks like** (added in v6.1). The first tool call arrives with no statement of intent, and long stretches of tool calls pass with no user-facing text. The opposite of #3b (too much narration) — choose by deployment and never ship both countermeasures in one prompt.
+
+**Warrant.** Prompting Claude Fable 5.2, "Keep users informed during long turns" `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`.
+
+**Deployment calibration** (D9c analytical, not measured): chat and Cowork with a person watching: MEDIUM to HIGH · interactive Claude Code: MEDIUM · unattended Claude Code and API loops: not applicable — the session report carries the need.
+
+**Lever 1 — harness.** On Fable 5.2 the updates the model writes between tool calls arrive as progress-update `thinking` blocks, empty at the default `display: "omitted"`; a client that renders only `text` looks silent. Set `display: "updates"` or `"summarized"` and render the non-empty blocks before adding prompt text. Where mid-conversation system messages exist, a turn-scoped reminder after several silent steps roughly halved the longest silent stretch in Anthropic's testing, with no noticeable increase in tokens or time.
+
+**Lever 2 — template, for watched sessions only (output standards):**
+```text
+Before your first tool call, say in one line what you are about to do. Every few tool calls, give a one-line update. End with a short recap that a reader who saw none of the steps can follow.
+```
+
+**Cost.** Anthropic reports about 20% more output tokens per task for the full opening-updates-recap form `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. Leave it out of unattended prompts.
 
 ---
 
@@ -747,10 +800,12 @@ Before finalizing a countermeasure package, walk through this checklist:
 - For chat interface deployments: are 1b, 7b, 9, 10 countermeasures included if their tendencies are observed?
 - For Projects: are 1b and 9 countermeasures included if long-conversation patterns exist?
 - For Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5): v4.0 excluded countermeasures for 5, 6, 7a, and 9 on the strength of `high`-effort mitigation. At the `medium` default that mitigation is weaker — apply them on observation rather than excluding them by default. Are 11, 12, 13, and 15 addressed for agentic runs?
-- For API: has the effort level been surfaced? Defaults differ — Opus 5.5 `medium`, Sonnet 5.5 `high`, Fable 5.1 `high`. `low`/`medium` are legitimate primary cost controls where evals show quality holds, but 7b and 15 rise there; raising effort is the first lever for both. Do not carry effort settings over from earlier generations without re-running an effort sweep.
+- For API: has the effort level been surfaced? Defaults differ — Opus 5.5 `medium`, Sonnet 5.5 `high`, Fable 5.2 `high`. `low`/`medium` are legitimate primary cost controls where evals show quality holds, but 7b and 15 rise there; raising effort is the first lever for both. Do not carry effort settings over from earlier generations without re-running an effort sweep.
 - Has tool-suppressing language from older prompts been removed (7b), and have think-harder / re-verify lines been removed (11)?
 - Is emphatic language (MUST / ALWAYS / NEVER) used only for tendency #7b?
 - Does the countermeasure set fit within 4-5 rules, or has consolidation been applied?
+- Does each caution still have a reason that holds, is there a positive-scope list beside the halts (16), and is any token budget kept out of the prompt text (fifth conditional defect)?
+- For watched sessions only: is the silent-run template (17) present, and no #3b narration suppressor beside it?
 
 ---
 
@@ -762,7 +817,7 @@ Countermeasure language design affects compliance. Research (Meincke et al. 2025
 
 ## Prompt/environment-conditional defects (not tendencies)
 
-Four failure modes track to the prompt, the harness, or the runtime configuration rather than the model. They are handled by writing prompts differently or configuring the API or harness differently, not by adding counter-tendency instructions.
+Five failure modes track to the prompt, the harness, or the runtime configuration rather than the model. They are handled by writing prompts differently or configuring the API or harness differently, not by adding counter-tendency instructions.
 
 ### Conservative-review literalism
 
@@ -788,7 +843,7 @@ filtered items.
 
 ### Thinking-disabled output artifacts (narrowed in v5.0)
 
-Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1. The artifacts — reasoning leaking into visible text, tool calls written as text instead of a structured `tool_use` block, internal XML tags in the response — are now documented only on Haiku 5.5 at `low` effort or with thinking off, and on Sonnet 5.5 at `between_tools` when a "don't think" instruction is left in the prompt. **Fix:** use adaptive thinking at `medium` and control cost through effort. Remove any "do not think" line.
+Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.2. The artifacts — reasoning leaking into visible text, tool calls written as text instead of a structured `tool_use` block, internal XML tags in the response — are now documented only on Haiku 5.5 at `low` effort or with thinking off, and on Sonnet 5.5 at `between_tools` when a "don't think" instruction is left in the prompt. **Fix:** use adaptive thinking at `medium` and control cost through effort. Remove any "do not think" line.
 
 **Sub-finding (stands from v4.0) — do NOT add "do not think" instructions.** A system-prompt rule telling the model not to think or not to reason INCREASES `<thinking>` tag leakage rather than suppressing it. If an integration must keep Haiku 5.5 thinking disabled and needs a mitigation instruction, use the general form:
 
@@ -800,7 +855,7 @@ internal or system XML tags in your response.
 </output_hygiene>
 ```
 
-**API rule.** `thinking: {"type": "disabled"}` is accepted only on Haiku 5.5, at effort `high` or below. On Opus 5.5, Sonnet 5.5, and Fable 5.1 it returns 400; Sonnet 5.5's floor is `between_tools` (at `high` or below).
+**API rule.** `thinking: {"type": "disabled"}` is accepted only on Haiku 5.5, at effort `high` or below. On Opus 5.5, Sonnet 5.5, and Fable 5.2 it returns 400; Sonnet 5.5's floor is `between_tools` (at `high` or below).
 
 ### Mid-turn user text misread as injection (NEW in v5.0)
 
@@ -815,6 +870,12 @@ Sonnet 5.5 and Haiku 5.5 treat user text placed inside `tool_result` blocks, per
 ### Reasoning-extraction refusal (NEW in v5.0)
 
 On all four current models, prompts that ask the model to reproduce its internal reasoning in the response can be declined with `stop_reason: "refusal"`, category `reasoning_extraction`. Symptom: "Claude refuses when I ask it to show its reasoning." **Fix** `[Anthropic docs — Sonnet 5.5 guide]`: "If your prompts ask the model to include its reasoning in the response, remove those instructions, because they invite `reasoning_extraction` declines. With adaptive thinking, read the reasoning from summarized thinking blocks instead (`display: "summarized"`). You can still ask for a short explanation of the answer or a summary of the actions taken"
+
+### Prompt-visible token budget (NEW in v6.1)
+
+A token budget shown to the model in the prompt raises spending. On Fable 5.2 the size of a budget shown in the prompt changes how much the model spends; in Anthropic's testing on coding tasks at `high` and `xhigh`, removing a large budget lowered cost with equivalent performance `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. The finding is about text in the prompt, not the API's task-budgets beta. Symptom: "the agent spends more since we put the budget in the prompt."
+
+**Fix — mechanism, not prompt text.** Keep the number in the design brief and enforce it with a mechanism: a spend flag on the run, a cap in settings or the environment, or the orchestration code. Do not write the budget, or a countdown of it, into the prompt. Sweep pattern: `token budget`, `budget of`, `tokens remaining`, `you have .* tokens`.
 
 ---
 

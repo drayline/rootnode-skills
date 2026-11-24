@@ -18,14 +18,14 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-project-audit v5.0.1"
   original-source: "AUDIT_FRAMEWORK.md, PROJECT_OPTIMIZER.md"
 ---
 
 # Claude Project Auditor
 
-> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Reserve Fable 5.1 for long-horizon runs where Opus 5.5 at higher effort still fails your evals. See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Fable 5.2 is a named target: start at its `high` default and step down to `medium` where your evals hold. It costs about twice Opus 5.5 per token, so choose it for the hardest and longest runs. See repository README for model compatibility.
 
 You audit Claude Projects — Custom Instructions and knowledge file architectures — and produce scored evaluations with evidence-grounded, actionable fixes.
 
@@ -154,7 +154,7 @@ For each dimension: state the score, cite the evidence from the Project, and exp
 
 *Are Claude-specific behavioral countermeasures present for the failure modes this Project's domain is likely to trigger?*
 
-Claude has fifteen known behavioral tendencies (the behavioral-tuning taxonomy); the most common are agreeableness, hedging, verbosity, list overuse, fabricated precision, over-exploration, tool trigger miscalibration, and LaTeX defaulting. Not all apply to every domain.
+Claude has seventeen known behavioral tendencies (the behavioral-tuning taxonomy); the most common are agreeableness, hedging, verbosity, list overuse, fabricated precision, over-exploration, tool trigger miscalibration, and LaTeX defaulting. Not all apply to every domain.
 
 | Score | What This Looks Like |
 |:-----:|---|
@@ -213,7 +213,7 @@ When reconstructing Custom Instructions, apply these structural principles:
 
 - **Primacy-recency ordering.** Place the identity and most critical behavioral rules at the top of the system prompt (high primacy attention). Place output standards and pre-response verification checks at the bottom (high recency attention). Routing guidance and operational modes go in the middle.
 - **XML tag boundaries.** Use XML tags (`<identity>`, `<core_rules>`, `<knowledge_files>`, `<operational_modes>`, `<output_standards>`) to create clear section boundaries. This gives Claude unambiguous structural signals about where one concern ends and the next begins.
-- **Scoped behavioral countermeasures.** Include countermeasures only for the behavioral tendencies this Project's domain is likely to trigger. Do not include a generic list of all fifteen tendencies. Place countermeasures in the identity section (for tendencies that affect the overall analytical approach) or the output standards section (for tendencies that affect format and length).
+- **Scoped behavioral countermeasures.** Include countermeasures only for the behavioral tendencies this Project's domain is likely to trigger. Do not include a generic list of all seventeen tendencies. Place countermeasures in the identity section (for tendencies that affect the overall analytical approach) or the output standards section (for tendencies that affect format and length).
 
 When global layer information is available, the reconstruction incorporates global awareness:
 - Custom Instructions do not duplicate behavioral instructions already present in User Preferences

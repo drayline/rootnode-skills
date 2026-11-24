@@ -18,14 +18,14 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-memory-optimization v5.0.0"
   original-source: "NEW"
 ---
 
 # Context Layer Optimization for Claude Projects
 
-> **Calibration:** Tier 2 (Sonnet-graceful) — designed against Opus 5.5 + Sonnet 5.5 dual-primary. Runs on Haiku 5.5 at `high` effort with less depth on multi-dimensional analysis; fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. Start at the model's default effort (`medium` on Opus 5.5 and Sonnet 5.5 in Claude Code; `high` for Sonnet 5.5 on the Claude API) and re-run an effort sweep on your own evals rather than carrying a setting over. See repository README for model compatibility.
+> **Calibration:** Tier 2 (Sonnet-graceful) — designed against Opus 5.5 + Sonnet 5.5 dual-primary. Runs on Haiku 5.5 at `high` effort with less depth on multi-dimensional analysis; fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. Start at the model's default effort (`medium` on Opus 5.5 and Sonnet 5.5 in Claude Code; `high` for Sonnet 5.5 on the Claude API) and re-run an effort sweep on your own evals rather than carrying a setting over. On Fable 5.2 the default is `high`; step down to `medium` where the work holds. See repository README for model compatibility.
 
 Rebalances context across Memory, Custom Instructions, knowledge files, and User Preferences in Claude Projects. Produces Memory edit prescriptions, knowledge file trimming recommendations, codification prescriptions for promoting stable patterns to explicit instructions, and cross-layer alignment findings.
 
@@ -154,6 +154,16 @@ For other knowledge files, assess at a lighter level:
 - Are any files bloated with content now unnecessary given Memory handling orientation?
 
 See `references/optimization-patterns.md` for trimming patterns and cross-layer alignment patterns with before/after examples.
+
+### 2d: Stale-Caution Check (all layers)
+
+Cautions and instructions pile up across Memory, Custom Instructions and knowledge files, and the model may have written some of them itself. Current models keep following them after their reason is gone, and treat an instruction that contains "never" as absolute `[Anthropic docs — Prompting Claude Fable 5.2, "Keep caution from piling up", fetched 2026-11-24]`. For each caution, restriction, or never/always rule in any layer, check:
+
+- **Reason still holds?** Name the reason. A one-time incident, a resolved constraint, or a finished phase makes the line stale.
+- **Written for an older model?** Lines that compensate for an earlier generation — "think step by step," "double-check your answer," tool-suppressing language, "answer directly without deliberating," "do not think" — or that assume an effort level or model the Project no longer runs.
+- **Absolute without scope?** A "never" or "always" applied beyond the case it was written for.
+
+**Fix:** removal, or a scoped rewrite with its reason ("ask before deleting files, because the archive has no backup" rather than "never delete files"). Propose each one in Stage 3 with the line quoted and its layer named; never apply it silently — Memory edits follow the confirmation rule above. Report how many cautions were checked and how many were stale. For the behavioral side of this pattern, see tendency #16 in `behavioral-tuning` if available.
 
 ## Stage 3: Optimization Prescription
 

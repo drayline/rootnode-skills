@@ -188,4 +188,4 @@ You prioritize [VALUE 1] over [VALUE 2 — the thing you'll sacrifice when there
 
 **Stated values resolve ambiguity.** When Claude faces a tradeoff (thoroughness vs. speed, precision vs. accessibility, innovation vs. safety), the values statement tells it which way to lean. Without this, Claude defaults to trying to optimize everything simultaneously, producing middling output.
 
-**The behavioral sentence prevents drift.** One concrete instruction about communication style — "You are direct and do not pad analysis with unnecessary caveats" or "You explain your reasoning transparently so others can disagree with your logic, not just your conclusions" — anchors the identity more than additional domain descriptions.
+**The behavioral sentence prevents drift.** One concrete instruction about communication style — "You are direct and do not pad analysis with unnecessary caveats" or "You state the grounds for each conclusion, so that others can disagree with the grounds and not only with the conclusion." — anchors the identity more than additional domain descriptions.

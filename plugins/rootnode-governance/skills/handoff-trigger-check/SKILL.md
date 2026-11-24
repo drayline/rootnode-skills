@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-handoff-trigger-check v5.0.1"
   original-source: "root.node design 2026 — runtime layer (gates, router, profile builder)"
   companion-files: "schema/profile.schema.json, profiles/strict.json, profiles/balanced.json, profiles/lenient.json, references/examples.md, references/troubleshooting.md, references/sensing-triggers-detailed.md"
@@ -28,7 +28,7 @@ metadata:
 
 # Handoff Trigger Check
 
-> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5), on Fable 5.2, and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Evaluate whether work-in-design is ready to hand off to autonomous execution. Runs a 7-condition gate, applies the active profile's pass threshold, and returns a structured verdict. The single most important check before letting an agent runtime — Claude Code, an n8n workflow, an OpenClaw instance, or any other autonomous executor — take over from human-led design.
 
@@ -36,11 +36,11 @@ The premise: **the costliest mistake in human/agent collaboration is holding wor
 
 ## Condition 7 — token/usage budget headroom under 1M windows
 
-All four current models — Fable 5.1, Opus 5.5, Sonnet 5.5, and Haiku 5.5 — support a 1M-token context window with 128K max output; 1M is the default in Claude Code (`CLAUDE_CODE_DISABLE_1M_CONTEXT=1` reverts to 200K; verify against the running Claude Code version) [Anthropic docs, models overview and Claude Code model-config, verified 2026-10-22]. The 200K default window applies to legacy models: Haiku 4.5 (200K only) and Sonnet 4.6 / Sonnet 4.5 without the `[1m]` suffix. The token-headroom math in condition 7 should account for the larger window: a chat conversation that consumed ~150K tokens leaves substantial headroom on any current model, but crowds a legacy 200K Haiku 4.5 window.
+All four current models — Fable 5.2, Opus 5.5, Sonnet 5.5, and Haiku 5.5 — support a 1M-token context window with 128K max output; 1M is the default in Claude Code (`CLAUDE_CODE_DISABLE_1M_CONTEXT=1` reverts to 200K; verify against the running Claude Code version) [Anthropic docs, models overview and Claude Code model-config, verified 2026-10-22; Fable 5.2 from the models overview, fetched 2026-11-24]. The 200K default window applies to legacy models: Haiku 4.5 (200K only) and Sonnet 4.6 / Sonnet 4.5 without the `[1m]` suffix. The token-headroom math in condition 7 should account for the larger window: a chat conversation that consumed ~150K tokens leaves substantial headroom on any current model, but crowds a legacy 200K Haiku 4.5 window.
 
 **Haiku 5.5 price band.** Haiku 5.5 bills a higher band above 100K prompt tokens: $0.10 / $0.50 per MTok (input / output) at or below 100K, $0.50 / $2.50 above [Anthropic docs, pricing, verified 2026-10-22]. When the handoff context passes 100K tokens and the target executor is Haiku 5.5, record the band change as a condition 7 cost note; it is a cost signal, not a failure.
 
-**Effort defaults on the 5.5 generation.** Opus 5.5 / Sonnet 5.5 / Haiku 5.5 default to `medium` in Claude Code; Sonnet 5.5 and Fable 5.1 default to `high` on the API. Effort controls thinking depth, not visible response length — a long conversation approaching context limits is not fixed by lowering effort. If context is the binding constraint, condition 7 fails; take that as a signal to shorten the conversation or split the handoff, not to lower effort.
+**Effort defaults on the 5.5 generation.** Opus 5.5 / Sonnet 5.5 / Haiku 5.5 default to `medium` in Claude Code; Sonnet 5.5 and Fable 5.2 default to `high` on the API [Anthropic docs — models overview, fetched 2026-11-24]; Fable 5.2's Claude Code default is not stated there. Effort controls thinking depth, not visible response length — a long conversation approaching context limits is not fixed by lowering effort. If context is the binding constraint, condition 7 fails; take that as a signal to shorten the conversation or split the handoff, not to lower effort.
 
 **Tokenizer note.** Sonnet 5.5 uses the Sonnet 5 tokenizer, which produces approximately 30% more tokens per unit of content than Sonnet 4.6; Haiku 5.5 produces approximately 30% more tokens than Haiku 4.5 [Anthropic docs, per-model what's-new pages, verified 2026-10-22]. Apply the ~1.30x multiplier only when the token estimate was calibrated to the older model (Sonnet 4.6 or Haiku 4.5); an estimate already calibrated to the 5-generation tokenizer is not adjusted. Compare the adjusted estimate against the target-model window.
 

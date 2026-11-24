@@ -8,7 +8,7 @@ description: >-
   double-checking," "spawns subagents for everything," "adds tests I didn't
   ask for," "fix Claude's output," "tune Claude's behavior," "Claude ignores
   my preferences," "adds unsolicited disclaimers," "uses too many lists."
-  Covers fifteen tendencies — agreeableness, verbosity, tool miscalibration,
+  Covers seventeen tendencies — agreeableness, verbosity, tool miscalibration,
   editorial drift, self-referential fabrication — plus over-verification,
   scope expansion, subagent over-delegation, correction narration, early
   turn termination. Also use when auditing a system prompt for behavioral
@@ -18,32 +18,32 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-behavioral-tuning v5.0.0"
   original-source: "OPTIMIZATION_REFERENCE.md, CLAUDE_OPTIMIZATION_NOTES.md"
 ---
 
 # Behavioral Tuning for Claude
 
-> **Calibration:** Tier 2 (Sonnet-graceful) — designed against Opus 5.5 + Sonnet 5.5 dual-primary. Runs on Haiku 5.5 at `high` effort with less depth on multi-dimensional analysis; fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. Start at the model's default effort (`medium` on Opus 5.5 and Sonnet 5.5 in Claude Code; `high` for Sonnet 5.5 on the Claude API) and re-run an effort sweep on your own evals rather than carrying a setting over. See repository README for model compatibility.
+> **Calibration:** Tier 2 (Sonnet-graceful) — designed against Opus 5.5 + Sonnet 5.5 dual-primary. Runs on Haiku 5.5 at `high` effort with less depth on multi-dimensional analysis; fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. Start at the model's default effort (`medium` on Opus 5.5 and Sonnet 5.5 in Claude Code; `high` for Sonnet 5.5 on the Claude API) and re-run an effort sweep on your own evals rather than carrying a setting over. On Fable 5.2 the default is `high`; step down to `medium` where the work holds. See repository README for model compatibility.
 
-**Version 5.0 — 15-tendency taxonomy, 5.5-generation calibration.**
+**Version 6.1 — 17-tendency taxonomy, 5.5-generation and Fable 5.2 calibration.**
 
 ## Purpose
 
-Diagnose Claude behavioral tendencies in system prompts and Projects, and retrieve the appropriate countermeasure template. Covers fifteen tendencies, each with a symptom, a remediation pattern, and deployment-context conditioning: some countermeasures apply universally, others are calibrated for specific deployment contexts (chat interface, Claude Projects, Claude Code, API).
+Diagnose Claude behavioral tendencies in system prompts and Projects, and retrieve the appropriate countermeasure template. Covers seventeen tendencies, each with a symptom, a remediation pattern, and deployment-context conditioning: some countermeasures apply universally, others are calibrated for specific deployment contexts (chat interface, Claude Projects, Claude Code, API).
 
 This Skill does not evaluate a prompt's overall quality — for that, use `prompt-validation` if available. This Skill does not redesign a Project's architecture — for that, use `project-audit` or `full-stack-audit` if available. It focuses specifically on behavioral-layer countermeasure selection and application.
 
 ## Reasoning discipline
 
-A defensible countermeasure recommendation shows its work. Observe the symptom in the user's specific language, identify which tendency it most closely matches against the catalog below, then apply the countermeasure template — compressing this into a direct recommendation makes the diagnosis harder to interrogate and easier to mis-route between adjacent tendencies (1a vs. 1b, 9 vs. 10, 12 vs. 15).
+A defensible countermeasure recommendation shows its work. Observe the symptom in the user's specific language, identify which tendency it most closely matches against the catalog below, then apply the countermeasure template — compressing this into a direct recommendation makes the diagnosis harder to interrogate and easier to mis-route between adjacent tendencies (1a vs. 1b, 9 vs. 10, 12 vs. 15, 15 vs. 16, 3b vs. 17).
 
 If the deployment context is unclear (is this a chat interface prompt? a Project CI? a Claude Code system prompt? an API integration?), confirm with the user before proceeding. Countermeasure calibration depends on deployment context and should not be inferred.
 
 ---
 
-## The Fifteen Tendencies
+## The Seventeen Tendencies
 
 Each tendency below is documented with (a) a short description, (b) its core symptom (the Diagnostic routing table is the full symptom surface), (c) the deployment contexts where it is most pronounced, and (d) a countermeasure that can be inserted into — or, for #11, removed from — a system prompt or Project CI.
 
@@ -305,11 +305,11 @@ Claude verifies its own work automatically; prompts that accumulated self-direct
 
 **Deployment calibration:** Chat interface (Adaptive): MEDIUM · Claude Projects: MEDIUM · Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5): HIGH · API (agent workloads, effort ≥ high): HIGH.
 
-**Countermeasure:** REMOVAL — delete the self-directed re-check and think-harder lines; do not insert a counter-instruction. Keep external-artifact checks (run the tests, inspect the rendered page, confirm the file exists) — they are the keep class, not this tendency. Sweep patterns, preservation patterns, and procedure: reference Section 11. At `xhigh`/`max`, add the review-round block in #13. For chat only, an optional "treat earlier answers as settled" line; not for agentic work, where later steps can reveal earlier mistakes. Removal applies wherever the lines live (system prompt, CLAUDE.md, Skill bodies).
+**Countermeasure:** REMOVAL — delete the self-directed re-check and think-harder lines; do not insert a counter-instruction. Keep external-artifact checks (run the tests, inspect the rendered page, confirm the file exists) — they are the keep class, not this tendency. Sweep patterns, preservation patterns, and procedure: reference Section 11. At `xhigh`/`max`, add the review-round block in #13. For chat only, an optional "treat earlier answers as settled" line; not for agentic work, where later steps can reveal earlier mistakes. On Fable 5.2 such a line also makes the model far less likely to flag its own earlier mistakes [Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24] — scope it or leave it out. Removal applies wherever the lines live (system prompt, CLAUDE.md, Skill bodies).
 
 ### 12. Scope expansion
 
-Claude delivers beyond the task — extra steps, features, or its own reading of what the task should be. Distinct from #6 (search breadth within a task); the opposite of #15. **Facet — unrequested additions:** tests, docs, and small supporting files that fit repo conventions, at every effort level and more at higher (Sonnet 5.5, Haiku 5.5, Fable 5.1); open-ended "show me what you can do" requests get built rather than answered.
+Claude delivers beyond the task — extra steps, features, or its own reading of what the task should be. Distinct from #6 (search breadth within a task); the opposite of #15. **Facet — unrequested additions:** tests, docs, and small supporting files that fit repo conventions, at every effort level and more at higher (Sonnet 5.5, Haiku 5.5, Fable 5.1); open-ended "show me what you can do" requests get built rather than answered. **Note — ownership framing (Fable 5.2):** telling the model it owns the codebase makes it consolidate duplicate code, and also raises output tokens by 70–80% and adds unrequested changes; a no-drive-by-refactors rule did not cancel it [Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]. Use it only when the operator owns that design decision.
 
 **Symptom:** Claude adds things nobody asked for, or builds a whole feature when asked for options.
 
@@ -325,7 +325,7 @@ The `<scope>` template, the stronger CC variant, and the Fable 5.1 pre-existing-
 
 ### 13. Subagent over-delegation
 
-Claude delegates to subagents more readily than earlier generations. Delegation pays off on genuinely independent, sizeable tracks; on small tasks it multiplies cost and time. Includes spawning a subagent to verify its own work (a subagent instance of #11). **Effort-conditioned facet:** at `xhigh`/`max`, Sonnet 5.5 launches reviewer subagents on its own.
+Claude delegates to subagents more readily than earlier generations. Delegation pays off on genuinely independent, sizeable tracks; on small tasks it multiplies cost and time. Includes spawning a subagent to verify its own work (a subagent instance of #11). **Effort-conditioned facet:** at `xhigh`/`max`, Sonnet 5.5 launches reviewer subagents on its own, and Fable 5.2 starts subagents to review its own work [Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]; levers are effort, the cap mechanism, and a subagent tool description that states the cost (reference Section 13).
 
 **Symptom:** Claude spawns subagents for tiny tasks, or every subagent runs on the expensive model.
 
@@ -351,13 +351,13 @@ Claude narrates corrections to its earlier statements, including corrections tha
 
 ### 15. Early turn termination (NEW in v5.0)
 
-Claude ends its turn while requested work is still owed: a summary that announces the next step with no tool call; an offer to continue; a list of decisions for the user when none blocks the remaining work; a report because the turn ran long or a milestone is done; at low effort, pausing to confirm a plan or asking a question it could answer itself; in long agent prompts, handing the task back. Distinct from #12 (too much) and #6 (search breadth) — #15 is too little, and its countermeasure runs opposite to #12's. Documented in all four current Anthropic prompting guides (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1).
+Claude ends its turn while requested work is still owed: a summary that announces the next step with no tool call; an offer to continue; a list of decisions for the user when none blocks the remaining work; a report because the turn ran long or a milestone is done; at low effort, pausing to confirm a plan or asking a question it could answer itself; in long agent prompts, handing the task back. Distinct from #12 (too much) and #6 (search breadth) — #15 is too little, and its countermeasure runs opposite to #12's. Documented in the Opus 5.5, Sonnet 5.5, Haiku 5.5 and Fable 5.1 prompting guides, and again in the Fable 5.2 guide, where it is more common at `low` and `medium`.
 
 **Symptom:** Claude stops mid-task to ask for confirmation, or writes the next step without doing it.
 
 **Deployment calibration:** Chat interface (default effort): LOW — a chat turn is supposed to end · Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5): MEDIUM at `medium`, HIGH at `low`; LOW at `high` and above; long system prompts raise it (Haiku 5.5 guide) · API agentic (developer-controlled effort): as Claude Code by effort level; HIGH for fully unattended loops with no harness continuation · Cowork / scheduled runs: HIGH — no operator present to send the continuation.
 
-**Countermeasure — first lever is effort.** At `low`/`medium`, try raising effort before adding the block; the block lengthens output and costs more at low effort (Sonnet 5.5 guide). Then the default block `[Anthropic docs — Sonnet 5.5 / Haiku 5.5 guides]`:
+**Countermeasure — first lever is effort.** At `low`/`medium`, try raising effort before adding the block; the block lengthens output and costs more at low effort (Sonnet 5.5 guide). On Fable 5.2 a finishing block roughly halved continuable early endings at `medium`, at about 30% more output tokens [Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]. Then the default block `[Anthropic docs — Sonnet 5.5 / Haiku 5.5 guides]`:
 ```
 Keep working until everything the user asked for is done, and only stop to ask when you can't go on without the user or before a risky step.
 
@@ -367,11 +367,27 @@ This is a turn-boundary instruction, not a self-verification instruction (AEA §
 
 **Placement:** Core rules. Fully-unattended variant at the end of the system prompt from the first request; never in human-in-the-loop applications.
 
+### 16. Caution accumulation (NEW in v6.1)
+
+Claude asks approval for routine steps, holds back ordinary actions, or stops at the first error, because cautions piled up in memory, notes, rules and instruction files; absolute "never" rules get applied far outside the case they were written for. The opposite of #12 (too little action, not too much); distinct from #15 (the agent keeps the turn but will not act). Documented in the Fable 5.2 guide, "Keep caution from piling up" [Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]. **Symptom:** the agent asks permission for everything, or one failed command stops the run.
+
+**Deployment calibration** (analytical, not measured): multi-agent and long-lived projects with Memory or handoff chains: HIGH · Claude Code with a large CLAUDE.md and rules: MEDIUM to HIGH · Chat interface: LOW · single-shot API: LOW.
+
+**Countermeasure — levers in order:** remove cautions whose reason no longer holds; rewrite each absolute as a scoped rule with its reason; name the routine steps that need no approval; narrow validation stops such as "stop at the first error"; restart a stuck system with trimmed memory and notes. Keep the deployment's confirmation step for risky or irreversible actions. Positive-scope template in reference Section 16. **Placement:** Core rules.
+
+### 17. Silent long runs (NEW in v6.1)
+
+The first tool call arrives with no statement of intent, and long stretches of tool calls pass with no user-facing text. The opposite of #3b — choose by deployment, never ship both. Documented in the Fable 5.2 guide, "Keep users informed during long turns" [Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24].
+
+**Deployment calibration** (analytical): chat and Cowork with a person watching: MEDIUM to HIGH · interactive Claude Code: MEDIUM · unattended Claude Code and API loops: N/A — the session report carries the need.
+
+**Countermeasure — harness first:** check that the client shows the progress-update thinking blocks (`display: "updates"` or `"summarized"`) before adding prompt text. Then, for watched sessions only, the opening-updates-recap template in reference Section 17 (about 20% more output tokens). **Placement:** Output standards.
+
 ---
 
 ## Diagnostic routing
 
-Match the user's described symptom against the patterns below. If multiple tendencies are plausible, prioritize by deployment context — a chat-interface issue more likely maps to 1b, 9, or 10; a Claude Code issue more likely maps to 11–13 or 15.
+Match the user's described symptom against the patterns below. If multiple tendencies are plausible, prioritize by deployment context — a chat-interface issue more likely maps to 1b, 9, or 10; a Claude Code issue more likely maps to 11–13, 15 or 16.
 
 | Symptom pattern | Likely tendency |
 |---|---|
@@ -405,12 +421,16 @@ Match the user's described symptom against the patterns below. If multiple tende
 | "Claude writes a summary and a next step but doesn't do the step" | 15 |
 | "The agent hands the task back half-done" | 15 |
 | "Claude offers to continue instead of continuing" | 15 |
+| "The agent asks permission for everything" / "stops at the first error" | 16 |
+| "An old rule in memory or CLAUDE.md keeps blocking routine work" | 16 |
+| "Claude goes silent for long stretches" | 17 |
+| "The agent spends more since we put the budget in the prompt" | Conditional defect: prompt-visible token budget |
 | "Claude ignores messages I send while it's working" | Conditional defect: mid-turn user text misread as injection |
 | "Claude refuses when I ask it to show its reasoning" | Conditional defect: reasoning-extraction refusal |
 
 When the symptom could plausibly match multiple tendencies, ask the user for a concrete example. Apply the countermeasure for the tendency the example best matches.
 
-**Conditional defects (not tendencies).** Four failure modes track to the prompt or the runtime rather than the model, and are fixed by rewriting the prompt or harness, not by adding a counter-instruction: conservative-review literalism; thinking-disabled output artifacts (now documented only on Haiku 5.5, plus Sonnet 5.5 `between_tools` with a "don't think" line left in place); mid-turn user text misread as injection (a harness fix — design detail in `domain-agentic-context` if available); and reasoning-extraction refusal. See the reference appendix.
+**Conditional defects (not tendencies).** Five failure modes track to the prompt or the runtime rather than the model, and are fixed by rewriting the prompt or harness, not by adding a counter-instruction: conservative-review literalism; thinking-disabled output artifacts (now documented only on Haiku 5.5, plus Sonnet 5.5 `between_tools` with a "don't think" line left in place); mid-turn user text misread as injection (a harness fix — design detail in `domain-agentic-context` if available); reasoning-extraction refusal; and a prompt-visible token budget, which raises spending on Fable 5.2 — keep the number in the brief and enforce it with a mechanism (a spend flag or a settings cap). See the reference appendix.
 
 ---
 
@@ -420,8 +440,8 @@ Not all countermeasures apply equally across deployment contexts. Before applyin
 
 - **Chat interface (Adaptive effort):** Tendencies 1b, 7b, 9, and 10 are most pronounced here. Strong countermeasures recommended. The Adaptive effort default weights persistent context lower than immediate prompts — the primary driver of 1b, 7b, 9, and 10. Tendency 15 is LOW: a chat turn is supposed to end.
 - **Claude Projects:** Tendencies 1b and 9 are mitigated by strong Custom Instructions but not eliminated. Moderate countermeasures appropriate. Tendency 10 is also MEDIUM here — verified via seed-project self-observation.
-- **Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5):** Tendencies 11, 12, and 13 are HIGH; 15 is MEDIUM at `medium` and HIGH at `low`. v4.0 treated countermeasures for 5, 6, 7a, and 9 as generally unnecessary because `high` effort mitigated them; at the `medium` default that mitigation is weaker, so apply them on observation rather than excluding them by default. The default is a capability choice, not a degraded mode: Opus 5.5 at `medium` "matches or exceeds Opus 5 at `high` on coding and knowledge-work evaluations" `[Anthropic docs]`. Applicability of this Skill itself is per-Skill: not all rootnode Skills are first-class Claude Code targets.
-- **API (developer-controlled effort):** API defaults differ from Claude Code — Opus 5.5 `medium`, Sonnet 5.5 `high`, Fable 5.1 `high` (dated landscape block `root_MODEL_LANDSCAPE_2026-10`; see repository README). At `high` or above, behaves similarly to Claude Code at `high`; at lower effort, closer to the chat interface, and 7b and 15 rise. Raising effort is the first lever for both. Re-run an effort sweep on your own evals rather than carrying a setting over.
+- **Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5):** Tendencies 11, 12, and 13 are HIGH; 15 is MEDIUM at `medium` and HIGH at `low`; 16 is MEDIUM to HIGH with a large CLAUDE.md and rules; 17 is MEDIUM when a person watches. v4.0 treated countermeasures for 5, 6, 7a, and 9 as generally unnecessary because `high` effort mitigated them; at the `medium` default that mitigation is weaker, so apply them on observation rather than excluding them by default. The default is a capability choice, not a degraded mode: Opus 5.5 at `medium` "matches or exceeds Opus 5 at `high` on coding and knowledge-work evaluations" `[Anthropic docs]`. Applicability of this Skill itself is per-Skill: not all rootnode Skills are first-class Claude Code targets.
+- **API (developer-controlled effort):** API defaults differ from Claude Code — Opus 5.5 `medium`, Sonnet 5.5 `high`, Fable 5.2 `high` (dated landscape block `root_MODEL_LANDSCAPE_2026-10`; see repository README). At `high` or above, behaves similarly to Claude Code at `high`; at lower effort, closer to the chat interface, and 7b and 15 rise. Raising effort is the first lever for both. Re-run an effort sweep on your own evals rather than carrying a setting over.
 
 When in doubt, apply the universal countermeasures (1a, 4, 8, 10 — #4 in its conditional form on Fable 5.1) and confirm deployment context before applying the conditional ones.
 
@@ -476,3 +496,4 @@ Before finalizing a countermeasure recommendation:
 - Is placement specified (identity block, core rules, output standards)?
 - For tendencies with reduced 4.7 manifestation (#1a, #2 on factual, #3, #5, #6, #7a), has the user actually observed the failure mode, or would applying the countermeasure be preemptive?
 - Did the countermeasure set exclude a tendency on the assumption of `high` effort when the deployment runs at `medium`?
+- Does each caution in the prompt still have a reason that holds (#16), and is any token budget kept out of the prompt text?

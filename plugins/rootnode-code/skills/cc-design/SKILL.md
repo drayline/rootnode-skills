@@ -14,7 +14,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.1.0"
+  version: "6.2.0"
   predecessor: "rootnode-cc-design v5.0.1"
   original-source: "root.node seed KFs (AEA, CCEG, AAP) + CC deployment research; v4.x evolves delegation architecture and REMEDIATE mode from v3 base"
   discipline_post: phase-30
@@ -22,7 +22,7 @@ metadata:
 
 # Claude Code Design
 
-> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Reserve Fable 5.1 for long-horizon runs where Opus 5.5 at higher effort still fails your evals. See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Fable 5.2 is a named target: start at its `high` default and step down to `medium` where your evals hold. It costs about twice Opus 5.5 per token, so choose it for the hardest and longest runs. See repository README for model compatibility.
 
 Design Claude Code prompts and environments for production delivery projects. This Skill produces paste-ready artifacts — CLAUDE.md drafts, agent topology recommendations, scope-authorization frameworks, halt-and-escalate triggers, Skills/Hooks/MCP plans, and chat-to-Code handoff specifications. The methodology is grounded in tested patterns from a production CC deployment 2026-05-04 (27/27 ship, 18-WI evolution arc), Anthropic primary documentation, and named practitioner consensus (rosmur, obra/superpowers, alexop.dev, Shrivu Shankar, Marc Nuri).
 
@@ -61,7 +61,9 @@ See `references/cc-delegation-patterns.md` for the role table, delegation briefs
 
 **The 7-layer placement rule comes first.** Before specifying CLAUDE.md content, place each piece of content in the correct mechanism (CLAUDE.md / rules / Skills / subagents / hooks / MCP / settings). Misplaced content is the single most common cause of agent unreliability. See `references/cc-environment-design-patterns.md`.
 
-**Halt-and-escalate triggers are mandatory.** Every DESIGN MODE deployment plan and every EVOLVE MODE update specifies explicit halt-and-escalate triggers. Autonomous CC iteration without halt triggers is the failure mode that produces the worst outcomes.
+**Halt-and-escalate triggers are mandatory, and they are the stop rule.** Every DESIGN MODE deployment plan and every EVOLVE MODE update specifies explicit halt-and-escalate triggers: stop only when the next action cannot be undone, when a decision could reasonably go either way and only the operator can make it, or when a spend cap is reached — plus the project's own irreversible actions and operator-only decisions. Each prompt also lists the routine actions that need no approval. Autonomous CC iteration without halt triggers produces the worst outcomes; a halt list that stops on ordinary errors produces the opposite failure, an agent that will not act (tendency #16). See `references/cc-methodology-patterns.md` §10a.
+
+**Size the ceremony to the project.** Every DESIGN and TEMPLATE output opens with one line, `Rigor: <level> — <reason in one clause>`, and the level (sprint, standard, strict) selects the gates, review roles, digest binding and report depth the output carries. A brief with no `rigor` value is sprint unless it names production data, an irreversible operation, or more than one contributor, which make it standard; strict is chosen explicitly.
 
 **Output complete files.** Per the user's working preference: produce complete files (CLAUDE.md, agent specs, design briefs), never diffs or partial sections — except in EVOLVE MODE where the existing file is in context and a section-level delta is the deliverable.
 
@@ -83,9 +85,9 @@ Five modes. Mode is inferred from the request signal; confirm in one line at the
 
 ### Step 2 — Check for or generate the design brief
 
-The Skill operates from a structured **design brief** for the delivery project. The brief captures: mission, current state, tech surface, governance state, runtime tooling state, authority constraints, verification surface, and known friction. It lives at `{project_code}_design_brief.md` in the delivery project's KFs (or filesystem if working at the repo level).
+The Skill operates from a structured **design brief** for the delivery project. The brief captures: mission, current state, tech surface, governance state, runtime tooling state, authority constraints, verification surface, rigor, spend and context limits, and known friction. It lives at `{project_code}_design_brief.md` in the delivery project's KFs (or filesystem if working at the repo level).
 
-**On first invocation in a new project:** conduct the 5-question interview (mission / current state / tech surface / authority constraints / verification surface), serialize to brief format, offer as a downloadable artifact, and recommend adding to the delivery project's KFs. See `references/cc-methodology-patterns.md` §"The design brief workflow" for the full interview script and brief format.
+**On first invocation in a new project:** conduct the 6-question interview (mission / current state / tech surface / authority constraints and routine actions / verification surface / rigor), serialize to brief format, offer as a downloadable artifact, and recommend adding to the delivery project's KFs. See `references/cc-methodology-patterns.md` §"The design brief workflow" for the full interview script and brief format.
 
 **On subsequent invocations:** read the existing brief as input. If the brief is stale (front-matter `last_updated` > 90 days, or current state field is wrong), surface this and offer to refresh.
 
@@ -105,14 +107,15 @@ Read the relevant references before producing output. Each mode draws from a spe
 
 - **File naming.** CLAUDE.md drafts for delivery projects use `{delivery_project_code}_CLAUDE.md` (the destination project's prefix). Agent role specs use `{delivery_project_code}_agent_{name}.md`. Design briefs use `{project_code}_design_brief.md` and live in the delivery project's KFs. Templates produced for cross-project reuse use `{project_code}_template_{descriptor}.md` or `shared_template_{descriptor}.md`.
 - **Markdown for CLAUDE.md drafts.** CLAUDE.md is consumed by Claude Code, which expects Markdown. Use `##` and `###` headers, fenced code blocks, tables for matrices. Do not use XML tags inside CLAUDE.md drafts — those are for system prompts, which CLAUDE.md is not.
-- **Halt triggers and scope authorization.** Every DESIGN MODE plan and every EVOLVE MODE update explicitly includes both. Ultracode stays off by default and is opted into per task (see `references/cc-delegation-patterns.md` §6 for the rationale). Non-negotiable.
+- **Rigor line first.** Every DESIGN and TEMPLATE output opens with `Rigor: <level> — <reason in one clause>`. The level selects the contents (`references/cc-methodology-patterns.md` §10a): at sprint there is no reviewer role, no phase gate, and no digest gate beyond files the operator hands over; standard adds one merge or release gate and one refute pass; strict adds a gate per phase and the Builder→Refuter loop.
+- **Halt triggers and scope authorization.** Every DESIGN MODE plan and every EVOLVE MODE update explicitly includes both: the stop rule plus project-specific irreversible actions, and the positive-scope list of routine actions that need no approval. Ultracode stays off by default and is opted into per task (see `references/cc-delegation-patterns.md` §6 for the rationale). Non-negotiable.
 - **Assert the END state, never the PRE state.** Non-negotiable. See `references/cc-prompt-design-patterns.md` §10 for the rule, the LF-normalize corollary, and the observed instances. `[generalizable]`
 - **Delegation briefs are complete or absent.** Any role the plan names carries a model, an effort level, a tool set, an isolation mode, and a return contract including a numeric length cap, and each delegation carries the ten-field brief (`references/cc-delegation-patterns.md` §2) — field 9 binds the spec digest, field 10 bars verdict dictation. Verification clauses name external artifacts; never instruct an agent to re-check its own output.
-- **Token budgets.** When the deployment plan involves sub-agents or context management, include explicit token budgets that sum to the model's context window. A context plan without numbers is not a context plan.
+- **Budgets are mechanisms.** Spend and context limits are enforced by mechanisms — a spend flag such as `--max-budget-usd` on `claude -p` runs, a cap in settings or the environment, subagent depth and concurrency caps — and the numbers are recorded in the brief (`limits`). Prompt text carries no token budget: on Fable 5.2 a budget shown to the model raised spending `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`.
 - **Source-tagged claims.** Every substantive technical claim carries an inline source tag.
-- **Output length.** When the deliverable is a design document, CLAUDE.md draft, or session prompt, target ≤200 lines per artifact. Multi-file designs may exceed this per-file if each file is self-contained.
+- **Output length.** When the deliverable is a design document, CLAUDE.md draft, or session prompt, target ≤200 lines per artifact. A sprint session prompt for a one-file change is a few dozen lines: task, scope, routine actions, stop rule, check, five-line report. Multi-file designs may exceed this per-file if each file is self-contained.
 - **CC-prompt-specific output discipline.** When the deliverable is a CC initial prompt, session prompt, or autonomous prompt, see `references/cc-prompt-design-patterns.md` § Output discipline for CC prompts for additional output standards (shell-agnostic syntax, pre-flight Skill enumeration, continuation-phrase ambiguity gate, forward-state-aware authoring, competing hypotheses and instrument fit for diagnostic prompts).
-- **Session reports are mandatory.** Every CC prompt authorizes a report write in its scope and ends with a "Write session report" item. The report records computed state, not narrated state — SHAs, LF digests, `git diff --name-status` rows, gate results with evidence, findings with locators — and names what it does not prove. Path and filename follow the delivery repo's audit convention, set in the design brief (`report_dir`); default `reports/`, timestamped `_{YYYYMMDD-HHMM}Z`. The report is not committed by the same prompt; it rides the next commit cycle. See `references/cc-session-reports.md`.
+- **Session reports are mandatory.** Every CC prompt authorizes a report write in its scope and ends with a "Write session report" item. Its depth follows the rigor level: at sprint, five lines and the file list; at standard and strict, a computed-state report. That report records computed state, not narrated state — SHAs, LF digests, `git diff --name-status` rows, gate results with evidence, findings with locators — and names what it does not prove. Path and filename follow the delivery repo's audit convention, set in the design brief (`report_dir`); default `reports/`, timestamped `_{YYYYMMDD-HHMM}Z`. The report is not committed by the same prompt; it rides the next commit cycle. See `references/cc-session-reports.md`.
 
 ### Step 5 — Surface the chat→Code handoff explicitly
 
@@ -158,16 +161,16 @@ The brief schema lives at `schema/cc-design-brief.schema.json`. The execution-pl
 
 **Actions:**
 1. Confirm mode: "DESIGN MODE — building a new Claude Code deployment plan."
-2. Check for a design brief; none exists for this project. Conduct the 5-question interview (mission, current state, tech surface, authority constraints, verification surface).
+2. Check for a design brief; none exists for this project. Conduct the 6-question interview (mission, current state, tech surface, authority constraints and routine actions, verification surface, rigor).
 3. Serialize the brief and offer it as a downloadable artifact. Recommend adding to the project's KFs.
 4. Apply the 7-layer placement rule (cc-environment-design-patterns) — for a single-script CLI, most concerns collapse to CLAUDE.md + 1-2 hooks; no Skills or subagents warranted yet.
 5. Apply the agent-warranted test (cc-methodology-patterns §1) — single-loop iteration; recommend single-agent loop, no sub-agents.
-6. Draft the CLAUDE.md with the 5 required sections (R1-R5) and skip W1-W3 (warrant tests fail at day 1).
-7. Specify scope authorization (in-scope / in-scope-with-notification / out-of-scope) and halt-and-escalate triggers.
+6. Set the rigor level: sprint (one contributor, no production data, no irreversible operation). Draft the CLAUDE.md with mission, scope and the stop rule; R1-R5 in full only at standard; skip W1-W3 (warrant tests fail at day 1).
+7. Specify scope authorization (in-scope / in-scope-with-notification / out-of-scope), the routine actions that need no approval, and the halt triggers: the stop rule plus the project's irreversible actions.
 8. Identify the chat→Code handoff point: "Once CLAUDE.md is in place, hand off to CC for the first iteration."
 9. Evaluate runtime tooling — handoff-trigger-check (if available) is overkill for a single-script project; recommend deferring.
 
-**Output:** Design brief artifact + CLAUDE.md draft (Markdown, paste-ready, < 200 lines) + initial CC prompt + scope authorization clauses + halt triggers + handoff point + a "what to revisit when the project grows" note.
+**Output:** Opens with `Rigor: sprint — one contributor, no production data`. Design brief artifact + CLAUDE.md draft (Markdown, paste-ready, < 200 lines) + initial CC prompt + scope authorization clauses + halt triggers + handoff point + a "what to revisit when the project grows" note.
 
 ### Example 2: EVOLVE MODE — friction in an existing CC project
 
@@ -247,7 +250,7 @@ Do NOT use this Skill when:
 
 ## Troubleshooting
 
-**Skill produces generic CLAUDE.md not tailored to the project:** The design brief was missing or thin. Generate the brief first via the 5-question interview before producing the deployment plan. The brief is the grounding artifact — without it, output drifts toward generic patterns.
+**Skill produces generic CLAUDE.md not tailored to the project:** The design brief was missing or thin. Generate the brief first via the 6-question interview before producing the deployment plan. The brief is the grounding artifact — without it, output drifts toward generic patterns.
 
 **Skill recommends rootnode runtime tooling for a project that doesn't need it:** The tool/agent gap discipline was skipped. For each runtime Skill, name the specific operational gap it fills in this project. If you can't, don't recommend it. See SKILL.md Step 6.
 

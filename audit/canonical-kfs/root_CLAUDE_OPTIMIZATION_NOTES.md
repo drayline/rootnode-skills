@@ -677,7 +677,7 @@ Sweep pattern for audit and review Skills: `only report`, `only flag`, `be conse
 
 #### Thinking-disabled output artifacts (narrowed for the 5.5 generation)
 
-Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1, so on the current generation this defect is documented only on Haiku 5.5 at `low` or with thinking off, and on Sonnet 5.5 at `between_tools` when a "don't think" instruction is left in the prompt. There, reasoning leaks into visible text; on the Opus 5 generation, `thinking: {"type": "disabled"}` produced two further artifacts:
+Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.2, so on the current generation this defect is documented only on Haiku 5.5 at `low` or with thinking off, and on Sonnet 5.5 at `between_tools` when a "don't think" instruction is left in the prompt. There, reasoning leaks into visible text; on the Opus 5 generation, `thinking: {"type": "disabled"}` produced two further artifacts:
 
 - **Tool calls as text.** The model writes a tool call into user-facing text instead of emitting a structured `tool_use` block. The call never runs; in agentic loops the leaked text stays in the conversation history and affects later turns. Most common on tool-heavy workloads such as search.
 - **Internal XML tags in visible response.** `<thinking>` tags or other internal tags leak into the visible response.

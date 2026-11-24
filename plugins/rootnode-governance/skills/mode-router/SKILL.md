@@ -19,7 +19,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-mode-router v5.0.1"
   original-source: "root.node design 2026 — runtime layer (gates, router, profile builder)"
   companion-files: "schema/router-config.schema.json, configs/example-router.json, examples/routing-walkthrough.md, references/trigger-types-detailed.md, references/compound-trigger-semantics.md, references/troubleshooting.md"
@@ -29,7 +29,7 @@ metadata:
 
 # Mode Router
 
-> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5), on Fable 5.2, and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Selects the active profile from triggering context. The piece that ties everything together: gates apply profiles, gates need to know which profile is active, the router decides.
 

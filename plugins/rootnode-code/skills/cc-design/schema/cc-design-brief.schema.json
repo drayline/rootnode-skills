@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/drayline/rootnode-skills/schemas/cc-design-brief.schema.json",
   "title": "CC Design Brief",
-  "description": "Schema for the YAML front-matter of {project_code}_design_brief.md \u2014 the grounding artifact for cc-design Skill conversations. Authored by the cc-design Skill via the 5-question interview, or by the profile-builder Skill if that flow is preferred. Brief body is free-form Markdown below the front-matter.",
+  "description": "Schema for the YAML front-matter of {project_code}_design_brief.md \u2014 the grounding artifact for cc-design Skill conversations. Authored by the cc-design Skill via the 6-question interview, or by the profile-builder Skill if that flow is preferred. Brief body is free-form Markdown below the front-matter.",
   "type": "object",
   "required": [
     "project_name",
@@ -175,6 +175,16 @@
       "default": "reports/",
       "minLength": 1,
       "maxLength": 200
+    },
+    "rigor": {
+      "type": "string",
+      "description": "Optional: how much ceremony the design carries \u2014 stops, gates, review depth, digest binding, report depth (references/cc-methodology-patterns.md \u00a710a). When absent, the design is sprint unless the brief names production data, an irreversible operation, or more than one contributor, which make it standard. strict is chosen explicitly. Moving up a level is an EVOLVE-mode change with a recorded trigger.",
+      "enum": ["sprint", "standard", "strict"]
+    },
+    "limits": {
+      "type": "string",
+      "description": "Optional: spend and context limits for runs, as numbers (e.g. 'claude -p runs capped at $5 with --max-budget-usd; subagent depth 1'). Enforced by mechanisms \u2014 a spend flag, a settings or environment cap, the orchestration code \u2014 and never written into prompt text.",
+      "maxLength": 500
     },
     "ecosystem_position": {
       "type": "object",

@@ -280,7 +280,7 @@ last_updated: YYYY-MM-DD
 
 **Canonical source:** `root_CC_ENVIRONMENT_GUIDE.md` §4 (rigor levels, positive scope, stop rule); AEA §4.7. `[catalog v6.1 design spec, 2026-11-24 — §3 and §4]`
 
-Stops, gates and review depth scale with what is at stake. Stops and cautions sized for a large system slow a small one, and most such stops carry no decision (tendency #16, caution accumulation). Every DESIGN and TEMPLATE output opens with one line — `Rigor: <level> — <reason in one clause>` — and the level selects what the output contains:
+Stops, gates and review depth scale with what is at stake. Stops and cautions sized for a large system slow a small one, and most such stops carry no decision (tendency #16, caution accumulation). Every DESIGN and TEMPLATE output opens with one line — `Rigor: <level> — <reason in one clause>` — as its very first line, before any preface, and the level selects what the output contains. At standard and strict, each gate is named as a gate ("Merge gate: …", "Release gate: …") with who passes it and on what evidence:
 
 | Setting | Sprint | Standard | Strict |
 |---|---|---|---|

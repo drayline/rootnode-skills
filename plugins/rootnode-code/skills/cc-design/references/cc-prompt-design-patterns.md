@@ -226,6 +226,9 @@ The rigor level (`cc-methodology-patterns.md` §10a) decides what else the promp
 5. If verification passes: mark item complete in @STATUS.md, move to next item
 6. If verification fails: diagnose and fix within scope, then re-run; if the item still fails after one fix pass, record it with the diagnosis in @STATUS.md and move to the next item that does not depend on it
 
+## Gate (standard and strict only)
+- Merge gate: <the one operator stop beyond the stop rule at standard, e.g. "the operator merges the PR after CI and the refute pass">; at strict, one gate per phase
+
 ## Stop rule (the only halts)
 Stop and write @HALT.md only when the next action cannot be undone, when a decision could reasonably go either way and only the operator can make it, or when a spend cap is reached. In this project that means:
 - <irreversible action or operator-only decision 1, with its reason>

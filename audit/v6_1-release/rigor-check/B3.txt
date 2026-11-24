@@ -1,0 +1,1 @@
+Write a session prompt to fix one typo in README.md.

@@ -34,9 +34,8 @@ gate_evidence() {                                    # sets EV (absolute), EV_RE
   EV_REL=""
   if [ -z "$p" ]; then EV="$STATE/evidence/$KEY.json"; return 0; fi
   case "$p" in /*|[A-Za-z]:/*) EV=$p ;; *) EV="$ROOT/${p#./}" ;; esac
-  case "$EV" in "$ROOT"/*) EV_REL=${EV#"$ROOT"/} ;; esac
-  case "/$EV_REL/" in */../*) EV_REL="" ;; esac    # a path that climbs out is not left out
-}
+  EV_REL=$(git -C "$ROOT" -c core.quotePath=false ls-files --full-name -c -o -- "$EV" 2>/dev/null | head -1)
+}                                                    # git resolves .., drive-letter case and /c/ paths; empty outside the repo
 gate_fingerprint() {                                 # $1 = root, $2 = in-repo path to leave out -> sha256 of the tree state
   local ps=(-- .); [ -n "$2" ] && ps+=(":(exclude,literal)$2")
   {
@@ -56,7 +55,7 @@ gate_verify_setup() {                                # design §7.2 steps 2–7,
   dir=$(gate_input "$1" .cwd); dir=${dir:-$PWD}
   ROOT=$(gate_root "$dir")
   if [ -z "$ROOT" ]; then                            # 2. not a git working copy: inactive, noted when the folder asks for a gate
-    [ -f "$dir/$GATE_CONFIG" ] && gate_log verify skip "$dir" not-a-git-repo
+    grep -q '"verify"' "$dir/$GATE_CONFIG" 2>/dev/null && gate_log verify skip "$dir" not-a-git-repo
     return 1
   fi
   CFG="$ROOT/$GATE_CONFIG"

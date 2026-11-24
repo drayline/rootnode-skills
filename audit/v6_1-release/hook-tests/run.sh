@@ -235,6 +235,36 @@ echo more >> "$R/newdir/n.txt"; hook verify-tests.sh "$(in_stop "$R" s1 false)"
 chk is 0,2,0,0,2; chk norepo
 row U1 "new untracked file: block; evidence; edit to the untracked file blocks again"
 
+# --- refuter findings (A3), each added before its fix ----------------------------------------
+cfg() { mkdir -p "$R/.claude"; printf '%s' "$1" > "$R/.claude/rootnode-gates.json"; }
+
+new_case; cfg '{"version":1,"verify":{"mode":"enforce","command":"true","evidence":{"path":"x/../.claude/ev.json"}}}'; mkrepo
+hook gate-baseline.sh "$(in_start "$R" s1)"; edit; hook verify-tests.sh "$(in_stop "$R" s1 false)"; msgcmd
+hook record-test-evidence.sh "" -- "$MROOT" "$MEV"; hook verify-tests.sh "$(in_stop "$R" s1 true)"
+chk is 0,2,0,0; chk [ "$RFX" = ".claude/ev.json " ]
+row F2a "own evidence path with ..: left out of the fingerprint; record, then exit 0"
+
+new_case; cfg "{\"version\":1,\"verify\":{\"mode\":\"enforce\",\"command\":\"true\",\"evidence\":{\"path\":\"$R/.claude/ev.json\"}}}"; mkrepo
+hook gate-baseline.sh "$(in_start "$R" s1)"; edit; hook verify-tests.sh "$(in_stop "$R" s1 false)"; msgcmd
+hook record-test-evidence.sh "" -- "$MROOT" "$MEV"; hook verify-tests.sh "$(in_stop "$R" s1 true)"
+chk is 0,2,0,0; chk [ "$RFX" = ".claude/ev.json " ]
+row F2b "own evidence as an absolute path spelled unlike git's root ($R): record, then exit 0"
+
+new_case; cfg $'{"version":1,"migrations_guard":{"enabled":\ntrue}}'; mkrepo
+hook guard-migrations.sh "$(in_tool "$R" Bash command 'rm -rf migrations')" "PATH=$NOJQ"
+chk is 2; chk norepo
+row F4a "no jq, \"enabled\": true split across lines: guard applies, exit 2"
+
+new_case; cfg '{"version":1,"migrations_guard":{"enabled":false},"x":{"enabled":true}}'; mkrepo
+hook guard-migrations.sh "$(in_tool "$R" Bash command 'rm -rf migrations')" "PATH=$NOJQ"
+chk is 0; chk norepo; chk nostate
+row F4b "no jq, guard disabled, another key enabled: exit 0"
+
+new_case; cfg '{"version":1,"migrations_guard":{"enabled":true}}'
+hook verify-tests.sh "$(in_stop "$R" s1 false)"
+chk is 0; chk norepo; chk nostate
+row 10b "not a git working copy, config without verify: exit 0, nothing logged"
+
 # --- lockout: a hook that cannot read its input, config or tools never blocks ---------------
 new_case; mkrepo all; edit
 hook verify-tests.sh ""; hook gate-baseline.sh ""; hook guard-migrations.sh ""

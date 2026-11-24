@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/drayline/rootnode-skills/schemas/cc-design-brief.schema.json",
   "title": "CC Design Brief",
-  "description": "Schema for the YAML front-matter of {project_code}_design_brief.md \u2014 the grounding artifact for cc-design Skill conversations. Authored by the rootnode-cc-design Skill via the 5-question interview, or by the profile-builder Skill if that flow is preferred. Brief body is free-form Markdown below the front-matter.",
+  "description": "Schema for the YAML front-matter of {project_code}_design_brief.md \u2014 the grounding artifact for cc-design Skill conversations. Authored by the cc-design Skill via the 5-question interview, or by the profile-builder Skill if that flow is preferred. Brief body is free-form Markdown below the front-matter.",
   "type": "object",
   "required": [
     "project_name",

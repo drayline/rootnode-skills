@@ -9,14 +9,35 @@
 
 In Claude Code these list as `/rootnode-code:<skill>`.
 
-The plugin also carries two hooks, which work best with `jq` on your PATH. Hooks run in Cowork and Claude Code only; chat loads the skills and ignores the hooks.
+## Hooks
 
-Both hooks apply in every repository where the plugin is enabled:
+The plugin carries a migration guard and a test-evidence Stop gate, plus a `SessionStart` hook that records where the Stop gate starts from. They work best with `jq` on your PATH. Plugin hooks run wherever the plugin loads, chat sessions that open a repository included, so both gates are off until a repository asks for them.
 
-- **Migration guard, with `jq`.** Blocks Claude's file edits under any `migrations/` folder, and shell delete or move commands that name one. It also blocks `find` commands that delete or run a command over one, `find . -delete` and similar with no name filter, and any delete, move, or `find` command with a wildcard that could match one, including `rm *` and a read-only `find . -name '*'`.
-- **Migration guard, without `jq`.** Does no parsing. It blocks any call to the five tools it gates — `Edit`, `Write`, `NotebookEdit`, `Bash`, and `PowerShell` — whose hook input contains `migrations` in any case, including a file's content or a path outside the target, and tells you to install `jq`. It allows everything else.
-- **Migration guard, limits.** Blocks are logged to `.claude/guard.log` in that repository. The guard reads text, so it is not a guarantee. With `jq`, a `cp` or shell redirect into `migrations/`, a piped delete such as `ls migrations | xargs rm`, and a script that deletes all pass; without `jq` these are blocked, because the guard blocks any input that contains `migrations`, but wildcards and quote-split names such as `mig''rations` pass. A script that deletes passes either way. A repository that needs a guarantee should add the Edit deny rule `"permissions": { "deny": ["Edit(migrations/**)"] }` and `sandbox.filesystem.denyWrite`. To turn the guard off, set `MIGRATIONS_GUARD_OFF=1`.
-- **Stop hook.** Does nothing in a repository where it detects no test command. It looks at the session's working directory for a line in `package.json` with a `"test":` key that is not npm's `no test specified` placeholder, a `test`, `tests`, `unittest`, or `unittests` target in a `Makefile`, `makefile`, or `GNUmakefile`, a `[tool.pytest` section in `pyproject.toml`, a `pytest.ini`, `tox.ini`, `noxfile.py`, `go.mod`, `Cargo.toml`, `pom.xml`, `build.gradle`, `build.gradle.kts`, or `mix.exs` file, a `.sln` or `.csproj` file, or a `tests`, `test`, or `spec` folder. Where it finds one, when Claude tries to stop, it looks for `.claude/state/last-test-evidence.json` containing `"pass": true`, written in the last five minutes. Without that, it sends Claude back to work up to twice on unchanged evidence and six times in one stop chain, then releases the stop. Without `jq` it cannot read the evidence or tell one stop chain from the next, so it blocks at most twice on unchanged evidence and six times in total per repository, until `.claude/state/verify-gate.count` is deleted. Nothing in the plugin writes the evidence file, so your test workflow has to; once the file exists, the hook checks it whatever else the repository contains. The hook keeps its own state under `.claude/state/`. To turn it off, set `VERIFY_GATE_OFF=1`.
+**Opt in per repository.** A gate acts only in a git repository whose root holds `.claude/rootnode-gates.json` with that gate's section. Without the file or the section, the hook exits 0 and writes nothing. `cc-design` adds the file when it designs an environment that wants a gate.
+
+```json
+{
+  "version": 1,
+  "verify": {
+    "mode": "watch",
+    "command": "npm test",
+    "surfaces": ["local"],
+    "max_blocks_chain": 2,
+    "max_blocks_session": 4
+  },
+  "migrations_guard": { "enabled": true }
+}
+```
+
+- **Stop gate (`verify`).** When the session starts, the plugin records a fingerprint of the repository: `HEAD`, `git status`, `git diff HEAD`, and the contents of untracked files. When Claude tries to stop, the gate does nothing if the fingerprint is unchanged, so a turn that only answers passes. If the tree changed, including by a commit or a push, it looks for passing test evidence recorded for the tree as it now stands. Its block message names the repository, the reason, and the command to run: `bash "<plugin>/scripts/record-test-evidence.sh" "<repo root>" "<evidence file>"`. That script runs `verify.command` at the repository root and records the result with the fingerprint. Evidence goes stale when the tree changes again; there is no clock.
+- **Watch, then enforce.** `mode` defaults to `watch`: the gate logs each stop it would have blocked and never blocks. Set `"mode": "enforce"` once the log shows it acting on the right turns. In enforce mode it sends Claude back at most `max_blocks_chain` times in one stop chain (default 2, never above `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`, default 8) and `max_blocks_session` times in a session (default 4), then releases the stop and logs the release.
+- **Surfaces.** `surfaces` defaults to `["local"]`. Add `"remote"` to gate cloud sessions (`CLAUDE_CODE_REMOTE=true`) too, for a repository whose tests can run there.
+- **Your own evidence file.** A repository that already records its test result can set `"evidence": {"path": ".claude/state/last-verify.json", "pass_field": "pass"}`; `command` is then optional. The file passes only when it carries a `fingerprint` field for the current tree, which `record-test-evidence.sh` writes.
+- **Migration guard (`migrations_guard`).** With `"enabled": true` and `jq`, it blocks Claude's file edits under any `migrations/` folder, and shell delete or move commands that name one. It also blocks `find` commands that delete or run a command over one, `find . -delete` and similar with no name filter, and any delete, move, or `find` command with a wildcard that could match one, including `rm *` and a read-only `find . -name '*'`. Without `jq` it does no parsing: it blocks any call to the five tools it gates — `Edit`, `Write`, `NotebookEdit`, `Bash`, and `PowerShell` — whose hook input contains `migrations` in any case, and tells you to install `jq`.
+- **Migration guard, limits.** The guard reads text, so it is not a guarantee. With `jq`, a `cp` or shell redirect into `migrations/`, a piped delete such as `ls migrations | xargs rm`, and a script that deletes all pass; without `jq` these are blocked, but wildcards and quote-split names such as `mig''rations` pass. A script that deletes passes either way. A repository that needs a guarantee should add the Edit deny rule `"permissions": { "deny": ["Edit(migrations/**)"] }` and `sandbox.filesystem.denyWrite`.
+- **State and status.** The hooks keep their state in the plugin's data folder (`CLAUDE_PLUGIN_DATA`), never in your repository. One log, `gates/gate.log` there, records every block, would-be block, release, and guard block. `bash "<plugin>/scripts/gate-status.sh" --state "<plugin data folder>" [repo root]` prints the counts per gate and the last five log lines.
+- **When a gate stays quiet.** A gate that cannot read its input, its config, or `git` does nothing. Without `jq` the Stop gate is inactive and says so on stderr. The baseline is taken when the session starts, or at the first stop in a repository the session entered later, so edits made there before that stop are not gated.
+- **Off-switches.** `VERIFY_GATE_OFF=1` turns off the Stop gate and its baseline; `MIGRATIONS_GUARD_OFF=1` turns off the guard. Removing the section from `.claude/rootnode-gates.json` turns a gate off for everyone who uses the repository.
 
 ## Install
 

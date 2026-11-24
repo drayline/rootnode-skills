@@ -13,7 +13,7 @@ CFG="$ROOT/$GATE_CONFIG"; [ -f "$CFG" ] || exit 0    # no config: the guard is o
 STATE=$(gate_state_dir)
 audit() { gate_log guard block "$ROOT" "$1" || echo "guard: audit row not written" >&2; }
 if ! command -v jq >/dev/null; then
-  grep -q '"migrations_guard"' "$CFG" && grep -Eq '"enabled"[[:space:]]*:[[:space:]]*true' "$CFG" || exit 0
+  tr '\r\n' '  ' < "$CFG" | grep -Eq '"migrations_guard"[[:space:]]*:[[:space:]]*\{[^}]*"enabled"[[:space:]]*:[[:space:]]*true' || exit 0
   case "$(printf '%s' "$IN" | tr '[:upper:]' '[:lower:]')" in
   *migrations*)
     audit no-jq

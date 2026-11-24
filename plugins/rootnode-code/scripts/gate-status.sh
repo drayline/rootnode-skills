@@ -1,6 +1,6 @@
 #!/bin/bash
 # gate-status.sh [--state <dir>] [repo root] — per gate, the count of blocks, would-be blocks and releases, and the
-# last five log lines, for every repository or one. Reads the state folder the hooks write: CLAUDE_PLUGIN_DATA, or
+# last five log lines, for all repositories or one. Reads the state folder the hooks write: CLAUDE_PLUGIN_DATA, or
 # --state with the plugin's data folder (or its gates folder).
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 . "$HERE/gate-lib.sh" 2>/dev/null || { echo "rootnode-code: gate-lib.sh not found" >&2; exit 0; }

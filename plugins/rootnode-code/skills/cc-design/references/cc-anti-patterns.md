@@ -2,7 +2,7 @@
 
 A catalog of 17 recurring failure modes in Claude Code deployments, drawn from the convergence of Anthropic primary documentation, named practitioners (rosmur, obra/superpowers, Shrivu Shankar, Marc Nuri, alexop.dev, Daniel Miessler), and community sources. These are the patterns where 3+ independent sources converged.
 
-**This Skill's role with the catalog:** rootnode-cc-design uses this catalog as a **fix-recipe library**. Each pattern includes a structural cause and a structural fix; REMEDIATE mode looks up the fix when consuming a hygiene finding tagged with the pattern's canonical reference. EVOLVE mode references it when diagnosing user-reported friction. DESIGN mode uses it as a "things to avoid creating" checklist.
+**This Skill's role with the catalog:** cc-design uses this catalog as a **fix-recipe library**. Each pattern includes a structural cause and a structural fix; REMEDIATE mode looks up the fix when consuming a hygiene finding tagged with the pattern's canonical reference. EVOLVE mode references it when diagnosing user-reported friction. DESIGN mode uses it as a "things to avoid creating" checklist.
 
 **The audit-checklist role belongs to repo-hygiene.** That Skill scans an existing CC environment for these patterns and produces `HYGIENE_REPORT.md`. This Skill consumes that report — it does not produce it. The two Skills share the catalog; they apply it from opposite directions (scan-for vs. fix). For audit-time signature scanning of these patterns, see `repo-hygiene` `references/anti-pattern-catalog.md` if available — that Skill applies the catalog from the scan direction; this file applies it from the fix-recipe direction.
 

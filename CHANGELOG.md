@@ -72,3 +72,12 @@ This PR completes the plugin layout from PR #30 per `design/root_DESIGN_plugin_p
 - rootnode-governance 6.0.0 — critic-gate, mode-router, handoff-trigger-check, session-handoff, profile-builder; profile-builder example finds the schema in a plugin install
 - rootnode-skill-builder 6.0.0 — skill-builder; path references and `package_zip.py` docstring use the plugin layout
 - Catalog surfaces — canonical-KF mirrors SBD and CC_EG synced from staging; `docs/root_SKILLS_RELEASE_PLAYBOOK.md` replaced; CLAUDE.md mission, packaging and releases sections; README Quick Start, plugin table, badge, unprefixed Skill names, roadmap; packager clears stale zips and checks embedded copies; `generate_release_notes.py` writes per-plugin notes; `build_releases.py` removed; `release-notes/*-v6.0.0.md`, `release-notes/catalog-v6.0.md`, `audit/v6_0-release/` (release-notes config)
+
+## rootnode-code 6.1.0 — opt-in, change-aware hooks (`fix/rootnode-code-6.1.0`)
+
+Single-plugin cut (playbook §1.5) per `design/root_DESIGN_verify_gate_fix.md` (D1–D6, §3a, §7). Release shape: one per-plugin release `rootnode-code/v6.1.0` (`--latest=false`); no umbrella, no catalog regeneration.
+
+- rootnode-code 6.1.0 — both hooks act only in a repository with `.claude/rootnode-gates.json`; the Stop gate blocks only when the tree changed since the session baseline (new `SessionStart` hook) and no passing evidence matches the current fingerprint; `record-test-evidence.sh` writes that evidence; `watch` mode by default, `enforce` capped per chain and per session; `surfaces` default `["local"]`; state, evidence and `gate.log` in `CLAUDE_PLUGIN_DATA`, none in the repository; `gate-status.sh`; shared `gate-lib.sh`; README hook section rewritten
+- cc-design 6.1.0 — hook reference embeds `gate-lib.sh`, `guard-migrations.sh` and `verify-tests.sh` under `shipped:` markers, documents the config and the chain/session caps; "rootnode-cc-design Skill" prose fixed in `cc-anti-patterns.md` and `cc-design-brief.schema.json`; Windows `jq -r` CRLF shell lesson
+- repo-hygiene stays 6.0.0
+- Catalog surfaces — root README hook statement; `release-notes/rootnode-code-v6.1.0.md`; `design/root_DESIGN_verify_gate_fix.md`; `audit/v6_1-release/` (hook-test harness and fixtures, KF update blocks)

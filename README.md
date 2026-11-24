@@ -46,7 +46,7 @@ Install each plugin once — on your account *or* locally in Claude Code, not bo
 
 **Evidence status.** `rootnode-projects` ships the catalog's first eval suite (`plugins/rootnode-projects/evals/`, 5 cases for `claude plugin eval`). Its first run showed no lift over the base model: every case scored the same with and without the plugin, because the graders did not test anything the base model misses. Stricter graders and suites for the other plugins come next. Until then, treat the plugins as unmeasured.
 
-The `rootnode-code` hooks run in every repository where that plugin is enabled. Chat ignores hooks.
+The `rootnode-code` hooks are opt-in: they act only in a repository that adds `.claude/rootnode-gates.json`, and do nothing elsewhere. Plugin hooks can run in chat sessions that open a repository, so the rule holds there too.
 
 > [!NOTE]
 > Activate any Skill with natural language — no commands, no special syntax. Every Skill also works standalone.

@@ -229,26 +229,158 @@ The doc's own warning: "Exit code 1 without valid JSON output is a non-blocking 
 }
 ```
 
-The `rootnode-code` plugin ships both scripts with this wiring in `hooks/hooks.json`, using `"${CLAUDE_PLUGIN_ROOT}"/scripts/<name>` paths; the blocks below are those scripts.
+The `rootnode-code` plugin ships its own versions of both scripts, wired in `hooks/hooks.json` with `"${CLAUDE_PLUGIN_ROOT}"/scripts/<name>` paths, plus a `SessionStart` hook, `gate-baseline.sh` (timeout 10). Plugin hooks run wherever the plugin loads, chat sessions that open a repository included, so the shipped hooks are opt-in: each acts only in a git repository whose root holds `.claude/rootnode-gates.json` with that hook's section, and otherwise exits 0 and writes nothing. When this Skill designs an environment that wants either gate, it adds that file:
+
+```json
+{
+  "version": 1,
+  "verify": {
+    "mode": "watch",
+    "command": "npm test",
+    "surfaces": ["local"],
+    "max_blocks_chain": 2,
+    "max_blocks_session": 4,
+    "evidence": { "path": ".claude/state/last-verify.json", "pass_field": "pass" }
+  },
+  "migrations_guard": { "enabled": true }
+}
+```
+
+| Key | Default | Meaning |
+|---|---|---|
+| `verify` | absent = Stop gate off | Turns the Stop gate and its baseline on |
+| `verify.mode` | `watch` | `watch` logs would-be blocks and exits 0; `enforce` blocks |
+| `verify.command` | none; required unless `evidence` is set | The test command `record-test-evidence.sh` runs at the repo root |
+| `verify.surfaces` | `["local"]` | `local`, `remote`; `remote` means `CLAUDE_CODE_REMOTE` is `"true"` |
+| `verify.max_blocks_chain` / `max_blocks_session` | 2 / 4 | The two caps (§5); the chain cap is clamped to `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` (default 8) |
+| `verify.evidence` | plugin-written evidence in the state folder | A repository's own evidence file; it passes only with a `fingerprint` field for the current tree |
+| `migrations_guard.enabled` | absent = guard off | Turns the PreToolUse guard on |
+
+The scripts share `gate-lib.sh`: repo root, config, state folder, fingerprint. A script that cannot source it exits 0. State lives in the plugin's data folder, `${CLAUDE_PLUGIN_DATA}/gates/` (a temp folder when the variable is unset), never in the repository: per-session baselines and counters under `sessions/<session_id>/<root key>/`, plugin-written evidence under `evidence/<root key>.json`, and one log, `gate.log`, with a tab-separated row per block, would-be block, release and guard block. The root key is the first 16 hex characters of the sha256 of the root path. `jq -r` on Git for Windows ends each line with CRLF; `gate_jq` strips the CR so no comparison or written value carries it.
+
+<!-- shipped: plugins/rootnode-code/scripts/gate-lib.sh -->
+```bash
+#!/bin/bash
+# gate-lib.sh — shared by the rootnode-code gate scripts: repo root, opt-in config, state folder, tree fingerprint.
+# Sourced, never run. A script that cannot source it exits 0, so a missing library never blocks.
+export GIT_OPTIONAL_LOCKS=0                          # git status must not rewrite the repository's index
+GATE_CONFIG=.claude/rootnode-gates.json              # the opt-in file; no file = no gate
+
+gate_jq() {                                          # jq -r without the CR that jq on Windows adds to each line
+  local out; out=$(jq -r "$@" 2>/dev/null) || return 1
+  printf '%s\n' "${out//$'\r'/}"
+}
+gate_input() {                                       # $1 = hook input, $2 = field -> its value, or empty
+  command -v jq >/dev/null && printf '%s' "$1" | gate_jq "$2 // empty"
+}
+gate_sha() {                                         # stdin -> 64 hex characters; fails without a sha256 tool
+  if command -v sha256sum >/dev/null; then sha256sum | cut -c1-64
+  elif command -v shasum >/dev/null; then shasum -a 256 | cut -c1-64
+  else return 1; fi
+}
+gate_root() {                                        # $1 = folder -> top level of its git working copy, or empty
+  [ -n "$1" ] && git -C "$1" rev-parse --show-toplevel 2>/dev/null
+}
+gate_state_dir() {                                   # the plugin's data folder, or a temp fallback; never the repo
+  local d=${CLAUDE_PLUGIN_DATA:-${TMPDIR:-/tmp}/rootnode-code}
+  printf '%s/gates' "${d//'\'//}"
+}
+gate_log() {                                         # gate action root detail... -> one tab-separated line in gate.log
+  local f out; out=$(date -u +%FT%TZ)
+  for f in "$@"; do out+=$'\t'"${f//[$'\t\r\n']/ }"; done
+  mkdir -p "$STATE" 2>/dev/null && printf '%s\n' "$out" >> "$STATE/gate.log" 2>/dev/null
+}
+gate_evidence() {                                    # sets EV (absolute), EV_REL (in-repo path the fingerprint leaves out), EV_FIELD
+  local p; p=$(gate_jq '.verify.evidence.path? // empty | strings' "$CFG"); p=${p//'\'//}
+  EV_FIELD=$(gate_jq '.verify.evidence.pass_field? // empty | strings' "$CFG"); EV_FIELD=${EV_FIELD:-pass}
+  EV_REL=""
+  if [ -z "$p" ]; then EV="$STATE/evidence/$KEY.json"; return 0; fi
+  case "$p" in /*|[A-Za-z]:/*) EV=$p ;; *) EV="$ROOT/${p#./}" ;; esac
+  EV_REL=$(git -C "$ROOT" -c core.quotePath=false ls-files --full-name -c -o -- "$EV" 2>/dev/null | head -1)
+}                                                    # git resolves .., drive-letter case and /c/ paths; empty outside the repo
+gate_fingerprint() {                                 # $1 = root, $2 = in-repo path to leave out -> sha256 of the tree state
+  local ps=(-- .); [ -n "$2" ] && ps+=(":(exclude,literal)$2")
+  {
+    git -C "$1" rev-parse -q --verify HEAD || echo none
+    git -C "$1" status --porcelain --untracked-files=all "${ps[@]}"
+    git -C "$1" diff HEAD --no-color --no-ext-diff "${ps[@]}" ||
+      git -C "$1" diff --cached --no-color --no-ext-diff "${ps[@]}"            # no commit yet
+    git -C "$1" -c core.quotePath=false ls-files -o --exclude-standard "${ps[@]}" |
+      git -C "$1" hash-object --stdin-paths                                    # contents of untracked files
+  } 2>/dev/null | gate_sha
+}
+gate_verify_setup() {                                # design §7.2 steps 2–7, shared by the Stop gate and the SessionStart baseline
+  # $1 = hook input. Returns 0 with ROOT CFG STATE KEY SD EV EV_REL EV_FIELD FP set when the gate goes on;
+  # returns 1 when the hook should exit 0 (inactive, or the baseline was just taken).
+  local dir on sid surf
+  STATE=$(gate_state_dir)
+  dir=$(gate_input "$1" .cwd); dir=${dir:-$PWD}
+  ROOT=$(gate_root "$dir")
+  if [ -z "$ROOT" ]; then                            # 2. not a git working copy: inactive, noted when the folder asks for a gate
+    grep -q '"verify"' "$dir/$GATE_CONFIG" 2>/dev/null && gate_log verify skip "$dir" not-a-git-repo
+    return 1
+  fi
+  CFG="$ROOT/$GATE_CONFIG"
+  [ -f "$CFG" ] || return 1                          # 3. no config: nothing written
+  if ! command -v jq >/dev/null; then                # 4. a gate that cannot read its config does not block
+    grep -q '"verify"' "$CFG" 2>/dev/null && echo "rootnode-code: jq not found; verify gate inactive" >&2
+    return 1
+  fi
+  on=$(gate_jq '(.verify | type) == "object"' "$CFG") ||
+    { echo "rootnode-code: $CFG is not valid JSON; verify gate inactive" >&2; return 1; }
+  [ "$on" = true ] || return 1                       # 3. no verify section
+  if [ -z "$(gate_jq '(.verify.command // empty | strings), (.verify.evidence.path? // empty | strings)' "$CFG")" ]; then
+    echo "rootnode-code: $CFG has no verify.command; verify gate inactive" >&2; return 1
+  fi
+  surf=local; [ "${CLAUDE_CODE_REMOTE:-}" = true ] && surf=remote
+  jq -e --arg s "$surf" '(.verify.surfaces // ["local"]) | if type == "array" then index($s) != null else . == $s end' \
+    "$CFG" >/dev/null 2>&1 || return 1               # 5. surface not listed
+  sid=$(gate_input "$1" .session_id); sid=${sid//[^A-Za-z0-9_-]/_}
+  [ -n "$sid" ] || { echo "rootnode-code: hook input has no session_id; verify gate inactive" >&2; return 1; }
+  KEY=$(printf '%s' "$ROOT" | gate_sha | cut -c1-16)  # 6. state folder, keyed by session and root
+  [ -n "$KEY" ] || { echo "rootnode-code: no sha256sum or shasum; verify gate inactive" >&2; return 1; }
+  SD="$STATE/sessions/$sid/$KEY"
+  mkdir -p "$SD" "$STATE/evidence" 2>/dev/null ||
+    { echo "rootnode-code: cannot create $STATE; verify gate inactive" >&2; return 1; }
+  gate_evidence
+  FP=$(gate_fingerprint "$ROOT" "$EV_REL")           # 7. fingerprint; the first one in a session is the baseline
+  [ -n "$FP" ] || { echo "rootnode-code: cannot fingerprint $ROOT; verify gate inactive" >&2; return 1; }
+  [ -f "$SD/baseline" ] || { printf '%s\n' "$FP" > "$SD/baseline"; return 1; }
+  return 0
+}
+```
 
 <!-- shipped: plugins/rootnode-code/scripts/guard-migrations.sh -->
 ```bash
 #!/bin/bash
-# guard-migrations.sh — Edit|Write|NotebookEdit|Bash|PowerShell guard.
-# With jq: parses the tool's target; fails closed on unreadable input.
+# guard-migrations.sh — Edit|Write|NotebookEdit|Bash|PowerShell guard. Acts only in a repository whose
+# .claude/rootnode-gates.json sets "migrations_guard": {"enabled": true}. Audit rows go to the plugin's state folder.
+# With jq: parses the tool's target; input that is not a JSON object leaves the guard inactive.
 # Without jq: no parsing. Blocks any hook input that contains "migrations", in any case, and allows the rest.
 [ "${MIGRATIONS_GUARD_OFF:-0}" = "1" ] && exit 0      # off-switch; audit its use
+HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+. "$HERE/gate-lib.sh" 2>/dev/null || { echo "rootnode-code: gate-lib.sh not found; migrations guard inactive" >&2; exit 0; }
 IN=$(cat)
+DIR=$(gate_input "$IN" .cwd); ROOT=$(gate_root "${DIR:-$PWD}")
+[ -n "$ROOT" ] || exit 0                             # not a git working copy
+CFG="$ROOT/$GATE_CONFIG"; [ -f "$CFG" ] || exit 0    # no config: the guard is off
+STATE=$(gate_state_dir)
+audit() { gate_log guard block "$ROOT" "$1" || echo "guard: audit row not written" >&2; }
 if ! command -v jq >/dev/null; then
+  tr '\r\n' '  ' < "$CFG" | grep -Eq '"migrations_guard"[[:space:]]*:[[:space:]]*\{[^}]*"enabled"[[:space:]]*:[[:space:]]*true' || exit 0
   case "$(printf '%s' "$IN" | tr '[:upper:]' '[:lower:]')" in
   *migrations*)
-    mkdir -p .claude && echo "$(date -u +%FT%TZ) block no-jq" >> .claude/guard.log ||   # audit row
-      echo "guard: audit row not written" >&2
+    audit no-jq
     echo "jq is missing and this call mentions migrations, so it is blocked. Next step: install jq (winget install jqlang.jq, brew install jq, or apt-get install jq)." >&2
     exit 2 ;;
   esac
   exit 0
 fi
+ON=$(gate_jq '.migrations_guard.enabled == true' "$CFG") ||
+  { echo "rootnode-code: $CFG is not valid JSON; migrations guard inactive" >&2; exit 0; }
+[ "$ON" = true ] || exit 0
+printf '%s' "$IN" | jq -e 'type == "object"' >/dev/null 2>&1 ||
+  { echo "rootnode-code: hook input is not a JSON object; migrations guard inactive" >&2; exit 0; }
 TOOL=$(printf '%s' "$IN" | jq -r '.tool_name // ""') &&
 T=$(printf '%s' "$IN" | jq -r '.tool_input.file_path // .tool_input.notebook_path // .tool_input.command // ""') ||
   { echo "Input unreadable; rule holds. Next step: check jq and the hook input." >&2; exit 2; }
@@ -281,13 +413,14 @@ Bash|PowerShell)
 *) case "$P" in migrations/*|*/migrations/*) HIT=1 ;; esac ;;
 esac
 [ -z "$HIT" ] && exit 0
-mkdir -p .claude && echo "$(date -u +%FT%TZ) block $TOOL $P" >> .claude/guard.log ||   # audit row
-  echo "guard: audit row not written" >&2
+audit "$TOOL $P"
 echo "migrations/ is protected. Next step: use the migration tool, then stop for review." >&2
 exit 2
 ```
 
-**Without `jq`.** The guard does no parsing. It blocks any gated call whose hook input contains `migrations` in any case, including a file's content or a path outside the target, writes a `block no-jq` audit row to `.claude/guard.log` (or warns on stderr when it cannot), and names installing `jq` as the next step; everything else passes. That branch also blocks the pipe-fed delete below, but a wildcard (`rm *`) or a quote-split name such as `mig''rations` gets through. With `jq`, a block writes `block <tool> <path>` to the same log and tells Claude to use the migration tool, then stop for review.
+**Activation.** After its off-switch, the guard resolves the repository root from the hook input's `cwd` and exits 0 outside a git working copy, without the config, or without `"migrations_guard": {"enabled": true}`. With `jq`, input that is not a JSON object leaves it inactive, and a config that is not valid JSON does the same with one stderr line. Every block writes a `guard block` row to `gate.log` in the state folder, or warns on stderr when it cannot; nothing is written in the repository.
+
+**Without `jq`.** The guard cannot parse the config, so it applies only when the config file holds a `"migrations_guard"` object with `"enabled": true` in it, matched as text across lines. It then does no parsing of the call: it blocks any gated call whose hook input contains `migrations` in any case, including a file's content or a path outside the target, logs `no-jq` as the reason, and names installing `jq` as the next step; everything else passes. That branch also blocks the pipe-fed delete below, but a wildcard (`rm *`) or a quote-split name such as `mig''rations` gets through. With `jq`, a block logs `<tool> <path>` and tells Claude to use the migration tool, then stop for review.
 
 **What the guard cannot see.** With `jq`, it matches command text, so a delete that does not appear as text gets through: a pipe-fed delete (`ls migrations | xargs rm`, `Get-ChildItem migrations | Remove-Item`), a script or another interpreter that deletes, or a variable that expands to the path. For a guarantee, pair the guard with the mechanisms that deny writes to the path. An `Edit` deny rule, `"permissions": { "deny": ["Edit(migrations/**)"] }`, matches a `migrations` folder at any depth and covers Claude's file tools, the file commands Claude Code recognizes in Bash, and redirect targets, but not "arbitrary subprocesses that read or write files indirectly". The sandbox's `sandbox.filesystem.denyWrite` belongs in project settings, `.claude/settings.json`, where `./` resolves to the project root: there `["./migrations"]`, with `sandbox.enabled` true, is enforced by the operating system on Bash, PowerShell and Monitor commands and the processes they start, and Claude Code adds `Edit` deny rules to the same list. That entry covers only the root `migrations` folder; the `Edit` deny rule supplies the any-depth coverage. The sandbox runs on macOS, Linux and WSL2; on native Windows, Claude Code runs commands unsandboxed, so the OS-level half needs WSL2 there. By default a sandbox that cannot start falls back to unsandboxed commands; `sandbox.failIfUnavailable` makes Claude Code exit instead. `[Anthropic docs — permissions, sandboxing, settings reference, fetched 2026-10-30]` The guard then adds an on-task message and an audit row; it is not the guarantee itself.
 
@@ -297,66 +430,74 @@ exit 2
 
 The verification-before-completion pattern (named in obra/superpowers, Marc Nuri's writeup, and rosmur) is the highest-leverage hook to install in any CC project that has runnable tests.
 
-**The pattern:** a `Stop` hook that blocks completion unless the agent provides evidence of test passage.
+**The pattern:** a `Stop` hook that blocks completion when the session changed the tree and no passing test evidence exists for the tree as it now stands. A gate that blocks a turn that changed nothing, or a repository that never asked for it, gets turned off; the shipped gate asks both questions first.
 
 **Shipped script (`verify-tests.sh`; `.claude/hooks/verify-tests.sh` in the authoring example):**
 
 <!-- shipped: plugins/rootnode-code/scripts/verify-tests.sh -->
 ```bash
 #!/bin/bash
-# verify-tests.sh — Stop guard; fails closed; bounded. Exits 0 in a repo with no detectable test command.
-[ "${VERIFY_GATE_OFF:-0}" = "1" ] && exit 0          # off-switch; audit its use
-EV=.claude/state/last-test-evidence.json; CT=.claude/state/verify-gate.count
-has_test_command() {                                 # common conventions, checked at the session's working directory
-  [ -f "$EV" ] && return 0                           # recorded evidence opts the repo in
-  grep -s '"test"[[:space:]]*:' package.json | grep -qv 'no test specified' && return 0
-  grep -qsE '^(unit)?tests?:' Makefile makefile GNUmakefile && return 0
-  grep -qs '^\[tool\.pytest' pyproject.toml && return 0
-  for F in pytest.ini tox.ini noxfile.py go.mod Cargo.toml pom.xml build.gradle build.gradle.kts mix.exs; do
-    [ -f "$F" ] && return 0
-  done
-  { compgen -G '*.sln' || compgen -G '*.csproj'; } >/dev/null && return 0
-  [ -d tests ] || [ -d test ] || [ -d spec ]
-}
-has_test_command || exit 0                           # nothing to verify: no block, no state written
-MAX="${VERIFY_GATE_MAX_BLOCKS:-2}"; mkdir -p .claude/state   # N: 2 interactive, 8 unattended; keep N ≤ CLAUDE_CODE_STOP_HOOK_BLOCK_CAP (default 8)
-HOST="${CLAUDE_CODE_STOP_HOOK_BLOCK_CAP:-8}"; [ "$MAX" -le "$HOST" ] 2>/dev/null || MAX=$HOST   # enforce N ≤ host cap
-MAX_TOTAL="${VERIFY_GATE_MAX_TOTAL:-$((MAX * 3))}"           # M: 3×N [assumption — tune per repo]
-INPUT=$(cat)                                                 # read stdin once
-block() {  # $1 = on-task reason naming the next step
-  KEY=$(sha256sum "$EV" 2>/dev/null | cut -c1-16); KEY=${KEY:-none}
-  LAST=""; N=0; TOTAL=0; [ -f "$CT" ] && read -r LAST N TOTAL < "$CT"
-  if [ "$LAST" = "$KEY" ]; then N=$((N + 1)); else N=1; fi
-  TOTAL=$((${TOTAL:-0} + 1))
-  echo "$KEY $N $TOTAL" > "$CT"; echo "$(date -u +%FT%TZ) block $KEY $N $TOTAL" >> .claude/state/verify-gate.log
-  if [ "$N" -gt "$MAX" ] || [ "$TOTAL" -gt "$MAX_TOTAL" ]; then   # bound 2: release, logged
-    echo "$(date -u +%FT%TZ) release $KEY $N $TOTAL" >> .claude/state/verify-gate.log; exit 0
-  fi
-  echo "$1" >&2; exit 2
-}
-ACTIVE=true                                          # bound 1: no jq or unreadable input = continuation
-command -v jq >/dev/null && ACTIVE=$(printf '%s' "$INPUT" | jq -r '.stop_hook_active // false' 2>/dev/null || echo true)
-[ "$ACTIVE" = "true" ] || rm -f "$CT"                # a new stop chain resets the counter
-command -v jq >/dev/null || block "jq not found — evidence not evaluated; caps still apply"
-[ -f "$EV" ] || block "Next step: run the test suite and record the result to $EV with \"pass\": true or false."
-AGE=$(($(date +%s) - $(stat -c %Y "$EV" 2>/dev/null || stat -f %m "$EV")))
-[ "$AGE" -le 300 ] || block "Next step: re-run the test suite; the evidence is over 5 minutes old."
-[ "$(jq -r '.pass' "$EV")" = "true" ] || block "Next step: $EV does not show \"pass\": true. Fix any failures, re-run the suite, and record the result."
-rm -f "$CT"; exit 0
+# verify-tests.sh — Stop gate. Acts only in a repository whose .claude/rootnode-gates.json has a "verify" section,
+# only when the tree changed in this session, and only without passing evidence for the current tree.
+# Watch mode (the default) logs would-be blocks and never blocks; enforce mode blocks, bounded by two caps.
+[ "${VERIFY_GATE_OFF:-0}" = "1" ] && exit 0          # 1. off-switch; audit its use
+HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+. "$HERE/gate-lib.sh" 2>/dev/null || { echo "rootnode-code: gate-lib.sh not found; verify gate inactive" >&2; exit 0; }
+IN=$(cat)                                            # 2. read stdin once
+gate_verify_setup "$IN" || exit 0                    # 2–7: inactive, or the baseline was just taken
+[ "$(gate_input "$IN" .stop_hook_active)" = true ] || rm -f "$SD/chain"   # 11. a new stop chain resets the chain count
+[ "$FP" = "$(cat "$SD/baseline" 2>/dev/null)" ] && exit 0                 # 8. unchanged since the baseline
+REASON=no-evidence                                   # 9. evidence bound to the current fingerprint
+if [ -f "$EV" ]; then
+  REASON=$(gate_jq --arg fp "$FP" --arg f "$EV_FIELD" \
+    'if .fingerprint != $fp then "stale-evidence" elif .[$f] == true then "ok" else "failing" end' "$EV")
+  case "$REASON" in ok|failing|stale-evidence) ;; *) REASON=stale-evidence ;; esac
+fi
+[ "$REASON" = ok ] && { rm -f "$SD/chain"; exit 0; }
+int() { case "$1" in ''|*[!0-9]*) echo "$2" ;; *) echo "$1" ;; esac; }   # 10. a would-be block
+NC=$(int "$(cat "$SD/chain" 2>/dev/null)" 0); NT=$(int "$(cat "$SD/total" 2>/dev/null)" 0)
+if [ "$(gate_jq '.verify.mode // "watch"' "$CFG")" != enforce ]; then
+  gate_log verify would-block "$ROOT" "$REASON" "chain=$NC" "session=$NT"; exit 0
+fi
+HOST=$(int "${CLAUDE_CODE_STOP_HOOK_BLOCK_CAP:-}" 8)
+MAXC=$(int "$(gate_jq '.verify.max_blocks_chain // empty' "$CFG")" 2); [ "$MAXC" -le "$HOST" ] || MAXC=$HOST
+MAXS=$(int "$(gate_jq '.verify.max_blocks_session // empty' "$CFG")" 4)
+NC=$((NC + 1)); NT=$((NT + 1)); echo "$NC" > "$SD/chain"; echo "$NT" > "$SD/total"   # the session count never resets
+if [ "$NC" -gt "$MAXC" ] || [ "$NT" -gt "$MAXS" ]; then
+  gate_log verify release "$ROOT" "$REASON" "chain=$NC" "session=$NT"; exit 0
+fi
+gate_log verify block "$ROOT" "$REASON" "chain=$NC" "session=$NT"
+echo "rootnode-code verify gate: $ROOT changed in this session and has no passing test evidence for the current tree ($REASON). Next step: run" >&2
+echo "bash \"$HERE/record-test-evidence.sh\" \"$ROOT\" \"$EV\"" >&2
+exit 2
 ```
 
-In a repository where it finds no test command (no `"test":` line in `package.json` other than npm's `no test specified` placeholder, no `test`/`tests`/`unittest`/`unittests` Makefile target, no `[tool.pytest` section in `pyproject.toml`, none of the listed build files, `.sln`, `.csproj`, or `tests`/`test`/`spec` folder) and no recorded evidence, the hook exits 0 before it reads stdin or writes state. Recorded evidence opts a repository in whatever else it contains. N defaults to 2 and is clamped to `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` (default 8); M defaults to 3×N. Without `jq`, every stop counts as a chain continuation, so the counter never resets on its own: the hook blocks with `jq not found — evidence not evaluated; caps still apply` at most N times on unchanged evidence and M times in total per repository, until `.claude/state/verify-gate.count` is deleted. With `jq`, each block message names the next step: record the result with `"pass": true` or false, re-run a suite whose evidence is over five minutes old, or fix the failures when the evidence does not show `"pass": true`.
+**Order of checks.** Off-switch (`VERIFY_GATE_OFF=1`); repository root from the input's `cwd` (not a git working copy → exit 0, with one `skip` log row when the folder holds the config); no config or no `verify` section → exit 0, nothing written; no `jq` → one stderr line, exit 0; surface not listed → exit 0; fingerprint, and the first fingerprint of a session for that root becomes its baseline (exit 0); unchanged since the baseline → exit 0; evidence whose `fingerprint` matches and whose pass field is `true` → exit 0. Anything else is a would-be block with the reason `no-evidence`, `stale-evidence` or `failing`: watch mode logs it and exits 0, enforce mode counts it and blocks, or releases over a cap. Input it cannot read, a config that is not valid JSON, a `verify` section with neither `command` nor `evidence.path`, or no sha256 tool leaves the gate inactive with one stderr line. A gate that cannot read its inputs never blocks.
+
+**The fingerprint** is the sha256 of `HEAD` (or `none`), `git status --porcelain --untracked-files=all`, `git diff HEAD`, and the blob hashes of untracked files, with a repository's own evidence path left out. An answer-only turn leaves it unchanged; a Bash edit changes it, and so does a commit or push in the session, because `HEAD` moved. Evidence is valid for exactly one fingerprint, so there is no clock to expire. `gate-baseline.sh` takes the baseline at `SessionStart`; a repository first seen at a Stop gets its baseline there, so edits made in it before that first Stop are not gated (a known gap; a `CwdChanged` hook could close it).
+
+**Recording evidence.** The block message ends with the command to run. It carries both paths because a Bash tool call sees neither `CLAUDE_PLUGIN_DATA` nor the session id:
+
+```text
+rootnode-code verify gate: <root> changed in this session and has no passing test evidence for the current tree (<reason>). Next step: run
+bash "<plugin>/scripts/record-test-evidence.sh" "<root>" "<evidence path>"
+```
+
+`record-test-evidence.sh` runs `verify.command` at the root, computes the fingerprint after the run (so files the tests rewrite count), writes `{"pass": …, "exit": …, "command": …, "fingerprint": …, "at": …}`, and exits with the test command's code; a usage error exits 64 and writes nothing. A repository that already records results names its own file in `verify.evidence`; the file passes only when it carries the current `fingerprint`, which the record script writes.
+
+**Watch before enforce.** `mode` defaults to `watch`. `gate-status.sh [--state <data folder>] [repo root]` prints, per gate, the counts of `block`, `would-block` and `release` and the last five log rows. A gate whose would-be blocks match the turns that should have been stopped is ready for `"mode": "enforce"`; one that never acts, or acts on the wrong turns, is tuned or removed before it blocks anyone.
 
 **Combined with a CLAUDE.md prompt rule:**
 
 ```markdown
 ## Verification
 
-Before declaring done, run the test suite. Record the result to
-`.claude/state/last-test-evidence.json` in the format:
-{ "pass": true|false, "tests_run": <n>, "duration_s": <n>, "timestamp": "<iso>" }
+Before declaring done, run the test suite through the command the verify
+gate's block message prints, so the result is bound to the tree as it stands.
+Never write the evidence file by hand.
 
-The Stop hook will block completion without fresh, passing evidence.
+The Stop hook blocks completion when the tree changed and no passing
+evidence exists for it.
 Banned phrases at completion: "should work", "probably fine", "looks good".
 ```
 
@@ -366,16 +507,16 @@ Banned phrases at completion: "should work", "probably fine", "looks good".
 
 "A stuck block is the ONE way to trap a session" `[practitioner: awslabs/aidlc-workflows core/hooks/aidlc-continue-workflow.ts header]`. Every iron-law hook this Skill emits has both bounds:
 
-1. **Scope the count with `stop_hook_active`** — Read `stop_hook_active` to scope the count. The field is true when Claude is already continuing because of a stop hook. A hook that ignores it can trap the session. A hook that releases on the first `true` can block only once per stop chain, so no block cap can trigger. Reset the chain counter when the field is false; count blocks while it is true. Without `jq`, treat every stop as a chain continuation, so the caps still release. `[Anthropic docs — hooks, fetched 2026-10-30; verify the field name on the running version]`
-2. **Two caps** — a state file holds `KEY N TOTAL` for the current chain:
-   - **No-progress:** N blocks on unchanged evidence, resetting when the evidence changes (AI-DLC working values: 2 interactive, 8 unattended).
-   - **Chain total:** M blocks in the chain whatever the evidence, default 3×N `[assumption — tune per repo]`.
+1. **Scope the count with `stop_hook_active`** — Read `stop_hook_active` to scope the count. The field is true when Claude is already continuing because of a stop hook. A hook that ignores it can trap the session. A hook that releases on the first `true` can block only once per stop chain, so no block cap can trigger. Reset the chain counter when the field is false; count blocks while it is true. A hook that cannot read the field treats every stop as a chain continuation, so the caps still release; the shipped gate does not block at all without `jq`. `[Anthropic docs — hooks, fetched 2026-10-30; verify the field name on the running version]`
+2. **Two caps**, kept outside the repository:
+   - **Chain:** N blocks in one stop chain, reset when `stop_hook_active` is false (shipped default 2).
+   - **Session:** M blocks in the session, never reset by a new chain or a new user turn (shipped default 4), so a gate cannot block every turn of a long session.
 
    Either cap releases, logged. The session report records the gate `NOT_RUN`.
 
 The block reason is an on-task continuation naming the missing evidence, never an override-shaped instruction.
 
-Claude Code also caps stop-hook continuations on the host side: after eight consecutive continuations it overrides the next block and ends the turn, the count resets each time Claude calls a tool, and `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` raises it `[Anthropic docs — hooks, fetched 2026-10-30]`. Keep the no-progress cap N at or below the host cap, or raise the host cap with it and say so in the design. A stop with no tool call before it leaves the evidence unchanged, so N and the host's count advance together; at N equal to the host cap, the hook releases on its own count before the host would override it. The chain-total cap M advances past N only when the evidence changes, which takes a tool call and resets the host's count, so M never meets the host cap. When the host overrides, the hook's log records a block that did not hold, and no logged release exists for the session report to cite.
+Claude Code also caps stop-hook continuations on the host side: after eight consecutive continuations it overrides the next block and ends the turn, the count resets each time Claude calls a tool, and `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` raises it `[Anthropic docs — hooks, fetched 2026-10-30]`. Keep the chain cap N at or below the host cap, or raise the host cap with it and say so in the design; the shipped gate clamps `max_blocks_chain` to `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`. A stop with no tool call before it advances N and the host's count together, so at N equal to the host cap the hook releases on its own count before the host would override it. When the host overrides, the hook's log records a block that did not hold, and no logged release exists for the session report to cite.
 
 ### Health carrier for observer hooks
 

@@ -1,0 +1,1 @@
+{"version":1,"verify":{"mode":"enforce","command":"true","evidence":{"path":".claude/state/last-verify.json","pass_field":"pass"}}}

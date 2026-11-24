@@ -82,7 +82,9 @@ Workflow:
 
 Authority bounds: <reference to CLAUDE.md authority matrix or specific rules>
 
-Halt and escalate if: <reference to halt-and-escalate triggers>
+Routine actions that need no approval: <list from the scope authorization>
+
+Stop only per the stop rule: <this project's irreversible actions and operator-only decisions, each with its reason>. Anything else is worked through and reported.
 ```
 
 ---
@@ -193,11 +195,14 @@ Autonomous prompts drive long-running, less-supervised CC work. They require mor
 
 1. **Mission statement** — what success looks like, in one paragraph
 2. **Scope authorization** — what's in-scope, in-scope-with-notification, out-of-scope (mirror the CLAUDE.md scope rules)
-3. **Halt-and-escalate triggers** — explicit conditions under which the agent must stop and surface
+3. **Halt-and-escalate triggers** — the stop rule (stop only when the next action cannot be undone, when a decision could reasonably go either way and only the operator can make it, or when a spend cap is reached) plus this project's irreversible actions and operator-only decisions (`cc-methodology-patterns.md` §10a)
 4. **Verification gates** — specific commands that must pass before any "done" declaration
 5. **Progress reporting cadence** — how often the agent should write to a status file (every N changes, every M minutes)
-6. **Error handling protocol** — what to do on test failure, build failure, ambiguous input
+6. **Error handling protocol** — how ordinary failures (a failing test or build, an unavailable tool, ambiguous input) are diagnosed, worked through or routed around, and reported; none of them is a stop by itself
 7. **Context bounds** — what files to read, what to ignore, what to write to
+8. **Positive scope** — the routine actions that need no approval
+
+The rigor level (`cc-methodology-patterns.md` §10a) decides what else the prompt carries: gates, review roles, digest binding and report depth.
 
 **Pattern: Autonomous-build template.**
 
@@ -210,7 +215,8 @@ Autonomous prompts drive long-running, less-supervised CC work. They require mor
 ## Scope
 - In-scope: <list>
 - In-scope with notification: <list>; log to STATUS.md
-- Out-of-scope (HALT and escalate): <list>
+- Out-of-scope (ask first; each item with its reason): <list>
+- Routine actions that need no approval: <list>
 
 ## Workflow per work item
 1. Read the next item from @WORK_QUEUE.md
@@ -218,12 +224,15 @@ Autonomous prompts drive long-running, less-supervised CC work. They require mor
 3. Update CHANGELOG.md with the entry per the change_log discipline
 4. Run the full verification suite: `<commands>`
 5. If verification passes: mark item complete in @STATUS.md, move to next item
-6. If verification fails: HALT, write diagnosis to @HALT.md, exit
+6. If verification fails: diagnose and fix within scope, then re-run; if the item still fails after one fix pass, record it with the diagnosis in @STATUS.md and move to the next item that does not depend on it
 
-## Halt-and-escalate triggers (any of these → HALT)
-- <trigger 1>
-- <trigger 2>
-- <trigger 3>
+## Gate (standard and strict only)
+- Merge gate: <the one operator stop beyond the stop rule at standard, e.g. "the operator merges the PR after CI and the refute pass">; at strict, one gate per phase
+
+## Stop rule (the only halts)
+Stop and write @HALT.md only when the next action cannot be undone, when a decision could reasonably go either way and only the operator can make it, or when a spend cap is reached. In this project that means:
+- <irreversible action or operator-only decision 1, with its reason>
+- <irreversible action or operator-only decision 2, with its reason>
 - Resume: after the operator fixes the cause, re-run this prompt; completed steps are skipped by <restart marker or idempotent check>.
 
 ## Progress reporting
@@ -231,9 +240,9 @@ Autonomous prompts drive long-running, less-supervised CC work. They require mor
 - Every 30 minutes (heartbeat): touch @HEARTBEAT.md
 
 ## Error handling
-- Test failure → HALT, write diagnosis
-- Ambiguous input from a work item → HALT, do not guess
-- Tool unavailable → HALT, write diagnosis
+- Test failure → diagnose, fix within scope, re-run; after one failed fix pass, record and move on
+- Ambiguous input from a work item → take the reading its wording and the code most directly support, record the assumption; stop only if the readings lead to different irreversible work
+- Tool unavailable → use another tool or source; record what could not be checked
 
 ## Context bounds
 - READ: @<paths>
@@ -247,7 +256,7 @@ Autonomous prompts drive long-running, less-supervised CC work. They require mor
 Write the session report (`cc-session-reports.md`), then stop.
 ```
 
-**Carry the work through — the early-stop countermeasure.** The 5.5-generation models can end a turn too early: Opus 5.5 in unattended runs, Sonnet 5.5 at `low`/`medium`, Haiku 5.5 at `low` with long prompts, Fable 5.1 on long tasks **[Anthropic docs — Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1 prompting guides]**. Too little, not too much — `behavioral-tuning` (if available) tendency #15, early turn termination. In an autonomous prompt:
+**Carry the work through — the early-stop countermeasure.** The 5.5-generation models can end a turn too early: Opus 5.5 in unattended runs, Sonnet 5.5 at `low`/`medium`, Haiku 5.5 at `low` with long prompts, Fable 5.1 on long tasks, and Fable 5.2 more often at `low` and `medium` **[Anthropic docs — Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1 prompting guides; Prompting Claude Fable 5.2, fetched 2026-11-24]**. Too little, not too much — `behavioral-tuning` (if available) tendency #15, early turn termination. In an autonomous prompt:
 
 - Treat a text-only end of turn as a report, not proof.
 - Name the early stops to avoid: a summary announcing the next step with no tool call; an offer to continue; a list of non-blocking decisions; a stop at a milestone report.
@@ -319,7 +328,7 @@ Return:
 - Verification output (pass/fail per gate).
 - One sentence: "complete" or "incomplete because <reason>".
 
-Halt and return early if: the spec is ambiguous; verification fails; the change requires touching files not in scope.
+Return early, with the reason, if: the change requires touching files not in scope, or the spec admits two readings that lead to different work. A failing verification is diagnosed and fixed within scope first; return it as failing only after one fix pass.
 
 Scope: only files in `src/<specific-area>/`.
 ```

@@ -262,15 +262,15 @@ Two fields are non-optional in every brief, and they are the two most often writ
 
 `[fields 9–10 added in the v5.0 cycle, 2026-10-22; practitioner: awslabs/aidlc-workflows — authority binds to content; reviewer brief contamination check]`
 
-### 3.4 Claude Code defaults on the 5.5 generation
+### 3.4 Claude Code defaults on the current generation (5.5 models and Fable 5.2)
 
-Model, effort, and thinking facts in this section are dated product facts from the landscape block in `root_CLAUDE_OPTIMIZATION_NOTES.md` §3 (verified 2026-10-22). Verify them against the running Claude Code version before relying on them.
+Model, effort, and thinking facts in this section are dated product facts from the landscape block in `root_CLAUDE_OPTIMIZATION_NOTES.md` §3 (verified 2026-10-22; Fable 5.2 refresh 2026-11-24). Verify them against the running Claude Code version before relying on them.
 
-**Effort default:** Claude Code defaults to `medium` on Opus 5.5, Sonnet 5.5, and Haiku 5.5, and to `high` on Fable 5.1 and earlier effort-capable models. Anthropic reports Opus 5.5 at `medium` matches or exceeds Opus 5 at `high` on coding and knowledge-work evaluations, and recommends starting there when moving from Opus 5. The rule from the Opus 5 cycle carries over: start at the default, re-run an effort sweep on the deployment's own evals rather than carrying a setting over, treat `low`/`medium` as legitimate cost controls where quality holds, and step to `xhigh`/`max` only on a measured gain. Two effort-conditioned behaviors bear on design: at `low`/`medium` early turn termination rises (tendency #15 — raise effort before adding the countermeasure block), and at `xhigh`/`max` Sonnet 5.5 self-starts review rounds and reviewer subagents (tendencies #11 and #13). Set effort per model in `modelSettings` rather than a top-level `effortLevel`, which the documentation says Opus 5.5 ignores `[verify on the running version]`; set a subagent's effort with the Agent tool's `effort` parameter `[v2.1.292+]` or frontmatter `effort`.
+**Effort default:** Claude Code defaults to `medium` on Opus 5.5, Sonnet 5.5, and Haiku 5.5, and to `high` on earlier effort-capable models. Fable 5.2's API default is `high` `[Anthropic docs — models overview, fetched 2026-11-24]`; its Claude Code default is not stated on the pages fetched, so set it explicitly. On Fable 5.2, start at `high`, where most of the gain arrives, and step down to `medium` where the deployment's evals hold; `xhigh` only on a measured gain; do not carry a setting tuned on Fable 5.1 or Opus 5.5 `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. Subagents on Fable 5.2 start at `low` — the guide places `low` at quick, well-specified and high-volume work, subagents included — and move up only where a role's output falls short. Anthropic reports Opus 5.5 at `medium` matches or exceeds Opus 5 at `high` on coding and knowledge-work evaluations, and recommends starting there when moving from Opus 5. The rule from the Opus 5 cycle carries over: start at the default, re-run an effort sweep on the deployment's own evals rather than carrying a setting over, treat `low`/`medium` as legitimate cost controls where quality holds, and step to `xhigh`/`max` only on a measured gain. Two effort-conditioned behaviors bear on design: at `low`/`medium` early turn termination rises (tendency #15 — raise effort before adding the countermeasure block), and at `xhigh`/`max` Sonnet 5.5 self-starts review rounds and reviewer subagents, and Fable 5.2 starts subagents to review its own work (tendencies #11 and #13). Set effort per model in `modelSettings` rather than a top-level `effortLevel`, which the documentation says Opus 5.5 ignores `[verify on the running version]`; set a subagent's effort with the Agent tool's `effort` parameter `[v2.1.292+]` or frontmatter `effort`.
 
 **Model default:** the Claude Code default model moves with product releases and is not restated here — it moved from Opus 5 to Opus 5.5 in one release. Consult the landscape block or Anthropic's Claude Code documentation at design time, and design deployments to work under the model the user is running rather than a version assumed at design time.
 
-**Thinking:** thinking cannot be turned off in Claude Code on Opus 5.5, Sonnet 5.5, Haiku 5.5, or the Fable models, and `MAX_THINKING_TOKENS=0` no longer applies to them. On the API, `thinking: {"type": "disabled"}` returns 400 on Opus 5.5, Sonnet 5.5, and Fable 5.1 at any effort; Sonnet 5.5's floor is `between_tools` at `high` or below; Haiku 5.5 accepts `disabled` at `high` or below. The Opus 5 rule — disabled accepted only at `high` or below — now applies only to Opus 5 and earlier. Designs carried from the Opus 5 era drop their thinking-disabled mitigations.
+**Thinking:** thinking cannot be turned off in Claude Code on Opus 5.5, Sonnet 5.5, Haiku 5.5, or the Fable models, and `MAX_THINKING_TOKENS=0` no longer applies to them. On the API, `thinking: {"type": "disabled"}` returns 400 on Opus 5.5, Sonnet 5.5, and Fable 5.2 at any effort; Sonnet 5.5's floor is `between_tools` at `high` or below; Haiku 5.5 accepts `disabled` at `high` or below. The Opus 5 rule — disabled accepted only at `high` or below — now applies only to Opus 5 and earlier. Designs carried from the Opus 5 era drop their thinking-disabled mitigations.
 
 **Ultracode:** a session setting, not a model effort level. It sends `xhigh` to the model and has Claude orchestrate dynamic workflows (orchestration scripts that fan work across many subagents) for substantive tasks. Ultracode sessions are exempt from the subagent concurrency limit, so a session-wide opt-in removes the one numeric cap on fan-out. Default it off and opt in per task; it fits codebase-wide audits, large migrations and cross-checked research, not routine editing. Turn it off for a session with `/effort ultracode off` `[v2.1.284+]`; it is unavailable when workflows are off or the model lacks `xhigh`. Disable it by mechanism with `CLAUDE_CODE_DISABLE_WORKFLOWS=1` `[name not on the 2026-10-22 fetched pages — verify on 2.1.30x]` or `disableWorkflows` in managed settings (§6 cap mechanism table), and state the default and the opt-in path in the design's prose. `[product fact 2026-10-22 — verify against the running Claude Code version]`
 
@@ -280,7 +280,7 @@ Model, effort, and thinking facts in this section are dated product facts from t
 
 | Role | Does | Capability needed | Model as of 2026-10-22 |
 |---|---|---|---|
-| Orchestrator | Plans, decomposes, spawns, reads reports, integrates | Highest — it holds the whole picture | Opus 5.5 (CC default); Fable 5.1 for multi-sitting runs |
+| Orchestrator | Plans, decomposes, spawns, reads reports, integrates | Highest — it holds the whole picture | Opus 5.5 (CC default); Fable 5.2 for the hardest and longest runs (2026-11-24) |
 | Scout | Locates files, symbols, call sites; returns locations | Low — retrieval, not judgment | Haiku 5.5 via a project `Explore` override, `low` effort |
 | Researcher | Establishes facts; marks unverified ones as unverified | Middle | Haiku 5.5 at `medium`–`high`, or Sonnet 5.5 for judgment-heavy reads |
 | Builder | Implements against a spec; runs the tests | Middle | Sonnet 5.5 baseline; Opus 5.5 for hard specs |
@@ -317,13 +317,36 @@ The framework: explicit in-scope and out-of-scope lists for autonomous iteration
 
 **Authorization grounding.** The authorization gate must be file-state-grounded. The agent looks at what is actually in the repository to evaluate authorization, not at what the conversation said earlier. This protects against drift when conversation context is lost or compacted. When the agent is uncertain whether a change is in-scope, the grounded check is "what does the authority matrix in the current CLAUDE.md say."
 
-**Halt triggers.** Four classes apply broadly:
-- *Authority-matrix tier boundary approach.* The agent's planned change would touch a higher tier than its current authorization permits.
-- *Schema or contract change between layers.* A change in one layer requires coordinated change in another (database schema + API + frontend type).
-- *Test count drop or regression.* The change reduces test coverage or breaks a previously-passing test.
-- *Ambiguity unresolvable from CLAUDE.md.* The agent cannot determine the right action from current standing context.
+**Halt triggers — the stop rule.** A session stops for the operator only when one of three conditions holds: the next action cannot be undone; a decision could reasonably go either way and only the operator can make it; a spend cap is reached. In every other case the session decides, records the choice in its report, and continues. A blocked step is worked through or routed around and reported; it is a stop only when it meets one of the three conditions. Hooks and deny rules still enforce the irreversible set; the rule governs prose stops, not mechanisms (AEA §4.7).
 
-Specific halt conditions are deployment-specific and live in CLAUDE.md §R4.
+Project-specific halt triggers are the stop rule plus the deployment's irreversible actions and operator-only decisions. Classes that commonly qualify:
+- *Authority-matrix tier boundary.* The planned change would touch a higher tier than the current authorization permits — an operator-only decision.
+- *Schema or contract change between layers.* A change in one layer requires coordinated change in another (database schema + API + frontend type) — usually irreversible once deployed.
+- *Ambiguity with consequences.* Two readings lead to materially different work and nothing in CLAUDE.md or the repository settles it — an operator-only decision.
+
+A failing test, a test-count drop or an ordinary error is not a halt class: the session diagnoses it, fixes it or routes around it, and reports it. Specific halt conditions are deployment-specific and live in CLAUDE.md §R4.
+
+### Positive scope
+
+Every prompt and CLAUDE.md lists the routine actions that need no approval, alongside its halt triggers — for example, create and switch working branches, edit files in the scope table, run the tests and the build, write under the project's output folders. Telling the model to act more freely is too vague; a named list is not. Pair it with a scoped "Ask before" list whose items each carry their reason. A caution with no list beside it is the main source of tendency #16, caution accumulation (`root_OPTIMIZATION_REFERENCE.md` #16).
+
+### Rigor levels
+
+A deployment's stops, gates and review depth scale with what is at stake. Three levels:
+
+| Setting | Sprint | Standard | Strict |
+|---|---|---|---|
+| Stops in a session | Only the stop rule | The stop rule, plus one merge or release gate | The stop rule, plus a gate per phase |
+| Independent review | None. Tests are the check | One refute pass, one cycle, no operator gate | Builder→Refuter, two cycles, digest-bound ACCEPT |
+| Digest binding | For files the operator hands over | Spec digest | Spec and diff digests, receipt freeze |
+| `rootnode-code` gates | Config with `mode: watch` | `watch` until a named milestone, then `enforce` | `enforce` |
+| Session report | Five lines and the file list | Computed-state report | Computed-state report with evidence per gate |
+| CLAUDE.md | Mission, scope, stop rule | R1–R5 | R1–R5 and warranted W1–W3 |
+| Delegation | None unless the brief asks | Capped by mechanism | Capped by mechanism, roles fully specified |
+
+**Default.** A design brief with no rigor value is treated as **sprint** unless it names production data, an irreversible operation, or more than one contributor, which make it **standard**. **Strict** is chosen explicitly.
+
+**Moving up a level** is an EVOLVE-mode change with a recorded trigger: first production deploy, first external user, first irreversible data operation, or a defect that a higher level would have caught. Stops and cautions sized for a large system slow a small one, and most such stops carry no decision; the level keeps the ceremony proportional. `[catalog v6.1 design spec, 2026-11-24 — §3 and §4]`
 
 ---
 
@@ -417,7 +440,7 @@ Before naming an instrument, run the instrument-fit test from AEA §4.14. An ins
 
 ### 5.9 Turn-economy rule
 
-A multi-phase CC prompt runs end to end and halts only at genuine operator gates — a merge decision, an accept/reject decision on a design. A halt whose only purpose is letting chat read a report and hand back the next paste is a design defect in the prompt, not a legitimate review gate. This applies to session prompts authored in design conversations; it does not apply to CLAUDE.md standing context, which governs every session rather than one prompt.
+A multi-phase CC prompt runs end to end and halts only where the stop rule (§4) says to: the next action cannot be undone, a decision could reasonably go either way and only the operator can make it, or a spend cap is reached — plus the gates its rigor level adds (a merge or release gate at standard, a gate per phase at strict). The stop rule replaces any open-ended list of phase halts. A halt that meets none of the three conditions and is not a rigor-level gate is a defect in the prompt — including a halt whose only purpose is letting chat read a report and hand back the next paste. This applies to session prompts authored in design conversations; it does not apply to CLAUDE.md standing context, which governs every session rather than one prompt.
 
 Within a single turn the same discipline is tendency #15, early turn termination: an agent that ends its turn with a summary and an announced next step, an offer to continue, or a decision list that blocks nothing has stopped work the prompt asked for. Multi-phase and unattended prompts carry the early-stop countermeasure — the default "Keep working until…" block, both paragraphs, or for fully unattended runs the Opus 5.5 variant — and name the stops the prompt does want: genuine operator gates and risky or destructive actions. Templates and placement: `root_OPTIMIZATION_REFERENCE.md` #15.
 
@@ -432,6 +455,10 @@ A common architectural decision: should this rule live in CLAUDE.md (or a Skill,
 **Hooks are deterministic.** A PreToolUse hook blocks the action before the model sees the result. A PostToolUse hook runs verification regardless of model decision. A Stop hook gates completion based on deterministic criteria.
 
 Decision rule: if a guarantee absolutely must hold, use a hook. If a preference is acceptable to violate occasionally, use a prompt-level mechanism. The cost of a hook is engineering complexity (you write the hook script, you maintain it). The cost of a prompt-level mechanism is occasional non-compliance.
+
+**Budgets are mechanisms, not prompt text.** Spend and context limits are enforced by a mechanism — `--max-budget-usd` on a `claude -p` run `[verified on Claude Code 2.1.317, print mode only]`, a cap in settings or the environment, or the orchestration code — and the numbers are recorded in the design brief. Prompt text carries no token budget: on Fable 5.2 a budget shown to the model raised spending, and removing it lowered cost at equal performance `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]` (`root_OPTIMIZATION_REFERENCE.md`, fifth conditional defect).
+
+**Shipped hooks that can block opt in per repository.** A hook shipped in a plugin runs wherever the plugin loads, so one that can block acts only where the repository adds a config file, keeps its state outside the repository, and exits 0 when it cannot read its input, config or tools (`root_SKILL_BUILD_DISCIPLINE.md` §4.7, hooks paragraph).
 
 **Common candidates for hook conversion:**
 - "Always run tests before declaring complete" → Stop hook blocking completion without test evidence.

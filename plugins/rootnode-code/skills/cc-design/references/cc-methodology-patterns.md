@@ -187,13 +187,13 @@ Triggers must be verifiable from the agent's vantage point — conditions the ag
 
 **For guarantees that absolutely cannot be missed, back the trigger with a hook.** CLAUDE.md text alone is preference, not enforcement. See `cc-skills-and-hooks-composition.md` for the hooks-vs-prompts decision tree and the verification "iron law" pattern.
 
-**Halt-trigger categories every CLAUDE.md should specify (R4):**
-- Authority matrix tier-1 boundary approach
-- Schema contract change between layers (e.g., extractor output ↔ generator input)
-- Test count drops or test failure after a change
-- Regression detected in a previously-passing build
-- Ambiguity that cannot be resolved from CLAUDE.md alone
-- Any operation requiring `--force` or equivalent destructive flag
+**Halt-trigger categories every CLAUDE.md should specify (R4)** — the stop rule (§10a) plus the project's own instances of it:
+- Authority matrix tier-1 boundary approach (an operator-only decision)
+- Schema contract change between layers (e.g., extractor output ↔ generator input) — irreversible once deployed
+- Ambiguity with consequences: two readings lead to materially different work and nothing in CLAUDE.md or the repository settles it
+- Any operation requiring `--force` or equivalent destructive flag (cannot be undone)
+
+A test failure, a test-count drop or a regression after a change is not a halt by itself: the session diagnoses and fixes it, or records it and routes around it, and the report names it. Pair the list with the routine actions that need no approval.
 
 **Working example — production CC deployment 2026-05-04:** Halt triggers were specified explicitly in CLAUDE.md §19.2 and the agent surfaced 0 halt violations across the 27/27 ship. Every fix's verification step proved the triggers held.
 
@@ -237,6 +237,8 @@ runtime_tooling:
   mode_router: <none | configured | active>
 authority_constraints: <free-text summary or "see brief body">
 verification_surface: <free-text summary or "see brief body">
+rigor: <sprint | standard | strict>   # optional; absent → the default rule in §10a
+limits: <spend and context limits, enforced by mechanism>   # optional; never in prompt text
 last_updated: YYYY-MM-DD
 ---
 
@@ -246,7 +248,10 @@ last_updated: YYYY-MM-DD
 <1-paragraph: what the project produces, who it's for, what "shipped" means>
 
 ## Authority constraints
-<what the agent must NOT modify; tier 1 / tier 2 / tier 3 if applicable>
+<what the agent may not change autonomously, each item with its reason; tier 1 / tier 2 / tier 3 if applicable>
+
+## Routine actions that need no approval
+<the ordinary steps the agent takes without asking: branches, edits in scope, tests, builds, report writes>
 
 ## Verification surface
 <how is correctness checked: tests, manual review, LLM judge, etc.>
@@ -258,17 +263,42 @@ last_updated: YYYY-MM-DD
 <things to surface in EVOLVE mode>
 ```
 
-**The 5-question interview** (used to author a brief on first invocation):
+**The 6-question interview** (used to author a brief on first invocation):
 
 1. **Mission.** "In one paragraph: what does this project produce, who is it for, and what does 'shipped' mean for it?"
 2. **Current state.** "Where is the project now? Greenfield (no code), in-progress (under active development), shipped (in production with maintenance work), or maintenance (mostly stable, occasional fixes)?"
 3. **Tech surface.** "What's the primary tech stack? Languages, frameworks, key dependencies, infrastructure platforms."
-4. **Authority constraints.** "What MUST the agent never modify autonomously? Examples: production database schemas, regulated content, customer-facing copy, irreversible operations. Apply the 3-tier authority matrix pattern."
+4. **Authority constraints.** "What should the agent not change without asking you, and why? Examples: production database schemas, regulated content, customer-facing copy, irreversible operations. And which routine steps can it take without asking?" Apply the 3-tier authority matrix pattern; record each constraint with its reason, and the routine steps as the positive-scope list.
 5. **Verification surface.** "How is correctness checked? Unit tests, integration tests, manual review, LLM judge, smoke scripts, runtime monitoring? Be specific — 'tests' is too vague."
+6. **Rigor.** "How much is at stake if a session goes wrong: is there production data, an operation that cannot be undone, or more than one person working in the repository?" Set `rigor` from the answer by the default rule in §10a; ask for `strict` only if the user names it. Skip the question when questions 1–5 already settle it.
 
 **Brief refresh trigger:** if `last_updated` is > 90 days old, or if the front-matter enum values are wrong (e.g., brief says `current_state: greenfield` but the project has shipped), surface the staleness and offer to refresh.
 
-**When to skip the brief:** small focused asks (one CLAUDE.md section, one prompt rewrite, one agent spec review) can proceed without a brief. The brief grounds multi-faceted design work, not single-shot questions. Use judgment.
+**When to skip the brief:** small focused asks (one CLAUDE.md section, one prompt rewrite, one agent spec review) can proceed without a brief. The brief grounds multi-faceted design work, not single-shot questions. Use judgment. With no brief, apply the default rule in §10a to what the request says.
+
+## 10a. Rigor levels and the stop rule
+
+**Canonical source:** `root_CC_ENVIRONMENT_GUIDE.md` §4 (rigor levels, positive scope, stop rule); AEA §4.7. `[catalog v6.1 design spec, 2026-11-24 — §3 and §4]`
+
+Stops, gates and review depth scale with what is at stake. Stops and cautions sized for a large system slow a small one, and most such stops carry no decision (tendency #16, caution accumulation). Every DESIGN and TEMPLATE output opens with one line — `Rigor: <level> — <reason in one clause>` — as its very first line, before any preface, and the level selects what the output contains. At standard and strict, each gate is named as a gate ("Merge gate: …", "Release gate: …") with who passes it and on what evidence:
+
+| Setting | Sprint | Standard | Strict |
+|---|---|---|---|
+| Stops in a session | Only the stop rule | The stop rule, plus one merge or release gate | The stop rule, plus a gate per phase |
+| Independent review | None. Tests are the check | One refute pass, one cycle, no operator gate | Builder→Refuter, two cycles, digest-bound ACCEPT |
+| Digest binding | For files the operator hands over | Spec digest | Spec and diff digests, receipt freeze |
+| `rootnode-code` gates | Config with `mode: watch` | `watch` until a named milestone, then `enforce` | `enforce` |
+| Session report | Five lines and the file list | Computed-state report | Computed-state report with evidence per gate |
+| CLAUDE.md | Mission, scope, stop rule | R1–R5 | R1–R5 and warranted W1–W3 |
+| Delegation | None unless the brief asks | Capped by mechanism | Capped by mechanism, roles fully specified |
+
+**Default rule.** A brief with no `rigor` value is **sprint** unless it names production data, an irreversible operation, or more than one contributor, which make it **standard**. **Strict** is chosen explicitly. At sprint the output has no reviewer role, no phase gates, and no digest gates beyond files the operator hands over.
+
+**Moving up** is an EVOLVE-mode change with a recorded trigger: first production deploy, first external user, first irreversible data operation, or a defect that a higher level would have caught.
+
+**The stop rule.** A session stops for the operator only when one of three conditions holds: the next action cannot be undone; a decision could reasonably go either way and only the operator can make it; a spend cap is reached. In every other case the session decides, records the choice in its report, and continues. A blocked step is worked through or routed around and reported; it is a stop only when it meets one of the three conditions. Hooks and deny rules still enforce the irreversible set; the rule governs prose stops, not mechanisms. A prompt's halt triggers are the stop rule plus the project's own irreversible actions and operator-only decisions — a halt that meets none of the three conditions is a defect in the prompt.
+
+**Positive scope.** Every prompt and CLAUDE.md lists the routine actions that need no approval beside its halt triggers, and an "Ask before" list whose items each carry their reason. A caution with no reason that still holds is removed, not carried forward.
 
 ---
 

@@ -1,0 +1,31 @@
+| B1 | first line matches Rigor: sprint | PASS | first line: Rigor: sprint. One contributor, no production data, and the only irreversible action (rena |
+| B1 | no "Refuter" | PASS | refuter lines: 0 |
+| B1 | no "token budget" | PASS | token-budget lines: 0 |
+| B1 | lists actions that need no approval | PASS | matching lines: 1 |
+B1 B1-6.2.0-fix.md: 4/4 pass
+| B1 | first line matches Rigor: sprint | PASS | first line: **Rigor: sprint.** You're the only contributor, there's no production data, and the code i |
+| B1 | no "Refuter" | PASS | refuter lines: 0 |
+| B1 | no "token budget" | PASS | token-budget lines: 0 |
+| B1 | lists actions that need no approval | PASS | matching lines: 1 |
+B1 B1-6.2.0.md: 4/4 pass
+| B1 | first line matches Rigor: sprint | FAIL | first line: I used the cc-design skill but kept it light. A one-person tool with no production data do |
+| B1 | no "Refuter" | PASS | refuter lines: 0 |
+| B1 | no "token budget" | PASS | token-budget lines: 0 |
+| B1 | lists actions that need no approval | FAIL | matching lines: 0 |
+B1 B1-control-6.1.0.md: 2/4 pass
+| B2 | first line matches Rigor: standard or strict | PASS | first line: Rigor: standard — production financial data, irreversible schema operations, three engin |
+| B2 | names a merge or release gate | PASS | same-line matches: 0; Gates-heading matches: 2 |
+| B2 | protects migrations by a mechanism | PASS | matching lines: 2 |
+B2 B2-6.2.0-fix.md: 3/3 pass
+| B2 | first line matches Rigor: standard or strict | FAIL | first line: I couldn't save any of the files: the permission prompts for writing into `recon-cc\` and  |
+| B2 | names a merge or release gate | FAIL | same-line matches: 0; Gates-heading matches: 0 |
+| B2 | protects migrations by a mechanism | PASS | matching lines: 4 |
+B2 B2-6.2.0.md: 1/3 pass
+| B3 | first line matches Rigor: sprint | FAIL | first line: Here's a session prompt you can paste in. There's no README.md in this directory, so I lef |
+| B3 | no subagent or reviewer role | PASS | subagent/reviewer lines: 0 |
+| B3 | 40 lines or fewer | PASS | wc -l: 17 |
+B3 B3-6.2.0-fix.md: 2/3 pass
+| B3 | first line matches Rigor: sprint | FAIL | first line: There's no README.md in this directory, so I couldn't find the typo. Here's a prompt you c |
+| B3 | no subagent or reviewer role | PASS | subagent/reviewer lines: 0 |
+| B3 | 40 lines or fewer | PASS | wc -l: 34 |
+B3 B3-6.2.0.md: 2/3 pass

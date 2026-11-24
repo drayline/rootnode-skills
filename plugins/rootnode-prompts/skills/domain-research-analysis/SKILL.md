@@ -18,14 +18,14 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-domain-research-analysis v5.0.1"
   original-source: "DOMAIN_PACK_RESEARCH_ANALYSIS.md"
 ---
 
 # Research & Analysis Prompt Methodology
 
-> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5), on Fable 5.2, and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Specialized approaches for building Claude prompts that handle quantitative analysis, policy research, investigative inquiry, systematic evidence review, and research-specific deliverable formats. This Skill provides identity templates, reasoning methods, and output structures tuned for research work — where rigor, source transparency, and calibrated confidence matter most.
 

@@ -1,0 +1,1 @@
+Design the Claude Code environment for a payments reconciliation service: three engineers, a Postgres production database with migrations, weekly production deploys.

@@ -1,0 +1,7 @@
+B1 B1-6.2.0-fix.md: 4/4 pass
+B1 B1-6.2.0.md: 4/4 pass
+B1 B1-control-6.1.0.md: 2/4 pass
+B2 B2-6.2.0-fix.md: 1/3 pass
+B2 B2-6.2.0.md: 1/3 pass
+B3 B3-6.2.0-fix.md: 2/3 pass
+B3 B3-6.2.0.md: 2/3 pass

@@ -18,14 +18,14 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-context-budget v5.0.1"
   original-source: "root_OPTIMIZATION_REFERENCE.md"
 ---
 
 # Context Budget Analysis
 
-> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Reserve Fable 5.1 for long-horizon runs where Opus 5.5 at higher effort still fails your evals. See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Fable 5.2 is a named target: start at its `high` default and step down to `medium` where your evals hold. It costs about twice Opus 5.5 per token, so choose it for the hardest and longest runs. See repository README for model compatibility.
 
 Analyze Claude Project context budget health. Determine operating mode (full-context vs. retrieval). Produce tiered file placement recommendations with a strategy matched to the project's growth trajectory, work-phase timing, and content routing needs.
 
@@ -66,7 +66,7 @@ Claude Projects operate in one of two modes:
 
 Two conceptually distinct things that were numerically entangled in the 200K era:
 
-- **Context window** — the model's maximum input capacity, measured in tokens per model. Currently 1M for Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5. Plan-dependent for Anthropic Projects.
+- **Context window** — the model's maximum input capacity, measured in tokens per model. Currently 1M for Fable 5.2 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5. Plan-dependent for Anthropic Projects.
   - *Legacy note:* Haiku 4.5 has a 200K window. It is not a calibration target (earliest retirement in the active set: not sooner than 2026-10-15); apply 200K only to a deployment that still pins it.
 - **RAG threshold** — the platform-side decision point where Projects switch from full-context loading to retrieval mode. Now tracks the window (automatic per current article), rather than being a fraction of it.
 
@@ -92,7 +92,7 @@ Estimate knowledge file tokens: run `ls -la /mnt/project/` for byte sizes, divid
 Conversion rates: English prose ≈ 4 characters/token. Structured content (XML, code, tables) ≈ 3.25 characters/token. Mixed markdown ≈ 3.75 characters/token. Estimates are ±15% per file, ±10% for project totals.
 
 **Tokenizer notes for current models:**
-- Fable 5.1 and Haiku 5.5 share the tokenizer introduced with Opus 4.7 — the same text produces roughly 30% more tokens than models before Opus 4.7 (Fable 5.1), or than Haiku 4.5 (Haiku 5.5) (Anthropic's models overview page; landscape 2026-10 §1).
+- Fable 5.2 and Haiku 5.5 share the tokenizer introduced with Opus 4.7 — the same text produces roughly 30% more tokens than models before Opus 4.7 (Fable 5.2, as Fable 5.1 before it), or than Haiku 4.5 (Haiku 5.5) (Anthropic's models overview page; landscape 2026-10 §1; Fable 5.2 what's-new, fetched 2026-11-24).
 - Sonnet 5.5 uses the Sonnet 5 tokenizer, which produces approximately 30% more tokens per unit of content than Sonnet 4.6 (Anthropic's whats-new-sonnet-5 page).
 - Opus 5.5 tokenizer specifics are unstated on the fetched Anthropic pages — treat measurements with explicit tolerance until re-baselined via `count_tokens`.
 
@@ -114,7 +114,7 @@ Per-plan windows for claude.ai Projects (Pro / Max / Team / Enterprise) are not 
 
 | Model / Surface | Context Window | RAG Behavior | Source |
 |---|---|---|---|
-| Fable 5.1 (API) | 1M tokens context / 128K max output | User-controlled context; no platform RAG (API-side has no Projects mode) | Anthropic models overview page — `platform.claude.com/docs/en/about-claude/models/overview` |
+| Fable 5.2 (API) | 1M tokens context / 128K max output | User-controlled context; no platform RAG (API-side has no Projects mode) | Anthropic models overview page — `platform.claude.com/docs/en/about-claude/models/overview` |
 | Opus 5.5 (API) | 1M tokens context / 128K max output | Same | Same |
 | Sonnet 5.5 (API) | 1M tokens context / 128K max output | Same | Same |
 | Haiku 5.5 (API) | 1M tokens context / 128K max output (higher price band above 100K prompt tokens — see budget note below) | Same | Same |
@@ -170,7 +170,7 @@ In full-context mode, compaction summarizes conversation history but leaves know
 
 ### Compaction Timing and Cache-Read Pricing (5.5 generation)
 
-Cache-read pricing fell on the current models: Fable 5.1 reads cached input at 0.025x the base input price, Opus 5.5 and Sonnet 5.5 at 0.05x. [Anthropic docs — pricing; landscape 2026-10 §1] For API and agentic deployments this changes the compaction calculus: "compacting early to save cost may no longer be the right cost-intelligence tradeoff" [Anthropic docs — Fable 5.1 prompting guide]. Later compaction points are a legitimate experiment — treat the compaction threshold as a tunable to measure on the deployment's own evals, not as a fixed recommendation. This does not change Projects-mode RAG activation, which the platform controls.
+Cache-read pricing fell on the current models: Fable 5.2 reads cached input at 0.025x the base input price ($0.20 per million tokens), Opus 5.5 and Sonnet 5.5 at 0.05x. [Anthropic docs — pricing; landscape 2026-10 §1; models overview, fetched 2026-11-24] For API and agentic deployments this changes the compaction calculus: "compacting early to save cost may no longer be the right cost-intelligence tradeoff" [Anthropic docs — Fable 5.1 prompting guide]. Later compaction points are a legitimate experiment — treat the compaction threshold as a tunable to measure on the deployment's own evals, not as a fixed recommendation. This does not change Projects-mode RAG activation, which the platform controls.
 
 ### Placement Tiers
 
@@ -363,7 +363,7 @@ For detailed guidance on each category, MCP infrastructure assessment, data spli
 
 ### API Deployment as Alternative Architecture
 
-When knowledge file requirements and cross-document synthesis needs exceed what Anthropic Projects can serve — very large content volumes that require cross-file reasoning that retrieval mode cannot preserve — surface API-based deployment. Context window: 1M tokens on Opus 5.5 / Sonnet 5.5 / Haiku 5.5 / Fable 5.1. Tradeoffs: per-token billing on massive inputs, higher latency (30–60+ seconds at high token counts), context rot at scale, full stack ownership (conversation management, retrieval, memory — all custom). API deployment is a different product architecture, not a casual upgrade. Recommend only when content volume and cross-document synthesis genuinely require it, and the user has engineering capacity for the integration. Do NOT recommend for projects that simply approach the current RAG activation point on their plan — most such projects benefit more from RAG quality optimization or a higher-window plan than from API-mode reconstruction.
+When knowledge file requirements and cross-document synthesis needs exceed what Anthropic Projects can serve — very large content volumes that require cross-file reasoning that retrieval mode cannot preserve — surface API-based deployment. Context window: 1M tokens on Opus 5.5 / Sonnet 5.5 / Haiku 5.5 / Fable 5.2. Tradeoffs: per-token billing on massive inputs, higher latency (30–60+ seconds at high token counts), context rot at scale, full stack ownership (conversation management, retrieval, memory — all custom). API deployment is a different product architecture, not a casual upgrade. Recommend only when content volume and cross-document synthesis genuinely require it, and the user has engineering capacity for the integration. Do NOT recommend for projects that simply approach the current RAG activation point on their plan — most such projects benefit more from RAG quality optimization or a higher-window plan than from API-mode reconstruction.
 
 ## Empirical Threshold Measurement (procedural detail)
 

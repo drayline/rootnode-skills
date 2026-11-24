@@ -278,7 +278,7 @@ Example: A strategic decision needing technical feasibility analysis → Strateg
 
 ### Reasoning-extraction check
 
-A Reasoning-layer instruction that asks the model to reproduce its internal reasoning in the response text can be declined: the response returns `stop_reason: "refusal"` with category `reasoning_extraction`. This applies on every current model (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1) [Anthropic docs, per-model what's-new and prompting guides, verified 2026-10-22].
+A Reasoning-layer instruction that asks the model to reproduce its internal reasoning in the response text can be declined: the response returns `stop_reason: "refusal"` with category `reasoning_extraction`. This applies on every current model (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.2) [Anthropic docs, per-model what's-new and prompting guides, verified 2026-10-22; Prompting Claude Fable 5.2, fetched 2026-11-24].
 
 Anthropic's category text [Anthropic docs, Sonnet 5.5 prompting guide, "Safeguard refusals"]:
 

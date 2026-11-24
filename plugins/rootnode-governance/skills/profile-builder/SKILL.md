@@ -18,7 +18,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-profile-builder v5.0.0"
   original-source: "root.node design 2026 — runtime layer (gates, router, profile builder)"
   companion-files: "examples/sample-interview-flow.md, references/schema-walking-patterns.md, references/common-schema-shapes.md, references/troubleshooting.md"
@@ -28,7 +28,7 @@ metadata:
 
 # Profile Builder
 
-> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5), on Fable 5.2, and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Conversational interview that produces validated JSON profile files for any rootnode Skill. Solves the "users won't hand-edit JSON" problem by walking them through one plain-language question at a time, then writing a validated file.
 

@@ -23,7 +23,7 @@ For the structural patterns this Skill applies, see the other reference files. T
 
 **Diagnosis:** The design brief was missing or thin. The Skill is producing pattern-shape output without project-specific grounding.
 
-**Fix:** Generate the brief first via the 5-question interview (see `cc-methodology-patterns.md` §10) before producing the deployment plan. The brief is the grounding artifact — without it, output drifts toward generic patterns. If the user wants a quick pass without a brief, narrow the deliverable scope (one section, one rule, one prompt) so the lack of grounding is bounded.
+**Fix:** Generate the brief first via the 6-question interview (see `cc-methodology-patterns.md` §10) before producing the deployment plan. The brief is the grounding artifact — without it, output drifts toward generic patterns. If the user wants a quick pass without a brief, narrow the deliverable scope (one section, one rule, one prompt) so the lack of grounding is bounded.
 
 ---
 
@@ -137,7 +137,7 @@ For the structural patterns this Skill applies, see the other reference files. T
 
 ## 4. Brief-related issues
 
-### Symptom: User refuses the 5-question interview
+### Symptom: User refuses the 6-question interview
 
 **Diagnosis:** Brief generation feels heavy for what the user perceives as a small ask.
 
@@ -149,7 +149,7 @@ For the structural patterns this Skill applies, see the other reference files. T
 
 **Diagnosis:** Brief `last_updated` is > 90 days old, or front-matter enums no longer match reality (e.g., brief says `current_state: greenfield` but the project has shipped).
 
-**Fix:** Surface the staleness explicitly. Offer to refresh the brief via a focused 2-3 question delta interview ("what's changed since last update?"). Don't re-run the full 5-question interview; just patch the changed sections.
+**Fix:** Surface the staleness explicitly. Offer to refresh the brief via a focused 2-3 question delta interview ("what's changed since last update?"). Don't re-run the full 6-question interview; just patch the changed sections.
 
 ---
 

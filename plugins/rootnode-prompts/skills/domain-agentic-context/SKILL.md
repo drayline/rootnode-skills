@@ -16,14 +16,14 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-domain-agentic-context v5.0.1"
   original-source: "DOMAIN_PACK_AGENTIC_CONTEXT.md"
 ---
 
 # Agentic & Context Engineering — Prompt Methodology
 
-> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5), on Fable 5.2, and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Specialized approaches for designing AI agent systems: the system prompts agents follow, the tool definitions they consume, the context architectures they operate within, the failure modes they encounter, and the evaluation criteria that measure their performance.
 
@@ -31,7 +31,7 @@ Specialized approaches for designing AI agent systems: the system prompts agents
 
 ## Refusal & fallback semantics (5.5 generation)
 
-When designing agents that build on the 5.5 generation (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1), account for safety-classifier refusals as a first-class signal — not an error condition.
+When designing agents that build on the current generation (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.2), account for safety-classifier refusals as a first-class signal — not an error condition.
 
 **Refusal categories** (from Anthropic's refusals-and-fallback page):
 - `cyber` — could enable cyber harm (malware, exploits). Benign cybersecurity work can also trigger.
@@ -55,7 +55,7 @@ These header names are the v4.0-era values; verify them against the current refu
 | Opus 5.5 | `fallbacks: "default"` (beta) | Opt in explicitly; instrument the `fallback` block. |
 | Sonnet 5.5 | Retries `cyber` and `frontier_llm` declines on Sonnet 5 only. "It doesn't retry `bio`, `reasoning_extraction`, or `general_harms` declines." [Anthropic docs — Sonnet 5.5 prompting guide] | Handle the three non-retried categories client-side. |
 | Haiku 5.5 | **None** — no server-side fallback | A declined Haiku 5.5 sub-agent call is not retried; the orchestrator owns the refusal path. |
-| Fable 5.1 | Opus 4.8 and Opus 5 | Agent output must be correct-shape on the fallback target. |
+| Fable 5.2 | Opus 4.8 and Opus 5 [Anthropic docs — Fable 5.2 what's-new, fetched 2026-11-24] | Agent output must be correct-shape on the fallback target. |
 
 **Refusal billing (changed 2026-09-24).** A refusal before any output is billed in low-false-positive categories. Count refusals in cost dashboards as well as in safety dashboards.
 
@@ -63,18 +63,19 @@ These header names are the v4.0-era values; verify them against the current refu
 
 **Give sub-agent calls their own fallback.** The `fallbacks` parameter does not propagate into model calls made from inside tool execution. Each agent surface configures fallback independently.
 
-### Harness rules (5.5 generation)
+### Harness rules (5.5 generation and Fable 5.2)
 
-Four rules for the loop around the model rather than the prompt inside it. Design them into any agent harness this Skill produces.
+Five rules for the loop around the model rather than the prompt inside it. Design them into any agent harness this Skill produces.
 
 1. **Never place user text inside a `tool_result` block.** Sonnet 5.5 and Haiku 5.5 read it as prompt injection. Anthropic's guidance on mid-turn user messages [Anthropic docs — Sonnet 5.5 prompting guide]:
    - Never put user text inside a `tool_result` block. The model misreads that placement most often.
    - Deliver mid-turn user input as a user turn. Append the user's words as a text block in the user message that carries the `tool_result` blocks, after the last `tool_result`.
    - Keep harness notices, such as reminders, in a separate mid-conversation system message after the user's words. Never put a notice and the user's words in the same block.
    - In interactive sessions where users can type mid-turn, don't add your own token or budget countdown after tool results.
-2. **Forced `tool_choice` is removed.** `tool_choice: {"type": "any"}` and `{"type": "tool"}` return HTTP 400 on Opus 5.5, Sonnet 5.5, Haiku 5.5, and Fable 5.1. Use `auto` with `strict: true` (or structured outputs), and state in the prompt when the tool applies. Anthropic's stated rationale: forced calls skip thinking, and the model "would write its working-out into the tool arguments instead." [Anthropic docs — Fable 5.1 what's-new; landscape 2026-10 §4.2]
+2. **Forced `tool_choice` is removed.** `tool_choice: {"type": "any"}` and `{"type": "tool"}` return HTTP 400 on Opus 5.5, Sonnet 5.5, Haiku 5.5, and Fable 5.2. Use `auto` with `strict: true` (or structured outputs), and state in the prompt when the tool applies. Anthropic's stated rationale: forced calls skip thinking, and the model "would write its working-out into the tool arguments instead." [Anthropic docs — Fable 5.1 what's-new; landscape 2026-10 §4.2]
 3. **Progress-update text arrives in `thinking` blocks.** Text between tool calls now arrives in `thinking` blocks, which are empty under the default `display: "omitted"`. A client that renders only `text` blocks goes silent between tool calls — set `thinking.display` to `"updates"` (beta) or `"summarized"`. [Anthropic docs; landscape 2026-10 §4.7]
 4. **Time budgets for multi-agent harnesses.** For non-interactive multi-agent harnesses, give each agent an advisory time budget in the form `elapsed Ns / Ms`, delivered as a harness notice (rule 1: a separate system message, never inside a `tool_result`). The budget is advisory — the harness, not the model, enforces hard limits. [catalog design spec v5.0 §4; no verbatim Anthropic text for this rule was available at build time]
+5. **Token budgets stay out of the agent's prompt.** The token plan per zone belongs in the design document; the agent's prompt carries no token budget or token countdown. On Fable 5.2 the size of a token budget shown to the model changed how much it spent, and removing a large budget lowered cost with equivalent performance at `high` and `xhigh` [Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]. Enforce spend and context limits with mechanisms: `max_tokens`, the API's task-budgets beta (not covered by that testing — measure it), a spend cap in the orchestration code.
 
 ## When to Use This Skill
 

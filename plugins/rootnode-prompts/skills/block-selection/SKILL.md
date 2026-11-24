@@ -18,14 +18,14 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-block-selection v5.0.0"
   original-source: "PROMPT_COMPILER.md, BLOCK_LIBRARY_IDENTITY.md, BLOCK_LIBRARY_REASONING.md, BLOCK_LIBRARY_OUTPUT.md"
 ---
 
 # Approach Selection for Claude Prompts
 
-> **Calibration:** Tier 2 (Sonnet-graceful) — designed against Opus 5.5 + Sonnet 5.5 dual-primary. Runs on Haiku 5.5 at `high` effort with less depth on multi-dimensional analysis; fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. Start at the model's default effort (`medium` on Opus 5.5 and Sonnet 5.5 in Claude Code; `high` for Sonnet 5.5 on the Claude API) and re-run an effort sweep on your own evals rather than carrying a setting over. See repository README for model compatibility.
+> **Calibration:** Tier 2 (Sonnet-graceful) — designed against Opus 5.5 + Sonnet 5.5 dual-primary. Runs on Haiku 5.5 at `high` effort with less depth on multi-dimensional analysis; fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. Start at the model's default effort (`medium` on Opus 5.5 and Sonnet 5.5 in Claude Code; `high` for Sonnet 5.5 on the Claude API) and re-run an effort sweep on your own evals rather than carrying a setting over. On Fable 5.2 the default is `high`; step down to `medium` where the work holds. See repository README for model compatibility.
 
 This Skill provides the decision logic for choosing the right identity, reasoning method, and output format when building a Claude prompt. Given a task description, it maps task characteristics to the best-fit approach in each category.
 

@@ -93,7 +93,7 @@ CLAUDE.md is the standing context CC reads on every session. Anthropic's primary
 | **R1. Mission statement** | One paragraph: what the project produces, who it's for, what "shipped" means |
 | **R2. Authority matrix** | Tiered table of what content classes the agent has authority to modify vs mirror vs originate (see `cc-methodology-patterns.md` §2) |
 | **R3. Bug-fixing authorization scope** | Explicit in-scope and out-of-scope lists for autonomous iteration (see `cc-methodology-patterns.md` §3) |
-| **R4. Halt-and-escalate triggers** | The conditions under which the agent must stop and surface to a human (see `cc-methodology-patterns.md` §8) |
+| **R4. Halt-and-escalate triggers** | The stop rule plus the project's irreversible actions and operator-only decisions, and beside them the routine actions that need no approval (see `cc-methodology-patterns.md` §8 and §10a) |
 | **R5. Pre-flight checklist** | What every agent must do before making changes (read change_log tail, run test backstop, verify build is clean) |
 
 **Warranted sections** (add only when the inclusion test passes):

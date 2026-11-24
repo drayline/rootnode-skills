@@ -18,14 +18,14 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-identity-blocks v5.0.0"
   original-source: "BLOCK_LIBRARY_IDENTITY.md"
 ---
 
 # Identity Approaches for Claude Prompts
 
-> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5), on Fable 5.2, and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Identity is the first layer of a well-structured Claude prompt. It defines WHO Claude is for a task — shaping the depth of analysis, the vocabulary used, the reasoning style applied, and what Claude treats as obvious versus what requires explanation.
 
@@ -131,7 +131,7 @@ You prioritize [VALUE 1] over [VALUE 2 — the thing you'll sacrifice when there
 
 **Stated values resolve ambiguity.** When Claude faces a tradeoff in the task (thoroughness vs. speed, precision vs. accessibility, innovation vs. safety), the values statement tells it which way to lean. Without this, Claude defaults to optimizing everything simultaneously and producing middling output.
 
-**The behavioral sentence prevents drift.** One concrete instruction about how this role communicates — "You are direct and do not pad analysis with unnecessary caveats" or "You explain your reasoning transparently so others can disagree with your logic, not just your conclusions" — anchors the identity more effectively than additional domain descriptions.
+**The behavioral sentence prevents drift.** One concrete instruction about how this role communicates — "You are direct and do not pad analysis with unnecessary caveats" or "You state the grounds for each conclusion, so that others can disagree with the grounds and not only with the conclusion." — anchors the identity more effectively than additional domain descriptions.
 
 ### Common Custom Identity Mistakes
 

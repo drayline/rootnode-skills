@@ -1,0 +1,1 @@
+I'm building a personal command-line tool in Python that renames photo files by EXIF date. One contributor, no production data, pytest exists. Design the Claude Code environment and the first session prompt.

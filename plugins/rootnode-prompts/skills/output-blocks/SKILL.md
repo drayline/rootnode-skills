@@ -18,14 +18,14 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.1.0"
   predecessor: "rootnode-output-blocks v5.0.0"
   original-source: "BLOCK_LIBRARY_OUTPUT.md"
 ---
 
 # Output Format Selection for Claude Prompts
 
-> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5) and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
+> **Calibration:** Tier 1 (Model-compatible) — runs cleanly on the current dual-primary tier (Opus 5.5, Sonnet 5.5), on Fable 5.2, and on Haiku 5.5. Structured retrieval, rule evaluation, or template lookup — output shape does not depend on the model. Fallback-graceful on Opus 5 / Sonnet 5; legacy-graceful on Sonnet 4.6. See repository README for model compatibility.
 
 Tested output format specifications that control what Claude's deliverable looks like — structure, sections, length, and format. Without an explicit output format, Claude defaults to its own formatting preferences, which often means overlong prose with excessive bullet points.
 

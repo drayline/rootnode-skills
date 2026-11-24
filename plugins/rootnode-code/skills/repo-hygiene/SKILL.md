@@ -19,7 +19,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: rootnode
-  version: "6.0.0"
+  version: "6.2.0"
   predecessor: "rootnode-repo-hygiene v5.0.0"
   original-source: "Synthesized from root_AGENT_ENVIRONMENT_ARCHITECTURE.md (surface-invariant placement discipline), root_CC_ENVIRONMENT_GUIDE.md (7-layer model, discipline practices, hooks-vs-prompts boundary), root_AGENT_ANTI_PATTERNS.md (canonical anti-pattern catalog with surface tags). Production-validated against a CC deployment sweep on 2026-05-04 surfacing 23 findings across 14 categories with three-form authorization use and Path 3 commit-plan adaptation accepted as defer-to-downstream."
   discipline_post: phase-30
@@ -27,7 +27,7 @@ metadata:
 
 # rootnode-repo-hygiene
 
-> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Reserve Fable 5.1 for long-horizon runs where Opus 5.5 at higher effort still fails your evals. See repository README for model compatibility.
+> **Calibration:** Tier 3 (High-effort recommended) — run on Opus 5.5 (start at its `medium` default; step to `high` when verification matters or edge cases are likely) or Sonnet 5.5 at `high`. Step up to `xhigh` only where your evals show a measured gain. Quality degrades at `low` effort and on legacy models (Sonnet 4.6). Fable 5.2 is a named target: start at its `high` default and step down to `medium` where your evals hold. It costs about twice Opus 5.5 per token, so choose it for the hardest and longest runs. See repository README for model compatibility.
 
 A two-phase Skill for auditing and cleaning up Claude Code repositories. Phase 1 sweeps the repo across 14 categories of hygiene concern plus a cross-category 7-layer placement leak check, producing a `HYGIENE_REPORT.md`. Phase 2 reads `[APPROVED]` markers placed in that file and executes the marked findings under critic-gate composition with halt-on-failure discipline.
 

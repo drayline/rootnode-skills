@@ -6,6 +6,9 @@
 # folder and TMPDIR at another temp folder (so a fallback write is seen), and prints one row: id,
 # expected, observed exit codes in order, files in the state folders, files the scripts changed in the
 # repo folder, verdict. Exits 1 on any FAIL. Row 15 is the operator's check and is not counted.
+# A case that runs without jq or git gets a PATH of one folder that links every other tool on PATH
+# (symlinks where the system makes them; two-line exec stubs on Git Bash, where ln -s copies), so the
+# case fails only for the missing tool, also on Linux where jq, git and bash share /usr/bin (v6.1).
 #
 # Usage: bash audit/v6_1-release/hook-tests/run.sh                    # plugins/rootnode-code/scripts
 #        bash audit/v6_1-release/hook-tests/run.sh --ref origin/main   # the scripts committed at a git ref
@@ -35,12 +38,28 @@ export GIT_AUTHOR_NAME=harness GIT_AUTHOR_EMAIL=harness@example.invalid
 export GIT_COMMITTER_NAME=harness GIT_COMMITTER_EMAIL=harness@example.invalid
 command -v jq >/dev/null || { echo "run.sh: the harness needs jq" >&2; exit 2; }
 
-path_without() {  # $1 = tool -> PATH with every folder that holds it removed
-  local out="" d IFS=:
-  for d in $PATH; do [ -x "$d/$1" ] || [ -x "$d/$1.exe" ] || out=${out:+$out:}$d; done
-  printf '%s' "$out"
+LINKMODE=stub; ln -s "$BASH" "$TMPROOT/.lt" 2>/dev/null && [ -L "$TMPROOT/.lt" ] && LINKMODE=link; rm -f "$TMPROOT/.lt"
+path_without() {  # $1 = tool -> a folder that links every other tool on PATH (first match wins); $1 is absent
+  local dir="$TMPROOT/path-no-$1" d f n IFS=:
+  mkdir -p "$dir" || return 1
+  for d in $PATH; do
+    [ -d "$d" ] || continue
+    for f in "$d"/*; do
+      [ -f "$f" ] && [ -x "$f" ] || continue
+      n=${f##*/}; n=${n%.exe}
+      case "$n" in "$1" | *.dll | *.DLL) continue ;; esac
+      [ -e "$dir/$n" ] && continue
+      if [ "$LINKMODE" = link ]; then ln -s "$f" "$dir/$n" || return 1
+      else printf '#!/bin/sh\nexec "%s" "$@"\n' "$f" > "$dir/$n" || return 1; [ -x "$dir/$n" ] || chmod +x "$dir/$n"; fi
+    done
+  done
+  printf '%s' "$dir"
 }
-NOJQ=$(path_without jq); NOGIT=$(path_without git)
+NOJQ=$(path_without jq) && NOGIT=$(path_without git) || { echo "run.sh: cannot build the tool folders" >&2; exit 2; }
+haveall() {  # <PATH value> <tool>... -> 0 when every tool resolves under that PATH
+  local p=$1 t; shift
+  for t in "$@"; do PATH=$p command -v "$t" >/dev/null || return 1; done
+}
 
 # --- hook input ------------------------------------------------------------------------------
 jesc() { local s=${1//\\/\\\\}; s=${s//\"/\\\"}; printf '%s' "$s"; }
@@ -92,7 +111,7 @@ row() {  # id expected [state column]
   if [ "$V" = PASS ]; then PASSN=$((PASSN + 1)); else FAILN=$((FAILN + 1)); fi
 }
 
-echo "rootnode-code hook harness · scripts $SCRIPTS · $(uname -s) · bash $BASH_VERSION"
+echo "rootnode-code hook harness · scripts $SCRIPTS · $(uname -s) · bash $BASH_VERSION · tool folders: $LINKMODE"
 echo
 echo "| id | expected | exit codes | state files | repo writes | result |"
 echo "|---|---|---|---|---|---|"
@@ -150,7 +169,7 @@ chk is 0; chk norepo; chk [ "$(logn skip)" = 1 ]
 row 10 "not a git working copy, config present: exit 0, one log line (state folder)"
 
 new_case; mkrepo enforce; hook gate-baseline.sh "$(in_start "$R" s1)"; edit
-chk [ -z "$(PATH=$NOJQ command -v jq)" ]
+chk [ -z "$(PATH=$NOJQ command -v jq)" ]; chk haveall "$NOJQ" git sed awk tr cat
 hook verify-tests.sh "$(in_stop "$R" s1 false)" "PATH=$NOJQ"
 chk is 0,0; chk [ "$(printf '%s\n' "$ERR" | grep -c .)" = 1 ]; chk has jq; chk norepo
 row 11 "no jq, config, edited: exit 0, one stderr line naming jq"
@@ -277,7 +296,7 @@ chk is 0,0,0; chk norepo
 row L2 "malformed JSON on stdin (verify, baseline, guard): exit 0"
 
 new_case; mkrepo all; edit
-chk [ -z "$(PATH=$NOGIT command -v git)" ]
+chk [ -z "$(PATH=$NOGIT command -v git)" ]; chk haveall "$NOGIT" jq sed awk tr cat
 hook gate-baseline.sh "$(in_start "$R" s1)" "PATH=$NOGIT"; hook verify-tests.sh "$(in_stop "$R" s1 false)" "PATH=$NOGIT"
 hook guard-migrations.sh "$(in_tool "$R" Edit file_path "$R/src/x.js")" "PATH=$NOGIT"
 chk is 0,0,0; chk norepo

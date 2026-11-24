@@ -149,3 +149,19 @@ A shared `scripts/gate-lib.sh` (root, state folder, fingerprint, config read) is
 ### 7.4 Documentation in the same cut
 
 `plugins/rootnode-code/README.md`: rewrite the hook section for §7 (opt-in file, watch then enforce, surfaces, caps, status script, off-switches) and remove the sentence that says chat ignores the hooks. `cc-skills-and-hooks-composition.md`: update the two `<!-- shipped: … -->` blocks to the new scripts (the packager fails on drift) and the prose around them. `remediate-mode-execution.md`: its example uses a repo-local `.claude/hooks/verify-tests.sh`; change it only where it states the plugin hook's behavior. Root `README.md`: line 49 says "Chat ignores hooks." and that the hooks run in every repository where the plugin is enabled; replace both statements with the opt-in rule, and adjust the `rootnode-code` table row only if its wording is now false (line number read 2026-11-24 at `8670edc`; locate by text). Plus A3.
+
+## 8. Amendments (v1.1)
+
+```
+root · DESIGN · verify-gate-fix · v1.1 amendments · 2026-11-24
+Status: appended by the catalog v6.1 build (design spec root_DESIGN_fable_5_2_alignment.md v1.0, §7.6 item 7). Sections 1–7 above are unchanged. These amendments ratify what rootnode-code 6.1.0 shipped and close refuter findings F1 and F3 from that cut.
+Source: rootnode-code 6.1.0 session report (session_report_20261124-1614Z.md), "Refuter (A3)" and "Routine choices".
+```
+
+| # | Amends | Amendment |
+|---|---|---|
+| F1 | §7.3, guard row ("With `jq`: current parsing, unchanged") | With `jq`, the guard exits 0 with one stderr line when its hook input is not a JSON object — empty and malformed input included (lockout cases L1 and L2) — instead of failing closed. The `jq` parsing of a readable input is otherwise unchanged. Without `jq`, the substring fallback of §7.3 applies as before. |
+| F3 | §7.2 step 7 | The fingerprint also covers untracked, non-ignored files: `git status --porcelain --untracked-files=all` and the blob hash of each untracked, non-ignored file's contents. An edit to a new file that is not yet tracked therefore changes the fingerprint, so §4 row 6 holds for new files (harness case U1). |
+| RC6 | §7.1 `verify.command`; §7.2 | A `verify` section with neither `command` nor `evidence.path` leaves the gate inactive with one stderr line, rather than blocking with a record command that cannot run. |
+| RC8 | §7.1 `verify.mode`; §7.2 step 10 | An unknown `mode` value is treated as `watch`. A watch run does not advance the chain or session counters. |
+| H1 | §4 rows 11 and L3–L4 (harness) | The harness hides one tool by giving the case a PATH of one folder that links every other tool on PATH — symlinks where the system makes them, two-line `exec` stubs on Git Bash where `ln -s` copies — not by dropping the tool's folder from PATH. On Linux `jq`, `git` and `bash` share `/usr/bin`, so dropping the folder removed every tool and the no-`jq` and no-`git` rows passed for the wrong reason. The rows also assert that the other tools still resolve. |

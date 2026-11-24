@@ -26,7 +26,7 @@ A catalog release has three outputs, and only the first one reaches installed us
 
 The marketplace is named `rootnode` (`.claude-plugin/marketplace.json`). Each entry's `source` is a `./plugins/<plugin>` path, because claude.ai sync rejects bare names under `metadata.pluginRoot` (SBD §4.7). Three install paths, in the order the README presents them:
 
-- **claude.ai (recommended).** **Customize > Plugins > Add > Add marketplace** → `drayline/rootnode-skills`, turn on **Sync automatically**, then add the plugins wanted. One account install reaches chat, Cowork and Claude Code; Claude Code signed in with that account loads each plugin as `<plugin>@synced`. Chat ignores plugin hooks and agents.
+- **claude.ai (recommended).** **Customize > Plugins > Add > Add marketplace** → `drayline/rootnode-skills`, turn on **Sync automatically**, then add the plugins wanted. One account install reaches chat, Cowork and Claude Code; Claude Code signed in with that account loads each plugin as `<plugin>@synced`. A chat session that has a container runs plugin hooks; a shipped hook that can block must opt in per repository (SBD §4.7).
 - **Claude Code without an account sync** (API-key sessions). `claude plugin marketplace add drayline/rootnode-skills`, then `claude plugin install <plugin>@rootnode`. Auto-update is off by default for a third-party marketplace, so updates take `claude plugin update`. `[dated product fact — verify on the running Claude Code version]`
 - **Manual.** Download `<plugin>-v<version>.zip` from a release and use claude.ai **Upload plugin**. No update channel.
 

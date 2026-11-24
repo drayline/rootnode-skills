@@ -1,10 +1,10 @@
 # Claude-Specific Optimization Notes
 
-A practical reference for writing prompts and building Projects optimized for how Claude actually works. Calibrated for the 5.5 generation: Claude Opus 5.5 and Sonnet 5.5 dual-primary, Fable 5.1 integrated-aware for long-horizon agent workloads, Haiku 5.5 subagent-aware, Opus 5 and Sonnet 5 fallback-graceful, and Sonnet 4.6 legacy-graceful. Consult this document whenever building or refining prompts. Section 3 is the dated model-landscape block (verified 2026-10-22): other files and design records reference it rather than restating its facts, and it is refreshed at each model-release cycle (AEA §4.15).
+A practical reference for writing prompts and building Projects optimized for how Claude actually works. Calibrated for the 5.5 generation and Fable 5.2: Claude Opus 5.5 and Sonnet 5.5 dual-primary, Fable 5.2 a named target for High-effort (Tier 3) work, Haiku 5.5 subagent-aware, Opus 5 and Sonnet 5 fallback-graceful, and Sonnet 4.6 legacy-graceful. Consult this document whenever building or refining prompts. Section 3 is the dated model-landscape block (verified 2026-10-22; Fable 5.2 refresh 2026-11-24): other files and design records reference it rather than restating its facts, and it is refreshed at each model-release cycle (AEA §4.15).
 
-**Calibration scope:** Opus 5.5 + Sonnet 5.5 **dual-primary** (Opus 5.5 is the Claude Code default on every Anthropic-hosted plan and Anthropic's recommended starting model; Sonnet 5.5 is the cost-optimal agentic tier with the same 1M / 128K envelope); Fable 5.1 **integrated-aware** (default nowhere — reserve it for long-horizon work where Opus 5.5 at higher effort still fails your evals); Haiku 5.5 **subagent-aware** (the first Haiku with a 1M window and effort control, positioned for scout and extraction roles); Opus 5 / Sonnet 5 **fallback-graceful** (the models users are silently served on classifier-flagged requests — output must keep its shape there without user awareness); Sonnet 4.6 **legacy-graceful** until retirement. Haiku 4.5 (out of scope from 2026-10-15, its earliest retirement date) and Mythos 5.1 are out of scope. When this document discusses model behavior without qualification, it refers to Opus 5.5. Where Anthropic documents a behavior for only some models, the entry names them rather than generalizing across the tier.
+**Calibration scope:** Opus 5.5 + Sonnet 5.5 **dual-primary** (Opus 5.5 is the Claude Code default on every Anthropic-hosted plan and Anthropic's recommended starting model; Sonnet 5.5 is the cost-optimal agentic tier with the same 1M / 128K envelope); Fable 5.2 a **named target** for High-effort (Tier 3) work (start at its `high` default and step down to `medium` where your evals hold; it costs about twice Opus 5.5 per token, so choose it for the hardest and longest runs — catalog decision D2, 2026-11-24); Haiku 5.5 **subagent-aware** (the first Haiku with a 1M window and effort control, positioned for scout and extraction roles); Opus 5 / Sonnet 5 **fallback-graceful** (the models users are silently served on classifier-flagged requests — output must keep its shape there without user awareness); Sonnet 4.6 **legacy-graceful** until retirement. Haiku 4.5 (out of scope from 2026-10-15, its earliest retirement date) and Mythos 5.1 are out of scope. When this document discusses model behavior without qualification, it refers to Opus 5.5. Where Anthropic documents a behavior for only some models, the entry names them rather than generalizing across the tier.
 
-**Effort-level note:** the effort default moved on the 5.5 generation. Claude Code defaults to `medium` on Opus 5.5, Sonnet 5.5, and Haiku 5.5; on the API the default is `medium` on Opus 5.5 and Haiku 5.5 and `high` on Sonnet 5.5 and Fable 5.1. Anthropic reports Opus 5.5 at `medium` matches or exceeds Opus 5 at `high` on coding and knowledge-work evaluations. The rule from the Opus 5 cycle stands: start at the model's default, adjust on your own evals, use `low`/`medium` as cost controls where quality holds, and step to `xhigh`/`max` only on a measured gain. Do not carry effort settings over from earlier models — re-run an effort sweep. Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1.
+**Effort-level note:** the effort default moved on the 5.5 generation. Claude Code defaults to `medium` on Opus 5.5, Sonnet 5.5, and Haiku 5.5; on the API the default is `medium` on Opus 5.5 and Haiku 5.5 and `high` on Sonnet 5.5 and Fable 5.2 `[Anthropic docs — models overview, fetched 2026-11-24]`. On Fable 5.2, start at `high`, where most of the gain arrives, and step down to `medium` where your evals hold; `low` suits subagent and high-volume work; `xhigh` only on a measured gain `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. Anthropic reports Opus 5.5 at `medium` matches or exceeds Opus 5 at `high` on coding and knowledge-work evaluations. The rule from the Opus 5 cycle stands: start at the model's default, adjust on your own evals, use `low`/`medium` as cost controls where quality holds, and step to `xhigh`/`max` only on a measured gain. Do not carry effort settings over from earlier models — re-run an effort sweep, including from Fable 5.1 or Opus 5.5 to Fable 5.2. Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.2.
 
 ---
 
@@ -66,7 +66,7 @@ For complex prompts, nest tags to create clear hierarchies:
 
 ## 2. Long Context: Claude's Key Advantage
 
-Claude handles long system prompts and large context windows exceptionally well. All four current models — Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5 — support a 1M-token context window with 128K max output; legacy Haiku 4.5 is 200K. See Section 3 for the full landscape. Unlike some models, Claude does not degrade significantly with longer prompts. Use this to your advantage.
+Claude handles long system prompts and large context windows exceptionally well. All four current models — Fable 5.2, Opus 5.5, Sonnet 5.5, Haiku 5.5 — support a 1M-token context window with 128K max output; legacy Haiku 4.5 is 200K. See Section 3 for the full landscape. Unlike some models, Claude does not degrade significantly with longer prompts. Use this to your advantage.
 
 ### Be Verbose Where It Matters
 
@@ -120,72 +120,75 @@ those passages.
 
 ---
 
-## 3. Model Landscape — dated block (verified 2026-10-22)
+## 3. Model Landscape — dated block (verified 2026-10-22; Fable 5.2 refresh 2026-11-24)
 
-This section is the reference for model-fact statements elsewhere in this document and in the other knowledge files. Every fact traces to Anthropic primary documentation fetched 2026-10-22 (sources at the end of the section). It supersedes the 2026-07-24/25 block (Opus 5 + Sonnet 5 dual-primary). Decision records cite this block rather than restating it (AEA §4.15); refresh it at the next model release. Every `CLAUDE_CODE_*` name, default, and minimum version below is a dated product fact — `[verify against the running Claude Code version]` travels with it into any generated design (`root_CC_ENVIRONMENT_GUIDE.md` §6).
+This section is the reference for model-fact statements elsewhere in this document and in the other knowledge files. Every fact traces to Anthropic primary documentation fetched 2026-10-22, and the Fable 5.2 facts to pages fetched 2026-11-24 (sources at the end of the section). It supersedes the 2026-07-24/25 block (Opus 5 + Sonnet 5 dual-primary). Decision records cite this block rather than restating it (AEA §4.15); refresh it at the next model release. Every `CLAUDE_CODE_*` name, default, and minimum version below is a dated product fact — `[verify against the running Claude Code version]` travels with it into any generated design (`root_CC_ENVIRONMENT_GUIDE.md` §6).
 
-**What changed since the last block, in one paragraph.** Four releases in five weeks: Fable 5.1 (2026-09-01), Opus 5.5 (2026-09-22), Sonnet 5.5 (2026-09-28), Haiku 5.5 (2026-10-07). All four share a 1M context window, 128K max output, and a June 2026 reliable knowledge cutoff. Opus 5.5 is the Claude Code default on every Anthropic-hosted plan and the recommended starting model for most workloads ("For most workloads, start with Claude Opus 5.5" — Fable 5.1 what's-new). The effort default moved to `medium` on the three 5.5 models in both the API (Opus 5.5 only) and Claude Code (all three). Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1; Haiku 5.5 still accepts `disabled` at `high` or below. Forced tool use (`tool_choice: any|tool`) is rejected on all four. Haiku 5.5 is the first 1M-context, effort-capable Haiku and is positioned as a subagent model. Prices fell: Opus 5.5 $4/$20 (from $5/$25), Sonnet 5.5 cache reads halved, Fable 5.1 cache reads quartered.
+**What changed on 2026-11-24, in one paragraph.** Claude Fable 5.2 (`claude-fable-5-2`) was released 2026-11-09 and replaces Fable 5.1 `[Anthropic docs — models overview; Fable 5.2 what's-new, fetched 2026-11-24]`. It keeps the 1M context window, 128K max output, June 2026 reliable cutoff and the tokenizer introduced with Opus 4.7. Price fell to $8 input / $40 output per million tokens (Fable 5.1 was $10 / $50); cache reads stay at 0.025× base, $0.20. Its API default effort is `high`; the Fable 5.2 guide says most of the gain arrives at `high`, to step down to `medium` where evals hold, that `low` suits subagent and high-volume work, and that `xhigh` is for measured gains only `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. Thinking is adaptive and always on; a "do not deliberate" line does not stop thinking at `medium` and above. Prefill and forced `tool_choice` return 400; editing `system`, `tools` or an earlier message mid-conversation fails the prefix check (400). Calibration: Opus 5.5 + Sonnet 5.5 stay dual-primary for Tier 1 and Tier 2; Fable 5.2 is a named target for Tier 3, not a fallback (catalog decision D2, 2026-11-24). Claude Code's default model and default effort for Fable 5.2 are not stated on the pages fetched.
+
+**What changed in the 2026-10-22 block, in one paragraph (history).** Four releases in five weeks: Fable 5.1 (2026-09-01), Opus 5.5 (2026-09-22), Sonnet 5.5 (2026-09-28), Haiku 5.5 (2026-10-07). All four share a 1M context window, 128K max output, and a June 2026 reliable knowledge cutoff. Opus 5.5 is the Claude Code default on every Anthropic-hosted plan and the recommended starting model for most workloads ("For most workloads, start with Claude Opus 5.5" — Fable 5.1 what's-new). The effort default moved to `medium` on the three 5.5 models in both the API (Opus 5.5 only) and Claude Code (all three). Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1; Haiku 5.5 still accepts `disabled` at `high` or below. Forced tool use (`tool_choice: any|tool`) is rejected on all four. Haiku 5.5 is the first 1M-context, effort-capable Haiku and is positioned as a subagent model. Prices fell: Opus 5.5 $4/$20 (from $5/$25), Sonnet 5.5 cache reads halved, Fable 5.1 cache reads quartered.
 
 ### Current models
 
-| | Fable 5.1 | Opus 5.5 | Sonnet 5.5 | Haiku 5.5 |
+| | Fable 5.2 | Opus 5.5 | Sonnet 5.5 | Haiku 5.5 |
 |---|---|---|---|---|
-| API ID | `claude-fable-5-1` | `claude-opus-5-5` | `claude-sonnet-5-5` | `claude-haiku-5-5` |
-| Released | 2026-09-01 | 2026-09-22 | 2026-09-28 | 2026-10-07 |
+| API ID | `claude-fable-5-2` | `claude-opus-5-5` | `claude-sonnet-5-5` | `claude-haiku-5-5` |
+| Released | 2026-11-09 | 2026-09-22 | 2026-09-28 | 2026-10-07 |
 | Positioning (Anthropic) | demanding reasoning and long-horizon agentic work | long-running agentic coding and knowledge work | best combination of speed and intelligence | high-volume, latency-sensitive: classification, extraction, routing, subagent tasks |
-| Input / output $/MTok | $10 / $50 | $4 / $20 | $2 / $10 | $0.10 / $0.50 (≤100K prompt); $0.50 / $2.50 (>100K) |
-| Cache read $/MTok | $0.25 (0.025× base) | $0.20 (0.05×) | $0.10 (0.05×) | $0.01 / $0.05 by band |
+| Input / output $/MTok | $8 / $40 | $4 / $20 | $2 / $10 | $0.10 / $0.50 (≤100K prompt); $0.50 / $2.50 (>100K) |
+| Cache read $/MTok | $0.20 (0.025× base) | $0.20 (0.05×) | $0.10 (0.05×) | $0.01 / $0.05 by band |
 | Context / max output | 1M / 128K | 1M / 128K | 1M / 128K | 1M / 128K |
 | Reliable cutoff | Jun 2026 | Jun 2026 | Jun 2026 | Jun 2026 |
-| Thinking | adaptive, always on | adaptive, always on | adaptive; `between_tools` is the floor (`disabled` → 400) | adaptive on by default; `disabled` allowed at ≤`high` |
+| Thinking | adaptive, always on (`disabled` and `budget_tokens` → 400; thinking counts toward `max_tokens`) | adaptive, always on | adaptive; `between_tools` is the floor (`disabled` → 400) | adaptive on by default; `disabled` allowed at ≤`high` |
 | API default effort | `high` | `medium` | `high` | `medium` |
-| Claude Code default effort | `high` | `medium` | `medium` | `medium` |
+| Claude Code default effort | not stated on the pages fetched 2026-11-24 | `medium` | `medium` | `medium` |
 | Effort ladder | low · medium · high · xhigh · max | same | same | same |
-| Tokenizer | same as Fable 5 (Opus 4.7-era; ~30% more tokens than pre-4.7) | — | same as Sonnet 5 | Opus 4.7-era; ~30% more tokens than Haiku 4.5 |
-| Min cacheable prompt | 512 | 512 | 512 (Sonnet 5 was 1,024) | 512 (Haiku 4.5 was 4,096) |
-| Tentative retirement | not sooner than 2027-09-01 | not sooner than 2027-09-22 | not sooner than 2027-09-28 | not sooner than 2027-10-07 |
+| Tokenizer | the one introduced with Opus 4.7 (no change from Fable 5.1) | — | same as Sonnet 5 | Opus 4.7-era; ~30% more tokens than Haiku 4.5 |
+| Min cacheable prompt | not re-verified for Fable 5.2 (Fable 5.1: 512) | 512 | 512 (Sonnet 5 was 1,024) | 512 (Haiku 4.5 was 4,096) |
+| Tentative retirement | not sooner than 2027-11-09 | not sooner than 2027-09-22 | not sooner than 2027-09-28 | not sooner than 2027-10-07 |
 
-Sources: models overview, per-model what's-new pages, pricing, model deprecations (all platform.claude.com/docs — see Sources below).
+Sources: models overview, per-model what's-new pages, pricing, model deprecations (all platform.claude.com/docs — see Sources below). Fable 5.2 column: `[Anthropic docs — models overview; Fable 5.2 what's-new; Fable 5.2 migration guide, fetched 2026-11-24]`.
 
-**Mythos 5.1** (`claude-mythos-5-1`) shares the Fable 5.1 model with looser safeguards; verified-organization access only. Out of scope for Skill calibration.
+**Mythos 5.2** (`claude-mythos-5-2`) offers the Fable 5.2 capabilities to organizations verified through Anthropic's cyber and life-sciences verification programs `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. Out of scope for Skill calibration, as Mythos 5.1 was.
 
 ### Still-active prior generation (fallback / legacy posture)
 
 | Model | State | Role in this landscape |
 |---|---|---|
-| Opus 5 (`claude-opus-5`) | Active, retirement not sooner than 2027-07-24 | Permitted fallback target for Fable 5.1. Reads/writes thinking blocks compatible with Opus 5.5. |
+| Fable 5.1 (`claude-fable-5-1`) | Replaced by Fable 5.2 (2026-11-09); its retirement date was not re-verified 2026-11-24 | Superseded. Does not read Fable 5.2 thinking blocks. Effort settings tuned on it do not carry over — re-run the sweep. |
+| Opus 5 (`claude-opus-5`) | Active, retirement not sooner than 2027-07-24 | Fallback model for Fable 5.2 (as for Fable 5.1). Reads/writes thinking blocks compatible with Opus 5.5. |
 | Sonnet 5 (`claude-sonnet-5`) | Active, not sooner than 2027-06-30 | Server-side fallback target for Sonnet 5.5 `cyber`/`frontier_llm` declines. |
-| Fable 5 (`claude-fable-5`) | Active, not sooner than 2027-06-09 | Superseded; `fable` alias resolves to Fable 5.1 except in Claude apps gateway sessions. |
-| Opus 4.8 (`claude-opus-4-8`) | Active, not sooner than 2027-05-28 | Permitted fallback target for Fable 5.1. Rejected as an advisor for Sonnet 5.5 executors. |
+| Fable 5 (`claude-fable-5`) | Active, not sooner than 2027-06-09 | Superseded. On 2026-10-22 the `fable` alias resolved to Fable 5.1 except in Claude apps gateway sessions; its resolution after the Fable 5.2 release was not verified on 2026-11-24. |
+| Opus 4.8 (`claude-opus-4-8`) | Active, not sooner than 2027-05-28 | Fallback model for Fable 5.2 (as for Fable 5.1). Rejected as an advisor for Sonnet 5.5 executors. |
 | Sonnet 4.6 (`claude-sonnet-4-6`) | Active, not sooner than 2027-02-17 | Legacy; effort ladder lacks `xhigh`; 1M only via `[1m]`. |
 | Haiku 4.5 (`claude-haiku-4-5-20251001`) | Active, not sooner than **2026-10-15** | Earliest retirement in the active set. Still the `haiku` alias on Bedrock / Agent Platform / Foundry / Claude Platform on AWS. |
 | Sonnet 4.5 | **Deprecated 2026-09-30, retires 2026-11-30** | Replacement: `claude-sonnet-5-5`. Still the Foundry default model in Claude Code. |
 
-### Calibration scope (accepted as catalog decision D2, 2026-10-22)
+### Calibration scope (catalog decision D2, 2026-10-22; Fable 5.2 revision 2026-11-24)
 
-**Dual-primary: Opus 5.5 + Sonnet 5.5.** Opus 5.5 is the CC default on every Anthropic-hosted plan and the API's recommended starting point; Sonnet 5.5 is the cost-optimal agentic tier with the same 1M/128K envelope. **Fable 5.1 integrated-aware** (not default anywhere; reserve for long-horizon work where Opus 5.5 at higher effort still fails evals). **Haiku 5.5 subagent-aware** — the first Haiku that fits the Scout/Researcher roles with effort control and a 1M window. **Opus 5 / Sonnet 5 fallback-graceful** (the models users are silently served on classifier-flagged requests). **Sonnet 4.6 and Haiku 4.5 legacy-graceful** until their retirement dates; Haiku 4.5 drops out of scope on 2026-10-15 and the catalog should not carry a Haiku 4.5 line past that date.
+**Dual-primary: Opus 5.5 + Sonnet 5.5** for Tier 1 and Tier 2. Opus 5.5 is the CC default on every Anthropic-hosted plan and the API's recommended starting point; Sonnet 5.5 is the cost-optimal agentic tier with the same 1M/128K envelope. **Fable 5.2 a named target for Tier 3** (High-effort recommended), not a fallback: start at its `high` default and step down to `medium` where evals hold; it costs about twice Opus 5.5 per token, so choose it for the hardest and longest runs. Tier membership did not change (T1 = 13, T2 = 7, T3 = 7). This replaces the 2026-10-22 wording "Fable 5.1 integrated-aware". **Haiku 5.5 subagent-aware** — the first Haiku that fits the Scout/Researcher roles with effort control and a 1M window. **Opus 5 / Sonnet 5 fallback-graceful** (the models users are silently served on classifier-flagged requests). **Sonnet 4.6 and Haiku 4.5 legacy-graceful** until their retirement dates; Haiku 4.5 drops out of scope on 2026-10-15 and the catalog should not carry a Haiku 4.5 line past that date.
 
 This replaces the v4.0 scope sentence ("Opus 5 + Sonnet 5 dual-primary, Fable 5 integrated-aware, Opus 4.8 fallback-graceful, Sonnet 4.6 legacy-graceful, Haiku 4.5 graceful-with-extended-thinking"). The three-tier structure (Model-compatible / Sonnet-graceful / High-effort recommended) is landscape-independent and survives unchanged; only the model column refreshes.
 
 ### Breaking API changes that touch Skill content
 
-1. **Thinking cannot be disabled** on Opus 5.5, Sonnet 5.5, Fable 5.1 (`disabled` and `enabled`+`budget_tokens` → 400). Sonnet 5.5 offers `between_tools` as the floor (≤`high` only). Haiku 5.5 accepts `disabled` at ≤`high`. Claude Code: "You can't turn thinking off on Opus 5.5, Sonnet 5.5, Haiku 5.5, or the Fable models"; `MAX_THINKING_TOKENS=0` no longer applies to them.
+1. **Thinking cannot be disabled** on Opus 5.5, Sonnet 5.5, Fable 5.2 (`disabled` and `enabled`+`budget_tokens` → 400). On Fable 5.2 thinking counts toward `max_tokens`, and a line such as "answer directly without deliberating" does not stop thinking at `medium` and above — lower effort instead `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. Sonnet 5.5 offers `between_tools` as the floor (≤`high` only). Haiku 5.5 accepts `disabled` at ≤`high`. Claude Code: "You can't turn thinking off on Opus 5.5, Sonnet 5.5, Haiku 5.5, or the Fable models"; `MAX_THINKING_TOKENS=0` no longer applies to them.
 2. **Forced tool use removed** — `tool_choice: {"type":"any"}` / `{"type":"tool"}` → 400 on all four. Replacement: `auto` + `strict: true`, or structured outputs, or state in the prompt when the tool applies. Rationale (Fable 5.1 what's-new): forced calls skip thinking and the model "would write its working-out into the tool arguments instead."
-3. **Thinking blocks are model- and conversation-bound.** Opus 5.5 reads Opus 5 and (API/Google Cloud) Sonnet 5.5 / Haiku 5.5 blocks, not Fable/Mythos; Sonnet 5.5 does not read Opus 5 / Opus 5.5 blocks. Accounts created ≥ 2026-08-31 get prefix-change enforcement by default (editing `system`, `tools`, or earlier turns after a thinking block → 400). Keep conversations append-only; use mid-conversation system messages and turn-scoped system messages (`clear_at: "next_user_message"`, beta) instead of editing history.
+3. **Thinking blocks are model- and conversation-bound.** Opus 5.5 reads Opus 5 and (API/Google Cloud) Sonnet 5.5 / Haiku 5.5 blocks, not Fable/Mythos; Sonnet 5.5 does not read Opus 5 / Opus 5.5 blocks. Accounts created ≥ 2026-08-31 get prefix-change enforcement by default (editing `system`, `tools`, or earlier turns after a thinking block → 400). Keep conversations append-only; use mid-conversation system messages and turn-scoped system messages (`clear_at: "next_user_message"`, beta) instead of editing history. Fable 5.2 uses preserved thinking: editing `system`, `tools` or an earlier message mid-conversation fails the prefix check (400), and only Fable 5.2 and Mythos 5.2 read Fable 5.2 thinking blocks `[Anthropic docs — Prompting Claude Fable 5.2; Fable 5.2 migration guide, fetched 2026-11-24]`.
 4. **`computer_20251124` rejected** on API and Google Cloud → `computer_toolset_20260801` (Bedrock still accepts the old type).
 5. **`reasoning_extraction` is a refusal category** on all four: prompts that ask the model to reproduce its internal reasoning in response text may be declined. "A short explanation of the answer or a summary of actions taken is still fine." Read reasoning from `display: "summarized"` thinking blocks instead.
-6. **Refusal billing changed 2026-09-24:** a refusal before any output is billed in low-false-positive categories. Server-side fallback: Opus 5.5 `fallbacks: "default"` (beta); Sonnet 5.5 retries `cyber`/`frontier_llm` on Sonnet 5 only; **Haiku 5.5 has no server-side fallback**; Fable 5.1 fallback targets are Opus 4.8 and Opus 5.
+6. **Refusal billing changed 2026-09-24:** a refusal before any output is billed in low-false-positive categories. Server-side fallback: Opus 5.5 `fallbacks: "default"` (beta); Sonnet 5.5 retries `cyber`/`frontier_llm` on Sonnet 5 only; **Haiku 5.5 has no server-side fallback**; Fable 5.2's fallback models are Opus 4.8 and Opus 5, as Fable 5.1's were `[Anthropic docs — Fable 5.2 what's-new, fetched 2026-11-24]`. On Fable 5.2 a refusal carries `stop_details.category`, and reasoning written into the response is one of the triggers (`reasoning_extraction`).
 7. **Text between tool calls now arrives in `thinking` blocks** (progress-update blocks), empty under the default `display: "omitted"`. API clients that render only `text` go silent between tool calls. Set `thinking.display` to `"updates"` (beta) or `"summarized"`.
-8. Haiku 5.5 additionally rejects `temperature`/`top_p`/`top_k`, assistant prefill, `budget_tokens`, and `computer_20250124`; it retains thinking blocks from all earlier turns (Haiku 4.5 kept only the latest). Fable 5.1 rejects prefill and sampling params as Fable 5 did.
+8. Haiku 5.5 additionally rejects `temperature`/`top_p`/`top_k`, assistant prefill, `budget_tokens`, and `computer_20250124`; it retains thinking blocks from all earlier turns (Haiku 4.5 kept only the latest). Fable 5.2 rejects prefill (400); omit `temperature`, `top_p` and `top_k` `[Anthropic docs — Fable 5.2 migration guide; models overview, fetched 2026-11-24]`.
 9. **Advisor tool pairings:** the advisor must be at least as capable as the executor. Sonnet 5.5 executor rejects Opus 4.8, Opus 4.7, Sonnet 5, and Haiku 5.5 advisors.
 10. **New betas relevant to agent design:** per-message effort (`mid-conversation-output-config-2026-07-01`), turn-scoped system messages (`mid-conversation-system-clear-at-2026-08-21`), progress-update display (`thinking-display-updates-2026-08-18`), compact on demand (`compact-2026-09-04`), inline tool definitions (`inline-tools-2026-09-15`), thinking-binding controls (`thinking-binding-controls-2026-08-01`), task budgets, fast mode (`speed: "fast"`, Opus 5.5).
 
 ### Claude Code facts (verified against code.claude.com/docs, 2026-10-22)
 
 - **Default model:** Opus 5.5 on Pro, Max, Team, Enterprise, and Anthropic API; also on Claude Platform on AWS, Bedrock, Google Cloud Agent Platform. Microsoft Foundry defaults to Sonnet 4.5. "Fable models are not the account-type default on any plan or provider."
-- **Alias resolution (Anthropic API):** `opus` → Opus 5.5, `sonnet` → Sonnet 5.5, `haiku` → Haiku 5.5, `fable` → Fable 5.1 (Fable 5 in Claude apps gateway sessions), `best` → `fable` where available else `opus`. Third-party providers lag: Bedrock/Agent Platform `sonnet` → Sonnet 4.5, `haiku` → Haiku 4.5.
-- **Minimum Claude Code versions:** Fable 5.1 v2.1.257+, Opus 5.5 v2.1.280+, Sonnet 5.5 v2.1.284+, Haiku 5.5 v2.1.293+. Current changelog tip observed: 2.1.308.
-- **Default effort:** `high` on every effort-capable model except Opus 5.5 / Sonnet 5.5 / Haiku 5.5 (`medium`) and Opus 4.7 (`xhigh`). Resolution order: `CLAUDE_CODE_EFFORT_LEVEL` / `--effort` / `/effort` → `modelSettings` per-model or `effortLevel` → model default. Doc states "Opus 5.5 ignores a top-level `effortLevel` in user settings, which applies to Opus 5 and earlier models" — *verify on the running version before relying on it*; use per-model `modelSettings`.
+- **Alias resolution (Anthropic API, as of 2026-10-22):** `opus` → Opus 5.5, `sonnet` → Sonnet 5.5, `haiku` → Haiku 5.5, `fable` → Fable 5.1 (Fable 5 in Claude apps gateway sessions), `best` → `fable` where available else `opus`. Third-party providers lag: Bedrock/Agent Platform `sonnet` → Sonnet 4.5, `haiku` → Haiku 4.5. Where `fable` resolves after the Fable 5.2 release was not verified on 2026-11-24 — check `/model` on the running version.
+- **Minimum Claude Code versions (as of 2026-10-22):** Fable 5.1 v2.1.257+, Opus 5.5 v2.1.280+, Sonnet 5.5 v2.1.284+, Haiku 5.5 v2.1.293+. Current changelog tip observed then: 2.1.308. The minimum version for Fable 5.2 was not verified on 2026-11-24.
+- **Default effort:** `high` on every effort-capable model except Opus 5.5 / Sonnet 5.5 / Haiku 5.5 (`medium`) and Opus 4.7 (`xhigh`). Fable 5.2's Claude Code default is not stated on the pages fetched 2026-11-24. Resolution order: `CLAUDE_CODE_EFFORT_LEVEL` / `--effort` / `/effort` → `modelSettings` per-model or `effortLevel` → model default. Doc states "Opus 5.5 ignores a top-level `effortLevel` in user settings, which applies to Opus 5 and earlier models" — *verify on the running version before relying on it*; use per-model `modelSettings`.
 - **Opus 5.5 at `medium` "matches or exceeds Opus 5 at `high` on coding and knowledge-work evaluations"** — "When you move from Opus 5 to Opus 5.5, start at `medium`."
 - **Thinking:** cannot be turned off on the 5.5 trio or Fable; `ultrathink` requests deeper reasoning for one turn.
 - **Ultracode:** a session setting, not an effort level; `/effort ultracode` and `/effort ultracode off` (v2.1.284+); `"ultracode": true` in settings; exempts the session from the concurrent-subagent limit; unavailable when workflows are off or the model lacks `xhigh`.
@@ -197,13 +200,14 @@ Every `CLAUDE_CODE_*` name and default above is a dated product fact. Carry the 
 
 ### Open items — do not assert
 
-- ZDR and data-retention posture for the 5.5 generation: not re-verified this cycle. The 2026-07 block's Fable 5 "Covered Model, no ZDR" fact is not carried forward to Fable 5.1 without verification.
+- ZDR and data-retention posture for the 5.5 generation: not re-verified this cycle. The 2026-07 block's Fable 5 "Covered Model, no ZDR" fact is not carried forward to Fable 5.1 or Fable 5.2 without verification.
 
-- Opus 5.5 tokenizer vs Opus 5: not stated on any fetched page. Treat as "same family as Sonnet 5.5 / Fable 5.1 (Opus 4.7-era)" only after `count_tokens` confirmation.
+- Opus 5.5 tokenizer vs Opus 5: not stated on any fetched page. Treat as "same family as Sonnet 5.5 / Fable 5.2 (Opus 4.7-era)" only after `count_tokens` confirmation.
+- Claude Code default model and default effort for Fable 5.2, the `fable` alias target, and the minimum Claude Code version for Fable 5.2: not stated on the pages fetched 2026-11-24.
 - Claude.ai plan defaults (which model Free/Pro/Max serve by default in chat): not fetched; the Claude Code defaults above are verified, chat defaults are not.
 - Whether `CLAUDE_CODE_DISABLE_WORKFLOWS` is still the workflow kill switch name on 2.1.30x.
 - Claude Code default *model* on Max vs Pro beyond "Opus 5.5" (e.g., whether Pro has usage-credit gating on Opus 5.5): not stated on the fetched page.
-- Behavioral re-baselining of the 15-tendency deployment-conditioning tables on the 5.5 generation is analytical (D9c) from Anthropic's guides, not measured. Calibration Lab re-baselining remains open (carried from v4.0).
+- Behavioral re-baselining of the 17-tendency deployment-conditioning tables (15 at v5.0; #16 and #17 added 2026-11-24) on the 5.5 generation and Fable 5.2 is analytical (D9c) from Anthropic's guides, not measured. Calibration Lab re-baselining remains open (carried from v4.0).
 
 ### Sources
 
@@ -217,6 +221,9 @@ Every `CLAUDE_CODE_*` name and default above is a dated product fact. Carry the 
 - https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-sonnet-5-5
 - https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-haiku-5-5
 - https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-1
+- https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2 (fetched 2026-11-24)
+- https://platform.claude.com/docs/en/models/fable-5-2/migration-guide (fetched 2026-11-24)
+- https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2 (fetched 2026-11-24)
 - https://code.claude.com/docs/en/model-config
 - https://code.claude.com/docs/en/sub-agents
 - https://code.claude.com/docs/en/changelog (entries 2.1.292–2.1.308)
@@ -236,12 +243,12 @@ A refusal returns HTTP 200 with `stop_reason: "refusal"` and a category, so it b
 
 ### Adaptive Thinking (current generation)
 
-All four current models use adaptive thinking: the model decides when and how much to think on each turn, and the `effort` parameter controls thinking depth. Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1 — `disabled`, and `enabled` with `budget_tokens`, return 400; Sonnet 5.5 offers `between_tools` as its floor at `high` or below. Haiku 5.5 runs adaptive thinking by default and accepts `disabled` at `high` or below. Section 3 has the per-model table.
+All four current models use adaptive thinking: the model decides when and how much to think on each turn, and the `effort` parameter controls thinking depth. Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.2 — `disabled`, and `enabled` with `budget_tokens`, return 400; Sonnet 5.5 offers `between_tools` as its floor at `high` or below. Haiku 5.5 runs adaptive thinking by default and accepts `disabled` at `high` or below. Section 3 has the per-model table.
 
 **The effort parameter** (full ladder on all four current models):
 - **`low`** — minimal thinking, fastest responses. A legitimate primary cost/latency control where evals show quality holds; early turn termination (#15) and tool under-triggering (#7b) rise here.
 - **`medium`** — moderate thinking. The Claude Code default on Opus 5.5, Sonnet 5.5, and Haiku 5.5, and the API default on Opus 5.5 and Haiku 5.5. Anthropic reports Opus 5.5 at `medium` matches or exceeds Opus 5 at `high` on coding and knowledge-work evaluations.
-- **`high`** — substantial thinking. The API default on Sonnet 5.5 and Fable 5.1, and the Claude Code default on Fable 5.1. Step here when verification matters or edge cases are likely.
+- **`high`** — substantial thinking. The API default on Sonnet 5.5 and Fable 5.2. Step here when verification matters or edge cases are likely. On Fable 5.2 this is the starting point and most of the gain arrives here; step down to `medium` where evals hold `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`.
 - **`xhigh`** — step up for demanding coding and agentic work, on a measured gain. Sonnet 5.5 at `xhigh`/`max` self-starts review rounds and reviewer subagents (#11, #13); Fable 5.1 may draft a deliverable twice (#3c).
 - **`max`** — top tier for the deepest reasoning; use when a task justifies unconstrained spend and the model has room (set a large `max_tokens`).
 
@@ -328,7 +335,7 @@ Generic "think step by step" is better than nothing, but task-specific reasoning
 
 ## 5. Claude's Behavioral Tendencies (And How to Manage Them)
 
-The tendency taxonomy expanded for Opus 5 (v4.0 cycle) and for the 5.5 generation (v5.0 cycle). Verbosity refactored into a three-surface family (#3a/#3b/#3c) with distinct triggers and countermeasures. Four tendencies were added for Opus 5 (#11–#14) and one for the 5.5 generation (#15 early turn termination). Four prompt/environment-conditional defects are treated separately at the end of this section rather than as model tendencies. Total: **15 numbered entries (#1–#15)** with 7 discrete facets (1a/1b under #1; 3a/3b/3c under #3; 7a/7b under #7) + 4 non-tendency defects. `root_OPTIMIZATION_REFERENCE.md` is the canonical taxonomy; this section is the quick-reference copy carrying the most-pasted templates. The 5.5-generation facets on #3c, #4, #5, #6, #7, #11, #12, and #13 — with their verbatim Anthropic blocks — live there.
+The tendency taxonomy expanded for Opus 5 (v4.0 cycle), for the 5.5 generation (v5.0 cycle) and for Fable 5.2 (catalog v6.1, 2026-11-24). Verbosity refactored into a three-surface family (#3a/#3b/#3c) with distinct triggers and countermeasures. Four tendencies were added for Opus 5 (#11–#14), one for the 5.5 generation (#15 early turn termination) and two for Fable 5.2 (#16 caution accumulation, #17 silent long runs). Five prompt/environment-conditional defects are treated separately at the end of this section rather than as model tendencies. Total: **17 numbered entries (#1–#17)** with 7 discrete facets (1a/1b under #1; 3a/3b/3c under #3; 7a/7b under #7) + 5 non-tendency defects. `root_OPTIMIZATION_REFERENCE.md` is the canonical taxonomy; this section is the quick-reference copy carrying the most-pasted templates. The 5.5-generation facets on #3c, #4, #5, #6, #7, #11, #12, and #13 — with their verbatim Anthropic blocks — live there.
 
 Deployment context matters. The same tendency manifests differently on the chat interface (Adaptive effort, no CI anchor), in Projects (CI partially anchors), on Claude Code (default `medium` on the 5.5 trio), and on the API (developer-controlled effort). Countermeasure calibration in each tendency entry names the deployment surfaces where it most applies.
 
@@ -646,11 +653,19 @@ Keep working until everything the user asked for is done, and only stop to ask w
 When the work the user asked for is done and checked, stop and report. Don't add features, tests, files, docs or refactors that weren't asked for. If you think one would help, mention it at the end instead of doing it.
 ```
 
-For fully unattended loops, the Opus 5.5 guide's long "standing instruction" variant and the harness continuation rule (treat a text-only end of turn as a report, cap continuations at two or three) are in `root_OPTIMIZATION_REFERENCE.md` #15.
+For fully unattended loops, the Opus 5.5 guide's long "standing instruction" variant and the harness continuation rule (treat a text-only end of turn as a report, cap continuations at two or three) are in `root_OPTIMIZATION_REFERENCE.md` #15. On Fable 5.2 early stops are more common at `low` and `medium`; Anthropic reports a finishing block roughly halved sessions that ended with continuable work at `medium`, at about 30% more output tokens `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`.
+
+### 16. Caution Accumulation (NEW in Fable 5.2)
+
+The agent asks for approval on routine steps, holds back ordinary actions, or stops at the first error, because cautions have piled up in memory, notes, rules and instruction files; absolute "never" rules are applied far outside the case they were written for. It is the opposite of #12: too little action, not too much. Most common in multi-agent and long-lived projects with Memory or handoff chains, and in Claude Code with a large CLAUDE.md and rules. Levers, in order: remove cautions whose reason no longer holds; rewrite an absolute as a scoped rule with its reason; name the routine steps that need no approval; narrow validation stops such as "stop at the first error"; restart a stuck system with trimmed memory and notes. Warrant: Prompting Claude Fable 5.2, "Keep caution from piling up" `[Anthropic docs, fetched 2026-11-24]`. Template and deployment calibration in `root_OPTIMIZATION_REFERENCE.md` #16; rigor levels and the stop rule in `root_CC_ENVIRONMENT_GUIDE.md` §4.
+
+### 17. Silent Long Runs (NEW in Fable 5.2)
+
+The first tool call arrives with no statement of intent, and long stretches of tool calls pass with no user-facing text. It is the opposite of #3b (too much narration); choose by deployment and never ship both. It matters where a person is watching (chat, Cowork, interactive Claude Code); in unattended runs the session report carries the need. First check that the client shows the progress updates the model writes between tool calls; add prompt text only after that. Warrant: Prompting Claude Fable 5.2, "Keep users informed during long turns" `[Anthropic docs, fetched 2026-11-24]`. Template in `root_OPTIMIZATION_REFERENCE.md` #17.
 
 ### Prompt/environment-conditional defects (not model tendencies)
 
-Four failure modes track cleanly to the prompt, the harness, or the runtime configuration rather than the model. They are handled by writing prompts differently or configuring the API or harness differently, not by adding counter-tendency instructions.
+Five failure modes track cleanly to the prompt, the harness, or the runtime configuration rather than the model. They are handled by writing prompts differently or configuring the API or harness differently, not by adding counter-tendency instructions.
 
 #### Conservative-instruction literalism
 
@@ -686,6 +701,10 @@ Sonnet 5.5 and Haiku 5.5 treat user text placed inside `tool_result` blocks, per
 #### Reasoning-extraction refusal (NEW in the 5.5 generation)
 
 Prompts that ask the model to reproduce its internal reasoning in the response can be declined — `stop_reason: "refusal"`, category `reasoning_extraction` — on all four current models. Remove those instructions, ask for a short explanation or a summary of actions taken, and read the reasoning itself from `display: "summarized"` thinking blocks.
+
+#### Prompt-visible token budget (NEW in Fable 5.2)
+
+A token budget shown to the model in the prompt raises spending: in Anthropic's testing on coding tasks at `high` and `xhigh`, removing a large budget lowered cost with equivalent performance `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. The finding is about text in the prompt, not the API's task-budgets beta. Keep the number in the design brief and enforce it with a mechanism (a spend flag, a cap in settings or the environment), not with prompt text.
 
 ---
 
@@ -934,7 +953,7 @@ For tasks that span multiple context windows (common in agent and coding workflo
 
 **Carrying effort settings over from prior models:** The default moved again on the 5.5 generation — `medium` in Claude Code on Opus 5.5, Sonnet 5.5, and Haiku 5.5 — and a setting that worked on an earlier model is not necessarily right for your evals. Anthropic explicitly recommends re-running an effort sweep on your own evals rather than carrying settings over.
 
-**Carrying Opus-5-era mitigations into 5.5-generation prompts:** thinking-disabled mitigations no longer apply (thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1); tool-suppressing language now causes under-search (7b); forced tool use (`tool_choice` `any` or `tool`) returns 400 on all four current models — state in the prompt when the tool applies, or use `auto` with `strict: true`.
+**Carrying Opus-5-era mitigations into 5.5-generation prompts:** thinking-disabled mitigations no longer apply (thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.2); tool-suppressing language now causes under-search (7b); forced tool use (`tool_choice` `any` or `tool`) returns 400 on all four current models — state in the prompt when the tool applies, or use `auto` with `strict: true`.
 
 **Adding "do not think" instructions with thinking disabled:** A system-prompt rule instructing the model not to think or not to reason (Haiku 5.5 is the only current model that can run with thinking disabled) INCREASES `<thinking>` tag leakage rather than suppressing it. If a mitigation is needed for a thinking-disabled integration, use the general "do not include internal or system XML tags" form.
 
@@ -947,13 +966,13 @@ Opus 5.5 and Sonnet 5.5 are the dual-primary calibration targets for root.node a
 ### Calibration Scope
 
 - **Opus 5.5 + Sonnet 5.5 dual-primary:** Skills and prompt patterns are designed against both. Where their documented behavior diverges, both are documented; T3 Skills favor Opus 5.5 behavior on divergence, T1/T2 favor Sonnet 5.5.
-- **Fable 5.1 integrated-aware:** output keeps its shape on Fable 5.1, including its refusal behavior; not a routine execution target because of price, and the default on no plan or provider.
+- **Fable 5.2 named target for Tier 3** (catalog decision D2, 2026-11-24; it replaced Fable 5.1 "integrated-aware"): High-effort Skills name it beside Opus 5.5 and Sonnet 5.5 — start at its `high` default and step down to `medium` where evals hold. It costs about twice Opus 5.5 per token (`[Anthropic docs — models overview, fetched 2026-11-24]`), so it is chosen for the hardest and longest runs, not as the default for Tier 1 and Tier 2 work. Output keeps its shape there, including its refusal behavior.
 - **Haiku 5.5 subagent-aware:** the first Haiku that fits scout, researcher, and extraction roles — 1M context and effort control. Tier 2 Skills run on it at `high` effort with less depth on multi-dimensional analysis. It is a valid D9a subject model, not a grader.
-- **Opus 5 / Sonnet 5 fallback-graceful:** the models users are silently served on classifier-flagged requests (Sonnet 5.5 falls back to Sonnet 5 for `cyber` and `frontier_llm`; Fable 5.1 to Opus 4.8 or Opus 5). Output must keep its shape there without the user knowing a fallback fired.
+- **Opus 5 / Sonnet 5 fallback-graceful:** the models users are silently served on classifier-flagged requests (Sonnet 5.5 falls back to Sonnet 5 for `cyber` and `frontier_llm`; Fable 5.2 to Opus 4.8 or Opus 5). Output must keep its shape there without the user knowing a fallback fired.
 - **Sonnet 4.6 legacy-graceful:** users may still select it until retirement; quality tuning targets Sonnet 5.5.
-- **Out of scope:** Haiku 4.5 (out of scope from 2026-10-15, its earliest retirement date; on third-party providers the `haiku` alias may still resolve to it — pin `claude-haiku-5-5`), Haiku 3.5 and earlier, Mythos 5.1.
+- **Out of scope:** Haiku 4.5 (out of scope from 2026-10-15, its earliest retirement date; on third-party providers the `haiku` alias may still resolve to it — pin `claude-haiku-5-5`), Haiku 3.5 and earlier, Mythos 5.1 and Mythos 5.2.
 
-**Effort-level guidance:** start at the model's default (`medium` in Claude Code on the 5.5 trio), step to `high` when verification matters, and to `xhigh` only on a measured gain. Tier 3 Skills say: Opus 5.5 at its `medium` default or `high`, or Sonnet 5.5 at `high`.
+**Effort-level guidance:** start at the model's default (`medium` in Claude Code on the 5.5 trio; `high` on Fable 5.2), step to `high` when verification matters, and to `xhigh` only on a measured gain. Tier 3 Skills say: Opus 5.5 at its `medium` default or `high`, Sonnet 5.5 at `high`, or Fable 5.2 at its `high` default, stepping down to `medium` where evals hold.
 
 ### The Deployment Context Model
 
@@ -961,8 +980,8 @@ Opus 5.5 and Sonnet 5.5 are the dual-primary calibration targets for root.node a
 |---|---|---|---|
 | Chat interface (claude.ai web/mobile) | Adaptive | HIGH for #1b, #7b, #9, #10; MEDIUM for #1a, #3a, #14 | Persistent-context instructions are weighted lower than immediate prompts. Strong countermeasures for the chat-specific tendencies. |
 | Claude Projects | Adaptive (CI anchors) | MEDIUM for #1b, #9, #14; LOW for most | CI partially mitigates the chat-interface tendencies. Moderate countermeasures suffice. |
-| Claude Code | `medium` on Opus 5.5 / Sonnet 5.5 / Haiku 5.5; `high` on Fable 5.1 | HIGH for #11, #12, #13; MEDIUM for #15 at `medium`, HIGH at `low`; LOW for chat-specific tendencies | The agentic tendencies surface here. Verification-instruction discipline, delegation caps, and the early-stop block (paired with the #12 paragraph) are the core set. Countermeasures excluded on the assumption of `high` effort should be applied on observation at `medium`. |
-| API | Developer-controlled; defaults `medium` (Opus 5.5, Haiku 5.5) or `high` (Sonnet 5.5, Fable 5.1) | Depends on effort level and model | At `high` and above, behaves like Claude Code for agentic work; at `low`, #7b and #15 rise. |
+| Claude Code | `medium` on Opus 5.5 / Sonnet 5.5 / Haiku 5.5; Fable 5.2 not stated (its API default is `high`) | HIGH for #11, #12, #13; MEDIUM for #15 at `medium`, HIGH at `low`; MEDIUM to HIGH for #16 with a large CLAUDE.md and rules; MEDIUM for #17 when interactive; LOW for chat-specific tendencies | The agentic tendencies surface here. Verification-instruction discipline, delegation caps, the early-stop block (paired with the #12 paragraph) and a positive-scope list (#16) are the core set. Countermeasures excluded on the assumption of `high` effort should be applied on observation at `medium`. |
+| API | Developer-controlled; defaults `medium` (Opus 5.5, Haiku 5.5) or `high` (Sonnet 5.5, Fable 5.2) | Depends on effort level and model | At `high` and above, behaves like Claude Code for agentic work; at `low`, #7b and #15 rise. A token budget shown in the prompt raises spending (fifth conditional defect). |
 
 Before applying a countermeasure, identify the deployment context. A countermeasure essential on the chat interface may be wasted tokens on Claude Code, and the reverse.
 
@@ -984,13 +1003,13 @@ This is a specific application of the tendency #10 countermeasure scoped to mode
 
 ### Tokenizer Notes
 
-Fable 5.1 uses the same tokenizer as Fable 5 — the one introduced with Opus 4.7, roughly 30% more tokens than pre-4.7 models. Sonnet 5.5 uses the Sonnet 5 tokenizer, approximately 30% more tokens than Sonnet 4.6. Haiku 5.5 uses the Opus 4.7-era tokenizer, roughly 30% more tokens than Haiku 4.5, and bills a higher price band above 100K prompt tokens. The Opus 5.5 tokenizer is not stated on any fetched Anthropic page — treat measurements with explicit tolerance until confirmed via `count_tokens` in a future Calibration Lab session.
+Fable 5.2 uses the tokenizer introduced with Opus 4.7, as Fable 5.1 and Fable 5 did — roughly 30% more tokens than pre-4.7 models `[Anthropic docs — Fable 5.2 what's-new, fetched 2026-11-24]`. Sonnet 5.5 uses the Sonnet 5 tokenizer, approximately 30% more tokens than Sonnet 4.6. Haiku 5.5 uses the Opus 4.7-era tokenizer, roughly 30% more tokens than Haiku 4.5, and bills a higher price band above 100K prompt tokens. The Opus 5.5 tokenizer is not stated on any fetched Anthropic page — treat measurements with explicit tolerance until confirmed via `count_tokens` in a future Calibration Lab session.
 
 ### API Parameter Landscape (current)
 
-1. **Thinking cannot be disabled** on Opus 5.5, Sonnet 5.5, or Fable 5.1 (`disabled`, and `enabled` with `budget_tokens`, return 400); Sonnet 5.5's floor is `between_tools` at `high` or below; Haiku 5.5 accepts `disabled` at `high` or below.
+1. **Thinking cannot be disabled** on Opus 5.5, Sonnet 5.5, or Fable 5.2 (`disabled`, and `enabled` with `budget_tokens`, return 400); Sonnet 5.5's floor is `between_tools` at `high` or below; Haiku 5.5 accepts `disabled` at `high` or below.
 2. **Forced tool use is removed** — `tool_choice: {"type": "any"}` or `{"type": "tool"}` returns 400 on all four current models. Use `auto` with `strict: true`, structured outputs, or a prompt statement of when the tool applies.
-3. **Sampling parameters and prefill.** `temperature`, `top_p`, and `top_k` return 400 on Claude 4.7 and later models; Haiku 5.5 and Fable 5.1 also reject assistant prefill. Adaptive thinking and effort control output variation.
+3. **Sampling parameters and prefill.** `temperature`, `top_p`, and `top_k` return 400 on Claude 4.7 and later models; Haiku 5.5 and Fable 5.2 also reject assistant prefill. Adaptive thinking and effort control output variation.
 4. **Conversations are append-only where thinking blocks are present.** Thinking blocks are model- and conversation-bound, and accounts created on or after 2026-08-31 reject edits to `system`, `tools`, or earlier turns after a thinking block. Use mid-conversation and turn-scoped system messages instead of editing history.
 5. **Progress updates arrive in `thinking` blocks** — set `thinking.display` to `"updates"` (beta) or `"summarized"`, or an API client that renders only `text` goes silent between tool calls.
 

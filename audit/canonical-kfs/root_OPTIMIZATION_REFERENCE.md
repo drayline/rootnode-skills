@@ -1,8 +1,8 @@
 # Optimization Reference
 
-Claude-specific structural principles, behavioral patterns, and fix patterns for Project optimization. Calibrated for the 5.5 generation: Claude Opus 5.5 and Sonnet 5.5 (dual-primary), Fable 5.1 integrated-aware for long-horizon agent workloads, Haiku 5.5 subagent-aware, Opus 5 and Sonnet 5 fallback-graceful (the models users are silently served on classifier-flagged requests), and Sonnet 4.6 legacy-graceful. Consult this when diagnosing structural issues, checking behavioral countermeasures, and reconstructing system prompts or knowledge file architectures. Model-fact statements defer to `root_CLAUDE_OPTIMIZATION_NOTES.md` Section 3 (the dated model-landscape block, verified 2026-10-22); this document assumes that reference.
+Claude-specific structural principles, behavioral patterns, and fix patterns for Project optimization. Calibrated for the 5.5 generation and Fable 5.2: Claude Opus 5.5 and Sonnet 5.5 (dual-primary), Fable 5.2 a named target for High-effort (Tier 3) work, Haiku 5.5 subagent-aware, Opus 5 and Sonnet 5 fallback-graceful (the models users are silently served on classifier-flagged requests), and Sonnet 4.6 legacy-graceful. Consult this when diagnosing structural issues, checking behavioral countermeasures, and reconstructing system prompts or knowledge file architectures. Model-fact statements defer to `root_CLAUDE_OPTIMIZATION_NOTES.md` Section 3 (the dated model-landscape block, verified 2026-10-22; Fable 5.2 refresh 2026-11-24); this document assumes that reference.
 
-**Calibration scope:** Opus 5.5 + Sonnet 5.5 **dual-primary**; Fable 5.1 **integrated-aware**; Haiku 5.5 **subagent-aware**; Opus 5 / Sonnet 5 **fallback-graceful**; Sonnet 4.6 **legacy-graceful** until retirement. Haiku 4.5 (retirement not sooner than 2026-10-15) and Mythos 5.1 are out of scope. Scope authority is the dated landscape block in `root_CLAUDE_OPTIMIZATION_NOTES.md` §3 and the catalog README's Model Compatibility section; `root_CALIBRATION_SCOPE_DECISION.md` and `root_SKILL_PORTABILITY_TIER_ASSIGNMENTS.md` are retired historical records (2026-07-28). Where Opus 5.5 and Sonnet 5.5 diverge, both are documented; where Anthropic documents no behavior for a model, the entry says so rather than inheriting a value from an earlier model.
+**Calibration scope:** Opus 5.5 + Sonnet 5.5 **dual-primary**; Fable 5.2 a **named target** for Tier 3 (catalog decision D2, 2026-11-24); Haiku 5.5 **subagent-aware**; Opus 5 / Sonnet 5 **fallback-graceful**; Sonnet 4.6 **legacy-graceful** until retirement. Haiku 4.5 (retirement not sooner than 2026-10-15), Mythos 5.1 and Mythos 5.2 are out of scope. Scope authority is the dated landscape block in `root_CLAUDE_OPTIMIZATION_NOTES.md` §3 and the catalog README's Model Compatibility section; `root_CALIBRATION_SCOPE_DECISION.md` and `root_SKILL_PORTABILITY_TIER_ASSIGNMENTS.md` are retired historical records (2026-07-28). Where Opus 5.5 and Sonnet 5.5 diverge, both are documented; where Anthropic documents no behavior for a model, the entry says so rather than inheriting a value from an earlier model.
 
 **Surface scope.** This document is primarily CP-side (Claude Project) optimization methodology. The Nine-Layer Architecture Model, system prompt architecture, Memory layer design, User Preference optimization, evolutionary optimization pathways, knowledge file design, context budget principles, RAG quality optimization, and most common structural fixes apply to chat-side Projects. The Behavioral Tendencies and Countermeasures section is surface-aware: tendencies and their deployment calibrations span CP, CC, and API contexts. The CC-side counterpart for environment design is `root_CC_ENVIRONMENT_GUIDE.md`. The surface-invariant principle layer is `root_AGENT_ENVIRONMENT_ARCHITECTURE.md`.
 
@@ -145,11 +145,11 @@ Within modes, nest subsections with descriptive names rather than generic tags. 
 
 ## Behavioral Tendencies and Countermeasures
 
-The taxonomy expanded for Opus 5 (v4.0 cycle) and again for the 5.5 generation (v5.0 cycle). Verbosity refactored into a three-surface family (#3a/#3b/#3c) with distinct triggers and countermeasures. Four tendencies were added for Opus 5 (#11–#14) and one for the 5.5 generation (#15 early turn termination). Four prompt/environment-conditional defects are treated separately at the end of this section rather than as model tendencies. Total: 15 model tendencies + 4 non-tendency defects.
+The taxonomy expanded for Opus 5 (v4.0 cycle), again for the 5.5 generation (v5.0 cycle), and for Fable 5.2 (catalog v6.1, 2026-11-24). Verbosity refactored into a three-surface family (#3a/#3b/#3c) with distinct triggers and countermeasures. Four tendencies were added for Opus 5 (#11–#14), one for the 5.5 generation (#15 early turn termination) and two for Fable 5.2 (#16 caution accumulation, #17 silent long runs). Five prompt/environment-conditional defects are treated separately at the end of this section rather than as model tendencies. Total: 17 model tendencies + 5 non-tendency defects.
 
-**5.5-generation provenance.** Facets added in the v5.0 cycle cite the Anthropic prompting guide they derive from (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1 — fetched 2026-10-22; URLs in `root_CLAUDE_OPTIMIZATION_NOTES.md` §3). Verbatim Anthropic blocks are carried in full, tagged `[Anthropic docs — <guide>, fetched 2026-10-22]`, rather than as pointers, because a pointer is a hidden dependency on a URL that will move. Deployment-conditioning values for the `medium`-default generation are D9c-analytical from the guides, not measured; Calibration Lab re-baselining remains open.
+**5.5-generation provenance.** Facets added in the v5.0 cycle cite the Anthropic prompting guide they derive from (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1 — fetched 2026-10-22; URLs in `root_CLAUDE_OPTIMIZATION_NOTES.md` §3). Entries and facets added in the v6.1 cycle cite the Fable 5.2 guide (Prompting Claude Fable 5.2, fetched 2026-11-24). Verbatim Anthropic blocks are carried in full, tagged `[Anthropic docs — <guide>, fetched 2026-10-22]`, rather than as pointers, because a pointer is a hidden dependency on a URL that will move. Deployment-conditioning values for the `medium`-default generation are D9c-analytical from the guides, not measured; Calibration Lab re-baselining remains open.
 
-During audits, check whether the Project's domain and deployment context is likely to trigger each tendency, and whether an appropriate countermeasure is present. Countermeasure calibration varies by deployment — a countermeasure essential on the chat interface may be wasted tokens on Claude Code, and the agentic tendencies (#11–#13, #15) surface strongly on Claude Code specifically because that is where agentic workloads run.
+During audits, check whether the Project's domain and deployment context is likely to trigger each tendency, and whether an appropriate countermeasure is present. Countermeasure calibration varies by deployment — a countermeasure essential on the chat interface may be wasted tokens on Claude Code, and the agentic tendencies (#11–#13, #15, #16) surface strongly on Claude Code specifically because that is where agentic workloads run.
 
 ### The Deployment Context Model
 
@@ -159,12 +159,12 @@ Countermeasure relevance varies by deployment surface. Four contexts matter:
 |---|---|---|
 | Chat interface (claude.ai web/mobile) | Adaptive | HIGH for #1b, #7b, #9, #10; MEDIUM for #1a, #3a, #14 |
 | Claude Projects | Adaptive (CI anchors) | MEDIUM for #1b, #9, #14; LOW for most others |
-| Claude Code | `medium` default (Opus 5.5 / Sonnet 5.5 / Haiku 5.5); `high` on Fable 5.1 | HIGH for #11, #12, #13; MEDIUM for #15 at `medium`, HIGH at `low`; LOW for chat-interface-specific tendencies |
+| Claude Code | `medium` default (Opus 5.5 / Sonnet 5.5 / Haiku 5.5); Fable 5.2 not stated (API default `high`) | HIGH for #11, #12, #13; MEDIUM for #15 at `medium`, HIGH at `low`; MEDIUM to HIGH for #16; MEDIUM for #17 when interactive; LOW for chat-interface-specific tendencies |
 | API | Developer-controlled effort; developer-selected model | Depends on effort level and model |
 
 Each tendency below includes a deployment calibration line indicating where it most strongly applies. Before applying a countermeasure, identify the Project's deployment context.
 
-**The `medium`-default generation.** Claude Code defaults to `medium` effort on Opus 5.5, Sonnet 5.5, and Haiku 5.5; API defaults differ (Opus 5.5 `medium`, Sonnet 5.5 `high`, Fable 5.1 `high`). Where a v4.0 Claude Code value of LOW rested on `high`-effort mitigation (tendencies #5, #6, #7a, #9), that mitigation is weaker at `medium` — apply the countermeasure on observation rather than excluding it by default. No likelihood value below was raised or lowered without a cited guide sentence; absent one, the v4.0 value stands with this note.
+**The `medium`-default generation.** Claude Code defaults to `medium` effort on Opus 5.5, Sonnet 5.5, and Haiku 5.5; API defaults differ (Opus 5.5 `medium`, Sonnet 5.5 `high`, Fable 5.2 `high` `[Anthropic docs — models overview, fetched 2026-11-24]`). Where a v4.0 Claude Code value of LOW rested on `high`-effort mitigation (tendencies #5, #6, #7a, #9), that mitigation is weaker at `medium` — apply the countermeasure on observation rather than excluding it by default. No likelihood value below was raised or lowered without a cited guide sentence; absent one, the v4.0 value stands with this note.
 
 **Note on Claude Code applicability (per-Skill, not universal).** The Claude Code column in each tendency's deployment calibration below applies at the Project / prompt design level. For Skill design decisions (description optimization, 250-char listing cap, trigger language), Claude Code applicability is per-Skill — some Skills are first-class Claude Code targets, others are Claude.ai Projects-native and out-of-domain for Claude Code users. See `root_SKILL_PORTABILITY_TIER_ASSIGNMENTS.md` for HIGH / MEDIUM / LOW / NONE classifications.
 
@@ -618,6 +618,8 @@ Once you have answered something, treat that answer as done. On later turns, foc
 
 **Audit note:** the pattern set that identifies this tendency in existing prompts is `double-check`, `re-verify`, `verify your (own )?work`, `verification step`, `subagent to verify`, `check your answer`, and on the 5.5 generation `think (carefully|step by step) before`. Not every hit is a removal target — some phrasings are ambiguous (see external-artifact examples above). Classify item-by-item, do not batch-apply.
 
+**Caution (Fable 5.2) — "treat that answer as done" lines.** The Opus 5.5 guide offers two chat-prompt sentences that tell the model to treat an earlier answer as done and focus on the new message. On Fable 5.2 at `high` they reduced thinking on follow-up questions and made the model far less likely to point out mistakes in its earlier answers `[Anthropic docs — Prompting Claude Fable 5.2, "Review prompts and harnesses designed for earlier models", fetched 2026-11-24]`. Scope them to deployments where re-examining earlier answers does not matter, or remove them. This is the opposite pressure from the rest of #11: the line suppresses a check the user wants.
+
 ### 12. Scope Expansion (NEW in Opus 5)
 
 **What it looks like:** Opus 5 expands the scope of a task, adding steps that weren't requested or applying its own judgment about what the task should be. This is deliverable-boundary drift.
@@ -642,6 +644,8 @@ When the user asks for ideas, options or a plan, give them that and stop. Don't 
 ```text
 If, while working or testing, you find a pre-existing bug, a performance concern, or behavior the task doesn't mention, don't fix, optimize or extend it in this change unless the requested behavior cannot work without it; report it as a follow-up in your summary. Where the task is ambiguous, implement the reading its wording and the surrounding code most directly support, state that assumption in your summary, and don't build for the other readings as well. Verify your work however you like; scratch scripts and quick checks need not be kept. Commit tests only where the task asks for them or this repository already keeps tests for this kind of change, sized like the neighboring test files — roughly one focused test per stated behavior — and don't turn scratch checks into additional permanent test files. This is about extras only: implement every behavior the task asks for, completely.
 ```
+
+**Note — ownership framing is a costed lever (Fable 5.2).** Telling the model it is the "owner and long-term maintainer" of the codebase makes it consolidate duplicate code (under 10% of runs without the sentence, about 75% with it), and also raises output tokens by 70 to 80% and produces changes nobody asked for, including new tests, documentation and, in some runs, changed feature behavior. The rule "No drive-by refactors, renames or cleanups" earlier in the same prompt did not cancel it `[Anthropic docs — Prompting Claude Fable 5.2, "Say who owns the code", fetched 2026-11-24]`. Use it only when the operator owns the design decision and wants structural change; never as a default, and never in the same prompt as a minimal-change request.
 
 **Countermeasure — constrain scope explicitly:**
 ```
@@ -669,6 +673,8 @@ whole task, and stop short of actions that are clearly beyond what was asked.
 ```text
 When the work the user asked for is done and its checks pass, stop and report. Don't start extra rounds of review or hardening on your own, and don't launch reviewer sub-agents unless the user asked for a review. If you think a deeper review is worth doing, say so at the end.
 ```
+
+**Facet — self-review delegation (Fable 5.2, effort-conditioned).** At `xhigh` and `max`, Fable 5.2 starts subagents to review its own work, which Fable 5.1 did not do on the same tasks, and subagents can be a large share of what a session costs `[Anthropic docs — Prompting Claude Fable 5.2, "Set expectations for subagents", fetched 2026-11-24]`. Levers, in order: the effort level (`high` before `xhigh`); the cap mechanisms below; and, only if the model starts more subagents than the task needs, a subagent tool description that states what a subagent adds to session cost, when delegation is worth it and when it is not, and how to brief a subagent it starts. Review standing delegation instructions in system prompts, Skills and agent files first.
 
 **Countermeasure — cap delegation:**
 ```
@@ -727,7 +733,9 @@ and move on without noting it.
 
 **What it looks like:** The model ends its turn while work it was asked for is still owed: a summary that closes by announcing the next step, with no tool call; an offer to continue "unless you'd prefer otherwise"; a list of decisions for the user when none of them blocks the remaining work; a report because the turn has been long or a milestone is done; at low effort, pausing to confirm a plan or asking a question it could answer itself; in long agent prompts, handing the task back. Distinct from #12 scope expansion (the model does too much) and #6 over-exploration (search breadth within a task). #15 is too little, and its countermeasure runs in the opposite direction from #12's — which is why it is a separate tendency, not a #12 facet.
 
-**Warrant (SBD §7.3 — named-primary-source documentation).** Documented with a prompt-level countermeasure in all four current Anthropic prompting guides: Opus 5.5 ("Unattended agentic runs"), Sonnet 5.5 ("Carrying work through" at `low`/`medium`), Haiku 5.5 ("Early stopping" — raising `low` → `medium` "roughly halved early stopping" `[Anthropic docs]`), and Fable 5.1 ("Finishing the whole task").
+**Warrant (SBD §7.3 — named-primary-source documentation).** Documented with a prompt-level countermeasure in all four current Anthropic prompting guides: Opus 5.5 ("Unattended agentic runs"), Sonnet 5.5 ("Carrying work through" at `low`/`medium`), Haiku 5.5 ("Early stopping" — raising `low` → `medium` "roughly halved early stopping" `[Anthropic docs]`), and Fable 5.1 ("Finishing the whole task"). The Fable 5.2 guide documents it again under "Finish the whole task" `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`.
+
+**Fable 5.2 conditioning.** More common at `low` and `medium`. In Anthropic's replay of recorded sessions from an agentic coding product at `medium`, a version of the guide's finishing block roughly halved the sessions that ended with unfinished work that could have been continued, at about 30% more output tokens; it removed most endings that ask permission or offer to continue, but not endings that list what remains and then stop. Because the model asks less often with the block, keep the deployment's own confirmation step for risky or irreversible actions `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`.
 
 **Deployment calibration** (D9c analytical from the guides; not measured):
 - Chat interface (default effort): LOW — a chat turn is supposed to end
@@ -759,9 +767,65 @@ A standing instruction from the user, the person you are working for. It is abou
 
 **Placement:** Core rules for the default block (both paragraphs, in agentic deployments); end of the system prompt for the fully-unattended variant only. Cross-reference: `root_CC_ENVIRONMENT_GUIDE.md` §5.9 (turn economy) applies the same discipline to multi-phase CC prompts.
 
+### 16. Caution Accumulation (NEW in Fable 5.2)
+
+**What it looks like:** The agent asks for approval on routine steps, holds back ordinary actions, or stops at the first error, because cautions have piled up in memory, notes, rules and instruction files; absolute "never" rules are applied far outside the case they were written for. The model may have written some of those cautions itself. Distinct from #15 early turn termination (the turn ends while work is owed): under #16 the agent keeps the turn but will not act.
+
+**Opposite of #12.** #12 is action beyond the request; #16 is too little action. Do not fold #16 into #12 — the direction and the countermeasure are opposite.
+
+**Warrant (SBD §7.3 — named-primary-source documentation).** Prompting Claude Fable 5.2, "Keep caution from piling up" and "Review prompts and harnesses designed for earlier models" `[Anthropic docs, fetched 2026-11-24]`: cautious instructions build up through memory, notes and instruction files; the model treats an instruction that contains "never" as absolute; in early testing this was seen mostly when several agents worked together. Also the operator's own observation across projects, 2026-11-24.
+
+**Deployment calibration** (D9c analytical, not measured):
+- Multi-agent and long-lived projects with Memory or handoff chains: HIGH
+- Claude Code with a large CLAUDE.md and rules: MEDIUM to HIGH
+- Chat interface: LOW
+- Single-shot API: LOW
+
+**Levers, in order:**
+1. **Remove.** Delete cautions whose reason no longer holds, at every model generation.
+2. **Scope.** Rewrite an absolute as a scoped rule with its reason ("ask for approval before deleting files", not "never delete files").
+3. **Positive scope.** Name the routine steps that need no approval. Telling the model to act more freely is too vague.
+4. **Narrow validation stops.** A condition such as "stop at the first error" blocks autonomous work; remove or narrow the stops the project does not need.
+5. **Restart.** If a system stays stuck, restart it with trimmed memory and notes.
+
+Keep the deployment's own confirmation step for risky or irreversible actions; #16 is about the routine ones.
+
+**Template:**
+```text
+Routine steps that need no approval: {LIST}. Do them without asking.
+Ask before: {SCOPED LIST, each item with its reason}.
+A rule in memory, notes or an instruction file applies only while its reason holds. If you find one whose reason no longer applies, name the file and the line in your report. Do not keep following it silently, and do not delete it yourself.
+```
+
+**Placement:** Core rules; the lists come from the project's scope authorization. Cross-reference: `root_CC_ENVIRONMENT_GUIDE.md` §4 (rigor levels, positive scope and the stop rule) and AEA §4.7 (the stop rule as the default halt set).
+
+### 17. Silent Long Runs (NEW in Fable 5.2)
+
+**What it looks like:** The first tool call arrives with no statement of intent, and long stretches of tool calls pass with no user-facing text.
+
+**Opposite of #3b.** #3b agentic progress narration is too much narration; #17 is too little. Choose by deployment and never ship both countermeasures in one prompt.
+
+**Warrant (SBD §7.3 — named-primary-source documentation).** Prompting Claude Fable 5.2, "Keep users informed during long turns" `[Anthropic docs, fetched 2026-11-24]`.
+
+**Deployment calibration** (D9c analytical, not measured):
+- Chat and Cowork with a person watching: MEDIUM to HIGH
+- Interactive Claude Code: MEDIUM
+- Unattended Claude Code and API loops: not applicable — the session report carries the need
+
+**Harness lever first.** On Fable 5.2 the updates the model writes between tool calls arrive as progress-update `thinking` blocks, empty at the default `display: "omitted"`; a client that renders only `text` looks silent. Check that the client shows them (`display: "updates"` or `"summarized"`) before adding prompt text. Where mid-conversation system messages exist, a turn-scoped reminder after several silent steps roughly halved the longest silent stretch in Anthropic's testing, with no noticeable increase in tokens or time.
+
+**Template, for watched sessions only:**
+```text
+Before your first tool call, say in one line what you are about to do. Every few tool calls, give a one-line update. End with a short recap that a reader who saw none of the steps can follow.
+```
+
+**Cost.** Anthropic reports about 20% more output tokens per task for the full opening-updates-recap form `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`.
+
+**Placement:** Output standards, in deployments where a person watches the run. Not in unattended prompts, and not alongside a #3b countermeasure.
+
 ### Prompt/environment-conditional defects (not model tendencies)
 
-Four failure modes track cleanly to the prompt, the harness, or the runtime configuration rather than the model. They are handled by writing prompts differently or configuring the API or harness differently, not by adding counter-tendency instructions.
+Five failure modes track cleanly to the prompt, the harness, or the runtime configuration rather than the model. They are handled by writing prompts differently or configuring the API or harness differently, not by adding counter-tendency instructions.
 
 #### Conservative-instruction literalism
 
@@ -773,7 +837,7 @@ Sweep pattern for prompts that carry this defect: `only report`, `only flag`, `b
 
 #### Thinking-disabled output artifacts (narrowed for the 5.5 generation)
 
-Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1. The artifacts — reasoning leaking into visible text, tool calls written as text instead of a structured `tool_use` block, internal XML tags in the response — are now documented only on Haiku 5.5 at `low` effort or with thinking off, and on Sonnet 5.5 at `between_tools` when a "don't think" instruction is left in the prompt. **Fix:** use adaptive thinking at `medium` and control cost through effort. Remove any "do not think" line.
+Thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.2. The artifacts — reasoning leaking into visible text, tool calls written as text instead of a structured `tool_use` block, internal XML tags in the response — are now documented only on Haiku 5.5 at `low` effort or with thinking off, and on Sonnet 5.5 at `between_tools` when a "don't think" instruction is left in the prompt. **Fix:** use adaptive thinking at `medium` and control cost through effort. Remove any "do not think" line.
 
 **Sub-finding (stands from v4.0) — do NOT add "do not think" instructions.** A system-prompt rule telling the model not to think or not to reason INCREASES `<thinking>` tag leakage rather than suppressing it. If an integration must keep Haiku 5.5 thinking disabled and needs a mitigation instruction, use the general form:
 
@@ -785,7 +849,7 @@ internal or system XML tags in your response.
 </output_hygiene>
 ```
 
-**API rule.** `thinking: {"type": "disabled"}` is accepted only on Haiku 5.5, at effort `high` or below. On Opus 5.5, Sonnet 5.5, and Fable 5.1 it returns 400; Sonnet 5.5's floor is `between_tools` (at `high` or below).
+**API rule.** `thinking: {"type": "disabled"}` is accepted only on Haiku 5.5, at effort `high` or below. On Opus 5.5, Sonnet 5.5, and Fable 5.2 it returns 400; Sonnet 5.5's floor is `between_tools` (at `high` or below).
 
 #### Mid-turn user text misread as injection (NEW in the 5.5 generation)
 
@@ -800,6 +864,12 @@ Sonnet 5.5 and Haiku 5.5 treat user text placed inside `tool_result` blocks, per
 #### Reasoning-extraction refusal (NEW in the 5.5 generation)
 
 On all four current models, prompts that ask the model to reproduce its internal reasoning in the response can be declined with `stop_reason: "refusal"`, category `reasoning_extraction`. Symptom: "Claude refuses when I ask it to show its reasoning." **Fix** `[Anthropic docs — Sonnet 5.5 guide]`: "If your prompts ask the model to include its reasoning in the response, remove those instructions, because they invite `reasoning_extraction` declines. With adaptive thinking, read the reasoning from summarized thinking blocks instead (`display: "summarized"`). You can still ask for a short explanation of the answer or a summary of the actions taken".
+
+#### Prompt-visible token budget (NEW in Fable 5.2)
+
+A token budget shown to the model in the prompt raises spending. Some harnesses show the model a budget for the task and how much of it is left; on Fable 5.2 the size of that budget changes how much the model spends, and in Anthropic's testing on coding tasks at `high` and `xhigh`, removing a large budget lowered cost with equivalent performance `[Anthropic docs — Prompting Claude Fable 5.2, "Review prompts and harnesses designed for earlier models", fetched 2026-11-24]`. The finding is about text in the prompt, not the API's task-budgets beta, which the testing did not cover. Symptom: "the agent spends more since we told it the budget."
+
+**Fix — mechanism, not prompt text.** Keep the number in the design brief and enforce it with a mechanism: a spend flag on the run, a cap in settings or the environment, or the orchestration code. Do not write the budget, or a countdown of it, into the prompt. Sweep pattern: `token budget`, `budget of`, `tokens remaining`, `you have .* tokens`.
 
 ---
 
@@ -997,7 +1067,7 @@ The optimization objective is to maximize the quality of Claude's content access
 
 Under the 200K-window era, the RAG threshold was numerically entangled with the window (empirically ~66,500 tokens on 200K plans, roughly a third of the window). That made the fixed number look like a stable rule of thumb, and it conflated two concepts that are conceptually distinct:
 
-- **Context window** — the model's maximum input capacity (measured in tokens per model; 1M on all four current models — Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5 — and 200K on legacy Haiku 4.5).
+- **Context window** — the model's maximum input capacity (measured in tokens per model; 1M on all four current models — Fable 5.2, Opus 5.5, Sonnet 5.5, Haiku 5.5 — and 200K on legacy Haiku 4.5).
 - **RAG threshold** — the platform-side decision point where Projects switch from full-context loading to retrieval mode. Now tracks the window (automatic per current article), rather than being a fraction of it.
 
 Under 1M-window models, the RAG threshold has moved with the window. State the two separately in prompt/Project design; do not carry the ~66,500 figure forward as a live threshold. See "Historical context" below for the measurement that produced that figure and why it is preserved as history but not as current-state guidance.
@@ -1034,7 +1104,7 @@ Where prior documentation states the 66,500 figure as a historical measurement i
 Claude cannot count tokens precisely but can estimate with sufficient accuracy for architectural decisions. Rough conversion for English prose: approximately 4 characters per token; structured content (XML, code, tables) at approximately 3.25 characters per token; mixed markdown at approximately 3.75 characters per token. One page of prose is roughly 500 words, 3,000 characters, or 750 tokens.
 
 **Tokenizer notes for current models:**
-- **Fable 5.1** uses the same tokenizer as Fable 5 — the one introduced with Opus 4.7; compared to models before Opus 4.7, the same text produces roughly 30% more tokens.
+- **Fable 5.2** uses the tokenizer introduced with Opus 4.7, as Fable 5.1 and Fable 5 did `[Anthropic docs — Fable 5.2 what's-new, fetched 2026-11-24]`; compared to models before Opus 4.7, the same text produces roughly 30% more tokens.
 - **Sonnet 5.5** uses the Sonnet 5 tokenizer, which produces approximately 30% more tokens than Sonnet 4.6.
 - **Haiku 5.5** uses the Opus 4.7-era tokenizer — roughly 30% more tokens than Haiku 4.5 — and bills a higher price band above 100K prompt tokens.
 - **Opus 5.5** tokenizer is not stated on any fetched Anthropic page (landscape block, open items). Treat measurements with explicit tolerance until confirmed via `count_tokens`.
@@ -1062,7 +1132,7 @@ Overhead affects context quality on every turn: as total context grows, the mode
 |---|---|---|
 | Pro / Max | 200K–1M tokens (plan-dependent; consult current Anthropic plan documentation) | RAG threshold is automatic per window |
 | Team / Enterprise | Plan-dependent | RAG threshold is automatic per window |
-| API (Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5) | 1M tokens; 128K max output | User-controlled context; no platform RAG |
+| API (Fable 5.2, Opus 5.5, Sonnet 5.5, Haiku 5.5) | 1M tokens; 128K max output | User-controlled context; no platform RAG |
 | API (Haiku 4.5, legacy) | 200K tokens | User-controlled context; no platform RAG |
 
 The context window is plan-dependent. The Projects RAG threshold now tracks the window (per the support article), rather than being a fixed number. Consult Anthropic's plan documentation for current per-plan windows; the numbers move with product changes.
@@ -1284,13 +1354,13 @@ Addresses the **Monolithic standing context** pattern (`root_AGENT_ANTI_PATTERNS
 ### Fix: Missing Countermeasures → Domain- and Deployment-Targeted Selection
 
 1. Identify the Project's domain, primary task types, and deployment context (chat / Projects / Claude Code / API).
-2. Check each of the 15 numbered behavioral tendencies (#1–#15, with facets 1a/1b under #1, 3a/3b/3c under #3, 7a/7b under #7) against the domain and deployment combination. Use the deployment calibration tables in the Behavioral Tendencies section to filter — a tendency at LOW for the deployment context generally does not need a countermeasure regardless of domain match.
+2. Check each of the 17 numbered behavioral tendencies (#1–#17, with facets 1a/1b under #1, 3a/3b/3c under #3, 7a/7b under #7) against the domain and deployment combination. Use the deployment calibration tables in the Behavioral Tendencies section to filter — a tendency at LOW for the deployment context generally does not need a countermeasure regardless of domain match.
 3. For each relevant tendency, add the countermeasure template (customized to the domain's language). For Tool Trigger Miscalibration (#7), apply the specific facet (7a or 7b). For Verbosity (#3), apply the specific surface (3a conversational, 3b agentic narration, 3c written deliverables).
 4. Place at the appropriate attention position (identity or core rules for critical countermeasures, output standards for format-level countermeasures).
 5. Do not add countermeasures for tendencies this domain or deployment does not trigger — they are noise that diminishes current models' strong instruction following.
 6. For Projects deployed on the chat interface specifically: prioritize countermeasures for #1b (persistent-preference dilution), #7b (tool under-triggering), #9 (editorial drift), and #10 (self-referential fabrication).
 7. For Projects deployed on Claude Code specifically (or agent workloads on the API): prioritize countermeasures for #3b (agentic narration), #11 (over-verification — REMOVE self-directed re-check instructions), #12 (scope expansion), #13 (subagent over-delegation), #15 (early turn termination — ship the default block's two paragraphs together, and raise effort first at `low`/`medium`). These are the tendencies the Opus 5 and 5.5 generations introduce or amplify on agentic surfaces.
-8. For Projects upgrading from a 5-era (Opus 5 / Sonnet 5) system prompt: remove thinking-disabled mitigations (thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.1), tool-suppressing language (#7b — it now causes under-search), and think-harder / re-verify lines (#11). For Projects upgrading from a 4.6-era or 4.8-era system prompt: audit for now-redundant countermeasures targeting tendencies #1a, #2 (factual claims), #3a (verbosity), #5 (external-fact), #6 (over-exploration), and #7a — these are partially or fully reduced at the model level. Where the failure mode is no longer observed, remove the countermeasure to free token budget for the new tendencies.
+8. For Projects upgrading from a 5-era (Opus 5 / Sonnet 5) system prompt: remove thinking-disabled mitigations (thinking cannot be disabled on Opus 5.5, Sonnet 5.5, or Fable 5.2), tool-suppressing language (#7b — it now causes under-search), and think-harder / re-verify lines (#11). For Projects upgrading from a 4.6-era or 4.8-era system prompt: audit for now-redundant countermeasures targeting tendencies #1a, #2 (factual claims), #3a (verbosity), #5 (external-fact), #6 (over-exploration), and #7a — these are partially or fully reduced at the model level. Where the failure mode is no longer observed, remove the countermeasure to free token budget for the new tendencies. For Projects whose prompts were written for Fable 5.1 or Opus 5.5 and now run on Fable 5.2: remove cautions whose reason no longer holds (#16), any token budget written into the prompt (fifth conditional defect), "answer directly without deliberating" lines (lower effort instead), and scope or remove "treat that answer as done" lines (#11 caution).
 9. For audit Skills specifically: apply the conservative-instruction literalism fix. Replace "only report high-severity issues" / "be conservative" language with report-everything-then-filter form.
 
 ### Fix: Pre-4.6 System Prompt → Recalibrate for Current Models
@@ -1304,7 +1374,7 @@ When a Project's system prompt was written for earlier Claude models (pre-4.6, p
 6. For chat-interface deployments: add countermeasures for #1b, #7b, #9, and #10 if not already present.
 7. For agentic deployments (Claude Code, API agent workloads): audit for accumulated verification instructions (double-check, re-verify, verification step, subagent to verify). Distinguish self-directed re-checking (REMOVE per tendency #11) from external-artifact verification (KEEP). This is the highest-value single audit on prompts that migrated from 4.7/4.8 into Opus 5.
 8. For audit-Skills and review prompts: apply the conservative-instruction literalism fix (see Fix: Missing Countermeasures step 9).
-9. Audit effort settings: on Claude Code the 5.5 trio (Opus 5.5, Sonnet 5.5, Haiku 5.5) defaults to `medium` — Anthropic reports Opus 5.5 at `medium` matches or exceeds Opus 5 at `high` — while Sonnet 5.5 and Fable 5.1 default to `high` on the API. Re-run an effort sweep rather than carrying settings over; step to `xhigh`/`max` only on a measured gain. Sonnet 5.5 at `xhigh`/`max` self-starts review rounds and reviewer subagents (#11, #13).
+9. Audit effort settings: on Claude Code the 5.5 trio (Opus 5.5, Sonnet 5.5, Haiku 5.5) defaults to `medium` — Anthropic reports Opus 5.5 at `medium` matches or exceeds Opus 5 at `high` — while Sonnet 5.5 and Fable 5.2 default to `high` on the API. On Fable 5.2, start at `high` and step down to `medium` where evals hold `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`. Re-run an effort sweep rather than carrying settings over; step to `xhigh`/`max` only on a measured gain. Sonnet 5.5 at `xhigh`/`max` self-starts review rounds and reviewer subagents (#11, #13).
 10. Remove forced tool use — `tool_choice: {"type": "any"}` or `{"type": "tool"}` returns 400 on all four current models; state in the prompt when the tool applies, or use `auto` with `strict: true`. Remove instructions that ask the model to reproduce its reasoning in the response (reasoning-extraction refusal).
 
 ### Fix: Misaligned Context Layers → Rebalance Memory and Knowledge Files

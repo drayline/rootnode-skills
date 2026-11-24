@@ -105,7 +105,9 @@ PLUGINS = [
         "summary": "Fable 5.2 calibration; taxonomy count",
         "changes": [
             CALIBRATION,
-            "skill-builder: D9c analytical validation cites the 17-tendency taxonomy.",
+            "skill-builder: SKILL.md cites the 17-tendency taxonomy for D9c analytical validation. Three reference lines "
+            "(`references/behavioral-validation.md` twice, `references/skills-spec.md` once) still say 15; they are "
+            "fixed in the next patch.",
         ],
     },
 ]

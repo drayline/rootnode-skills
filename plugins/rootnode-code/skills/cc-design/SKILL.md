@@ -165,7 +165,7 @@ The brief schema lives at `schema/cc-design-brief.schema.json`. The execution-pl
 3. Serialize the brief and offer it as a downloadable artifact. Recommend adding to the project's KFs.
 4. Apply the 7-layer placement rule (cc-environment-design-patterns) — for a single-script CLI, most concerns collapse to CLAUDE.md + 1-2 hooks; no Skills or subagents warranted yet.
 5. Apply the agent-warranted test (cc-methodology-patterns §1) — single-loop iteration; recommend single-agent loop, no sub-agents.
-6. Set the rigor level: sprint (one contributor, no production data, no irreversible operation). Draft the CLAUDE.md with mission, scope and the stop rule; R1-R5 in full only at standard; skip W1-W3 (warrant tests fail at day 1).
+6. Set the rigor level: sprint (one contributor, no production data, no irreversible operation). Draft the CLAUDE.md with mission, scope and the stop rule; R1-R5 in full at standard and above (plus warranted W1-W3 at strict); skip W1-W3 (warrant tests fail at day 1).
 7. Specify scope authorization (in-scope / in-scope-with-notification / out-of-scope), the routine actions that need no approval, and the halt triggers: the stop rule plus the project's irreversible actions.
 8. Identify the chat→Code handoff point: "Once CLAUDE.md is in place, hand off to CC for the first iteration."
 9. Evaluate runtime tooling — handoff-trigger-check (if available) is overkill for a single-script project; recommend deferring.

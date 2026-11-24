@@ -812,7 +812,7 @@ A rule in memory, notes or an instruction file applies only while its reason hol
 - Interactive Claude Code: MEDIUM
 - Unattended Claude Code and API loops: not applicable — the session report carries the need
 
-**Harness lever first.** On Fable 5.2 the updates the model writes between tool calls arrive as progress-update `thinking` blocks, empty at the default `display: "omitted"`; a client that renders only `text` looks silent. Check that the client shows them (`display: "updates"` or `"summarized"`) before adding prompt text. Where mid-conversation system messages exist, a turn-scoped reminder after several silent steps roughly halved the longest silent stretch in Anthropic's testing, with no noticeable increase in tokens or time.
+**Harness lever first.** On Fable 5.2 the updates the model writes between tool calls arrive as progress-update `thinking` blocks, empty at the default `display: "omitted"`; a client that renders only `text` looks silent. Check that the client shows them (`display: "updates"` or `"summarized"`) before adding prompt text. Where mid-conversation system messages exist, a turn-scoped reminder after several silent steps roughly halved the longest silent stretch in Anthropic's testing, with no noticeable increase in tokens or time `[Anthropic docs — Prompting Claude Fable 5.2, fetched 2026-11-24]`.
 
 **Template, for watched sessions only:**
 ```text

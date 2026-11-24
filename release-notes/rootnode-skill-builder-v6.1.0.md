@@ -21,7 +21,7 @@ Install once: on your account or locally in Claude Code, not both.
 ## Changes in v6.1.0
 
 - Calibration lines updated for Claude Fable 5.2, which replaces Fable 5.1: Tier 1 Skills name Fable 5.2 beside Opus 5.5, Sonnet 5.5 and Haiku 5.5; Tier 2 Skills add that Fable 5.2 defaults to `high` and steps down to `medium` where the work holds; Tier 3 Skills name Fable 5.2 as a target for the hardest and longest runs instead of a reserve. Tier membership is unchanged (13 / 7 / 7).
-- skill-builder: D9c analytical validation cites the 17-tendency taxonomy.
+- skill-builder: SKILL.md cites the 17-tendency taxonomy for D9c analytical validation. Three reference lines (`references/behavioral-validation.md` twice, `references/skills-spec.md` once) still say 15; they are fixed in the next patch.
 
 ## Upgrading from v5.x
 

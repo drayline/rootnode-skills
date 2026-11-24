@@ -212,7 +212,7 @@ Claude fails to fire tools even when user preferences or Project CI require them
 ```
 Use the search tool to check specifics that may have changed since your training, such as what is allowed, required or charged, even when you feel confident. For researched work such as a report or a comparison, gather current sources rather than writing from your training knowledge.
 ```
-Give the current date (Haiku 5.5). On Fable 5.1 at `low`, raise effort for affected turns or add a name-verification nudge. Do not add blanket "always search" instructions — the Haiku 5.5 guide reports more searching on prompts that needed none, with no accuracy gain.
+Give the current date (Haiku 5.5). At `low`, raise effort for affected turns or add a name-verification nudge (the Fable 5.1 guide's fix). Do not add blanket "always search" instructions — the Haiku 5.5 guide reports more searching on prompts that needed none, with no accuracy gain.
 
 **Countermeasure, step 2 — explicit enforcement** (when Preferences or CI name a required tool):
 ```
@@ -441,9 +441,9 @@ Not all countermeasures apply equally across deployment contexts. Before applyin
 - **Chat interface (Adaptive effort):** Tendencies 1b, 7b, 9, and 10 are most pronounced here. Strong countermeasures recommended. The Adaptive effort default weights persistent context lower than immediate prompts — the primary driver of 1b, 7b, 9, and 10. Tendency 15 is LOW: a chat turn is supposed to end.
 - **Claude Projects:** Tendencies 1b and 9 are mitigated by strong Custom Instructions but not eliminated. Moderate countermeasures appropriate. Tendency 10 is also MEDIUM here — verified via seed-project self-observation.
 - **Claude Code (`medium` default on Opus 5.5 / Sonnet 5.5 / Haiku 5.5):** Tendencies 11, 12, and 13 are HIGH; 15 is MEDIUM at `medium` and HIGH at `low`; 16 is MEDIUM to HIGH with a large CLAUDE.md and rules; 17 is MEDIUM when a person watches. v4.0 treated countermeasures for 5, 6, 7a, and 9 as generally unnecessary because `high` effort mitigated them; at the `medium` default that mitigation is weaker, so apply them on observation rather than excluding them by default. The default is a capability choice, not a degraded mode: Opus 5.5 at `medium` "matches or exceeds Opus 5 at `high` on coding and knowledge-work evaluations" `[Anthropic docs]`. Applicability of this Skill itself is per-Skill: not all rootnode Skills are first-class Claude Code targets.
-- **API (developer-controlled effort):** API defaults differ from Claude Code — Opus 5.5 `medium`, Sonnet 5.5 `high`, Fable 5.2 `high` (dated landscape block `root_MODEL_LANDSCAPE_2026-10`; see repository README). At `high` or above, behaves similarly to Claude Code at `high`; at lower effort, closer to the chat interface, and 7b and 15 rise. Raising effort is the first lever for both. Re-run an effort sweep on your own evals rather than carrying a setting over.
+- **API (developer-controlled effort):** API defaults differ from Claude Code — Opus 5.5 `medium`, Sonnet 5.5 `high` (dated landscape block `root_MODEL_LANDSCAPE_2026-10`), Fable 5.2 `high` `[Anthropic docs — models overview, fetched 2026-11-24]`; see repository README. At `high` or above, behaves similarly to Claude Code at `high`; at lower effort, closer to the chat interface, and 7b and 15 rise. Raising effort is the first lever for both. Re-run an effort sweep on your own evals rather than carrying a setting over.
 
-When in doubt, apply the universal countermeasures (1a, 4, 8, 10 — #4 in its conditional form on Fable 5.1) and confirm deployment context before applying the conditional ones.
+When in doubt, apply the universal countermeasures (1a, 4, 8, 10 — #4 in its conditional form where the model already formats sparingly, as the Fable 5.1 guide documented) and confirm deployment context before applying the conditional ones.
 
 ---
 

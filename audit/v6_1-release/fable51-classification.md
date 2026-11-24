@@ -6,9 +6,9 @@ Source: every occurrence of `Fable 5.1` at `07ae3fa` in `plugins/`, `audit/canon
 
 | Scope | Files | Occurrences | Lines | Landscape | Evidence | History |
 |---|---|---|---|---|---|---|
-| plugins/ | 18 | 86 | 62 | 28 | 58 | 0 |
+| plugins/ | 18 | 86 | 62 | 30 | 56 | 0 |
 | seven KFs + playbook | 6 | 88 | 65 | 50 | 33 | 5 |
-| all | 24 | 174 | 127 | 78 | 91 | 5 |
+| all | 24 | 174 | 127 | 80 | 89 | 5 |
 
 Spec §7.3 count check: plugins 86 occurrences in 18 files (spec: 86 in 18); KFs 65 lines (spec: 65, a line count; 88 occurrences).
 Landscape rows whose source line survives unchanged: 0.
@@ -156,12 +156,12 @@ Landscape rows whose source line survives unchanged: 0.
 | 137 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 149 | 1 | Evidence | no | kept unchanged (documented Fable 5.1 behavior or citation) | …s #10.** **Facet — unmarked quotations (Fable 5.1):** summaries reproduce source passages… |
 | 138 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 205 | 1 | Evidence | no | kept unchanged (documented Fable 5.1 behavior or citation) | … prompts. On Sonnet 5.5, Haiku 5.5, and Fable 5.1, tool-suppressing language carried over… |
 | 139 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 209 | 1 | Evidence | no | kept unchanged (documented Fable 5.1 behavior or citation) | …ge is present (Sonnet 5.5 / Haiku 5.5 / Fable 5.1 guides) · API (effort ≥ high): LOW.… |
-| 140 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 215 | 1 | Evidence | no | kept unchanged (documented Fable 5.1 behavior or citation) | …Give the current date (Haiku 5.5). On Fable 5.1 at 'low', raise effort for affected tur… |
+| 140 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 215 | 1 | Landscape | yes | rewritten for Fable 5.2 | …Give the current date (Haiku 5.5). On Fable 5.1 at 'low', raise effort for affected tur… |
 | 141 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 312 | 1 | Evidence | yes | facet kept; the line gained the Fable 5.2 ownership note | … more at higher (Sonnet 5.5, Haiku 5.5, Fable 5.1); open-ended "show me what you can do" … |
 | 142 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 322 | 1 | Evidence | no | kept unchanged (documented Fable 5.1 behavior or citation) | …plate, the stronger CC variant, and the Fable 5.1 pre-existing-bug rule for coding are in… |
 | 143 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 354 | 1 | Evidence | yes | kept; Fable 5.2 guide added | …uides (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.1).… |
 | 144 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 424 | 1 | Landscape | yes | rewritten for Fable 5.2 | …— Opus 5.5 'medium', Sonnet 5.5 'high', Fable 5.1 'high' (dated landscape block 'root_MOD… |
-| 145 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 426 | 1 | Evidence | no | kept unchanged (documented Fable 5.1 behavior or citation) | …, 8, 10 — #4 in its conditional form on Fable 5.1) and confirm deployment context before … |
+| 145 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 426 | 1 | Landscape | yes | rewritten for Fable 5.2 | …, 8, 10 — #4 in its conditional form on Fable 5.1) and confirm deployment context before … |
 | 146 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 459 | 1 | Evidence | no | kept unchanged (documented Fable 5.1 behavior or citation) | …eeableness fix, too little structure on Fable 5.1 after an anti-list fix), soften the lan… |
 | 147 | `plugins/rootnode-tuning/skills/behavioral-tuning/references/countermeasure-templates.md` | 5 | 1 | Landscape | yes | rewritten for Fable 5.2 | …' on Opus 5.5 / Sonnet 5.5 / Haiku 5.5 (Fable 5.1: 'high'); API defaults are Opus 5.5 'me… |
 | 148 | `plugins/rootnode-tuning/skills/behavioral-tuning/references/countermeasure-templates.md` | 5 | 2 | Landscape | yes | rewritten for Fable 5.2 | …e Opus 5.5 'medium', Sonnet 5.5 'high', Fable 5.1 'high' (dated landscape block 'root_MOD… |
@@ -204,7 +204,6 @@ Every `Fable 5.1` occurrence in the working tree on a line that does not exist v
 | `audit/canonical-kfs/root_CLAUDE_OPTIMIZATION_NOTES.md` | 7 | 1 | …r models — re-run an effort sweep, including from Fable 5.1 or Opus 5.5 to Fable 5.2. Thinking cannot be disabled on Op… |
 | `audit/canonical-kfs/root_CLAUDE_OPTIMIZATION_NOTES.md` | 127 | 2 | …-fable-5-2') was released 2026-11-09 and replaces Fable 5.1 '[Anthropic docs — models overview; Fable 5.2 what's-new, f… |
 | `audit/canonical-kfs/root_CLAUDE_OPTIMIZATION_NOTES.md` | 129 | 4 | …ragraph (history).** Four releases in five weeks: Fable 5.1 (2026-09-01), Opus 5.5 (2026-09-22), Sonnet 5.5 (2026-09-28… |
-| `audit/canonical-kfs/root_CLAUDE_OPTIMIZATION_NOTES.md` | 146 | 1 | … the one introduced with Opus 4.7 (no change from Fable 5.1) / — / same as Sonnet 5 / Opus 4.7-era; ~30% more tokens th… |
 | `audit/canonical-kfs/root_CLAUDE_OPTIMIZATION_NOTES.md` | 147 | 1 | …cacheable prompt / not re-verified for Fable 5.2 (Fable 5.1: 512) / 512 / 512 (Sonnet 5 was 1,024) / 512 (Haiku 4.5 was… |
 | `audit/canonical-kfs/root_CLAUDE_OPTIMIZATION_NOTES.md` | 158 | 1 | …/ Fable 5.1 ('claude-fable-5-1') / Replaced by Fable 5.2 (2026-11-09); … |
 | `audit/canonical-kfs/root_CLAUDE_OPTIMIZATION_NOTES.md` | 159 | 1 | …2027-07-24 / Fallback model for Fable 5.2 (as for Fable 5.1). Reads/writes thinking blocks compatible with Opus 5.5. /… |
@@ -222,13 +221,28 @@ Every `Fable 5.1` occurrence in the working tree on a line that does not exist v
 | `audit/canonical-kfs/root_OPTIMIZATION_REFERENCE.md` | 736 | 1 | …y halved early stopping" '[Anthropic docs]'), and Fable 5.1 ("Finishing the whole task"). The Fable 5.2 guide documents… |
 | `audit/canonical-kfs/root_OPTIMIZATION_REFERENCE.md` | 1107 | 1 | …* uses the tokenizer introduced with Opus 4.7, as Fable 5.1 and Fable 5 did '[Anthropic docs — Fable 5.2 what's-new, fe… |
 | `audit/canonical-kfs/root_OPTIMIZATION_REFERENCE.md` | 1363 | 1 | …cies. For Projects whose prompts were written for Fable 5.1 or Opus 5.5 and now run on Fable 5.2: remove cautions whose… |
-| `plugins/rootnode-code/skills/cc-design/references/cc-prompt-design-patterns.md` | 256 | 2 | …'/'medium', Haiku 5.5 at 'low' with long prompts, Fable 5.1 on long tasks, and Fable 5.2 more often at 'low' and 'mediu… |
+| `plugins/rootnode-code/skills/cc-design/references/cc-prompt-design-patterns.md` | 259 | 2 | …'/'medium', Haiku 5.5 at 'low' with long prompts, Fable 5.1 on long tasks, and Fable 5.2 more often at 'low' and 'mediu… |
 | `plugins/rootnode-projects/skills/context-budget/SKILL.md` | 95 | 1 | …tokens than models before Opus 4.7 (Fable 5.2, as Fable 5.1 before it), or than Haiku 4.5 (Haiku 5.5) (Anthropic's mode… |
 | `plugins/rootnode-projects/skills/context-budget/SKILL.md` | 173 | 1 | …ght cost-intelligence tradeoff" [Anthropic docs — Fable 5.1 prompting guide]. Later compaction points are a legitimate … |
 | `plugins/rootnode-prompts/skills/domain-agentic-context/SKILL.md` | 75 | 1 | …to the tool arguments instead." [Anthropic docs — Fable 5.1 what's-new; landscape 2026-10 §4.2]… |
+| `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 215 | 1 | …ected turns or add a name-verification nudge (the Fable 5.1 guide's fix). Do not add blanket "always search" instructio… |
 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 312 | 1 | … level and more at higher (Sonnet 5.5, Haiku 5.5, Fable 5.1); open-ended "show me what you can do" requests get built r… |
 | `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 354 | 1 | …mented in the Opus 5.5, Sonnet 5.5, Haiku 5.5 and Fable 5.1 prompting guides, and again in the Fable 5.2 guide, where i… |
+| `plugins/rootnode-tuning/skills/behavioral-tuning/SKILL.md` | 446 | 1 | …where the model already formats sparingly, as the Fable 5.1 guide documented) and confirm deployment context before app… |
 | `plugins/rootnode-tuning/skills/behavioral-tuning/references/countermeasure-templates.md` | 579 | 1 | ….2 starts subagents to review its own work, which Fable 5.1 did not do on the same tasks; subagents can be a large shar… |
 | `plugins/rootnode-tuning/skills/behavioral-tuning/references/countermeasure-templates.md` | 631 | 1 | …y halved early stopping" '[Anthropic docs]'), and Fable 5.1 ("Finishing the whole task"). **Fable 5.2 conditioning:** t… |
 
-Total occurrences on new or edited lines: 37.
+Total occurrences on new or edited lines: 38.
+
+## Anthropic pages fetched by the build session (2026-11-24)
+
+The build session fetched these pages itself with `curl` (the `.md` form of each docs URL) on 2026-11-24. Statements tagged `fetched 2026-11-24` and every quotation of Anthropic wording added in this cut rest on these copies. Digests are sha256 over the LF-normalized text as fetched; the copies are kept with the session report, not in the repository.
+
+| Page | URL | Bytes | sha256 (LF) |
+|---|---|---|---|
+| Prompting Claude Fable 5.2 | https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2 | 29560 | `c20db12661c1cea8594aaf29a20dc2ad460437200f6ffbbbf8d3086b9c724c5d` |
+| Models overview | https://platform.claude.com/docs/en/models/overview | 19558 | `41f5ac40ac7890dc6983142312f31f0719430c3c242fc93a3fc5bc63e3816641` |
+| What's new in Claude Fable 5.2 | https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2 | 28308 | `0e8e79ec2c7668dc6ffe13dd0787fca25f8a561df33accd33dcd434c0b8fba8d` |
+| Fable 5.2 migration guide | https://platform.claude.com/docs/en/models/fable-5-2/migration-guide | 72193 | `354ce2ce6660768e3e2af871793d40896baac40cfd2a54e785f331054ae184ce` |
+
+Facts beyond spec §7.1 that this cut states, and where each sits in those pages: tokenizer "the tokenizer introduced with Claude Opus 4.7" (what's-new, Tokenizer bullet); fallback models Opus 4.8 and Opus 5 (what's-new, model-switch bullet); retirement "Not sooner than November 9, 2027" (overview, Retirement row); Fable 5.2 thinking blocks dropped by every model except Mythos 5.2 (what's-new, "Check model switches"); `claude-mythos-5-2` (what's-new and migration guide); the reminder that "roughly halved the longest silent stretch", the ownership sentence and its 10% / 75% / 70–80% figures, and the section titles "Keep caution from piling up", "Keep users informed during long turns", "Review prompts and harnesses designed for earlier models", "Set expectations for subagents", "Say who owns the code", "Finish the whole task" (prompting guide).
